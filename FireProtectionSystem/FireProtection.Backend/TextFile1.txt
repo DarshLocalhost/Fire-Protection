@@ -1,1 +1,77 @@
-﻿ignoreeeeeeeeeeeeeeeee
+﻿Fire Protection System - Project Description
+==============================================
+
+Fire Protection System - Autodesk Revit add-in for Phase 1: production-ready model-data extraction.
+
+PURPOSE
+-------
+Extracts MEP-host model data (levels, rooms with boundaries, ceilings, obstacles,
+existing sprinklers) and produces a normalized JSON snapshot for downstream Phase 2
+sprinkler-placement calculations.
+
+TECH STACK
+----------
+C#/.NET (WPF UI, Revit API). Two projects:
+- FireProtection.Backend (extraction services, Newtonsoft.Json)
+- FireProtection.UI (WPF front-end)
+
+REVIT VERSIONS
+--------------
+Built for Revit 2024 (.NET 4.8), Revit 2025 & 2026 (.NET 8.0-windows).
+Configurations defined in the .slnx solution file and each .csproj.
+
+EXTRACTION PIPELINES
+--------------------
+- LevelExtractor: discovers levels from host and linked documents, maps elevations.
+- RoomExtractor: extracts rooms with outer/inner loops and curved boundaries.
+- CeilingExtractor: 3-D solid inspection, slope/type classification (FLAT, SLOPED,
+  STEPPED, NONE).
+- ObstacleExtractor: columns, beams, walls, MEP curves relevant to placement.
+- ExistingSprinklerExtractor: family/type, mount, location of existing sprinklers.
+
+OUTPUT
+------
+Versioned JSON (schemaVersion: "1.0"), units in decimal feet, coordinate system
+host_mep_model. Contains:
+- project metadata
+- levels
+- rooms (bounding polygon, area, volume)
+- ceilings (elevation, slope)
+- obstacles
+- existing sprinklers
+- hazard classification (via senior-provided HazardClassifier)
+- warnings/errors
+
+KEY DESIGN RULES
+----------------
+- Extraction fully separated from placement calculation and UI.
+- Snowdon test JSON must NOT be a production dependency.
+- All linked geometry transformed to host-MEP coordinates via link-instance transforms.
+- Per-room error handling: bad rooms produce warnings but do not abort the whole
+  extraction.
+- Zero-transaction, read-only extraction (model never dirtied).
+
+COMMAND FLOW
+------------
+1. obtain active Revit document
+2. initialize model context (host + links)
+3. discover/transform
+4. execute extraction
+5. hazard classification
+6. validate
+7. serialize normalized DTOs
+8. export JSON
+9. report summary
+
+ACCEPTANCE CRITERIA
+-------------------
+- Extraction pipeline works on a real MEP host with architectural links.
+- Levels, rooms (with boundaries), ceilings, obstacles, sprinklers, hazard data all
+  present in JSON.
+- No Snowdon placement coordinates in output.
+- Builds successfully for Revit 2024, 2025, 2026.
+- Existing .addin deployment configuration remains valid.
+
+In short, the project is a Revit add-in that reads the host MEP model and linked
+architectural models, extracts a comprehensive set of fire-protection-relevant data,
+normalizes it to a deterministic JSON format, and leaves Phase 2 placement logic for later.

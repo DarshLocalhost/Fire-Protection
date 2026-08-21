@@ -1,0 +1,145 @@
+﻿<UserControl x:Class="FireProtection.UI.Views.Sprinklers.SprinklerView"
+             xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             xmlns:vmCollision="clr-namespace:FireProtection.UI.ViewModels.Sprinklers.Collision"
+             xmlns:vmBruteForce="clr-namespace:FireProtection.UI.ViewModels.Sprinklers.BruteForce"
+             xmlns:vCollision="clr-namespace:FireProtection.UI.Views.Sprinklers.Collision"
+             xmlns:vBruteForce="clr-namespace:FireProtection.UI.Views.Sprinklers.BruteForce"
+             Background="#F8FAFC"
+             FontFamily="Segoe UI">
+
+    <UserControl.Resources>
+
+        <!-- Colors -->
+        <SolidColorBrush x:Key="AccentBrush" Color="#2563EB"/>
+        <SolidColorBrush x:Key="TextPrimaryBrush" Color="#0F172A"/>
+        <SolidColorBrush x:Key="TextSecondaryBrush" Color="#64748B"/>
+        <SolidColorBrush x:Key="BorderBrush" Color="#E2E8F0"/>
+        <SolidColorBrush x:Key="SurfaceBrush" Color="#FFFFFF"/>
+
+
+        <!-- Header templates: label per sub-view-model type.
+             Underlying ViewModels are unchanged; only the visible header text changes. -->
+        <DataTemplate x:Key="CollisionHeaderTemplate"
+                      DataType="{x:Type vmCollision:SprinklerCollisionViewModel}">
+            <TextBlock Text="Preliminary"/>
+        </DataTemplate>
+
+        <DataTemplate x:Key="BruteForceHeaderTemplate"
+                      DataType="{x:Type vmBruteForce:SprinklerBruteForceViewModel}">
+            <TextBlock Text="Final"/>
+        </DataTemplate>
+
+
+        <!-- Header template selector: chooses label based on ViewModel type -->
+        <local:SprinklerSubTabHeaderTemplateSelector
+            x:Key="SprinklerSubTabHeaderTemplateSelector"
+            xmlns:local="clr-namespace:FireProtection.UI.Views.Sprinklers"
+            CollisionTemplate="{StaticResource CollisionHeaderTemplate}"
+            BruteForceTemplate="{StaticResource BruteForceHeaderTemplate}"/>
+
+
+        <!-- Pill tab style -->
+        <Style x:Key="SubTabItemStyle" TargetType="TabItem">
+            <Setter Property="Foreground" Value="{StaticResource TextSecondaryBrush}"/>
+            <Setter Property="Background" Value="Transparent"/>
+            <Setter Property="FontSize" Value="14"/>
+            <Setter Property="FontWeight" Value="SemiBold"/>
+            <Setter Property="Padding" Value="28,10"/>
+            <Setter Property="Cursor" Value="Hand"/>
+            <Setter Property="Margin" Value="2,0"/>
+            <Setter Property="Template">
+                <Setter.Value>
+                    <ControlTemplate TargetType="TabItem">
+                        <Border x:Name="Bd"
+                                Background="{TemplateBinding Background}"
+                                CornerRadius="6"
+                                Padding="{TemplateBinding Padding}">
+                            <ContentPresenter x:Name="ContentSite"
+                                              ContentSource="Header"
+                                              HorizontalAlignment="Center"
+                                              VerticalAlignment="Center"/>
+                        </Border>
+                        <ControlTemplate.Triggers>
+                            <Trigger Property="IsSelected" Value="True">
+                                <Setter TargetName="Bd" Property="Background" Value="{StaticResource AccentBrush}"/>
+                                <Setter Property="Foreground" Value="White"/>
+                            </Trigger>
+                            <MultiTrigger>
+                                <MultiTrigger.Conditions>
+                                    <Condition Property="IsSelected" Value="False"/>
+                                    <Condition Property="IsMouseOver" Value="True"/>
+                                </MultiTrigger.Conditions>
+                                <Setter Property="Foreground" Value="{StaticResource AccentBrush}"/>
+                            </MultiTrigger>
+                        </ControlTemplate.Triggers>
+                    </ControlTemplate>
+                </Setter.Value>
+            </Setter>
+        </Style>
+
+
+        <!-- Sub-tab TabControl style: pill container with content area below -->
+        <Style x:Key="SubTabControlStyle" TargetType="TabControl">
+            <Setter Property="Background" Value="Transparent"/>
+            <Setter Property="BorderThickness" Value="0"/>
+            <Setter Property="Padding" Value="0"/>
+            <Setter Property="Template">
+                <Setter.Value>
+                    <ControlTemplate TargetType="TabControl">
+                        <Grid>
+                            <Grid.RowDefinitions>
+                                <RowDefinition Height="Auto"/>
+                                <RowDefinition Height="*"/>
+                            </Grid.RowDefinitions>
+
+                            <Border Grid.Row="0"
+                                    Background="{StaticResource SurfaceBrush}"
+                                    BorderBrush="{StaticResource BorderBrush}"
+                                    BorderThickness="1"
+                                    CornerRadius="8"
+                                    Padding="6"
+                                    HorizontalAlignment="Left">
+                                <TabPanel x:Name="HeaderPanel"
+                                          IsItemsHost="True"
+                                          Background="Transparent"/>
+                            </Border>
+
+                            <Border Grid.Row="1"
+                                    Margin="0,16,0,0"
+                                    Background="{StaticResource SurfaceBrush}"
+                                    BorderBrush="{StaticResource BorderBrush}"
+                                    BorderThickness="1"
+                                    CornerRadius="8">
+                                <ContentPresenter ContentSource="SelectedContent"/>
+                            </Border>
+                        </Grid>
+                    </ControlTemplate>
+                </Setter.Value>
+            </Setter>
+        </Style>
+
+
+        <!-- Sub-view ViewModel -> View mapping -->
+        <DataTemplate DataType="{x:Type vmCollision:SprinklerCollisionViewModel}">
+            <vCollision:SprinklerCollisionView/>
+        </DataTemplate>
+
+        <DataTemplate DataType="{x:Type vmBruteForce:SprinklerBruteForceViewModel}">
+            <vBruteForce:SprinklerBruteForceView/>
+        </DataTemplate>
+
+    </UserControl.Resources>
+
+
+    <Grid Margin="20">
+
+        <TabControl Style="{StaticResource SubTabControlStyle}"
+                    ItemContainerStyle="{StaticResource SubTabItemStyle}"
+                    ItemsSource="{Binding SubTabViewModels}"
+                    SelectedItem="{Binding SelectedSubTabViewModel, Mode=TwoWay}"
+                    ItemTemplateSelector="{StaticResource SprinklerSubTabHeaderTemplateSelector}"/>
+
+    </Grid>
+
+</UserControl>

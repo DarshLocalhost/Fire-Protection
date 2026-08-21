@@ -1,0 +1,261 @@
+﻿<Project Sdk="Microsoft.NET.Sdk">
+
+	<!-- ========================================================= -->
+	<!-- Common settings                                           -->
+	<!-- ========================================================= -->
+
+	<PropertyGroup>
+
+		<Configurations>Debug;Release;Revit2024;Revit2025;Revit2026</Configurations>
+		<Platforms>AnyCPU;x64</Platforms>
+
+		<LangVersion>7.3</LangVersion>
+
+		<Nullable>disable</Nullable>
+		<ImplicitUsings>disable</ImplicitUsings>
+
+		<RootNamespace>FireProtection.Backend</RootNamespace>
+		<AssemblyName>FireProtection.Backend</AssemblyName>
+
+	</PropertyGroup>
+
+
+	<!-- ========================================================= -->
+	<!-- Revit 2024                                               -->
+	<!-- ========================================================= -->
+
+	<PropertyGroup Condition="'$(Configuration)' == 'Revit2024'">
+
+		<TargetFramework>net48</TargetFramework>
+
+		<OutputPath>bin\2024\</OutputPath>
+
+		<DefineConstants>$(DefineConstants);REVIT_2024</DefineConstants>
+
+		<PlatformTarget>x64</PlatformTarget>
+
+	</PropertyGroup>
+
+
+	<!-- ========================================================= -->
+	<!-- Revit 2025                                               -->
+	<!-- ========================================================= -->
+
+	<PropertyGroup Condition="'$(Configuration)' == 'Revit2025'">
+
+		<TargetFramework>net8.0-windows</TargetFramework>
+
+		<OutputPath>bin\2025\</OutputPath>
+
+		<DefineConstants>$(DefineConstants);REVIT_2025</DefineConstants>
+
+		<PlatformTarget>x64</PlatformTarget>
+
+	</PropertyGroup>
+
+
+	<!-- ========================================================= -->
+	<!-- Revit 2026                                               -->
+	<!-- ========================================================= -->
+
+	<PropertyGroup Condition="'$(Configuration)' == 'Revit2026'">
+
+		<TargetFramework>net8.0-windows</TargetFramework>
+
+		<OutputPath>bin\2026\</OutputPath>
+
+		<DefineConstants>$(DefineConstants);REVIT_2026</DefineConstants>
+
+		<PlatformTarget>x64</PlatformTarget>
+
+	</PropertyGroup>
+
+
+	<!-- ========================================================= -->
+	<!-- Debug                                                     -->
+	<!-- ========================================================= -->
+
+	<PropertyGroup Condition="'$(Configuration)' == 'Debug'">
+
+		<TargetFramework>net8.0-windows</TargetFramework>
+
+		<PlatformTarget>x64</PlatformTarget>
+
+	</PropertyGroup>
+
+
+	<!-- ========================================================= -->
+	<!-- Release                                                   -->
+	<!-- ========================================================= -->
+
+	<PropertyGroup Condition="'$(Configuration)' == 'Release'">
+
+		<TargetFramework>net8.0-windows</TargetFramework>
+
+		<PlatformTarget>x64</PlatformTarget>
+
+	</PropertyGroup>
+
+
+	<!-- ========================================================= -->
+	<!-- Revit 2024 API                                            -->
+	<!-- ========================================================= -->
+
+	<ItemGroup Condition="'$(Configuration)' == 'Revit2024'">
+
+		<Reference Include="RevitAPI">
+			<HintPath>C:\Program Files\Autodesk\Revit 2024\RevitAPI.dll</HintPath>
+			<Private>False</Private>
+		</Reference>
+
+		<Reference Include="RevitAPIUI">
+			<HintPath>C:\Program Files\Autodesk\Revit 2024\RevitAPIUI.dll</HintPath>
+			<Private>False</Private>
+		</Reference>
+
+	</ItemGroup>
+
+
+	<!-- ========================================================= -->
+	<!-- Revit 2025 API                                            -->
+	<!-- ========================================================= -->
+
+	<ItemGroup Condition="'$(Configuration)' == 'Revit2025'">
+
+		<Reference Include="RevitAPI">
+			<HintPath>C:\Program Files\Autodesk\Revit 2025\RevitAPI.dll</HintPath>
+			<Private>False</Private>
+		</Reference>
+
+		<Reference Include="RevitAPIUI">
+			<HintPath>C:\Program Files\Autodesk\Revit 2025\RevitAPIUI.dll</HintPath>
+			<Private>False</Private>
+		</Reference>
+
+	</ItemGroup>
+
+
+	<!-- ========================================================= -->
+	<!-- Revit 2026 API                                            -->
+	<!-- ========================================================= -->
+
+	<ItemGroup Condition="'$(Configuration)' == 'Revit2026'">
+
+		<Reference Include="RevitAPI">
+			<HintPath>C:\Program Files\Autodesk\Revit 2026\RevitAPI.dll</HintPath>
+			<Private>False</Private>
+		</Reference>
+
+		<Reference Include="RevitAPIUI">
+			<HintPath>C:\Program Files\Autodesk\Revit 2026\RevitAPIUI.dll</HintPath>
+			<Private>False</Private>
+		</Reference>
+
+	</ItemGroup>
+
+
+	<!-- ========================================================= -->
+	<!-- UI project dependency                                     -->
+	<!-- ========================================================= -->
+
+	<ItemGroup>
+
+		<ProjectReference Include="..\FireProtection.UI\FireProtection.UI.csproj" />
+
+	</ItemGroup>
+
+	<ItemGroup>
+		<Folder Include="Infrastructure\" />
+		<Folder Include="Models\Extraction\" />
+		<Folder Include="Properties\" />
+	</ItemGroup>
+
+	<ItemGroup>
+		<PackageReference Include="Newtonsoft.Json" Version="13.0.4" />
+	</ItemGroup>
+
+
+	<!-- ========================================================= -->
+	<!-- Automatic Revit deployment                                -->
+	<!-- ========================================================= -->
+
+	<PropertyGroup Condition="'$(Configuration)' == 'Revit2024'">
+		<RevitVersion>2024</RevitVersion>
+		<RevitAddinsDirectory>$(APPDATA)\Autodesk\Revit\Addins\2024</RevitAddinsDirectory>
+	</PropertyGroup>
+
+
+	<PropertyGroup Condition="'$(Configuration)' == 'Revit2025'">
+		<RevitVersion>2025</RevitVersion>
+		<RevitAddinsDirectory>$(APPDATA)\Autodesk\Revit\Addins\2025</RevitAddinsDirectory>
+	</PropertyGroup>
+
+
+	<PropertyGroup Condition="'$(Configuration)' == 'Revit2026'">
+		<RevitVersion>2026</RevitVersion>
+		<RevitAddinsDirectory>$(APPDATA)\Autodesk\Revit\Addins\2026</RevitAddinsDirectory>
+	</PropertyGroup>
+
+
+	<!-- ========================================================= -->
+	<!-- Deployment target                                         -->
+	<!-- ========================================================= -->
+
+	<Target Name="DeployToRevit" AfterTargets="Build" Condition="'$(Configuration)' == 'Revit2024' Or&#xD;&#xA;                 '$(Configuration)' == 'Revit2025' Or&#xD;&#xA;                 '$(Configuration)' == 'Revit2026'">
+
+		<!-- Create Revit Addins directory -->
+
+		<MakeDir Directories="$(RevitAddinsDirectory)" />
+
+
+		<!-- ======================================================= -->
+		<!-- Copy Backend DLL                                         -->
+		<!-- ======================================================= -->
+
+		<Copy SourceFiles="$(TargetPath)" DestinationFolder="$(RevitAddinsDirectory)" SkipUnchangedFiles="true" />
+
+
+		<!-- ======================================================= -->
+		<!-- Copy UI DLL                                              -->
+		<!-- ======================================================= -->
+
+		<Copy SourceFiles="$(TargetDir)FireProtection.UI.dll" DestinationFolder="$(RevitAddinsDirectory)" SkipUnchangedFiles="true" />
+
+
+		<!-- ======================================================= -->
+		<!-- Generate .addin manifest                                 -->
+		<!-- Registers ONLY:                                          -->
+		<!--   * Application (ribbon entry point)                     -->
+		<!--                                                          -->
+		<!-- FireProtectionApplication builds the ribbon tab, panel,  -->
+		<!-- and button. The button internally targets                -->
+		<!-- FireProtection.Backend.Commands.FireProtectionCommand    -->
+		<!-- via its PushButtonData, so no separate <AddIn Type=      -->
+		<!-- "Command"> registration is required.                     -->
+		<!-- ======================================================= -->
+
+		<WriteLinesToFile File="$(IntermediateOutputPath)FireProtectionSystem.addin" Overwrite="true" Lines="&lt;?xml version=&quot;1.0&quot; encoding=&quot;utf-8&quot; standalone=&quot;no&quot;?&gt;" Encoding="UTF-8" />
+		<WriteLinesToFile File="$(IntermediateOutputPath)FireProtectionSystem.addin" Overwrite="false" Lines="&lt;RevitAddIns&gt;" Encoding="UTF-8" />
+
+		<!-- ===== Application registration (Ribbon) ===== -->
+		<WriteLinesToFile File="$(IntermediateOutputPath)FireProtectionSystem.addin" Overwrite="false" Lines="  &lt;AddIn Type=&quot;Application&quot;&gt;" Encoding="UTF-8" />
+		<WriteLinesToFile File="$(IntermediateOutputPath)FireProtectionSystem.addin" Overwrite="false" Lines="    &lt;Name&gt;Fire Protection System&lt;/Name&gt;" Encoding="UTF-8" />
+		<WriteLinesToFile File="$(IntermediateOutputPath)FireProtectionSystem.addin" Overwrite="false" Lines="    &lt;Assembly&gt;$(TargetPath)&lt;/Assembly&gt;" Encoding="UTF-8" />
+		<WriteLinesToFile File="$(IntermediateOutputPath)FireProtectionSystem.addin" Overwrite="false" Lines="    &lt;AddInId&gt;7E6F5F2A-8C2B-4F43-A8C8-4C8D2B9F6A11&lt;/AddInId&gt;" Encoding="UTF-8" />
+		<WriteLinesToFile File="$(IntermediateOutputPath)FireProtectionSystem.addin" Overwrite="false" Lines="    &lt;FullClassName&gt;FireProtection.Backend.Revit.FireProtectionApplication&lt;/FullClassName&gt;" Encoding="UTF-8" />
+		<WriteLinesToFile File="$(IntermediateOutputPath)FireProtectionSystem.addin" Overwrite="false" Lines="    &lt;VendorId&gt;FPS&lt;/VendorId&gt;" Encoding="UTF-8" />
+		<WriteLinesToFile File="$(IntermediateOutputPath)FireProtectionSystem.addin" Overwrite="false" Lines="    &lt;VendorDescription&gt;Fire Protection System&lt;/VendorDescription&gt;" Encoding="UTF-8" />
+		<WriteLinesToFile File="$(IntermediateOutputPath)FireProtectionSystem.addin" Overwrite="false" Lines="  &lt;/AddIn&gt;" Encoding="UTF-8" />
+
+		<WriteLinesToFile File="$(IntermediateOutputPath)FireProtectionSystem.addin" Overwrite="false" Lines="&lt;/RevitAddIns&gt;" Encoding="UTF-8" />
+
+
+		<!-- ======================================================= -->
+		<!-- Copy generated manifest to Revit                         -->
+		<!-- ======================================================= -->
+
+		<Copy SourceFiles="$(IntermediateOutputPath)FireProtectionSystem.addin" DestinationFiles="$(RevitAddinsDirectory)\FireProtectionSystem.addin" SkipUnchangedFiles="true" />
+
+	</Target>
+
+</Project>

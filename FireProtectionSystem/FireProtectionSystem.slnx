@@ -1,0 +1,18 @@
+<Solution>
+  <Configurations>
+    <BuildType Name="Debug" />
+    <BuildType Name="Release" />
+    <BuildType Name="Revit2024" />
+    <BuildType Name="Revit2025" />
+    <BuildType Name="Revit2026" />
+    <Platform Name="Any CPU" />
+    <Platform Name="x64" />
+  </Configurations>
+  <Project Path="FireProtection.Backend/FireProtection.Backend.csproj">
+    <Platform Solution="*|x64" Project="x64" />
+  </Project>
+  <Project Path="FireProtection.UI/FireProtection.UI.csproj">
+    <BuildType Solution="Revit2024|Any CPU" Project="Debug" />
+    <Platform Solution="*|x64" Project="x64" />
+  </Project>
+</Solution>

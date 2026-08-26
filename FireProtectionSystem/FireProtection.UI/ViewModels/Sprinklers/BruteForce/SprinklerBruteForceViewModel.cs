@@ -349,28 +349,15 @@ namespace FireProtection.UI.ViewModels.Sprinklers.BruteForce
             }
         }
 
-        /// <summary>Visible rooms that failed placement as a real defect (must NOT be conflated with BLOCKED).</summary>
-        public int VisiblePlacementErrorRoomCount
+        /// <summary>Visible rooms for which eligibility is undetermined (configuration/infra error; not BLOCKED, not selectable).</summary>
+        public int VisibleUndeterminedRoomCount
         {
             get
             {
                 int count = 0;
                 if (RoomsView != null)
                     foreach (object obj in RoomsView)
-                        if (obj is RoomItemViewModel r && r.IsPlacementError) count++;
-                return count;
-            }
-        }
-
-        /// <summary>Visible rooms for which eligibility is undetermined (insufficient evidence; not selectable).</summary>
-        public int VisibleUnknownRoomCount
-        {
-            get
-            {
-                int count = 0;
-                if (RoomsView != null)
-                    foreach (object obj in RoomsView)
-                        if (obj is RoomItemViewModel r && r.IsUnknown) count++;
+                        if (obj is RoomItemViewModel r && r.IsUndetermined) count++;
                 return count;
             }
         }
@@ -397,14 +384,12 @@ namespace FireProtection.UI.ViewModels.Sprinklers.BruteForce
                 int visible = VisibleRoomCount;
                 int eligible = VisibleEligibleRoomCount;
                 int blocked = VisibleBlockedRoomCount;
-                int errors = VisiblePlacementErrorRoomCount;
-                int unknown = VisibleUnknownRoomCount;
+                int undetermined = VisibleUndeterminedRoomCount;
                 string baseText = visible + (visible == 1 ? " room shown" : " rooms shown");
                 var parts = new System.Collections.Generic.List<string>();
                 if (eligible > 0) parts.Add(eligible + " eligible");
-                if (errors > 0) parts.Add(errors + " placement-error");
                 if (blocked > 0) parts.Add(blocked + " blocked");
-                if (unknown > 0) parts.Add(unknown + " undetermined");
+                if (undetermined > 0) parts.Add(undetermined + " undetermined");
                 if (parts.Count == 0) return baseText;
                 return baseText + " (" + string.Join(", ", parts) + ")";
             }
@@ -417,13 +402,11 @@ namespace FireProtection.UI.ViewModels.Sprinklers.BruteForce
                 int selected = SelectedVisibleEligibleRoomCount;
                 int eligible = VisibleEligibleRoomCount;
                 int blocked = VisibleBlockedRoomCount;
-                int errors = VisiblePlacementErrorRoomCount;
-                int unknown = VisibleUnknownRoomCount;
+                int undetermined = VisibleUndeterminedRoomCount;
                 string baseSummary = selected + " of " + eligible + " eligible rooms selected";
                 var extra = new System.Collections.Generic.List<string>();
                 if (blocked > 0) extra.Add(blocked + " blocked");
-                if (errors > 0) extra.Add(errors + " placement-error");
-                if (unknown > 0) extra.Add(unknown + " undetermined");
+                if (undetermined > 0) extra.Add(undetermined + " undetermined");
                 return extra.Count == 0 ? baseSummary : baseSummary + " (" + string.Join(", ", extra) + ")";
             }
         }
@@ -448,7 +431,7 @@ namespace FireProtection.UI.ViewModels.Sprinklers.BruteForce
 
         /// <summary>
         /// True when every selectable room (an ELIGIBLE room) is selected. Only ELIGIBLE rooms are part of the
-        /// selectable population; BLOCKED, PLACEMENT_ERROR and UNKNOWN rooms are never selected, so they cannot
+        /// selectable population; BLOCKED and UNDETERMINED rooms are never selected, so they cannot
         /// keep the single toggle stuck on "Select All".
         /// </summary>
         public bool AreAllSelectableRoomsSelected =>
@@ -699,9 +682,9 @@ namespace FireProtection.UI.ViewModels.Sprinklers.BruteForce
                     if (!roomVm.IsSelected) continue;
                     if (!roomVm.IsEligible)
                     {
-                        // Hard guard: only ELIGIBLE rooms reach the placement pipeline. BLOCKED, PLACEMENT_ERROR
-                        // and UNKNOWN rooms are rejected (rejecting a placement-error/unknown room does NOT mean
-                        // it was "blocked" — the distinction is preserved on the room's EligibilityState).
+                        // Hard guard: only ELIGIBLE rooms reach the placement pipeline. BLOCKED and UNDETERMINED
+                        // rooms are rejected (rejecting an undetermined room does NOT mean it was "blocked" —
+                        // the distinction is preserved on the room's EligibilityState).
                         System.Diagnostics.Debug.WriteLine(
                             $"[ROOM-SELECTION-GUARD] RoomId={roomVm.Room?.RoomId} State={roomVm.EligibilityState} " +
                             $"IsEligible={roomVm.IsEligible} IsSelected={roomVm.IsSelected} -> REJECTED");
@@ -794,8 +777,8 @@ namespace FireProtection.UI.ViewModels.Sprinklers.BruteForce
         {
             RoomItemViewModel room = obj as RoomItemViewModel;
             if (room == null) return false;
-            // "Show eligible rooms only" hides everything that is NOT ELIGIBLE (BLOCKED, PLACEMENT_ERROR and
-            // UNKNOWN rooms are all filtered out, so a placement defect is never masked as "just hidden").
+            // "Show eligible rooms only" hides everything that is NOT ELIGIBLE (BLOCKED and UNDETERMINED rooms
+            // are all filtered out, so a defect/undetermined room is never masked as "just hidden").
             if (ShowEligibleRoomsOnly && !room.IsEligible) return false;
             if (room.ParentLevel == null || !room.ParentLevel.IsSelected) return false;
             if (HideUnselectedRooms && !room.IsSelected) return false;
@@ -832,7 +815,7 @@ namespace FireProtection.UI.ViewModels.Sprinklers.BruteForce
         private void ToggleSelectAllRooms()
         {
             bool select = !AreAllSelectableRoomsSelected;
-            // Only ELIGIBLE rooms participate in the select-all toggle. BLOCKED / PLACEMENT_ERROR / UNKNOWN rooms
+            // Only ELIGIBLE rooms participate in the select-all toggle. BLOCKED / UNDETERMINED rooms
             // are never bulk-selected (and selecting them is meaningless — they cannot be placed).
             foreach (RoomItemViewModel room in AllRooms.Where(r => r.IsEligible))
                 room.IsSelected = select;
@@ -842,8 +825,23 @@ namespace FireProtection.UI.ViewModels.Sprinklers.BruteForce
         {
             if (e.PropertyName == nameof(LevelItemViewModel.IsSelected))
             {
+                // §7 / §8: a level selection drives its rooms. Selecting a level selects its ELIGIBLE rooms;
+                // clearing a level deselects its ELIGIBLE rooms. Non-eligible (BLOCKED/UNDETERMINED) rooms are
+                // never selected, regardless of level state, and other selected levels are unaffected.
+                var levelVm = sender as LevelItemViewModel;
+                if (levelVm != null)
+                {
+                    bool select = levelVm.IsSelected;
+                    foreach (RoomItemViewModel room in levelVm.Rooms)
+                    {
+                        room.IsSelected = room.IsEligible ? select : false;
+                    }
+                }
+
                 OnPropertyChanged(nameof(AreAllSelectableLevelsSelected));
                 OnPropertyChanged(nameof(LevelSelectionToggleLabel));
+                OnPropertyChanged(nameof(AreAllSelectableRoomsSelected));
+                OnPropertyChanged(nameof(RoomSelectionToggleLabel));
             }
         }
 
@@ -853,6 +851,12 @@ namespace FireProtection.UI.ViewModels.Sprinklers.BruteForce
             {
                 OnPropertyChanged(nameof(AreAllSelectableRoomsSelected));
                 OnPropertyChanged(nameof(RoomSelectionToggleLabel));
+            }
+            else if (e.PropertyName == nameof(RoomItemViewModel.SelectedHazardClass))
+            {
+                // HazardClass participates in eligibility (it drives candidate generation and the
+                // preflight cache key), so a per-room hazard edit must re-run the deterministic preflight.
+                RefreshEligibility();
             }
         }
 
@@ -911,14 +915,14 @@ namespace FireProtection.UI.ViewModels.Sprinklers.BruteForce
                 if (!canEvaluate)
                 {
                     // Family/type not yet chosen: cannot prove feasibility. The Place command is gated on a
-                    // family/type too, so rooms are marked UNKNOWN (undetermined), never falsely BLOCKED.
+                    // family/type too, so rooms are marked UNDETERMINED, never falsely BLOCKED.
                     result = PlacementEligibilityResult.Pending();
                 }
                 else if (calcFailed)
                 {
-                    result = PlacementEligibilityResult.Unknown(
+                    result = PlacementEligibilityResult.Undetermined(
                         "Candidate calculation could not be run for this room; eligibility is undetermined.",
-                        PlacementEligibilityStatusCodes.Unknown);
+                        PlacementEligibilityStatusCodes.CalculationFailed);
                 }
                 else
                 {
@@ -933,6 +937,7 @@ namespace FireProtection.UI.ViewModels.Sprinklers.BruteForce
                         roomVm.Room, candidates, familyName, typeName);
                 }
 
+                bool wasEligible = roomVm.IsEligible;
                 roomVm.SetEligibility(result);
 
                 System.Diagnostics.Debug.WriteLine(
@@ -940,11 +945,14 @@ namespace FireProtection.UI.ViewModels.Sprinklers.BruteForce
                     $"Family={familyName} Type={typeName} CandidateCount={candidateCount} " +
                     $"State={roomVm.EligibilityState} Status={result.StatusCode} Reason={result.Reason}");
 
-                // Any room that is no longer ELIGIBLE (blocked / placement-error / undetermined) must drop out
-                // of the selection set. This is what breaks the circular hide: a placement-error room is deselected
-                // and shown distinctly, not silently swept into "blocked".
-                if (!roomVm.IsEligible && roomVm.IsSelected)
+                // Normalize selection to the authoritative eligibility state (§4 / §10 / §11 / §19):
+                //  - a room that is NOT eligible (BLOCKED / UNDETERMINED) can never be selected;
+                //  - a room that JUST became ELIGIBLE (was not eligible before this evaluation) is selected
+                //    by default; an already-eligible room keeps the user's manual selection choice.
+                if (!roomVm.IsEligible)
                     roomVm.IsSelected = false;
+                else if (!wasEligible)
+                    roomVm.IsSelected = true;
             }
 
             OnPropertyChanged(nameof(AreAllSelectableRoomsSelected));

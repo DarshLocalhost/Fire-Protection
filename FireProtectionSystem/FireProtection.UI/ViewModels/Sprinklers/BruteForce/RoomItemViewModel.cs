@@ -44,7 +44,7 @@ namespace FireProtection.UI.ViewModels.Sprinklers.BruteForce
             // family/type are available, then calls SetEligibility. Until then the room is
             // treated as not-yet-evaluated so the UI does not present a false "eligible".
             _isEligible = false;
-            _eligibilityState = PlacementEligibilityStates.Unknown;
+            _eligibilityState = EligibilityStates.Undetermined;
             _eligibilityReason = "Placement eligibility not evaluated.";
         }
 
@@ -126,24 +126,18 @@ namespace FireProtection.UI.ViewModels.Sprinklers.BruteForce
         public bool IsBlocked =>
             string.Equals(
                 _eligibilityState,
-                PlacementEligibilityStates.Blocked,
+                EligibilityStates.Blocked,
                 StringComparison.OrdinalIgnoreCase);
 
-        /// <summary>True when placement was attempted but failed unexpectedly (must NOT be conflated with BLOCKED).</summary>
-        public bool IsPlacementError =>
+        /// <summary>True when eligibility could not be determined (configuration/infra error). Must NOT be
+        /// conflated with BLOCKED — a normal missing ceiling/host is BLOCKED, not UNDETERMINED.</summary>
+        public bool IsUndetermined =>
             string.Equals(
                 _eligibilityState,
-                PlacementEligibilityStates.PlacementError,
+                EligibilityStates.Undetermined,
                 StringComparison.OrdinalIgnoreCase);
 
-        /// <summary>True when there was insufficient evidence to classify the room (must NOT be conflated with BLOCKED).</summary>
-        public bool IsUnknown =>
-            string.Equals(
-                _eligibilityState,
-                PlacementEligibilityStates.Unknown,
-                StringComparison.OrdinalIgnoreCase);
-
-        /// <summary>Raw four-state classification (ELIGIBLE / BLOCKED / PLACEMENT_ERROR / UNKNOWN).</summary>
+        /// <summary>Raw three-state classification (ELIGIBLE / BLOCKED / UNDETERMINED).</summary>
         public string EligibilityState => _eligibilityState;
 
         /// <summary>Human-readable reason the room is blocked (empty when eligible). Shown in the UI tooltip.</summary>
@@ -184,7 +178,7 @@ namespace FireProtection.UI.ViewModels.Sprinklers.BruteForce
             if (result == null)
             {
                 _isEligible = false;
-                _eligibilityState = PlacementEligibilityStates.Unknown;
+                _eligibilityState = EligibilityStates.Undetermined;
                 _eligibilityReason = "Placement eligibility not evaluated.";
                 _familyPlacementType = null;
                 _hostingStrategy = null;
@@ -210,8 +204,7 @@ namespace FireProtection.UI.ViewModels.Sprinklers.BruteForce
 
             OnPropertyChanged(nameof(IsEligible));
             OnPropertyChanged(nameof(IsBlocked));
-            OnPropertyChanged(nameof(IsPlacementError));
-            OnPropertyChanged(nameof(IsUnknown));
+            OnPropertyChanged(nameof(IsUndetermined));
             OnPropertyChanged(nameof(EligibilityState));
             OnPropertyChanged(nameof(EligibilityReason));
             OnPropertyChanged(nameof(FamilyPlacementType));

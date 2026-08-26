@@ -2,28 +2,35 @@ namespace FireProtection.UI.Services
 {
     /// <summary>
     /// Machine-readable result of a pre-placement eligibility / preflight check for one room, given the
-    /// currently selected sprinkler family/type. Produced by the Backend placement service (which reuses the
-    /// exact strategy / host-resolution / placement-validation logic used by actual placement) and consumed by
-    /// the UI so that a room can be shown blocked BEFORE the user executes placement. This is Revit-free; no
-    /// Revit type crosses it.
+    /// currently selected sprinkler family/type AND the room's effective HazardClass. Produced by the Backend
+    /// placement service using a deterministic feasibility preflight (the SAME family/level/host/candidate
+    /// prerequisites that actual placement uses) and consumed by the UI so a room can be shown blocked BEFORE
+    /// the user executes placement. This is Revit-free; no Revit type crosses it.
     ///
-    /// Four semantic states are mandatory (master prompt): ELIGIBLE, BLOCKED, PLACEMENT_ERROR, UNKNOWN.
-    /// A placement *defect* (exception, created-but-invalid, unexpected runtime failure) is NEVER silently
-    /// converted into BLOCKED — it is reported as PLACEMENT_ERROR or UNKNOWN so the defect stays visible.
+    /// Three explicit semantic states (master prompt): ELIGIBLE, BLOCKED, UNDETERMINED. Different states are
+    /// never collapsed into one boolean internally.
     /// </summary>
     public class PlacementEligibilityResult
     {
-        /// <summary>One of <see cref="PlacementEligibilityStates"/>. Drives every derived flag below.</summary>
-        public string EligibilityState { get; set; } = PlacementEligibilityStates.Unknown;
+        /// <summary>One of <see cref="EligibilityStates"/>.</summary>
+        public string EligibilityState { get; set; } = EligibilityStates.Undetermined;
 
-        /// <summary>Human-readable explanation (shown in the UI tooltip). For non-eligible states this is the
-        /// deterministic reason (BLOCKED) or the placement failure detail (PLACEMENT_ERROR / UNKNOWN).</summary>
+        /// <summary>Human-readable explanation (shown in the UI tooltip / status). For non-eligible states this is
+        /// the deterministic reason (BLOCKED) or the evaluation-failure detail (UNDETERMINED).</summary>
         public string Reason { get; set; }
 
         /// <summary>Structured status code (see <see cref="PlacementEligibilityStatusCodes"/>).</summary>
         public string StatusCode { get; set; }
 
-        /// <summary>Proven Revit <c>FamilyPlacementType</c> of the selected family (FaceBased / WorkPlaneBased / OneLevelBased).</summary>
+        /// <summary>Number of candidate points that satisfy BOTH the candidate-generation rules AND the selected
+        /// placement strategy's hosting prerequisites (e.g. a usable ceiling host where required).</summary>
+        public int ValidCandidateCount { get; set; }
+
+        /// <summary>The room's effective HazardClass that drove this evaluation (e.g. "Light", "OH1"). Carried for
+        /// diagnostics only; the authoritative hazard-dependent calculation already happened in candidate generation.</summary>
+        public string HazardClass { get; set; }
+
+        /// <summary>Proven Revit FamilyPlacementType of the selected family (FaceBased / WorkPlaneBased / OneLevelBased).</summary>
         public string FamilyPlacementType { get; set; }
 
         /// <summary>Hosting strategy the placement would use (FaceBasedHost / WorkPlaneCeilingFace / WorkPlaneSketchPlane / LevelBased).</summary>
@@ -32,7 +39,10 @@ namespace FireProtection.UI.Services
         /// <summary>"host" / "link:&lt;name&gt;" / "none" — where a ceiling host was found (or not).</summary>
         public string CeilingSource { get; set; }
 
-        /// <summary>Name of the linked model that supplied the ceiling host, when applicable.</summary>
+        /// <summary>Where a ceiling host was found, normalized ("host" / "link:&lt;name&gt;" / "none"). Mirrors <see cref="CeilingSource"/>.</summary>
+        public string HostSource { get; set; }
+
+        /// <summary>Linked model name supplying the ceiling host, when applicable.</summary>
         public string LinkInstanceName { get; set; }
 
         /// <summary>ElementId (string) of the discovered ceiling host, when applicable.</summary>
@@ -45,25 +55,21 @@ namespace FireProtection.UI.Services
         public string HostLevelName { get; set; }
 
         public bool IsEligible =>
-            string.Equals(EligibilityState, PlacementEligibilityStates.Eligible, System.StringComparison.OrdinalIgnoreCase);
+            string.Equals(EligibilityState, EligibilityStates.Eligible, System.StringComparison.OrdinalIgnoreCase);
 
         /// <summary>Deterministic inability to place (explicit reason + status code required).</summary>
         public bool IsBlocked =>
-            string.Equals(EligibilityState, PlacementEligibilityStates.Blocked, System.StringComparison.OrdinalIgnoreCase);
+            string.Equals(EligibilityState, EligibilityStates.Blocked, System.StringComparison.OrdinalIgnoreCase);
 
-        /// <summary>Placement was attempted but an unexpected/API/runtime failure occurred (must NOT be treated as BLOCKED).</summary>
-        public bool IsPlacementError =>
-            string.Equals(EligibilityState, PlacementEligibilityStates.PlacementError, System.StringComparison.OrdinalIgnoreCase);
-
-        /// <summary>Insufficient evidence to safely classify the room (must NOT be treated as BLOCKED).</summary>
-        public bool IsUnknown =>
-            string.Equals(EligibilityState, PlacementEligibilityStates.Unknown, System.StringComparison.OrdinalIgnoreCase);
+        /// <summary>Could not be determined (configuration/infrastructure/environmental error). Must NOT be
+        /// confused with BLOCKED — a normal missing ceiling/host is BLOCKED, not UNDETERMINED.</summary>
+        public bool IsUndetermined =>
+            string.Equals(EligibilityState, EligibilityStates.Undetermined, System.StringComparison.OrdinalIgnoreCase);
 
         public static PlacementEligibilityResult Eligible(PlacementEligibilityResult template = null)
         {
             var r = CopyFrom(template);
-            r.EligibilityState = PlacementEligibilityStates.Eligible;
-            r.IsEligibleFlag = true;
+            r.EligibilityState = EligibilityStates.Eligible;
             r.StatusCode = PlacementEligibilityStatusCodes.Eligible;
             r.Reason = null;
             return r;
@@ -72,8 +78,7 @@ namespace FireProtection.UI.Services
         public static PlacementEligibilityResult Blocked(PlacementEligibilityResult template, string statusCode, string reason)
         {
             var r = CopyFrom(template);
-            r.EligibilityState = PlacementEligibilityStates.Blocked;
-            r.IsEligibleFlag = false;
+            r.EligibilityState = EligibilityStates.Blocked;
             r.StatusCode = statusCode;
             r.Reason = reason;
             return r;
@@ -83,34 +88,22 @@ namespace FireProtection.UI.Services
         public static PlacementEligibilityResult Blocked(string statusCode, string reason) =>
             Blocked((PlacementEligibilityResult)null, statusCode, reason);
 
-        public static PlacementEligibilityResult PlacementError(PlacementEligibilityResult template, string statusCode, string reason)
+        /// <summary>Used when eligibility genuinely cannot be determined (config/infra error), NOT when a room is
+        /// simply unplaceable — a missing ceiling/host is BLOCKED, never UNDETERMINED.</summary>
+        public static PlacementEligibilityResult Undetermined(string reason, string statusCode = PlacementEligibilityStatusCodes.PreflightError)
         {
-            var r = CopyFrom(template);
-            r.EligibilityState = PlacementEligibilityStates.PlacementError;
-            r.IsEligibleFlag = false;
-            r.StatusCode = statusCode;
-            r.Reason = reason;
-            return r;
-        }
-
-        public static PlacementEligibilityResult Unknown(string reason, string statusCode = PlacementEligibilityStatusCodes.Unknown)
-        {
-            var r = new PlacementEligibilityResult
+            return new PlacementEligibilityResult
             {
-                EligibilityState = PlacementEligibilityStates.Unknown,
-                IsEligibleFlag = false,
+                EligibilityState = EligibilityStates.Undetermined,
                 StatusCode = statusCode,
                 Reason = reason
             };
-            return r;
         }
 
         // Back-compat shim used by the VM when family/type is not yet selected (cannot evaluate yet).
-        public static PlacementEligibilityResult Pending() => Unknown(
+        public static PlacementEligibilityResult Pending() => Undetermined(
             "Select a sprinkler family and type to evaluate placement eligibility.",
             PlacementEligibilityStatusCodes.PendingFamilySelection);
-
-        private bool IsEligibleFlag;
 
         private static PlacementEligibilityResult CopyFrom(PlacementEligibilityResult source)
         {
@@ -118,12 +111,14 @@ namespace FireProtection.UI.Services
             return new PlacementEligibilityResult
             {
                 EligibilityState = source.EligibilityState,
-                IsEligibleFlag = source.IsEligibleFlag,
                 StatusCode = source.StatusCode,
                 Reason = source.Reason,
+                ValidCandidateCount = source.ValidCandidateCount,
+                HazardClass = source.HazardClass,
                 FamilyPlacementType = source.FamilyPlacementType,
                 HostingStrategy = source.HostingStrategy,
                 CeilingSource = source.CeilingSource,
+                HostSource = source.HostSource,
                 LinkInstanceName = source.LinkInstanceName,
                 HostCeilingElementId = source.HostCeilingElementId,
                 HostLevelId = source.HostLevelId,
@@ -132,13 +127,12 @@ namespace FireProtection.UI.Services
         }
     }
 
-    /// <summary>Four mandatory semantic eligibility states.</summary>
-    public static class PlacementEligibilityStates
+    /// <summary>Three mandatory semantic eligibility states.</summary>
+    public static class EligibilityStates
     {
         public const string Eligible = "ELIGIBLE";
         public const string Blocked = "BLOCKED";
-        public const string PlacementError = "PLACEMENT_ERROR";
-        public const string Unknown = "UNKNOWN";
+        public const string Undetermined = "UNDETERMINED";
     }
 
     /// <summary>
@@ -153,18 +147,15 @@ namespace FireProtection.UI.Services
         public const string UnsupportedFamilyPlacement = "UNSUPPORTED_FAMILY_PLACEMENT";
         public const string UnsupportedFamilyPlacementType = "UNSUPPORTED_FAMILY_PLACEMENT_TYPE";
         public const string MissingHostLevel = "MISSING_HOST_LEVEL";
-        public const string NoCeilingHost = "NO_CEILING_HOST";
-        public const string PlacementStrategyUnavailable = "PLACEMENT_STRATEGY_UNAVAILABLE";
-        public const string PreflightError = "PREFLIGHT_ERROR";
-
-        // Candidate-generation / probe outcomes (authoritative eligibility via real calculation + real placement probe).
         public const string NoCandidatePoints = "NO_CANDIDATE_POINTS";
-        public const string NoPlaceableCandidate = "NO_PLACEABLE_CANDIDATE";
-        public const string NoValidCandidate = "NO_VALID_CANDIDATE";
-        public const string CreatedButInvalid = "CREATED_BUT_INVALID";
-        public const string ProbeException = "PROBE_EXCEPTION";
 
-        public const string PlacementError = "PLACEMENT_ERROR";
-        public const string Unknown = "UNKNOWN";
+        /// <summary>Required ceiling host does not exist for a family/strategy that requires one (FaceBased and
+        /// WorkPlaneBased; a numeric "Ceiling Height" UI value is NOT proof of a usable host).</summary>
+        public const string NoUsableCeilingHost = "NO_USABLE_CEILING_HOST";
+
+        /// <summary>Candidate calculation could not be run (insufficient evidence) — UNDETERMINED, never BLOCKED.</summary>
+        public const string CalculationFailed = "CALCULATION_FAILED";
+
+        public const string PreflightError = "PREFLIGHT_ERROR";
     }
 }

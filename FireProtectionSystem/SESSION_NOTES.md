@@ -16,6 +16,69 @@
 
 ---
 
+### 2026-08-26 — Selection/level sync + default-eligible + linked-cache hardening (master prompt: SPRINKLER_SELECTION_LINKED_MODEL_PRODUCTION)
+
+- **Context**: Continuation master prompt required the 3-state eligibility to also drive correct SELECTION behavior
+  (all eligible selected by default; blocked/undetermined frozen + never selected; room Select All/Clear All; level↔room
+  sync; hazard/type invalidation; truthful counts; final-placement guard) without altering the read-only preflight.
+- **Actions Taken** (`SprinklerBruteForceViewModel.cs`):
+  - `OnLevelItemPropertyChanged`: selecting a level now selects its **ELIGIBLE** rooms; clearing a level deselects its
+    ELIGIBLE rooms; non-eligible rooms stay deselected; other levels unaffected (§7/§8).
+  - `RefreshEligibility`: now normalizes selection to the authoritative state — a non-eligible room is always
+    deselected; a room that **just became ELIGIBLE** is selected by default; an already-eligible room keeps the user's
+    manual choice (§4/§10/§11/§19). Fixes "blocked→eligible after refresh stays unchecked".
+  - `CollectSelectedRooms` already rejects `!IsEligible` (defensive guard, §16/K).
+  - `ApplyDefaultSelection`/`Reset` unchanged (select eligible by default).
+- **Backend** (`RevitSprinklerPlacementService.EvaluateRoomEligibility`): eligibility cache key now folds in
+  room `Name` + `LevelName` alongside `RoomId` so linked-model rooms with colliding element-ids don't return another
+  model's cached result (§15). **Known residual limitation:** `RoomUiData` carries no typed `LinkInstanceId`, so a
+  true link-unique key (roomId+linkInstanceId) is not yet threaded end-to-end; recommended follow-up is to add
+  `LinkInstanceId` to `RoomUiData` and include it in the cache key + candidate-calc dictionary. The linked-room
+  preflight itself already reuses `CeilingHostResolver.FindCeilingHost` (host coords) and the extraction already
+  normalizes linked geometry to host-MEP coordinates, so linked rooms are NOT auto-blocked and are evaluated in host
+  placement context (§12/§13/§14).
+- **Tests**: added `FireProtection.Tests/BruteForceSelectionTests.cs` (Revit-free, fake `ISprinklerPlacementService`)
+  covering §22 A–G + K (default selection, Select All, Clear All, level sync, hazard invalidation, family/type
+  invalidation, non-eligible-never-selected invariant). H/I/J (linked eligible/blocked/undetermined) require the
+  Revit-enabled Backend and are covered by architecture reuse + manual Revit acceptance.
+- **Open Questions / Blockers**: Backend (and therefore `FireProtection.Tests`) not buildable in this headless CLI
+  (Revit API `CS0246`). Tests ADDED but NOT EXECUTED here.
+- **Handoff**: In a Revit-enabled build, run `BruteForceSelectionTests.RunAll()` and perform the §23 manual Revit
+  acceptance (normal host room, no-ceiling host room, multi-hazard, family/type change, linked eligible + linked
+  no-host) confirming ELIGIBLE→enabled+selected, BLOCKED/UNDETERMINED→frozen+unchecked.
+
+### 2026-08-26 — Eligibility reworked to 3-state deterministic preflight (ELIGIBLE/BLOCKED/UNDETERMINED); yfbxcv 1234 regression fixed
+
+- **Context**: Continuation master prompt (`SPRINKLER_ROOM_ELIGIBILITY_CONTINUE_OPENCODE_MASTER_PROMPT.md`) superseded
+  the 4-state + live-probe approach. It mandated a **3-state** model, **forbade any live `strategy.Place()` probe**,
+  required a **no-ceiling WorkPlaneBased room to be BLOCKED before placement**, and required HazardClass participation.
+  Production room `yfbxcv 1234` (WorkPlaneBased, no usable ceiling, SketchPlane fallback rejected by Revit) placed
+  `Calculated:2, Placed:0, Failed:2` — proving the prior WorkPlaneBased-ELIGIBLE assumption was wrong.
+- **Actions Taken**:
+  - `FireProtection.UI/Services/PlacementEligibilityResult.cs`: 3-state DTO (`EligibilityStates` = ELIGIBLE/BLOCKED/
+    UNDETERMINED; factories `Eligible`/`Blocked(2-arg & 3-arg)`/`Undetermined`/`Pending`); status codes incl.
+    `NO_USABLE_CEILING_HOST`, `CALCULATION_FAILED`, `UNSUPPORTED_FAMILY_PLACEMENT`, `PREFLIGHT_ERROR`.
+  - `FireProtection.Backend/.../RevitSprinklerPlacementService.cs`: `EvaluateRoomEligibility` is now a **read-only**
+    deterministic preflight (no Transaction, no `FamilyInstance`). `requiresCeilingHost = FaceBased || WorkPlaneBased`;
+    candidates without a usable ceiling host are skipped; ≥1 valid candidate ⇒ ELIGIBLE (records host/level info).
+    Family/type unresolved ⇒ UNDETERMINED; candidates null ⇒ UNDETERMINED `CALCULATION_FAILED`; exception ⇒ UNDETERMINED
+    `PREFLIGHT_ERROR`. Cache key now includes `HazardClass`. Removed `EmitCandidateDiagnostic`.
+  - `FireProtection.UI/ViewModels/Sprinklers/BruteForce/RoomItemViewModel.cs`: dropped `IsPlacementError`/`IsUnknown`,
+    added `IsUndetermined`; now keys off `EligibilityStates`.
+  - `FireProtection.UI/ViewModels/Sprinklers/BruteForce/SprinklerBruteForceViewModel.cs`: counts split into
+    Eligible/Blocked/Undetermined (`VisibleUndeterminedRoomCount` replaces `VisiblePlacementErrorRoomCount` +
+    `VisibleUnknownRoomCount`); `RefreshEligibility` calc-fail ⇒ UNDETERMINED; re-runs on family/type **and** per-room
+    HazardClass edit; auto-deselects non-eligible rooms.
+  - `FireProtection.UI/Views/Sprinklers/BruteForce/SprinklerBruteForceView.xaml`: non-eligible rooms muted; BLOCKED red
+    outline, UNDETERMINED amber outline; inline status line (state + reason) under the room name; tooltip = reason.
+- **Decisions**: See [[DECISIONS]] (016) — supersedes 014/015.
+- **Open Questions / Blockers**: Backend not buildable in headless CLI (Revit API `CS0246`); runtime Revit verification
+  pending. The 3-state design assumes `CeilingHostResolver.FindCeilingHost` returns the same host placement would use
+  (read-only) — to be confirmed at runtime on `yfbxcv 1234` and normal rooms.
+- **Handoff**: Next session should run Revit with a model containing a WorkPlaneBased family + a no-ceiling room and a
+  FaceBased family + normal ceiling room; confirm the no-ceiling room is BLOCKED (`NO_USABLE_CEILING_HOST`) and the
+  normal room is ELIGIBLE; verify `[ROOM-ELIGIBILITY]` diagnostics.
+
 ### 2026-08-26 — Eligibility hardened to a 4-state model (ELIGIBLE/BLOCKED/PLACEMENT_ERROR/UNKNOWN); circular hide broken
 
 - **Context**: Master prompt `SPRINKLER_ROOM_ELIGIBILITY_PRODUCTION_GRADE_FIX_MASTER_PROMPT.md` required that the

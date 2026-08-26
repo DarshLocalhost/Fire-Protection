@@ -44,6 +44,9 @@ namespace FireProtection.Backend.Models.DTOs
         [JsonProperty("levelsExtracted")]
         public int LevelsExtracted { get; set; }
 
+        [JsonProperty("ceilingsExtracted")]
+        public int CeilingsExtracted { get; set; }
+
         [JsonProperty("roomsExtracted")]
         public int RoomsExtracted { get; set; }
 
@@ -84,6 +87,7 @@ namespace FireProtection.Backend.Models.DTOs
         {
             return $"Extraction Validation Summary:\n" +
                    $"  Levels extracted: {LevelsExtracted}\n" +
+                   $"  Ceilings extracted: {CeilingsExtracted}\n" +
                    $"  Rooms extracted: {RoomsExtracted}\n" +
                    $"  Rooms with boundaries: {RoomsWithBoundaries}\n" +
                    $"  Rooms missing boundaries: {RoomsMissingBoundaries}\n" +

@@ -19,6 +19,7 @@ namespace FireProtection.Backend.Services.Extraction
             }
 
             summary.LevelsExtracted = snapshot.Levels?.Count ?? 0;
+            summary.CeilingsExtracted = snapshot.Ceilings?.Count ?? 0;
             summary.RoomsExtracted = snapshot.Rooms?.Count ?? 0;
             summary.LinkedModelsFound = snapshot.Model?.Links?.Count ?? 0;
             summary.ExistingSprinklersExtracted = snapshot.ExistingSprinklers?.Count ?? 0;
@@ -98,6 +99,74 @@ namespace FireProtection.Backend.Services.Extraction
             summary.RoomsMissingBoundaries = missingBoundary;
             summary.CeilingsResolved = withCeiling;
             summary.RoomsWithoutCeilings = withoutCeiling;
+
+            // ---- Suspicious-condition checks (legitimate empties must NOT be flagged as errors) ----
+            int roomsCount = summary.RoomsExtracted;
+            int ceilingsFromLinks = 0, obstaclesFromLinks = 0, sprinklersFromLinks = 0;
+
+            if (snapshot.Ceilings != null)
+                foreach (CeilingData c in snapshot.Ceilings)
+                    if (c.Source != null && c.Source.IsFromLink) ceilingsFromLinks++;
+            if (snapshot.Obstacles != null)
+                foreach (ObstacleData o in snapshot.Obstacles)
+                    if (o.Source != null && o.Source.IsFromLink) obstaclesFromLinks++;
+            if (snapshot.ExistingSprinklers != null)
+                foreach (ExistingSprinklerData s in snapshot.ExistingSprinklers)
+                    if (s.Source != null && s.Source.IsFromLink) sprinklersFromLinks++;
+
+            // Host source metadata integrity
+            bool hostSourceMissing = false;
+            if (snapshot.Rooms != null)
+            {
+                foreach (RoomData r in snapshot.Rooms)
+                {
+                    if (r.Source == null || string.IsNullOrEmpty(r.Source.DocumentTitle))
+                    {
+                        hostSourceMissing = true;
+                        break;
+                    }
+                }
+            }
+            if (hostSourceMissing)
+            {
+                issues.Add(new ExtractionIssue(
+                    ExtractionIssueSeverity.Warning,
+                    "SourceValidation",
+                    "One or more host-model records are missing source document metadata (documentTitle)."));
+            }
+
+            if (roomsCount > 0 && summary.CeilingsExtracted == 0)
+            {
+                issues.Add(new ExtractionIssue(
+                    ExtractionIssueSeverity.Warning,
+                    "CeilingValidation",
+                    "Rooms were extracted but no ceiling elements were found in the host or linked models. Verify the model contains ceiling geometry."));
+            }
+
+            if (roomsCount > 0 && summary.ObstaclesExtracted == 0)
+            {
+                issues.Add(new ExtractionIssue(
+                    ExtractionIssueSeverity.Info,
+                    "ObstacleValidation",
+                    "No obstacle elements (walls, columns, beams, MEP curves) were extracted. This may be valid for geometry-light models, but verify if obstacles were expected."));
+            }
+
+            if (summary.ExistingSprinklersExtracted == 0)
+            {
+                issues.Add(new ExtractionIssue(
+                    ExtractionIssueSeverity.Info,
+                    "SprinklerValidation",
+                    "No existing sprinkler instances were extracted. This may be valid for models without placed sprinklers, but verify if sprinklers were expected."));
+            }
+
+            if (summary.LinkedModelsLoaded > 0 &&
+                ceilingsFromLinks == 0 && obstaclesFromLinks == 0 && sprinklersFromLinks == 0)
+            {
+                issues.Add(new ExtractionIssue(
+                    ExtractionIssueSeverity.Warning,
+                    "LinkValidation",
+                    "One or more linked models are loaded, but no ceilings, obstacles, or sprinklers were extracted from any link. Verify link geometry visibility and that the expected linked categories are present."));
+            }
 
             // Count warnings & errors
             int warnings = 0;

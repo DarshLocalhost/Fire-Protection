@@ -204,9 +204,28 @@ namespace FireProtection.Backend.Services.Model
                 familyName = elemType.FamilyName;
             }
 
+            // Resolve level (hosted level) when available
+            string ceilingLevelId = string.Empty;
+            string ceilingLevelName = string.Empty;
+            if (ceiling.LevelId != null && ceiling.LevelId != ElementId.InvalidElementId)
+            {
+#if REVIT_2024 || REVIT_2025 || REVIT_2026
+                ceilingLevelId = ceiling.LevelId.Value.ToString();
+#else
+                ceilingLevelId = ceiling.LevelId.ToString();
+#endif
+                Level ceilingLevel = document.GetElement(ceiling.LevelId) as Level;
+                if (ceilingLevel != null)
+                {
+                    ceilingLevelName = ceilingLevel.Name;
+                }
+            }
+
             CeilingData dto = new CeilingData
             {
                 ElementId = elementId,
+                LevelId = ceilingLevelId,
+                LevelName = ceilingLevelName,
                 CeilingName = ceiling.Name,
                 FamilyName = familyName,
                 TypeName = typeName,

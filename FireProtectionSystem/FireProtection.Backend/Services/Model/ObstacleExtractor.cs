@@ -83,8 +83,23 @@ namespace FireProtection.Backend.Services.Model
                     {
                         if (element == null) continue;
 
-                        BoundingBoxXYZ bbox = element.get_BoundingBox(null);
-                        if (bbox == null) continue;
+                    BoundingBoxXYZ bbox = element.get_BoundingBox(null);
+                    if (bbox == null)
+                    {
+                        // Fallback: derive a bounding box from the element's solid geometry
+                        // so valid obstacles are never silently discarded.
+                        bbox = GetGeometryBoundingBox(element);
+                    }
+                    if (bbox == null)
+                    {
+                        issues.Add(new ExtractionIssue(
+                            ExtractionIssueSeverity.Info,
+                            "ObstacleExtraction",
+                            $"Obstacle '{element.Id}' ({element.Name}) has no resolvable bounding box and was skipped.",
+                            element.Id.ToString(),
+                            element.Name));
+                        continue;
+                    }
 
 #if REVIT_2024 || REVIT_2025 || REVIT_2026
                         string elementId = element.Id.Value.ToString();
@@ -139,6 +154,83 @@ namespace FireProtection.Backend.Services.Model
                         "ObstacleExtraction",
                         $"Category '{cat}' obstacle extraction notice in '{source.DocumentTitle}': {ex.Message}"));
                 }
+            }
+        }
+
+        /// <summary>
+        /// Builds a bounding box from the element's solid geometry when the direct
+        /// bounding-box call returns null. Returns null if no usable geometry is found.
+        /// </summary>
+        private static BoundingBoxXYZ GetGeometryBoundingBox(Element element)
+        {
+            if (element == null) return null;
+
+            try
+            {
+                Options options = new Options
+                {
+                    DetailLevel = ViewDetailLevel.Coarse,
+                    ComputeReferences = false,
+                    IncludeNonVisibleObjects = true
+                };
+
+                GeometryElement geom = element.get_Geometry(options);
+                if (geom == null) return null;
+
+                BoundingBoxXYZ result = null;
+                foreach (GeometryObject obj in geom)
+                {
+                    BoundingBoxXYZ candidate = null;
+                    if (obj is Solid solid && solid.Volume > 1e-9)
+                    {
+                        candidate = solid.GetBoundingBox();
+                    }
+                    else if (obj is GeometryInstance inst)
+                    {
+                        GeometryElement instGeom = inst.GetInstanceGeometry();
+                        if (instGeom != null)
+                        {
+                            foreach (GeometryObject inner in instGeom)
+                            {
+                                if (inner is Solid s && s.Volume > 1e-9)
+                                {
+                                    candidate = s.GetBoundingBox();
+                                    if (candidate != null) break;
+                                }
+                            }
+                        }
+                    }
+
+                    if (candidate == null) continue;
+
+                    if (result == null)
+                    {
+                        result = candidate;
+                    }
+                    else
+                    {
+                        // Expand result to encompass candidate
+                        XYZ min = new XYZ(
+                            Math.Min(result.Min.X, candidate.Min.X),
+                            Math.Min(result.Min.Y, candidate.Min.Y),
+                            Math.Min(result.Min.Z, candidate.Min.Z));
+                        XYZ max = new XYZ(
+                            Math.Max(result.Max.X, candidate.Max.X),
+                            Math.Max(result.Max.Y, candidate.Max.Y),
+                            Math.Max(result.Max.Z, candidate.Max.Z));
+                        result = new BoundingBoxXYZ
+                        {
+                            Min = min,
+                            Max = max
+                        };
+                    }
+                }
+
+                return result;
+            }
+            catch
+            {
+                return null;
             }
         }
     }

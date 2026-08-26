@@ -58,6 +58,9 @@ namespace FireProtection.Backend.Models.DTOs
         [JsonProperty("rooms")]
         public List<RoomData> Rooms { get; set; }
 
+        [JsonProperty("ceilings")]
+        public List<CeilingData> Ceilings { get; set; }
+
         [JsonProperty("existingSprinklers")]
         public List<ExistingSprinklerData> ExistingSprinklers { get; set; }
 
@@ -81,6 +84,7 @@ namespace FireProtection.Backend.Models.DTOs
             Model = new ModelStructureInfo();
             Levels = new List<LevelData>();
             Rooms = new List<RoomData>();
+            Ceilings = new List<CeilingData>();
             ExistingSprinklers = new List<ExistingSprinklerData>();
             Obstacles = new List<ObstacleData>();
             Summary = new ValidationSummary();

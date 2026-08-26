@@ -1,6 +1,9 @@
-﻿using FireProtection.UI.Models;
+using FireProtection.UI.Models;
+using FireProtection.UI.Models.Sprinklers.BruteForce;
 using FireProtection.UI.Services;
 using FireProtection.UI.ViewModels.Common;
+using FireProtection.UI.ViewModels.Sprinklers.BruteForce;
+using Newtonsoft.Json.Linq;
 using System;
 using System.Collections.Generic;
 using System.Collections.ObjectModel;
@@ -15,13 +18,15 @@ namespace FireProtection.UI.ViewModels.Sprinklers.BruteForce
 {
     public class SprinklerBruteForceViewModel : ObservableObject
     {
-        private readonly IPlacementExecutor _placementExecutor;
+        private readonly IPlacementInputExporter _placementInputExporter;
         private readonly ISprinklerFamilySource _sprinklerFamilySource;
-
+        private readonly ISprinklerPlacementService _sprinklerPlacementService;
         private string _levelSearchText;
         private string _roomSearchText;
         private bool _hideUnselectedLevels;
         private bool _hideUnselectedRooms;
+        private bool _showEligibleRoomsOnly;
+        private bool _showLevelsWithRoomsOnly;
         private bool _isPlacementRunning;
         private string _placementStatusMessage;
 
@@ -40,19 +45,29 @@ namespace FireProtection.UI.ViewModels.Sprinklers.BruteForce
 
         public SprinklerBruteForceViewModel(
             FireProtectionUiData data,
-            IPlacementExecutor placementExecutor)
-            : this(data, placementExecutor, null)
+            ISprinklerFamilySource sprinklerFamilySource)
+            : this(data, null, sprinklerFamilySource)
         {
         }
 
         public SprinklerBruteForceViewModel(
             FireProtectionUiData data,
-            IPlacementExecutor placementExecutor,
+            IPlacementInputExporter placementInputExporter,
             ISprinklerFamilySource sprinklerFamilySource)
+            : this(data, placementInputExporter, sprinklerFamilySource, null)
+        {
+        }
+
+        public SprinklerBruteForceViewModel(
+            FireProtectionUiData data,
+            IPlacementInputExporter placementInputExporter,
+            ISprinklerFamilySource sprinklerFamilySource,
+            ISprinklerPlacementService sprinklerPlacementService)
         {
             Data = data;
-            _placementExecutor = placementExecutor;
+            _placementInputExporter = placementInputExporter;
             _sprinklerFamilySource = sprinklerFamilySource;
+            _sprinklerPlacementService = sprinklerPlacementService;
 
             Levels = new ObservableCollection<LevelItemViewModel>();
             AllRooms = new ObservableCollection<RoomItemViewModel>();
@@ -89,17 +104,37 @@ namespace FireProtection.UI.ViewModels.Sprinklers.BruteForce
             ToggleHideUnselectedLevelsCommand = new RelayCommand(_ => HideUnselectedLevels = !HideUnselectedLevels);
             ToggleHideUnselectedRoomsCommand = new RelayCommand(_ => HideUnselectedRooms = !HideUnselectedRooms);
 
-            SelectAllVisibleLevelsCommand = new RelayCommand(_ => SetSelectionOnVisibleLevels(true));
-            ClearVisibleLevelSelectionCommand = new RelayCommand(_ => SetSelectionOnVisibleLevels(false));
+            ToggleSelectAllLevelsCommand = new RelayCommand(_ => ToggleSelectAllLevels());
+            ToggleSelectAllRoomsCommand = new RelayCommand(_ => ToggleSelectAllRooms());
 
-            SelectAllVisibleRoomsCommand = new RelayCommand(_ => SetSelectionOnVisibleRooms(true));
-            ClearVisibleRoomSelectionCommand = new RelayCommand(_ => SetSelectionOnVisibleRooms(false));
+            // Keep the smart toggle state (button label + derived bool) in sync when a
+            // level or room checkbox is toggled manually (or by ApplyDefaultSelection/Reset).
+            foreach (LevelItemViewModel level in Levels)
+                level.PropertyChanged += OnLevelItemPropertyChanged;
+            foreach (RoomItemViewModel room in AllRooms)
+                room.PropertyChanged += OnRoomItemPropertyChanged;
 
             PlaceSprinklersCommand = new RelayCommand(
                 _ => ExecutePlaceSprinklers(),
                 _ => CanExecutePlaceSprinklers());
 
             ResetCommand = new RelayCommand(_ => Reset());
+
+            // Evaluate placement eligibility for every room against the (initially unselected)
+            // family/type BEFORE default selection, so ApplyDefaultSelection only selects rooms
+            // the production pipeline can actually place.
+            RefreshEligibility();
+
+            // Apply default selection (eligible levels + eligible rooms selected; blocked
+            // rooms and empty levels remain unselected) once the collections are built.
+            ApplyDefaultSelection();
+
+            // Publish the initial smart-toggle state so the single toggle buttons render
+            // with the correct label on first show.
+            OnPropertyChanged(nameof(AreAllSelectableLevelsSelected));
+            OnPropertyChanged(nameof(LevelSelectionToggleLabel));
+            OnPropertyChanged(nameof(AreAllSelectableRoomsSelected));
+            OnPropertyChanged(nameof(RoomSelectionToggleLabel));
         }
 
         public FireProtectionUiData Data { get; }
@@ -151,6 +186,41 @@ namespace FireProtection.UI.ViewModels.Sprinklers.BruteForce
             }
         }
 
+        /// <summary>
+        /// When ON, rooms that are not eligible (blocked) are filtered out of the visible
+        /// room collection. This is visibility-only: the underlying room selection and
+        /// source collection are never modified by filtering.
+        /// </summary>
+        public bool ShowEligibleRoomsOnly
+        {
+            get => _showEligibleRoomsOnly;
+            set
+            {
+                if (SetProperty(ref _showEligibleRoomsOnly, value))
+                {
+                    RoomsView.Refresh();
+                    RaiseRoomCounts();
+                }
+            }
+        }
+
+        /// <summary>
+        /// When ON, levels that contain no rooms are filtered out of the visible level
+        /// collection. A level's eligibility is derived from the underlying room
+        /// collection (HasRooms), never from the transient room filter.
+        /// </summary>
+        public bool ShowLevelsWithRoomsOnly
+        {
+            get => _showLevelsWithRoomsOnly;
+            set
+            {
+                if (SetProperty(ref _showLevelsWithRoomsOnly, value))
+                {
+                    LevelsView.Refresh();
+                }
+            }
+        }
+
         public bool IsPlacementRunning
         {
             get => _isPlacementRunning;
@@ -162,6 +232,18 @@ namespace FireProtection.UI.ViewModels.Sprinklers.BruteForce
             get => _placementStatusMessage;
             private set => SetProperty(ref _placementStatusMessage, value);
         }
+
+        /// <summary>
+        /// Most recent BruteForce calculation result (in-memory; no Revit elements created).
+        /// Exposed for UI display/binding; the calculation itself runs in the Backend service.
+        /// </summary>
+        public BruteForceCalculationResult LastCalculationResult { get; private set; }
+
+        /// <summary>
+        /// Most recent actual Revit placement result (populated only when a placement service is wired up).
+        /// Exposed for UI display/binding.
+        /// </summary>
+        public SprinklerPlacementResult LastPlacementResult { get; private set; }
 
         public SprinklerFamilyOption SelectedSprinklerFamily
         {
@@ -175,6 +257,7 @@ namespace FireProtection.UI.ViewModels.Sprinklers.BruteForce
                     OnPropertyChanged(nameof(IsSprinklerFamilySelected));
                     OnPropertyChanged(nameof(IsSprinklerTypeSelected));
                     CommandManager.InvalidateRequerySuggested();
+                    RefreshEligibility();
                 }
             }
         }
@@ -188,6 +271,7 @@ namespace FireProtection.UI.ViewModels.Sprinklers.BruteForce
                 {
                     OnPropertyChanged(nameof(IsSprinklerTypeSelected));
                     CommandManager.InvalidateRequerySuggested();
+                    RefreshEligibility();
                 }
             }
         }
@@ -226,6 +310,71 @@ namespace FireProtection.UI.ViewModels.Sprinklers.BruteForce
             }
         }
 
+        /// <summary>Rooms currently visible in the room view that are placement-eligible (not blocked).</summary>
+        public int VisibleEligibleRoomCount
+        {
+            get
+            {
+                int count = 0;
+                if (RoomsView != null)
+                    foreach (object obj in RoomsView)
+                        if (obj is RoomItemViewModel r && r.IsEligible) count++;
+                return count;
+            }
+        }
+
+        /// <summary>Eligible, visible rooms that are currently selected.</summary>
+        public int SelectedVisibleEligibleRoomCount
+        {
+            get
+            {
+                int count = 0;
+                if (RoomsView != null)
+                    foreach (object obj in RoomsView)
+                        if (obj is RoomItemViewModel r && r.IsEligible && r.IsSelected) count++;
+                return count;
+            }
+        }
+
+        /// <summary>Visible rooms that are placement-blocked (deterministic inability; excluded from selection).</summary>
+        public int VisibleBlockedRoomCount
+        {
+            get
+            {
+                int count = 0;
+                if (RoomsView != null)
+                    foreach (object obj in RoomsView)
+                        if (obj is RoomItemViewModel r && r.IsBlocked) count++;
+                return count;
+            }
+        }
+
+        /// <summary>Visible rooms that failed placement as a real defect (must NOT be conflated with BLOCKED).</summary>
+        public int VisiblePlacementErrorRoomCount
+        {
+            get
+            {
+                int count = 0;
+                if (RoomsView != null)
+                    foreach (object obj in RoomsView)
+                        if (obj is RoomItemViewModel r && r.IsPlacementError) count++;
+                return count;
+            }
+        }
+
+        /// <summary>Visible rooms for which eligibility is undetermined (insufficient evidence; not selectable).</summary>
+        public int VisibleUnknownRoomCount
+        {
+            get
+            {
+                int count = 0;
+                if (RoomsView != null)
+                    foreach (object obj in RoomsView)
+                        if (obj is RoomItemViewModel r && r.IsUnknown) count++;
+                return count;
+            }
+        }
+
         public string RoomsHeader
         {
             get
@@ -246,21 +395,68 @@ namespace FireProtection.UI.ViewModels.Sprinklers.BruteForce
             get
             {
                 int visible = VisibleRoomCount;
-                return visible + (visible == 1 ? " room shown" : " rooms shown");
+                int eligible = VisibleEligibleRoomCount;
+                int blocked = VisibleBlockedRoomCount;
+                int errors = VisiblePlacementErrorRoomCount;
+                int unknown = VisibleUnknownRoomCount;
+                string baseText = visible + (visible == 1 ? " room shown" : " rooms shown");
+                var parts = new System.Collections.Generic.List<string>();
+                if (eligible > 0) parts.Add(eligible + " eligible");
+                if (errors > 0) parts.Add(errors + " placement-error");
+                if (blocked > 0) parts.Add(blocked + " blocked");
+                if (unknown > 0) parts.Add(unknown + " undetermined");
+                if (parts.Count == 0) return baseText;
+                return baseText + " (" + string.Join(", ", parts) + ")";
             }
         }
 
-        public string RoomsSelectedSummary =>
-            SelectedVisibleRoomCount + " of " + VisibleRoomCount + " rooms selected";
+        public string RoomsSelectedSummary
+        {
+            get
+            {
+                int selected = SelectedVisibleEligibleRoomCount;
+                int eligible = VisibleEligibleRoomCount;
+                int blocked = VisibleBlockedRoomCount;
+                int errors = VisiblePlacementErrorRoomCount;
+                int unknown = VisibleUnknownRoomCount;
+                string baseSummary = selected + " of " + eligible + " eligible rooms selected";
+                var extra = new System.Collections.Generic.List<string>();
+                if (blocked > 0) extra.Add(blocked + " blocked");
+                if (errors > 0) extra.Add(errors + " placement-error");
+                if (unknown > 0) extra.Add(unknown + " undetermined");
+                return extra.Count == 0 ? baseSummary : baseSummary + " (" + string.Join(", ", extra) + ")";
+            }
+        }
 
         public ICommand ToggleHideUnselectedLevelsCommand { get; }
         public ICommand ToggleHideUnselectedRoomsCommand { get; }
 
-        public ICommand SelectAllVisibleLevelsCommand { get; }
-        public ICommand ClearVisibleLevelSelectionCommand { get; }
+        public ICommand ToggleSelectAllLevelsCommand { get; }
+        public ICommand ToggleSelectAllRoomsCommand { get; }
 
-        public ICommand SelectAllVisibleRoomsCommand { get; }
-        public ICommand ClearVisibleRoomSelectionCommand { get; }
+        /// <summary>
+        /// True when every selectable level (a level that has at least one room) is selected.
+        /// Used to derive the single Level toggle button label. Blocked/empty levels are not
+        /// part of the selectable population, so they never keep the button stuck on "Select All".
+        /// </summary>
+        public bool AreAllSelectableLevelsSelected =>
+            Levels.Any(l => l.HasRooms) && Levels.Where(l => l.HasRooms).All(l => l.IsSelected);
+
+        /// <summary>Dynamic label for the single Level selection toggle.</summary>
+        public string LevelSelectionToggleLabel =>
+            AreAllSelectableLevelsSelected ? "Clear All" : "Select All";
+
+        /// <summary>
+        /// True when every selectable room (an ELIGIBLE room) is selected. Only ELIGIBLE rooms are part of the
+        /// selectable population; BLOCKED, PLACEMENT_ERROR and UNKNOWN rooms are never selected, so they cannot
+        /// keep the single toggle stuck on "Select All".
+        /// </summary>
+        public bool AreAllSelectableRoomsSelected =>
+            AllRooms.Any(r => r.IsEligible) && AllRooms.Where(r => r.IsEligible).All(r => r.IsSelected);
+
+        /// <summary>Dynamic label for the single Room selection toggle.</summary>
+        public string RoomSelectionToggleLabel =>
+            AreAllSelectableRoomsSelected ? "Clear All" : "Select All";
 
         public ICommand PlaceSprinklersCommand { get; }
         public ICommand ResetCommand { get; }
@@ -318,8 +514,7 @@ namespace FireProtection.UI.ViewModels.Sprinklers.BruteForce
         private bool CanExecutePlaceSprinklers()
         {
             if (IsPlacementRunning) return false;
-            if (_placementExecutor == null) return false;
-            if (SelectedRoomCount == 0) return false;
+            if (SelectedVisibleEligibleRoomCount == 0) return false;
             if (SelectedSprinklerFamily == null) return false;
             if (SelectedSprinklerType == null) return false;
             if (!string.Equals(SelectedSprinklerType.FamilyName, SelectedSprinklerFamily.FamilyName, StringComparison.OrdinalIgnoreCase)) return false;
@@ -343,13 +538,13 @@ namespace FireProtection.UI.ViewModels.Sprinklers.BruteForce
             }
 
             IsPlacementRunning = true;
-            PlacementStatusMessage = "Placing sprinklers...";
+            PlacementStatusMessage = "Exporting placement input snapshot...";
 
             try
             {
-                List<PlacementRequestItem> items = BuildPlacementRequests();
+                List<PlacementRoomInputItem> roomSelections = CollectSelectedRooms();
 
-                if (items.Count == 0)
+                if (roomSelections.Count == 0)
                 {
                     PlacementStatusMessage = "No selected rooms with usable geometry.";
                     MessageBox.Show(
@@ -360,14 +555,100 @@ namespace FireProtection.UI.ViewModels.Sprinklers.BruteForce
                     return;
                 }
 
-                PlacementRunReport report = _placementExecutor.ExecutePlacement(items);
-                ShowPlacementReport(report);
+                string projectName = Data?.Project?.Name ?? "FireProtectionModel";
+                string familyName = SelectedSprinklerFamily.FamilyName;
+                string typeName = SelectedSprinklerType.TypeName;
+
+                if (_placementInputExporter == null)
+                {
+                    throw new InvalidOperationException("Placement input exporter service is not configured.");
+                }
+
+                // Delegate building & exporting to placement input exporter (debug JSON aid).
+                PlacementInputExportResult result = _placementInputExporter.ExportInput(
+                    projectName,
+                    familyName,
+                    typeName,
+                    roomSelections);
+
+                if (!result.Success)
+                {
+                    throw new InvalidOperationException(result.ErrorMessage ?? "Failed to export placement input snapshot.");
+                }
+
+                // Run the in-memory BruteForce calculation (does NOT create Revit elements).
+                BruteForceCalculationResult calc = _placementInputExporter.CalculateBruteForce(
+                    projectName,
+                    familyName,
+                    typeName,
+                    roomSelections);
+
+                LastCalculationResult = calc;
+
+                PlacementStatusMessage =
+                    $"Calculated {calc.TotalCalculatedSprinklers} sprinkler point(s) " +
+                    $"across {calc.Rooms.Count} room(s). (Input JSON also exported.)";
+
+                StringBuilder sb = new StringBuilder();
+                sb.AppendLine("BruteForce sprinkler calculation complete.");
+                sb.AppendLine();
+                sb.AppendLine(calc.SummaryText());
+                sb.AppendLine();
+                sb.AppendLine($"Placement input JSON exported to:\n{result.ExportFilePath}");
+                if (calc.IsProvisional)
+                {
+                    sb.AppendLine();
+                    sb.AppendLine("NOTE: Provisional spacing rules were used. No NFPA13-2022");
+                    sb.AppendLine("compliance is implied. Human review is required.");
+                }
+
+                // Phase 2: actual Revit FamilyInstance placement (does nothing if no service is wired).
+                bool didPlace = false;
+                string placementPath = null;
+
+                if (_sprinklerPlacementService != null)
+                {
+                    SprinklerPlacementResult placement = _sprinklerPlacementService.PlaceSprinklers(
+                        familyName,
+                        typeName,
+                        calc);
+
+                    LastPlacementResult = placement;
+                    didPlace = true;
+
+                    if (_placementInputExporter != null)
+                    {
+                        try
+                        {
+                            placementPath = _placementInputExporter.ExportPlacementResult(placement);
+                        }
+                        catch (Exception ex)
+                        {
+                            placement.Warnings.Add("Failed to export placement result JSON: " + ex.Message);
+                        }
+                    }
+
+                    sb.AppendLine();
+                    sb.AppendLine("---- Actual Revit Placement ----");
+                    sb.AppendLine(placement.SummaryText());
+                    if (!string.IsNullOrEmpty(placementPath))
+                    {
+                        sb.AppendLine();
+                        sb.AppendLine($"Placement result JSON:\n{placementPath}");
+                    }
+                }
+
+                MessageBox.Show(
+                    sb.ToString(),
+                    didPlace ? "Place Sprinklers — Result" : "Place Sprinklers — BruteForce Result",
+                    MessageBoxButton.OK,
+                    calc.Success ? MessageBoxImage.Information : MessageBoxImage.Warning);
             }
             catch (Exception ex)
             {
-                PlacementStatusMessage = "Placement failed: " + ex.Message;
+                PlacementStatusMessage = "Export failed: " + ex.Message;
                 MessageBox.Show(
-                    "Sprinkler placement failed:\n\n" + ex.Message,
+                    "Failed to export placement input JSON:\n\n" + ex.Message,
                     "Place Sprinklers",
                     MessageBoxButton.OK,
                     MessageBoxImage.Error);
@@ -381,9 +662,6 @@ namespace FireProtection.UI.ViewModels.Sprinklers.BruteForce
 
         private string ValidatePlacementInputs()
         {
-            if (_placementExecutor == null)
-                return "Placement service is not available.";
-
             if (SelectedSprinklerFamily == null)
                 return "Please select a sprinkler family.";
 
@@ -393,8 +671,8 @@ namespace FireProtection.UI.ViewModels.Sprinklers.BruteForce
             if (!string.Equals(SelectedSprinklerType.FamilyName, SelectedSprinklerFamily.FamilyName, StringComparison.OrdinalIgnoreCase))
                 return "The selected sprinkler type does not belong to the selected sprinkler family.";
 
-            if (SelectedRoomCount == 0)
-                return "Please select at least one room.";
+            if (SelectedVisibleEligibleRoomCount == 0)
+                return "Please select at least one eligible room.";
 
             bool selectedTypeExistsInCurrentFamily = SprinklerTypes.Any(t =>
                 string.Equals(t.FamilyName, SelectedSprinklerType.FamilyName, StringComparison.OrdinalIgnoreCase) &&
@@ -406,12 +684,9 @@ namespace FireProtection.UI.ViewModels.Sprinklers.BruteForce
             return null;
         }
 
-        private List<PlacementRequestItem> BuildPlacementRequests()
+        private List<PlacementRoomInputItem> CollectSelectedRooms()
         {
-            List<PlacementRequestItem> list = new List<PlacementRequestItem>();
-
-            string selectedFamilyName = SelectedSprinklerFamily != null ? SelectedSprinklerFamily.FamilyName : null;
-            string selectedTypeName = SelectedSprinklerType != null ? SelectedSprinklerType.TypeName : null;
+            List<PlacementRoomInputItem> list = new List<PlacementRoomInputItem>();
 
             foreach (LevelItemViewModel levelVm in Levels)
             {
@@ -422,9 +697,23 @@ namespace FireProtection.UI.ViewModels.Sprinklers.BruteForce
                 foreach (RoomItemViewModel roomVm in levelVm.Rooms)
                 {
                     if (!roomVm.IsSelected) continue;
+                    if (!roomVm.IsEligible)
+                    {
+                        // Hard guard: only ELIGIBLE rooms reach the placement pipeline. BLOCKED, PLACEMENT_ERROR
+                        // and UNKNOWN rooms are rejected (rejecting a placement-error/unknown room does NOT mean
+                        // it was "blocked" — the distinction is preserved on the room's EligibilityState).
+                        System.Diagnostics.Debug.WriteLine(
+                            $"[ROOM-SELECTION-GUARD] RoomId={roomVm.Room?.RoomId} State={roomVm.EligibilityState} " +
+                            $"IsEligible={roomVm.IsEligible} IsSelected={roomVm.IsSelected} -> REJECTED");
+                        continue;
+                    }
 
                     RoomUiData roomData = roomVm.Room;
                     if (roomData == null) continue;
+
+                    System.Diagnostics.Debug.WriteLine(
+                        $"[ROOM-SELECTION-GUARD] RoomId={roomData.RoomId} IsEligible={roomVm.IsEligible} " +
+                        $"IsSelected={roomVm.IsSelected} -> ACCEPTED");
 
                     List<double[]> polyCopy = new List<double[]>();
                     if (roomData.Geometry != null && roomData.Geometry.Polygon != null)
@@ -436,7 +725,11 @@ namespace FireProtection.UI.ViewModels.Sprinklers.BruteForce
                         }
                     }
 
-                    list.Add(new PlacementRequestItem
+                    // Forward the complete room payload so the placement input retains
+                    // ceilings, obstacles, existing sprinklers, and source metadata.
+                    JObject fullRoomJson = BuildFullRoomJson(roomData);
+
+                    list.Add(new PlacementRoomInputItem
                     {
                         LevelId = levelData.LevelId,
                         LevelName = levelData.Name,
@@ -447,12 +740,11 @@ namespace FireProtection.UI.ViewModels.Sprinklers.BruteForce
                         RoomNumber = roomData.Number,
                         AreaSqFt = roomData.AreaSqFt,
                         CeilingHeightFt = roomData.Geometry?.CeilingHeightFt,
+                        CeilingType = roomData.Geometry?.CeilingType,
                         Polygon = polyCopy,
 
                         EffectiveHazardClass = roomVm.SelectedHazardClass,
-
-                        SelectedSprinklerFamilyName = selectedFamilyName,
-                        SelectedSprinklerTypeName = selectedTypeName
+                        FullRoomJson = fullRoomJson
                     });
                 }
             }
@@ -460,55 +752,37 @@ namespace FireProtection.UI.ViewModels.Sprinklers.BruteForce
             return list;
         }
 
-        private void ShowPlacementReport(PlacementRunReport report)
+        /// <summary>
+        /// Reconstructs the full room JSON (including ceilings, obstacles, existing
+        /// sprinklers, source, boundary, and hazard) from the reduced display model plus
+        /// the extension data captured during deserialization of the ModelSnapshot JSON.
+        /// </summary>
+        private static JObject BuildFullRoomJson(RoomUiData roomData)
         {
-            StringBuilder sb = new StringBuilder();
+            if (roomData == null) return null;
 
-            sb.AppendLine("Rooms processed: " + report.RoomsProcessed);
-            sb.AppendLine("  Succeeded: " + report.RoomsSucceeded);
-            sb.AppendLine("  Failed:    " + report.RoomsFailed);
-            sb.AppendLine("  Skipped:   " + report.RoomsSkipped);
-            sb.AppendLine();
-            sb.AppendLine("Sprinklers placed: " + report.SprinklersPlaced
-                          + " / " + report.SprinklersRequested);
-            sb.AppendLine();
-            sb.AppendLine("---- Per-room details ----");
+            JObject full = JObject.FromObject(roomData);
 
-            if (report.RoomReports != null)
+            // Remove the extension-data container if Newtonsoft emitted it as a nested object.
+            if (full["ExtensionData"] != null) full.Remove("ExtensionData");
+
+            // Merge the captured full-model properties (ceilings, obstacles, source, etc.).
+            if (roomData.ExtensionData != null)
             {
-                foreach (PlacementRoomReport r in report.RoomReports)
+                foreach (KeyValuePair<string, JToken> kvp in roomData.ExtensionData)
                 {
-                    string header =
-                        "[" + (r.Status ?? "?") + "] "
-                        + (string.IsNullOrEmpty(r.LevelName) ? "<no level>" : r.LevelName)
-                        + " / "
-                        + (string.IsNullOrEmpty(r.RoomName) ? "<no name>" : r.RoomName)
-                        + "  (points " + r.PointsPlaced + "/" + r.PointsRequested + ")";
-
-                    sb.AppendLine(header);
-                    if (!string.IsNullOrEmpty(r.Message))
-                    {
-                        sb.AppendLine("   " + r.Message);
-                    }
+                    full[kvp.Key] = kvp.Value;
                 }
             }
 
-            string summary = sb.ToString();
-            PlacementStatusMessage =
-                "Placed " + report.SprinklersPlaced + "/" + report.SprinklersRequested
-                + " sprinklers across " + report.RoomsProcessed + " room(s).";
-
-            MessageBox.Show(
-                summary,
-                "Place Sprinklers - Result",
-                MessageBoxButton.OK,
-                MessageBoxImage.Information);
+            return full;
         }
 
         private bool FilterLevel(object obj)
         {
             LevelItemViewModel level = obj as LevelItemViewModel;
             if (level == null) return false;
+            if (ShowLevelsWithRoomsOnly && !level.HasRooms) return false;
             if (HideUnselectedLevels && !level.IsSelected) return false;
             if (string.IsNullOrWhiteSpace(LevelSearchText)) return true;
             string search = LevelSearchText.Trim();
@@ -520,6 +794,9 @@ namespace FireProtection.UI.ViewModels.Sprinklers.BruteForce
         {
             RoomItemViewModel room = obj as RoomItemViewModel;
             if (room == null) return false;
+            // "Show eligible rooms only" hides everything that is NOT ELIGIBLE (BLOCKED, PLACEMENT_ERROR and
+            // UNKNOWN rooms are all filtered out, so a placement defect is never masked as "just hidden").
+            if (ShowEligibleRoomsOnly && !room.IsEligible) return false;
             if (room.ParentLevel == null || !room.ParentLevel.IsSelected) return false;
             if (HideUnselectedRooms && !room.IsSelected) return false;
             return MatchesRoomSearch(room);
@@ -536,28 +813,212 @@ namespace FireProtection.UI.ViewModels.Sprinklers.BruteForce
             return nameMatch || numberMatch;
         }
 
-        private void SetSelectionOnVisibleLevels(bool isSelected)
+        /// <summary>
+        /// One smart toggle: select every selectable level when not all are selected, else
+        /// clear every selectable level. State is derived from the actual selectable
+        /// collection (never a fragile independent bool). Blocked/empty levels excluded.
+        /// </summary>
+        private void ToggleSelectAllLevels()
         {
-            if (LevelsView == null) return;
-            List<LevelItemViewModel> visible = new List<LevelItemViewModel>();
-            foreach (object obj in LevelsView)
-                if (obj is LevelItemViewModel level) visible.Add(level);
+            bool select = !AreAllSelectableLevelsSelected;
+            foreach (LevelItemViewModel level in Levels.Where(l => l.HasRooms))
+                level.IsSelected = select;
+        }
 
-            foreach (LevelItemViewModel level in visible)
+        /// <summary>
+        /// One smart toggle for rooms. Selects every eligible (non-blocked) room when not all
+        /// are selected, else clears them. Blocked rooms are never selected.
+        /// </summary>
+        private void ToggleSelectAllRooms()
+        {
+            bool select = !AreAllSelectableRoomsSelected;
+            // Only ELIGIBLE rooms participate in the select-all toggle. BLOCKED / PLACEMENT_ERROR / UNKNOWN rooms
+            // are never bulk-selected (and selecting them is meaningless — they cannot be placed).
+            foreach (RoomItemViewModel room in AllRooms.Where(r => r.IsEligible))
+                room.IsSelected = select;
+        }
+
+        private void OnLevelItemPropertyChanged(object sender, PropertyChangedEventArgs e)
+        {
+            if (e.PropertyName == nameof(LevelItemViewModel.IsSelected))
             {
-                if (isSelected && !level.HasRooms) continue;
-                level.IsSelected = isSelected;
+                OnPropertyChanged(nameof(AreAllSelectableLevelsSelected));
+                OnPropertyChanged(nameof(LevelSelectionToggleLabel));
             }
         }
 
-        private void SetSelectionOnVisibleRooms(bool isSelected)
+        private void OnRoomItemPropertyChanged(object sender, PropertyChangedEventArgs e)
         {
-            if (RoomsView == null) return;
-            List<RoomItemViewModel> visible = new List<RoomItemViewModel>();
-            foreach (object obj in RoomsView)
-                if (obj is RoomItemViewModel room) visible.Add(room);
-            foreach (RoomItemViewModel room in visible)
-                room.IsSelected = isSelected;
+            if (e.PropertyName == nameof(RoomItemViewModel.IsSelected))
+            {
+                OnPropertyChanged(nameof(AreAllSelectableRoomsSelected));
+                OnPropertyChanged(nameof(RoomSelectionToggleLabel));
+            }
+        }
+
+        /// <summary>
+        /// Re-runs the authoritative pre-placement eligibility preflight for every room, given the
+        /// currently selected sprinkler family/type, and pushes the result into each
+        /// <see cref="RoomItemViewModel"/>. Non-destructive: it never creates a Revit instance — it
+        /// reuses the exact strategy/host-resolution logic the placement service uses. When no
+        /// family/type is selected yet, rooms are left "pending" (eligible, pending family selection)
+        /// so they stay selectable until the user picks a family (the Place command is gated separately).
+        /// Any room that becomes blocked is automatically deselected so a stale selection can never
+        /// reach placement.
+        /// </summary>
+        private void RefreshEligibility()
+        {
+            if (_sprinklerPlacementService == null) return;
+
+            string familyName = SelectedSprinklerFamily?.FamilyName;
+            string typeName = SelectedSprinklerType?.TypeName;
+            bool canEvaluate = !string.IsNullOrWhiteSpace(familyName) && !string.IsNullOrWhiteSpace(typeName);
+
+            // Drop any cached probe results so this evaluation is authoritative, not stale.
+            _sprinklerPlacementService.ClearEligibilityCache();
+
+            // Compute the REAL candidate points for every visible room via the exact BruteForce calculation
+            // the placement step consumes. Eligibility then probes actual placement of those candidates.
+            Dictionary<string, RoomCalculationResult> calcByRoom = null;
+            bool calcRan = canEvaluate && _placementInputExporter != null;
+            if (calcRan)
+            {
+                try
+                {
+                    List<PlacementRoomInputItem> allRooms = CollectAllVisibleRooms();
+                    BruteForceCalculationResult calc = _placementInputExporter.CalculateBruteForce(
+                        Data?.Project?.Name ?? "FireProtectionModel", familyName, typeName, allRooms);
+                    if (calc?.Rooms != null)
+                        calcByRoom = calc.Rooms.Where(r => r != null).ToDictionary(r => r.RoomId);
+                }
+                catch (Exception ex)
+                {
+                    System.Diagnostics.Debug.WriteLine("[ROOM-ELIGIBILITY] candidate calculation failed: " + ex.Message);
+                    calcByRoom = null;
+                }
+            }
+
+            // If we intended to calculate but it threw, we have INSUFFICIENT EVIDENCE -> UNKNOWN for every
+            // room. We must NOT fall through to probing with a null candidate list and report BLOCKED, because
+            // that would hide a calculation/infrastructure failure behind "blocked".
+            bool calcFailed = calcRan && calcByRoom == null;
+
+            foreach (RoomItemViewModel roomVm in AllRooms)
+            {
+                PlacementEligibilityResult result;
+                int candidateCount = 0;
+
+                if (!canEvaluate)
+                {
+                    // Family/type not yet chosen: cannot prove feasibility. The Place command is gated on a
+                    // family/type too, so rooms are marked UNKNOWN (undetermined), never falsely BLOCKED.
+                    result = PlacementEligibilityResult.Pending();
+                }
+                else if (calcFailed)
+                {
+                    result = PlacementEligibilityResult.Unknown(
+                        "Candidate calculation could not be run for this room; eligibility is undetermined.",
+                        PlacementEligibilityStatusCodes.Unknown);
+                }
+                else
+                {
+                    IReadOnlyList<CalculatedSprinklerPoint> candidates = null;
+                    if (calcByRoom != null && roomVm.Room != null &&
+                        calcByRoom.TryGetValue(roomVm.Room.RoomId, out RoomCalculationResult rc))
+                    {
+                        candidates = rc.Points;
+                    }
+                    candidateCount = candidates?.Count ?? 0;
+                    result = _sprinklerPlacementService.EvaluateRoomEligibility(
+                        roomVm.Room, candidates, familyName, typeName);
+                }
+
+                roomVm.SetEligibility(result);
+
+                System.Diagnostics.Debug.WriteLine(
+                    $"[ROOM-ELIGIBILITY] RoomId={roomVm.Room?.RoomId} RoomName={roomVm.Room?.Name} " +
+                    $"Family={familyName} Type={typeName} CandidateCount={candidateCount} " +
+                    $"State={roomVm.EligibilityState} Status={result.StatusCode} Reason={result.Reason}");
+
+                // Any room that is no longer ELIGIBLE (blocked / placement-error / undetermined) must drop out
+                // of the selection set. This is what breaks the circular hide: a placement-error room is deselected
+                // and shown distinctly, not silently swept into "blocked".
+                if (!roomVm.IsEligible && roomVm.IsSelected)
+                    roomVm.IsSelected = false;
+            }
+
+            OnPropertyChanged(nameof(AreAllSelectableRoomsSelected));
+            OnPropertyChanged(nameof(RoomSelectionToggleLabel));
+        }
+
+        /// <summary>
+        /// Builds <see cref="PlacementRoomInputItem"/> for every visible room (regardless of selection state)
+        /// so the authoritative eligibility probe can evaluate the real candidate points for all rooms. Mirrors
+        /// <see cref="CollectSelectedRooms"/> but does not filter on <c>IsSelected</c>/<c>IsBlocked</c>.
+        /// </summary>
+        private List<PlacementRoomInputItem> CollectAllVisibleRooms()
+        {
+            List<PlacementRoomInputItem> list = new List<PlacementRoomInputItem>();
+
+            foreach (LevelItemViewModel levelVm in Levels)
+            {
+                LevelUiData levelData = levelVm.Level;
+                if (levelData == null) continue;
+
+                foreach (RoomItemViewModel roomVm in levelVm.Rooms)
+                {
+                    RoomUiData roomData = roomVm.Room;
+                    if (roomData == null) continue;
+
+                    List<double[]> polyCopy = new List<double[]>();
+                    if (roomData.Geometry != null && roomData.Geometry.Polygon != null)
+                    {
+                        foreach (double[] v in roomData.Geometry.Polygon)
+                        {
+                            if (v != null && v.Length >= 2)
+                                polyCopy.Add(new double[] { v[0], v[1] });
+                        }
+                    }
+
+                    list.Add(new PlacementRoomInputItem
+                    {
+                        LevelId = levelData.LevelId,
+                        LevelName = levelData.Name,
+                        LevelElevationFt = levelData.ElevationFt,
+                        RoomId = roomData.RoomId,
+                        RoomName = roomData.Name,
+                        RoomNumber = roomData.Number,
+                        AreaSqFt = roomData.AreaSqFt,
+                        CeilingHeightFt = roomData.Geometry?.CeilingHeightFt,
+                        CeilingType = roomData.Geometry?.CeilingType,
+                        Polygon = polyCopy,
+                        EffectiveHazardClass = roomVm.SelectedHazardClass,
+                        FullRoomJson = BuildFullRoomJson(roomData)
+                    });
+                }
+            }
+
+            return list;
+        }
+
+        /// <summary>
+        /// Selects all eligible levels and all eligible rooms by default. Blocked rooms and
+        /// levels with no rooms are intentionally left unselected. Selection state lives on
+        /// the source collections, so subsequent filtering cannot destroy it.
+        /// </summary>
+        private void ApplyDefaultSelection()
+        {
+            foreach (LevelItemViewModel level in Levels)
+            {
+                if (!level.HasRooms) continue;          // empty levels not selectable
+                level.IsSelected = true;
+
+                foreach (RoomItemViewModel room in level.Rooms)
+                {
+                    if (!room.IsEligible) continue;        // only ELIGIBLE rooms are selected by default
+                    room.IsSelected = true;
+                }
+            }
         }
 
         private void OnLevelSelectionChanged(object sender, EventArgs e)
@@ -616,6 +1077,8 @@ namespace FireProtection.UI.ViewModels.Sprinklers.BruteForce
             }
 
             PlacementStatusMessage = null;
+            RefreshEligibility();
+            ApplyDefaultSelection();
             CommandManager.InvalidateRequerySuggested();
         }
     }

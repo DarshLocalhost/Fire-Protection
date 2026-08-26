@@ -1,4 +1,4 @@
-﻿using System.Collections.Generic;
+using System.Collections.Generic;
 using System.Collections.ObjectModel;
 using System.ComponentModel;
 using System.Runtime.CompilerServices;
@@ -23,25 +23,39 @@ namespace FireProtection.UI.ViewModels.Sprinklers
         {
         }
 
-        public SprinklerViewModel(FireProtectionUiData data, IPlacementExecutor placementExecutor)
-            : this(data, placementExecutor, null)
+        public SprinklerViewModel(
+            FireProtectionUiData data,
+            ISprinklerFamilySource sprinklerFamilySource)
+            : this(data, null, sprinklerFamilySource)
         {
         }
 
         public SprinklerViewModel(
             FireProtectionUiData data,
-            IPlacementExecutor placementExecutor,
+            IPlacementInputExporter placementInputExporter,
             ISprinklerFamilySource sprinklerFamilySource)
+            : this(data, placementInputExporter, sprinklerFamilySource, null)
+        {
+        }
+
+        public SprinklerViewModel(
+            FireProtectionUiData data,
+            IPlacementInputExporter placementInputExporter,
+            ISprinklerFamilySource sprinklerFamilySource,
+            ISprinklerPlacementService sprinklerPlacementService)
         {
             Data = data;
 
             Collision = new SprinklerCollisionViewModel(data);
-            BruteForce = new SprinklerBruteForceViewModel(data, placementExecutor, sprinklerFamilySource);
+            BruteForce = new SprinklerBruteForceViewModel(data, placementInputExporter, sprinklerFamilySource, sprinklerPlacementService);
 
+            // Tabs swapped (Preliminary <-> Final). The BruteForce sub-view now occupies the
+            // "Preliminary" position and the Collision sub-view the "Final" position. The
+            // ViewModels themselves (and their commands/actions) are unchanged.
             SubTabViewModels = new ObservableCollection<object>
             {
-                Collision,
-                BruteForce
+                BruteForce,
+                Collision
             };
 
             _selectedSubTabViewModel = BruteForce;

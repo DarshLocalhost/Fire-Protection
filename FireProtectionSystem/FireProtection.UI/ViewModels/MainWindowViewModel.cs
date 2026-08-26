@@ -1,4 +1,4 @@
-﻿using System.Collections.Generic;
+using System.Collections.Generic;
 using System.ComponentModel;
 using System.Runtime.CompilerServices;
 using Newtonsoft.Json;
@@ -24,16 +24,18 @@ namespace FireProtection.UI.ViewModels
         {
         }
 
-        public MainWindowViewModel(string json, IPlacementExecutor placementExecutor)
-            : this(DeserializeData(json), placementExecutor, null)
+        public MainWindowViewModel(
+            string json,
+            ISprinklerFamilySource sprinklerFamilySource)
+            : this(DeserializeData(json), null, sprinklerFamilySource)
         {
         }
 
         public MainWindowViewModel(
             string json,
-            IPlacementExecutor placementExecutor,
+            IPlacementInputExporter placementInputExporter,
             ISprinklerFamilySource sprinklerFamilySource)
-            : this(DeserializeData(json), placementExecutor, sprinklerFamilySource)
+            : this(DeserializeData(json), placementInputExporter, sprinklerFamilySource)
         {
         }
 
@@ -42,21 +44,34 @@ namespace FireProtection.UI.ViewModels
         {
         }
 
-        public MainWindowViewModel(FireProtectionUiData data, IPlacementExecutor placementExecutor)
-            : this(data, placementExecutor, null)
+        public MainWindowViewModel(
+            FireProtectionUiData data,
+            IPlacementInputExporter placementInputExporter,
+            ISprinklerFamilySource sprinklerFamilySource)
+            : this(data, placementInputExporter, sprinklerFamilySource, null)
         {
         }
 
         public MainWindowViewModel(
             FireProtectionUiData data,
-            IPlacementExecutor placementExecutor,
-            ISprinklerFamilySource sprinklerFamilySource)
+            IPlacementInputExporter placementInputExporter,
+            ISprinklerFamilySource sprinklerFamilySource,
+            ISprinklerPlacementService sprinklerPlacementService)
         {
             Data = data;
-            Sprinkler = new SprinklerViewModel(data, placementExecutor, sprinklerFamilySource);
+            Sprinkler = new SprinklerViewModel(data, placementInputExporter, sprinklerFamilySource, sprinklerPlacementService);
             SmokeDetector = new SmokeDetectorViewModel(data);
             NotificationAppliance = new NotificationApplianceViewModel(data);
             _selectedTabViewModel = Sprinkler;
+        }
+
+        public MainWindowViewModel(
+            string json,
+            IPlacementInputExporter placementInputExporter,
+            ISprinklerFamilySource sprinklerFamilySource,
+            ISprinklerPlacementService sprinklerPlacementService)
+            : this(DeserializeData(json), placementInputExporter, sprinklerFamilySource, sprinklerPlacementService)
+        {
         }
 
         public event PropertyChangedEventHandler PropertyChanged;

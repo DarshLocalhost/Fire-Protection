@@ -4,6 +4,7 @@ using Autodesk.Revit.UI;
 using FireProtection.Backend.Models.DTOs;
 using FireProtection.Backend.Services.Extraction;
 using FireProtection.Backend.Services.Placement;
+using FireProtection.Backend.Services.Placement.Sprinklers.Final;
 using FireProtection.UI.Services;
 using Newtonsoft.Json;
 using System;
@@ -41,12 +42,21 @@ namespace FireProtection.Backend.Commands
                 // 3. Serialize normalized snapshot to versioned JSON string for UI consumption
                 string json = JsonConvert.SerializeObject(snapshot, Formatting.Indented);
 
-                // 4. Initialize production placement executor & family source for UI interaction
-                RevitPlacementExecutor executor = new RevitPlacementExecutor(hostDocument);
+                // 4. Initialize sprinkler family source to query available sprinkler families from host document
                 RevitSprinklerFamilySource sprinklerFamilySource = new RevitSprinklerFamilySource(hostDocument);
 
-                // 5. Open UI modal window on Revit API thread
-                UiLauncher.Show(json, executor, sprinklerFamilySource);
+                // 5. Initialize placement input JSON exporter (saving structured placement inputs for future engines).
+                //    Pass the global obstacle and existing-sprinkler collections so they can be re-associated to each
+                //    selected room (they are stored at the ModelSnapshot level, not per room).
+                PlacementInputJsonExporter inputExporter = new PlacementInputJsonExporter(
+                    snapshot.Obstacles,
+                    snapshot.ExistingSprinklers);
+
+                // 5b. Initialize the actual Revit sprinkler placement service (holds the active Document).
+                RevitSprinklerPlacementService placementService = new RevitSprinklerPlacementService(hostDocument);
+
+                // 6. Open UI modal window on Revit API thread
+                UiLauncher.Show(json, inputExporter, sprinklerFamilySource, placementService);
 
                 return Result.Succeeded;
             }

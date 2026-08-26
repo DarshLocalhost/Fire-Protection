@@ -574,18 +574,18 @@
                                           <Border.Style>
                                               <Style TargetType="Border">
                                                   <Style.Triggers>
-                                                      <!-- All non-eligible rooms (BLOCKED / PLACEMENT_ERROR / UNKNOWN) are muted. -->
+                                                      <!-- All non-eligible rooms (BLOCKED / UNDETERMINED) are muted. -->
                                                       <DataTrigger Binding="{Binding IsEligible}" Value="False">
                                                           <Setter Property="Opacity" Value="0.5"/>
                                                       </DataTrigger>
-                                                      <!-- A placement defect gets a distinct red outline (surfaced, never hidden as blocked). -->
-                                                      <DataTrigger Binding="{Binding IsPlacementError}" Value="True">
-                                                          <Setter Property="BorderBrush" Value="#D9534F"/>
+                                                      <!-- UNDETERMINED (config/infra error) gets a distinct amber outline. -->
+                                                      <DataTrigger Binding="{Binding IsUndetermined}" Value="True">
+                                                          <Setter Property="BorderBrush" Value="#E0A800"/>
                                                           <Setter Property="BorderThickness" Value="0,0,0,2"/>
                                                       </DataTrigger>
-                                                      <!-- Undetermined eligibility gets a distinct amber outline. -->
-                                                      <DataTrigger Binding="{Binding IsUnknown}" Value="True">
-                                                          <Setter Property="BorderBrush" Value="#E0A800"/>
+                                                      <!-- BLOCKED gets a distinct red outline so the user sees why it cannot be selected. -->
+                                                      <DataTrigger Binding="{Binding IsBlocked}" Value="True">
+                                                          <Setter Property="BorderBrush" Value="#D9534F"/>
                                                           <Setter Property="BorderThickness" Value="0,0,0,2"/>
                                                       </DataTrigger>
                                                   </Style.Triggers>
@@ -606,13 +606,38 @@
                                                       VerticalAlignment="Center"
                                                       ToolTip="{Binding EligibilityReason}"/>
 
-                                            <TextBlock Grid.Column="1"
-                                                       Text="{Binding Name}"
-                                                       FontSize="13"
-                                                       FontWeight="SemiBold"
-                                                       Foreground="{StaticResource TextPrimaryBrush}"
-                                                       VerticalAlignment="Center"
-                                                       TextTrimming="CharacterEllipsis"/>
+                                            <StackPanel Grid.Column="1" VerticalAlignment="Center">
+                                                <TextBlock Text="{Binding Name}"
+                                                           FontSize="13"
+                                                           FontWeight="SemiBold"
+                                                           Foreground="{StaticResource TextPrimaryBrush}"
+                                                           TextTrimming="CharacterEllipsis"/>
+                                                <!-- Non-eligible status line (BLOCKED / UNDETERMINED) so the reason is visible inline, not only in the tooltip. -->
+                                                <TextBlock FontSize="11"
+                                                           Margin="0,2,0,0"
+                                                           TextTrimming="CharacterEllipsis">
+                                                    <TextBlock.Style>
+                                                        <Style TargetType="TextBlock">
+                                                            <Setter Property="Visibility" Value="Collapsed"/>
+                                                            <Style.Triggers>
+                                                                <DataTrigger Binding="{Binding IsEligible}" Value="False">
+                                                                    <Setter Property="Visibility" Value="Visible"/>
+                                                                </DataTrigger>
+                                                                <DataTrigger Binding="{Binding IsBlocked}" Value="True">
+                                                                    <Setter Property="Foreground" Value="#D9534F"/>
+                                                                </DataTrigger>
+                                                                <DataTrigger Binding="{Binding IsUndetermined}" Value="True">
+                                                                    <Setter Property="Foreground" Value="#E0A800"/>
+                                                                </DataTrigger>
+                                                            </Style.Triggers>
+                                                        </Style>
+                                                    </TextBlock.Style>
+                                                    <Run Text="{Binding EligibilityState, Mode=OneWay}"
+                                                         FontWeight="Bold"/>
+                                                    <Run Text=" — "/>
+                                                    <Run Text="{Binding EligibilityReason, Mode=OneWay}"/>
+                                                </TextBlock>
+                                            </StackPanel>
 
                                             <TextBlock Grid.Column="2"
                                                        Text="{Binding AreaSqFt, StringFormat={}{0:N2}}"

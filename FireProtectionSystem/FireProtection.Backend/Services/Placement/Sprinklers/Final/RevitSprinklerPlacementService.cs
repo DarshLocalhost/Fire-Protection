@@ -202,12 +202,22 @@ namespace FireProtection.Backend.Services.Placement.Sprinklers.Final
                     "Room boundary is incomplete (at least 3 points required for placement).");
             }
 
+            // §15: the eligibility cache key must include every eligibility-affecting input. Room identity is
+            // the primary key, but a bare element-based RoomId can collide across linked models (Revit element
+            // ids are only unique within a single document), so the room Name + LevelName are folded in to keep
+            // linked rooms from returning another model's cached result. (A fully link-unique key also threading
+            // LinkInstanceId end-to-end is the recommended follow-up — see SESSION_NOTES.)
+            string hazardKey = room?.Classification?.HazardClass ?? "?";
             string familyKey = (selectedFamilyName ?? string.Empty) + "::" + (selectedTypeName ?? string.Empty);
-            string cacheKey = familyKey + "::" + (room.RoomId ?? room.Name ?? "?");
+            string identity = (room.RoomId ?? room.Name ?? "?")
+                + "::" + (room.Name ?? "?")
+                + "::" + (room.LevelName ?? "?");
+            string cacheKey = familyKey + "::" + hazardKey + "::" + identity;
             if (_eligibilityCache.TryGetValue(cacheKey, out var cached))
                 return cached;
 
             var result = new PlacementEligibilityResult();
+            result.HazardClass = room?.Classification?.HazardClass;
 
             try
             {
@@ -216,10 +226,11 @@ namespace FireProtection.Backend.Services.Placement.Sprinklers.Final
 
                 if (symbol == null)
                 {
-                    return CacheAndReturn(cacheKey, PlacementEligibilityResult.Blocked(
-                        result,
-                        PlacementEligibilityStatusCodes.UnsupportedFamilyPlacement,
-                        error ?? $"Sprinkler family/type '{selectedFamilyName}:{selectedTypeName}' was not found."));
+                    // Family/type not resolved is a CONFIGURATION error, not proof the room is unplaceable.
+                    // Per master prompt §19 it must NOT be converted into "every room is non-eligible" -> UNDETERMINED.
+                    return CacheAndReturn(cacheKey, PlacementEligibilityResult.Undetermined(
+                        error ?? $"Sprinkler family/type '{selectedFamilyName}:{selectedTypeName}' was not found.",
+                        PlacementEligibilityStatusCodes.UnsupportedFamilyPlacement));
                 }
 
                 if (strategy == null)
@@ -233,10 +244,10 @@ namespace FireProtection.Backend.Services.Placement.Sprinklers.Final
                 if (candidates == null)
                 {
                     // Null candidates means the caller could not run/produce the calculation at all (insufficient
-                    // evidence to decide) — this is UNKNOWN, never BLOCKED.
-                    return CacheAndReturn(cacheKey, PlacementEligibilityResult.Unknown(
+                    // evidence to decide) — this is UNDETERMINED, never BLOCKED.
+                    return CacheAndReturn(cacheKey, PlacementEligibilityResult.Undetermined(
                         "Candidate point calculation could not be run for this room; eligibility is undetermined.",
-                        PlacementEligibilityStatusCodes.Unknown));
+                        PlacementEligibilityStatusCodes.CalculationFailed));
                 }
 
                 if (candidates.Count == 0)
@@ -249,30 +260,33 @@ namespace FireProtection.Backend.Services.Placement.Sprinklers.Final
                         "nothing can be placed here."));
                 }
 
-                // --- DETERMINISTIC FEASIBILITY PREFLIGHT (4-state classification; NO instance is created) ---
-                // Master prompt §12: prefer a deterministic preflight that MIRRORS placement capability over
-                // performing live Revit placements. "Eligible" answers "can the selected family be placed in this
-                // room in principle?" and MUST NOT be coupled to a runtime placement defect — otherwise a broken
-                // executor makes every room look non-eligible (the reported "0 eligible rooms" pathology, §10/§37).
-                // Actual placement correctness is a separate concern, re-checked at placement time and guarded
-                // again in the Place command. This reuses the SAME resolvers placement uses (ResolveFamily /
-                // ResolveHostLevel / CeilingHostResolver) so eligibility stays faithful to real preconditions;
-                // no fire-protection rule is invented and no model change is ever made.
+                // --- DETERMINISTIC FEASIBILITY PREFLIGHT (NO instance is created; mirrors placement prerequisites) ---
+                // Reuses the SAME resolvers placement uses (ResolveHostLevel / CeilingHostResolver.FindCeilingHost),
+                // but performs only READ-ONLY queries — no transaction, no FamilyInstance creation (master prompt §8).
+                // This is the single source of truth for "can this room receive a sprinkler with the current config".
                 //
-                // Feasibility by proven FamilyPlacementType:
-                //   FaceBased      -> requires a real ceiling/host FACE for >=1 candidate (deterministic BLOCKED if none).
-                //   WorkPlaneBased -> a ceiling face when present, else a SketchPlane at the requested Z (always
-                //                     constructible given a point + resolved level) -> feasible if a level resolves.
-                //   OneLevelBased  -> needs only a resolvable level -> feasible if a level resolves.
-                // No candidate with a resolvable level -> deterministic BLOCKED (MissingHostLevel).
-                // PLACEMENT_ERROR / UNKNOWN are still produced (outer catch below; null/empty candidates above),
-                // so the 4-state contract is preserved and defects are never hidden as BLOCKED.
-                bool requiresHostFace =
-                    placementType != null &&
-                    placementType.IndexOf("Face", StringComparison.OrdinalIgnoreCase) >= 0;
+                // Host requirement by proven FamilyPlacementType:
+                //   FaceBased      -> REQUIRES a usable ceiling/host face for >=1 candidate.
+                //   WorkPlaneBased -> REQUIRES a usable ceiling/host face for >=1 candidate. Its SketchPlane
+                //                     fallback (SPRINKLER_ACTUAL_Z_DIAGNOSTIC / the yfbxcv 1234 failure) is the
+                //                     documented, unreliable path, so the preflight must require a real ceiling host
+                //                     rather than trusting the fallback that already failed in production.
+                //   OneLevelBased  -> requires only a resolvable level (legitimately placed without a ceiling).
+                //
+                // A numeric "Ceiling Height" (CeilingHeightFt) is NEVER treated as proof of a usable host (§4).
+                bool requiresCeilingHost =
+                    string.Equals(placementType, "FaceBased", StringComparison.OrdinalIgnoreCase) ||
+                    string.Equals(placementType, "WorkPlaneBased", StringComparison.OrdinalIgnoreCase);
 
                 bool anyLevelResolved = false;
+                bool anyHostOk = false;
+                int validCandidateCount = 0;
                 string firstLevelFailure = null;
+                string hostSource = null;
+                string linkInstanceName = null;
+                string hostCeilingElementId = null;
+                string hostLevelId = null;
+                string hostLevelName = null;
                 int candidateIndex = 0;
 
                 foreach (CalculatedSprinklerPoint c in candidates)
@@ -293,33 +307,25 @@ namespace FireProtection.Backend.Services.Placement.Sprinklers.Final
                     Level level = levelRes.HostLevel;
                     XYZ xyz = new XYZ(c.X, c.Y, c.Z);
 
-                    // Read-only host lookup (NO placement). Required for FaceBased, diagnostic for the others.
+                    // Read-only host lookup (NO placement). For ceiling-requiring families this is the gating check.
                     CeilingHostLookup host = null;
                     try { host = _ceilingHostResolver.FindCeilingHost(_hostDocument, xyz, level); }
                     catch { /* host lookup is best-effort; never fail eligibility on it */ }
 
                     bool hasHostFace = host != null && host.HostFace != null;
 
-                    if (requiresHostFace && !hasHostFace)
-                        continue; // this candidate has no host face; try the next candidate
+                    if (requiresCeilingHost && !hasHostFace)
+                        continue; // this candidate has no usable ceiling host; try the next candidate
 
-                    // Deterministically feasible: record the resolved host/level context and classify ELIGIBLE.
-                    result.HostingStrategy = requiresHostFace
-                        ? "FaceBasedHost"
-                        : (hasHostFace ? "WorkPlaneCeilingFace" : "WorkPlaneSketchPlane");
-                    result.CeilingSource = host?.Source ?? "none";
-                    result.LinkInstanceName = host?.LinkInstanceName;
-                    result.HostCeilingElementId = host?.CeilingElementId;
-                    result.HostLevelId = level.Id.ToString();
-                    result.HostLevelName = level.Name;
-
-                    EmitCandidateDiagnostic(
-                        room, candidateIndex, c, placementType, level, outcome: null,
-                        requested: xyz, actual: null, deviation: double.NaN,
-                        statusCode: PlacementEligibilityStatusCodes.Eligible,
-                        exceptionDetail: null);
-
-                    return CacheAndReturn(cacheKey, PlacementEligibilityResult.Eligible(result));
+                    // This candidate satisfies every placement prerequisite: a resolved level AND (if required) a
+                    // usable ceiling host.
+                    anyHostOk = true;
+                    validCandidateCount++;
+                    hostSource = host?.Source ?? "none";
+                    linkInstanceName = host?.LinkInstanceName;
+                    hostCeilingElementId = host?.CeilingElementId;
+                    hostLevelId = level.Id.ToString();
+                    hostLevelName = level.Name;
                 }
 
                 if (!anyLevelResolved)
@@ -331,56 +337,49 @@ namespace FireProtection.Backend.Services.Placement.Sprinklers.Final
                         firstLevelFailure ?? "No candidate point has a resolvable host level."));
                 }
 
-                // A level resolved for at least one candidate but (FaceBased only) no ceiling/host face was found
-                // anywhere in the room -> genuine deterministic inability.
-                return CacheAndReturn(cacheKey, PlacementEligibilityResult.Blocked(
-                    result,
-                    PlacementEligibilityStatusCodes.NoCeilingHost,
-                    "The selected face-based family requires a ceiling/host face, but none was found in this room."));
+                if (!anyHostOk)
+                {
+                    // A level resolved, but the room cannot satisfy the selected family's hosting requirement.
+                    if (requiresCeilingHost)
+                    {
+                        return CacheAndReturn(cacheKey, PlacementEligibilityResult.Blocked(
+                            result,
+                            PlacementEligibilityStatusCodes.NoUsableCeilingHost,
+                            "No usable ceiling host was found for the selected sprinkler family/type."));
+                    }
+
+                    // Non-ceiling-requiring family with no feasible candidate (every candidate rejected by an
+                    // unexpected precondition despite a resolved level).
+                    return CacheAndReturn(cacheKey, PlacementEligibilityResult.Blocked(
+                        result,
+                        PlacementEligibilityStatusCodes.NoCandidatePoints,
+                        "No candidate point could be placed for the selected sprinkler family/type."));
+                }
+
+                // ELIGIBLE: at least one candidate satisfies every placement prerequisite.
+                if (string.Equals(placementType, "FaceBased", StringComparison.OrdinalIgnoreCase))
+                    result.HostingStrategy = "FaceBasedHost";
+                else if (string.Equals(placementType, "WorkPlaneBased", StringComparison.OrdinalIgnoreCase))
+                    result.HostingStrategy = "WorkPlaneCeilingFace";
+                else
+                    result.HostingStrategy = "LevelBased";
+                result.CeilingSource = hostSource;
+                result.HostSource = hostSource;
+                result.LinkInstanceName = linkInstanceName;
+                result.HostCeilingElementId = hostCeilingElementId;
+                result.HostLevelId = hostLevelId;
+                result.HostLevelName = hostLevelName;
+                result.ValidCandidateCount = validCandidateCount;
+
+                return CacheAndReturn(cacheKey, PlacementEligibilityResult.Eligible(result));
             }
             catch (Exception ex)
             {
-                return CacheAndReturn(cacheKey, PlacementEligibilityResult.PlacementError(
-                    result,
-                    PlacementEligibilityStatusCodes.PreflightError,
-                    "Preflight evaluation failed: " + ex.Message));
+                // An unexpected evaluation failure is UNDETERMINED, never BLOCKED (master prompt §3/§19).
+                return CacheAndReturn(cacheKey, PlacementEligibilityResult.Undetermined(
+                    "Preflight evaluation failed: " + ex.Message,
+                    PlacementEligibilityStatusCodes.PreflightError));
             }
-        }
-
-        // Structured per-candidate probe diagnostic (master prompt §4). Emitted via Debug so it does not affect
-        // the UI, but is available in any debugger / trace listener to identify the exact placement defect.
-        [System.Diagnostics.Conditional("DEBUG")]
-        private void EmitCandidateDiagnostic(
-            RoomUiData room,
-            int candidateIndex,
-            CalculatedSprinklerPoint candidate,
-            string placementType,
-            Level level,
-            PlacementOutcome outcome,
-            XYZ requested,
-            XYZ actual,
-            double deviation,
-            string statusCode,
-            string exceptionDetail)
-        {
-            string fmt(double v) => double.IsNaN(v) ? "NaN" : v.ToString("F3");
-            string delta = (requested != null && actual != null)
-                ? $"Delta=({fmt(actual.X - requested.X)},{fmt(actual.Y - requested.Y)},{fmt(actual.Z - requested.Z)})"
-                : "Delta=n/a";
-
-            System.Diagnostics.Debug.WriteLine(
-                $"[ROOM-CANDIDATE-DIAGNOSTIC] RoomId={room?.RoomId} RoomName={room?.Name} " +
-                $"CandidateIndex={candidateIndex} " +
-                $"Requested=({fmt(candidate?.X ?? double.NaN)},{fmt(candidate?.Y ?? double.NaN)},{fmt(candidate?.Z ?? double.NaN)}) " +
-                $"PlacementType={placementType} " +
-                $"HostLevel={level?.Name} CeilingSource={outcome?.CeilingSource} " +
-                $"HostingStrategy={outcome?.HostingStrategy} " +
-                $"PlacementSucceeded={outcome?.Created.ToString() ?? "n/a"} " +
-                $"CreatedElementId={outcome?.Instance?.Id.ToString() ?? "n/a"} " +
-                $"Actual=({fmt(actual?.X ?? double.NaN)},{fmt(actual?.Y ?? double.NaN)},{fmt(actual?.Z ?? double.NaN)}) " +
-                $"DistanceFromRequested={fmt(deviation)} {delta} " +
-                $"ValidationStatus={statusCode} " +
-                (exceptionDetail != null ? $"ExceptionDetail={exceptionDetail}" : string.Empty));
         }
 
         private PlacementEligibilityResult CacheAndReturn(string key, PlacementEligibilityResult value)

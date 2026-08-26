@@ -495,7 +495,7 @@ invalid placement.
 
 ---
 
-## Decision 014 - Eligibility is a 4-state model (ELIGIBLE / BLOCKED / PLACEMENT_ERROR / UNKNOWN); placement defects are never hidden as BLOCKED
+## Decision 014 - Eligibility is a 4-state model (ELIGIBLE / BLOCKED / PLACEMENT_ERROR / UNKNOWN); placement defects are never hidden as BLOCKED — **SUPERSEDED by Decision 016 (3-state)**
 
 **Context (2026-08-26, production-grade fix):** Decision 013 made eligibility authoritative via a real placement
 probe, which fixed the `INVALID=N` blind spot. But its fail-closed rule collapsed *every* non-eligible outcome into
@@ -550,7 +550,7 @@ the placement/coordinate source, **not** by enlarging the validation tolerance.
 
 ---
 
-## Decision 015 - Room eligibility is a DETERMINISTIC feasibility preflight (no live placement); supersedes the live-probe mechanism of 013/014, keeps the 4-state contract
+## Decision 015 - Room eligibility is a DETERMINISTIC feasibility preflight (no live placement); supersedes the live-probe mechanism of 013/014, keeps the 4-state contract — **SUPERSEDED by Decision 016 (3-state + WorkPlaneBased requires ceiling)**
 
 **Context (2026-08-26, "0 eligible rooms" production bug):** Decisions 013/014 made `EvaluateRoomEligibility` decide
 eligibility by performing a **live** `strategy.Place(...)` for each candidate inside a rolled-back `Transaction` and
@@ -601,6 +601,47 @@ spatial validity) remains a separate concern, re-checked at placement time and g
 **Status (2026-08-26):** Backend **builds clean under Revit2025 (0 errors)**; Revit-free test harness **all tests
 pass**. The only warnings are environmental `MSB3277` (`Microsoft.VisualBasic` version conflict from `RevitAPI.dll`),
 not from this change. Runtime Revit verification **pending** (no live Revit host in this environment).
+
+---
+
+## Decision 016 - Eligibility is a 3-state deterministic preflight (ELIGIBLE / BLOCKED / UNDETERMINED); supersedes the 4-state PLACEMENT_ERROR/UNKNOWN split of 014/015 and the WorkPlaneBased SketchPlane assumption
+
+**Context (2026-08-26, continuation master prompt):** Decision 015's deterministic preflight still carried a
+PLACEMENT_ERROR state (it had removed the live probe but kept 4 states) and, critically, treated **WorkPlaneBased** as
+ELIGIBLE whenever a candidate resolved a host level — relying on a `SketchPlane` work-plane fallback. Production room
+`yfbxcv 1234` (WorkPlaneBased, no usable ceiling face, the SketchPlane overload rejected by Revit) placed `Calculated:2,
+Placed:0, Failed:2`, proving the fallback is unreliable. The new master prompt mandates a **3-state** model
+(ELIGIBLE/BLOCKED/UNDETERMINED), explicitly forbids any live `strategy.Place()` probe, requires a **no-ceiling
+WorkPlaneBased room to be BLOCKED before placement**, and requires HazardClass to participate in eligibility.
+
+**Decision:**
+- **Three states only:** ELIGIBLE, BLOCKED, UNDETERMINED. There is no placement-error state — the preflight never
+  places, so there is no placement runtime to error on. PLACEMENT_ERROR and UNKNOWN from Decisions 014/015 are
+  collapsed into UNDETERMINED (config/infra/insufficient-evidence). BLOCKED remains a deterministic, reason+code outcome.
+- **No live probe:** `EvaluateRoomEligibility` performs only **read-only** queries (`ResolveFamily`, `ResolveHostLevel`,
+  `CeilingHostResolver.FindCeilingHost`). No `Transaction`, no `FamilyInstance` creation, no `strategy.Place()`.
+- **Host requirement by proven `FamilyPlacementType`:** `FaceBased` **and** `WorkPlaneBased` both REQUIRE a usable
+  ceiling/host **face** on ≥1 candidate. `WorkPlaneBased`'s `SketchPlane` fallback is NOT trusted (the `yfbxcv 1234`
+  failure). `OneLevelBased` requires only a resolvable level. A numeric `CeilingHeightFt` is never proof of a host.
+- **Classification:** geometry incomplete → BLOCKED `MISSING_ROOM_GEOMETRY`; family/type not resolved → UNDETERMINED
+  `UNSUPPORTED_FAMILY_PLACEMENT` (a config error, NOT "every room blocked" — master prompt §19); strategy null → BLOCKED
+  `UNSUPPORTED_FAMILY_PLACEMENT_TYPE`; candidates null → UNDETERMINED `CALCULATION_FAILED`; candidates empty → BLOCKED
+  `NO_CANDIDATE_POINTS`; no resolvable level → BLOCKED `MISSING_HOST_LEVEL`; ceiling-required & no host face → BLOCKED
+  `NO_USABLE_CEILING_HOST`; ≥1 valid candidate → ELIGIBLE; unexpected exception → UNDETERMINED `PREFLIGHT_ERROR`.
+- **HazardClass participates:** the eligibility cache key includes `HazardClass` and `RefreshEligibility` re-runs on a
+  per-room hazard edit, because candidate generation (and therefore feasibility) is hazard-dependent.
+
+**What this supersedes:** Decision 015's 4-state contract and its WorkPlaneBased-ELIGIBLE-on-level-resolution rule; the
+PLACEMENT_ERROR/UNKNOWN split of Decision 014 (both become UNDETERMINED). Decision 013's authoritative-single-source
+principle is preserved.
+
+**Rationale:** The 3-state model with a read-only preflight is the minimal contract the master prompt requires; folding
+PLACEMENT_ERROR into UNDETERMINED removes a state that could never occur without a live probe. Requiring a real ceiling
+host for WorkPlaneBased closes the `yfbxcv 1234` regression (a room that provably cannot be placed is BLOCKED, not
+silently ELIGIBLE).
+
+**Status (2026-08-26):** UI builds clean (0 errors). Backend not buildable in the headless CLI (Revit API `CS0246`,
+environmental); type-correctness verified by inspection. Runtime Revit verification **pending**.
 
 ---
 

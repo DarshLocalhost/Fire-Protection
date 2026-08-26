@@ -186,66 +186,75 @@ defect** from a pure **view-range / level-association** symptom (the "wrong floo
  **The export tells the truth about the created instance — actual fields are never back-filled with requested
  coordinates.**
 
-## 8b. Placement Preflight / UI Eligibility (Decisions 013, 014 & 015, 2026-08-26, STATIC-VERIFIED; RUNTIME-UNVERIFIED)
+## 8b. Placement Preflight / UI Eligibility (Decisions 013, 014, 015 & 016, 2026-08-26, STATIC-VERIFIED; RUNTIME-UNVERIFIED)
 
-The BruteForce UI blocks rooms the production pipeline provably cannot place. Eligibility is **not** re-derived in
-the UI — it is produced by the Backend as a single source of truth, it is a **deterministic feasibility preflight**
-(Decision 015 — **not** a live placement probe), and it is a **4-state model** (Decision 014):
+The BruteForce UI blocks rooms the production pipeline provably cannot place **before** the user executes placement.
+Eligibility is produced by the Backend as a single source of truth. Per Decision 016 (the current master prompt) it is
+a **deterministic feasibility preflight** — **NO live `strategy.Place()` probe** (no `FamilyInstance` creation, no
+`Transaction`) — and a **three-state model**: **ELIGIBLE / BLOCKED / UNDETERMINED**. Decision 016 supersedes the
+4-state PLACEMENT_ERROR/UNKNOWN split of Decisions 014/015 (those states are collapsed into UNDETERMINED; there is no
+placement-error state because the preflight never places).
 
 - `ISprinklerPlacementService.EvaluateRoomEligibility(RoomUiData room, IReadOnlyList<CalculatedSprinklerPoint> candidates, string familyName, string typeName)`
-  (interface in `FireProtection.UI/Services`; UI stays Revit-free).
-- **Decision 015 (current):** `RevitSprinklerPlacementService.EvaluateRoomEligibility` runs a **deterministic
-  feasibility preflight** that reuses the **same** resolvers real placement uses — `ResolveFamily`
-  (symbol + proven `FamilyPlacementType` + strategy), `ResolveHostLevel`, `CeilingHostResolver.FindCeilingHost` —
-  but **creates no instance and opens no transaction**. Feasibility by proven placement type: **FaceBased** needs a
-  real host **face** on ≥1 candidate (else BLOCKED `NO_CEILING_HOST`); **WorkPlaneBased** is ELIGIBLE once a candidate
-  resolves a host level (ceiling face when present, else a `SketchPlane` at the requested Z — always constructible);
-  **OneLevelBased** is ELIGIBLE once a level resolves; no candidate resolves a level ⇒ BLOCKED `MISSING_HOST_LEVEL`;
-  any preflight exception ⇒ PLACEMENT_ERROR `PREFLIGHT_ERROR`. Results cached per (family/type/room), invalidated via
-  `ClearEligibilityCache()`.
-- **Why the live probe (Decisions 013/014 mechanism) was replaced:** it decided eligibility by *creating* a
-  `FamilyInstance` per candidate inside a rolled-back `Transaction` and requiring the created instance to be spatially
-  valid. That coupled eligibility to the placement executor's **runtime** behaviour, so any placement runtime defect
-  made **every** room non-eligible → the reported **"0 eligible rooms"** pathology (master prompt §37 = SYSTEM-ERROR
-  signal). Decision 015 keeps the 4-state contract but removes the coupling; actual placement correctness is
-  re-checked at placement time and guarded again in the Place command (§23).
-- **Four states (never collapsed):**
-  - **ELIGIBLE** — ≥1 candidate placed + spatially valid. Selectable.
-  - **BLOCKED** — deterministic inability only: `MISSING_ROOM_GEOMETRY`, `UNSUPPORTED_FAMILY_PLACEMENT`,
-    `UNSUPPORTED_FAMILY_PLACEMENT_TYPE`, `NO_CANDIDATE_POINTS`, `MISSING_HOST_LEVEL`/`NO_CEILING_HOST`
-    (host provably absent, e.g. FaceBased `REQUIRED_HOST_UNAVAILABLE`), `NO_PLACEABLE_CANDIDATE`. Not selectable.
-  - **PLACEMENT_ERROR** — `CREATED_BUT_INVALID`, `PROBE_EXCEPTION`, or other unexpected API/runtime failure while a
-    candidate existed and placement was attempted. A real defect, surfaced distinctly (red outline, dedicated count,
-    detail in `Reason`). **Never** reported as BLOCKED. Not selectable.
-  - **UNKNOWN** — insufficient evidence: family/type not selected, or the candidate calculation itself could not run.
-    Not selectable (amber). Never treated as BLOCKED.
-- **Circular-hide break:** the probe's 4-state classification means a broken placement path yields `PLACEMENT_ERROR`
-  (visible) for the affected rooms, never a blanket `BLOCKED` that would mask the defect. `RefreshEligibility` sets
-  **UNKNOWN for every room** when the candidate calculation throws (rather than probing with a null list → BLOCKED),
-  and auto-deselects any room that becomes non-ELIGIBLE. **Error ≠ Blocked; Unknown ≠ Eligible/Blocked.**
-- **Why the prior (2026-08-26 first-pass) preflight was insufficient:** it only tested a single representative centroid
-  point and treated `WorkPlaneBased` as *always* eligible, without running the real calculation or a real placement
-  probe. Runtime proved it false: rooms reported eligible but actual placement produced `Placed=0, INVALID=N, Failed=N`
-  (the `(0,0,0)` origin snap — the old Level-overload bug, fixed in Decisions 011/012). Decision 013 made the probe
-  authoritative; Decision 014 split the fail-closed outcome into BLOCKED vs PLACEMENT_ERROR vs UNKNOWN so real defects
-  stay visible.
+  (interface in `FireProtection.UI/Services`; UI stays Revit-free). Cache key now also includes the room `HazardClass`.
+- **Decision 016 preflight** (`RevitSprinklerPlacementService.EvaluateRoomEligibility`): reuses the **same** read-only
+  resolvers real placement uses — `ResolveFamily` (symbol + proven `FamilyPlacementType` + strategy), `ResolveHostLevel`,
+  `CeilingHostResolver.FindCeilingHost` — but performs **only read-only queries** (no instance, no transaction).
+  Host requirement by proven `FamilyPlacementType`:
+  - **FaceBased** ⇒ REQUIRES a usable ceiling/host **face** on ≥1 candidate.
+  - **WorkPlaneBased** ⇒ REQUIRES a usable ceiling/host **face** on ≥1 candidate. Its `SketchPlane` work-plane fallback
+    (`SPRINKLER_ACTUAL_Z_DIAGNOSTIC` / the `yfbxcv 1234` production failure) is the documented, unreliable path, so the
+    preflight must require a **real** ceiling host rather than trusting the fallback that already failed at runtime.
+    *(This is the regression fix: a WorkPlaneBased room with no usable ceiling is BLOCKED, not ELIGIBLE.)*
+  - **OneLevelBased** ⇒ requires only a resolvable host level (legitimately placed without a ceiling).
+  - A numeric `CeilingHeightFt` ("Ceiling Height") is **NEVER** treated as proof of a usable host.
+- **Classification (never collapsed):**
+  - **ELIGIBLE** — ≥1 candidate satisfies every placement prerequisite (resolved level **and**, where required, a
+    usable ceiling host). Selectable. Records `HostSource`/`CeilingSource`/`LinkInstanceName`/`HostCeilingElementId`/
+    `HostLevelId`/`HostLevelName`/`ValidCandidateCount`/`HazardClass`.
+  - **BLOCKED** — deterministic inability, with an explicit `Reason` + `StatusCode` (never selectable):
+    `MISSING_ROOM_GEOMETRY`, `UNSUPPORTED_FAMILY_PLACEMENT_TYPE`, `NO_CANDIDATE_POINTS`, `MISSING_HOST_LEVEL`,
+    `NO_USABLE_CEILING_HOST` (required ceiling host provably absent, incl. WorkPlaneBased with no usable ceiling).
+  - **UNDETERMINED** — insufficient evidence / configuration-or-infrastructure error (never selectable, amber):
+    family/type **not resolved** ⇒ `UNSUPPORTED_FAMILY_PLACEMENT` (a config error, **NOT** "every room blocked" per
+    master prompt §19); candidate calculation could not run ⇒ `CALCULATION_FAILED`; unexpected preflight exception ⇒
+    `PREFLIGHT_ERROR`. **UNDETERMINED is never reported as BLOCKED.**
+- **Why no live probe (Decisions 013/014 mechanism retired):** deciding eligibility by *creating* a `FamilyInstance`
+  per candidate inside a rolled-back `Transaction` coupled eligibility to the placement executor's runtime behaviour,
+  so any placement runtime defect made **every** room non-eligible → the "0 eligible rooms" pathology. Decision 016
+  keeps the deterministic single-source-of-truth contract but removes the coupling entirely; placement correctness is
+  still re-checked at placement time and guarded in the Place command.
+- **Circular-hide break:** family/type not resolved sets UNDETERMINED (amber, distinct) for the affected rooms, never a
+  blanket BLOCKED that would mask a config defect. `RefreshEligibility` sets **UNDETERMINED for every room** when the
+  candidate calculation throws (rather than BLOCKED), auto-deselects any non-ELIGIBLE room, re-runs on family/type
+  change, and re-runs on a per-room `HazardClass` edit (hazard drives candidate generation and the cache key).
 - Result DTO `PlacementEligibilityResult` (`FireProtection.UI/Services`, Revit-free) carries
-  `EligibilityState / IsEligible / IsBlocked / IsPlacementError / IsUnknown / Reason / StatusCode /
-  FamilyPlacementType / HostingStrategy / CeilingSource / LinkInstanceName / HostLevelId / HostLevelName`.
-- UI wiring: `SprinklerBruteForceViewModel.RefreshEligibility()` computes candidates for every visible room
-  (new `CollectAllVisibleRooms()`), calls the probe, and `RoomItemViewModel.SetEligibility` applies the 4-state result.
-  Only ELIGIBLE rooms are selectable (grid checkbox `IsEnabled=IsEligible`, single Select-All toggle selects only
-  `IsEligible`, `ApplyDefaultSelection` selects only `IsEligible`). "Show eligible rooms only" filters to `IsEligible`
-  (hides BLOCKED/ERROR/UNKNOWN equally). `CollectSelectedRooms` and `CanExecutePlaceSprinklers` guard on
-  `SelectedVisibleEligibleRoomCount`, so a non-eligible room can never reach placement. `[ROOM-ELIGIBILITY]` /
-  `[ROOM-SELECTION-GUARD]` / `[ROOM-CANDIDATE-DIAGNOSTIC]` `Debug` diagnostics prove the path and pinpoint defects (§17).
-- **Status:** UI builds clean (0 errors, 2026-08-26). Backend not buildable in the headless CLI (Revit API `CS0246`,
-  environmental); type-correctness verified by inspection against `PlacementContext`, `strategy.Place`,
-  `PlacementOutcome`, `LevelResolution`, `CalculatedSprinklerPoint`, `PlacementStatusCodes`. Runtime Revit
-  verification **pending** (no Revit host in this environment). The `(0,0,0)`-style defect is already fixed by
-  Decisions 011/012; if a residual `CREATED_BUT_INVALID` appears at runtime, the 4-state model surfaces it as
-  `PLACEMENT_ERROR` (with requested-vs-actual deviation in `Reason`) rather than `BLOCKED` — to be fixed at the
-  placement/coordinate source, **not** by enlarging the validation tolerance.
+  `EligibilityState / IsEligible / IsBlocked / IsUndetermined / Reason / StatusCode / ValidCandidateCount / HazardClass /
+  FamilyPlacementType / HostingStrategy / CeilingSource / HostSource / LinkInstanceName / HostCeilingElementId /
+  HostLevelId / HostLevelName`.
+- UI wiring: `SprinklerBruteForceViewModel.RefreshEligibility()` runs the preflight for every visible room and
+  `RoomItemViewModel.SetEligibility` applies the 3-state result. **Selection contract:** only ELIGIBLE rooms are
+  selectable (grid checkbox `IsEnabled=IsEligible`; BLOCKED rooms get a red outline + inline status text + tooltip;
+  UNDETERMINED an amber outline). After every evaluation, selection is normalized to the authoritative state — a
+  non-eligible room is always deselected; a room that **just became ELIGIBLE** is selected by default; an already-eligible
+  room keeps the user's manual choice (master prompt §4/§10/§11). **Level↔room sync (§7/§8):** selecting a level selects
+  its ELIGIBLE rooms; clearing a level deselects its ELIGIBLE rooms; non-eligible rooms stay deselected and other
+  selected levels are unaffected. Room **Select All** selects only visible ELIGIBLE rooms; **Clear All** deselects
+  ELIGIBLE rooms; both never touch BLOCKED/UNDETERMINED. `ApplyDefaultSelection`/`Reset` seed only ELIGIBLE rooms.
+  "Show eligible rooms only" filters to `IsEligible` (filters never mutate `IsEligible`). `CollectSelectedRooms`
+  (defensive guard, §16) and `CanExecutePlaceSprinklers` both gate on `IsEligible`, so a non-eligible room can never
+  reach placement. `[ROOM-ELIGIBILITY]` and `[ROOM-SELECTION-GUARD]` `Debug` diagnostics prove the path.
+- **Linked-model eligibility (§12/§13/§14/§15):** linked rooms are evaluated in the host-model placement context.
+  Extraction already normalizes linked geometry to host-MEP coordinates, and the preflight reuses
+  `CeilingHostResolver.FindCeilingHost` (which already resolves linked ceilings) — so a linked room is **not** auto-blocked
+  and may be ELIGIBLE when it has a supported host context. The eligibility cache key now folds in room `Name`+`LevelName`
+  with `RoomId` so a bare element-id collision across links does not return another model's result. **Residual limitation:**
+  `RoomUiData` has no typed `LinkInstanceId`, so a fully link-unique cache key (roomId + linkInstanceId) is not yet end-to-end;
+  thread `LinkInstanceId` through `RoomUiData` + the candidate-calc dictionary for the complete fix.
+- **Status:** UI builds clean (0 errors). Backend not buildable in the headless CLI (Revit API `CS0246`, environmental);
+  type-correctness verified by inspection against `PlacementContext`, `strategy.Place`, `PlacementOutcome`,
+  `LevelResolution`, `CalculatedSprinklerPoint`, `PlacementStatusCodes`. Runtime Revit verification **pending** (no
+  Revit host in this environment).
 
 ## 9. Level Resolution (`ResolveHostLevel`, STATIC-VERIFIED)
 

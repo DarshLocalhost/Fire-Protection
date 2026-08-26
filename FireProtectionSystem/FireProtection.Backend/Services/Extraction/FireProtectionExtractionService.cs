@@ -66,11 +66,17 @@ namespace FireProtection.Backend.Services.Extraction
             // 5. Extract Obstacles (columns, beams, walls, MEP elements)
             List<ObstacleData> obstacles = _obstacleExtractor.ExtractObstacles(context, issues);
 
-            // 6. Extract Existing Sprinklers from host model
+            // 6. Extract Existing Sprinklers from host model (and linked models)
             List<ExistingSprinklerData> existingSprinklers =
                 _existingSprinklerExtractor.ExtractExistingSprinklers(context, levels, issues);
 
-            // 7. Build root ModelSnapshot DTO
+            // 7. Retain all extracted ceilings at the global level so none are silently lost,
+            //     then associate obstacles and sprinklers to their containing rooms.
+            List<CeilingData> allCeilings = ceilingItems.ConvertAll(c => c.Dto);
+            AssociateObstaclesToRooms(rooms, obstacles);
+            AssociateSprinklersToRooms(rooms, existingSprinklers);
+
+            // 8. Build root ModelSnapshot DTO
             ModelSnapshot snapshot = new ModelSnapshot
             {
                 SchemaVersion = "1.0",
@@ -95,11 +101,12 @@ namespace FireProtection.Backend.Services.Extraction
                 Model = context.GetModelStructureInfo(linkRoomCounts),
                 Levels = levels,
                 Rooms = rooms,
+                Ceilings = allCeilings,
                 ExistingSprinklers = existingSprinklers,
                 Obstacles = obstacles
             };
 
-            // 8. Validate extraction & compute statistics
+            // 9. Validate extraction & compute statistics                                      
             snapshot.Summary = _validator.Validate(snapshot, issues);
 
             // Populate issues list
@@ -128,19 +135,56 @@ namespace FireProtection.Backend.Services.Extraction
         }
 
         /// <summary>
-        /// Backward-compatibility helper for older caller signatures.
+        /// Associates each obstacle with the rooms it intersects in the XY plane and vertically.
+        /// Populates both the obstacle's <see cref="ObstacleData.AssociatedRoomIds"/> and the
+        /// room's <see cref="RoomData.AssociatedObstacleIds"/> for downstream placement logic.
         /// </summary>
-        public ModelSnapshot Extract(Document hostDocument)
+        private static void AssociateObstaclesToRooms(List<RoomData> rooms, List<ObstacleData> obstacles)
         {
-            return ExtractModelSnapshot(hostDocument);
+            if (rooms == null || obstacles == null) return;
+
+            foreach (ObstacleData obstacle in obstacles)
+            {
+                if (obstacle.BoundingBox == null) continue;
+
+                foreach (RoomData room in rooms)
+                {
+                    if (room.BoundingBox == null) continue;
+
+                    bool xy = SpatialHelpers.XYOverlap(obstacle.BoundingBox, room.BoundingBox);
+                    bool z = SpatialHelpers.ZOverlap(obstacle.BoundingBox, room.BoundingBox);
+                    if (xy && z)
+                    {
+                        if (!obstacle.AssociatedRoomIds.Contains(room.RoomId))
+                            obstacle.AssociatedRoomIds.Add(room.RoomId);
+                        if (!room.AssociatedObstacleIds.Contains(obstacle.ElementId))
+                            room.AssociatedObstacleIds.Add(obstacle.ElementId);
+                    }
+                }
+            }
         }
 
         /// <summary>
-        /// Backward-compatibility helper for same-model extraction.
+        /// Associates each existing sprinkler with the room that contains its location point.
         /// </summary>
-        public ModelSnapshot ExtractFromHostModel(Document hostDocument)
+        private static void AssociateSprinklersToRooms(List<RoomData> rooms, List<ExistingSprinklerData> sprinklers)
         {
-            return ExtractModelSnapshot(hostDocument);
+            if (rooms == null || sprinklers == null) return;
+
+            foreach (ExistingSprinklerData sprinkler in sprinklers)
+            {
+                if (sprinkler.Location == null) continue;
+
+                foreach (RoomData room in rooms)
+                {
+                    if (SpatialHelpers.PointInRoomXY(sprinkler.Location, room))
+                    {
+                        sprinkler.RoomId = room.RoomId;
+                        sprinkler.RoomName = room.Name;
+                        break;
+                    }
+                }
+            }
         }
     }
 }

@@ -1,4 +1,4 @@
-﻿using System.Windows;
+using System.Windows;
 using FireProtection.UI.Services;
 using FireProtection.UI.ViewModels;
 
@@ -12,25 +12,14 @@ namespace FireProtection.UI.Views
             DataContext = new MainWindowViewModel();
         }
 
-        public MainWindow(string json)
-        {
-            InitializeComponent();
-            DataContext = new MainWindowViewModel(json);
-        }
-
-        public MainWindow(string json, IPlacementExecutor placementExecutor)
-        {
-            InitializeComponent();
-            DataContext = new MainWindowViewModel(json, placementExecutor);
-        }
-
         public MainWindow(
             string json,
-            IPlacementExecutor placementExecutor,
-            ISprinklerFamilySource sprinklerFamilySource)
+            IPlacementInputExporter placementInputExporter,
+            ISprinklerFamilySource sprinklerFamilySource,
+            ISprinklerPlacementService sprinklerPlacementService)
         {
             InitializeComponent();
-            DataContext = new MainWindowViewModel(json, placementExecutor, sprinklerFamilySource);
+            DataContext = new MainWindowViewModel(json, placementInputExporter, sprinklerFamilySource, sprinklerPlacementService);
         }
     }
 }

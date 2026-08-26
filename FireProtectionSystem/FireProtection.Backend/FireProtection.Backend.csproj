@@ -223,6 +223,16 @@
 
 
 		<!-- ======================================================= -->
+		<!-- Copy Newtonsoft.Json (single compatible build)          -->
+		<!-- Revit loads its own Newtonsoft.Json first; this co-located -->
+		<!-- copy provides a genuine, full 13.0.0.0 fallback so the  -->
+		<!-- add-in is never bound to a trimmed/older build.          -->
+		<!-- ======================================================= -->
+
+		<Copy SourceFiles="$(TargetDir)Newtonsoft.Json.dll" DestinationFolder="$(RevitAddinsDirectory)" SkipUnchangedFiles="true" Condition="Exists('$(TargetDir)Newtonsoft.Json.dll')" />
+
+
+		<!-- ======================================================= -->
 		<!-- Generate .addin manifest                                 -->
 		<!-- Registers ONLY:                                          -->
 		<!--   * Application (ribbon entry point)                     -->

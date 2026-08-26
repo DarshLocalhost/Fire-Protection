@@ -1,0 +1,342 @@
+# FireProtectionSystem — Session Notes
+
+> Template for capturing session-specific knowledge that must survive future OpenCode sessions.
+> Each entry: date, session focus, key actions, open questions, handoff. Most-recent first.
+
+## Template
+
+```markdown
+### YYYY-MM-DD — <Session Focus>
+- **Context**: <why this session happened>
+- **Actions Taken**: <what was done, with file references>
+- **Decisions**: <links to [[DECISIONS]] if a decision was recorded>
+- **Open Questions / Blockers**: <unresolved items>
+- **Handoff**: <what the next session should pick up>
+```
+
+---
+
+### 2026-08-26 — Eligibility hardened to a 4-state model (ELIGIBLE/BLOCKED/PLACEMENT_ERROR/UNKNOWN); circular hide broken
+
+- **Context**: Master prompt `SPRINKLER_ROOM_ELIGIBILITY_PRODUCTION_GRADE_FIX_MASTER_PROMPT.md` required that the
+  BruteForce UI block **only** deterministically-unplaceable rooms and **surface real placement defects** instead of
+  hiding them behind "blocked". Hard rules: Error ≠ Blocked; Unknown ≠ Eligible/Blocked; fix the actual placement
+  defect (do **not** mask it by enlarging `PlacementValidationToleranceFt`); break the circular dependency where a
+  broken placement path made preflight mark every room BLOCKED.
+- **Actions Taken**:
+  - `FireProtection.UI/Services/PlacementEligibilityResult.cs`: replaced the boolean `IsEligible` field with a
+    `EligibilityState` (ELIGIBLE/BLOCKED/PLACEMENT_ERROR/UNKNOWN) + derived `IsEligible/IsBlocked/IsPlacementError/
+    IsUnknown`; added factories `Eligible`, `Blocked(template,code,reason)`, `PlacementError(template,code,reason)`,
+    `Unknown(reason,code)`; `Pending()` now maps to UNKNOWN (family not selected). Added status codes
+    `CREATED_BUT_INVALID`, `PROBE_EXCEPTION`, `PLACEMENT_ERROR`, `UNKNOWN`.
+  - `FireProtection.UI/ViewModels/Sprinklers/BruteForce/RoomItemViewModel.cs`: carries `EligibilityState` /
+    `IsPlacementError` / `IsUnknown`; `SetEligibility` copies the 4-state result and raises all four flags.
+  - `FireProtection.Backend/.../RevitSprinklerPlacementService.cs`: rewrote `EvaluateRoomEligibility` to classify the
+    4 states. Deterministic inability (incl. FaceBased `REQUIRED_HOST_UNAVAILABLE`) → BLOCKED; any unexpected
+    API/runtime failure or created-but-invalid → PLACEMENT_ERROR; family not selected / calc could not run → UNKNOWN;
+    ≥1 spatially-valid candidate → ELIGIBLE. Any exception in the probe harness/strategy → `PLACEMENT_ERROR`
+    (`ProbeException`), **not** BLOCKED — this is the circular-hide break. Added `[ROOM-CANDIDATE-DIAGNOSTIC]` `Debug`
+    output (requested vs actual XYZ, delta, distance, validation status, exception detail) to pinpoint the defect.
+  - `FireProtection.UI/ViewModels/Sprinklers/BruteForce/SprinklerBruteForceViewModel.cs`: `RefreshEligibility` now sets
+    **UNKNOWN for every room when the candidate calculation throws** (was: would probe a null list → BLOCKED);
+    auto-deselects any non-ELIGIBLE room. Counts split into `VisibleEligibleRoomCount` / `VisibleBlockedRoomCount` /
+    `VisiblePlacementErrorRoomCount` / `VisibleUnknownRoomCount`; `RoomsFoundText`/`RoomsSelectedSummary` surface all
+    four. Selectable population = `IsEligible` only (grid `IsEnabled=IsEligible`, single Select-All, `ApplyDefaultSelection`,
+    `CollectSelectedRooms` guard, "Show eligible only" filter all keyed to `IsEligible`).
+  - `FireProtection.UI/Views/Sprinklers/BruteForce/SprinklerBruteForceView.xaml`: non-eligible rooms muted (Opacity);
+    PLACEMENT_ERROR gets a red outline, UNKNOWN an amber outline; checkbox `IsEnabled=IsEligible` + tooltip = reason.
+- **Decisions**: See [[DECISIONS]] (014). The `(0,0,0)` origin-snap defect was already fixed by Decisions 011/012
+  (no Level-overload; all strategies place at the requested ceiling-height point; `CeilingHostResolver` handles linked
+  ceilings correctly) — verified by code inspection. If a residual `CREATED_BUT_INVALID` appears at runtime (e.g.
+  requested Z from `CeilingHeightFt` vs actual ceiling-face elevation mismatch), it will surface as `PLACEMENT_ERROR`
+  with the deviation in `Reason` — to be fixed at the placement/coordinate source, **not** by enlarging tolerance.
+- **Verification (static)**: `dotnet build FireProtection.UI -c Debug` → **0 errors, 0 warnings**. Backend/Tests NOT
+  buildable in this headless CLI (Revit API `CS0246` — environmental). Runtime Revit verification **pending** (no Revit
+  host). The probe is the same code path as placement, so its classification is the fix's whole point, but the four
+  counts (Eligible/Blocked/PlacementError/Unknown) must be confirmed in a live Revit session.
+- **Handoff**: On a Revit host, run the BruteForce flow and read `[ROOM-ELIGIBILITY]` + `[ROOM-CANDIDATE-DIAGNOSTIC]`
+  `Debug` output. If rooms show PLACEMENT_ERROR with `CREATED_BUT_INVALID`, capture requested-vs-actual Z and fix the
+  coordinate source (likely `CeilingHeightFt` vs linked-ceiling elevation). Do not bump `PlacementValidationToleranceFt`
+  to mask it.
+
+### 2026-08-26 — BruteForce UI: room eligibility, blocked-room handling, eligibility/levels-only toggles, default selection, and Preliminary/Final tab swap
+
+- **Context**: Master prompt `FIRE_PROTECTION_UI_SELECTION_MASTER_PROMPT.md` asked for UI-only changes so that
+  rooms are flagged eligible/blocked from existing authoritative data, blocked rooms are excluded from
+  selection/placement and shown disabled, two new filter toggles ("Show eligible rooms only",
+  "Show levels with rooms only") drive visibility (never destroy the source collections / selection), a
+  default selection seeds eligible levels + eligible rooms (blocked never selected), Select All skips
+  blocked, and the Preliminary/Final tab labels + order are swapped (BruteForce = "Preliminary" first,
+  Collision = "Final" second). Explicit constraint: **UI-only — do not touch NFPA/spacing/calculation/
+  placement/hosting/coordinate/Revit logic**, and preserve MVVM (no business logic in XAML code-behind).
+- **Actions Taken** (all in `FireProtection.UI`):
+  - `ViewModels/Sprinklers/BruteForce/RoomItemViewModel.cs`: added `IsEligible`, `IsBlocked`,
+    `EligibilityReason` (readonly), computed in ctor via `EvaluateEligibility(room, out reason)`. Eligibility
+    source = existing authoritative data only: `room.Geometry != null && Geometry.Polygon.Count >= 3 &&
+    Geometry.CeilingHeightFt.HasValue`. No engineering rules invented.
+  - `ViewModels/Sprinklers/BruteForce/SprinklerBruteForceViewModel.cs`: added `ShowEligibleRoomsOnly` and
+    `ShowLevelsWithRoomsOnly` bool props (setters call `RoomsView.Refresh()` / `LevelsView.Refresh()` only);
+    `FilterLevel` drops empty levels when `ShowLevelsWithRoomsOnly`; `FilterRoom` drops blocked rooms when
+    `ShowEligibleRoomsOnly`. Replaced the two-button Select All / Clear commands with **one smart toggle per
+    section**: `ToggleSelectAllLevelsCommand` / `ToggleSelectAllRoomsCommand`, whose label is derived live from
+    `AreAllSelectableLevelsSelected` / `AreAllSelectableRoomsSelected` (computed over the selectable
+    population only — levels with rooms, and non-blocked rooms — so blocked/empty items never stick the button
+    on "Select All"). Manual checkbox changes are synced via `PropertyChanged` subscriptions
+    (`OnLevelItemPropertyChanged` / `OnRoomItemPropertyChanged`) that raise `LevelSelectionToggleLabel` /
+    `RoomSelectionToggleLabel`. `ApplyDefaultSelection()` (selects eligible levels + eligible rooms; never
+    blocked) is called from ctor and `Reset`.
+  - `Views/Sprinklers/BruteForce/SprinklerBruteForceView.xaml`: added the two CheckBox filter toggles (level
+    section `Show levels with rooms only` + room section `Show eligible rooms only`) and, per section, **one
+    smart toggle button** bound to `ToggleSelectAllLevelsCommand` / `LevelSelectionToggleLabel` (and the room
+    equivalents) — replaces the previous two permanent Select All / Clear buttons. Blocked rooms are styled —
+    row `Opacity=0.55` via `IsBlocked` DataTrigger, room CheckBox `IsEnabled="{Binding IsEligible}"` +
+    `ToolTip="{Binding EligibilityReason}"`.
+  - `Views/Sprinklers/SprinklerView.xaml`: swapped header labels — Collision header = "Final", BruteForce
+    header = "Preliminary".
+  - `ViewModels/Sprinklers/SprinklerViewModel.cs`: `SubTabViewModels` order now `{ BruteForce, Collision }`,
+    `_selectedSubTabViewModel = BruteForce` (so BruteForce shows first as "Preliminary").
+- **Decisions**: Eligibility derived strictly from existing `RoomUiData.Geometry` (no new engineering rules),
+  per master-prompt §3. Filtering is visibility-only via `ICollectionView.Refresh()`; source `ObservableCollection`
+  and selection state are preserved so filtering cannot destroy selection.
+- **Verification (static)**: `dotnet build FireProtection.UI -c Debug` → **0 errors, 0 warnings** (my UI-only
+  changes compile cleanly). **Backend/Tests could NOT be built or run in this headless CLI environment** because
+  the Revit API assembly is not resolvable under standalone `dotnet build` (`CS0246: Document/FamilyInstance/
+  Level/Element not found`) — an **environmental limitation** (these projects build inside Visual Studio where
+  the Revit references resolve), **not a code defect, and unrelated to the UI-only change**. Runtime UI/Revit
+  verification still pending; no live Revit host here.
+- **Open Questions / Blockers**: Runtime UI verification in Revit not performed (no live host). The
+  Preliminary/Final label swap is presentation-only; the underlying ViewModels/commands are unchanged, so no
+  behavioral risk — but a user visual check is recommended.
+- **Handoff**: Run the add-in in Revit, open BruteForce ("Preliminary") tab, confirm blocked rooms appear
+  greyed/disabled with a tooltip, the two toggles filter visibility without losing selection, and Reset
+  re-applies the eligible default selection. No placement/calculation code was touched.
+
+---
+
+### 2026-08-25 — Decision 012: placement records the ACTUAL host/level read back from the created instance (diagnostics-only)
+
+- **Context**: Continuing P0 (physically-correct, runtime-verifiable placement). Before touching any
+  placement semantics, inspected the current Decision 011 implementation to establish the 10 runtime
+  evidence fields. Found the post-placement diagnostics recorded requested-vs-actual XYZ, strategy, ceiling
+  source and status — but did **not** read back the created instance's ACTUAL host / associated level /
+  Schedule Level. Those are exactly the fields that distinguish a genuine hosting defect from a view-range /
+  level-association symptom (the "sprinkler shows in the wrong floor plan" report). Closed that gap — the
+  single permitted immediate edit — so **one** Revit run yields complete evidence.
+- **Actions Taken**:
+  - `FireProtection.UI/Models/Sprinklers/BruteForce/SprinklerPlacementResult.cs`: added 8 diagnostic fields
+    to `PlacedSprinklerEntry` — `FamilyPlacementType`, `HostCeilingElementId`, `LinkInstanceName`, and the
+    ACTUAL read-backs `ActualHostElementId`, `ActualHostName`, `ActualInstanceLevelId`,
+    `ActualInstanceLevelName`, `ActualScheduleLevelName`. Revit-free DTO; Newtonsoft serializes automatically.
+  - `FireProtection.Backend/Services/Placement/Sprinklers/Final/RevitSprinklerPlacementService.cs`: populate
+    those fields on the success path from `outcome` + read-only `ReadActual*` helpers
+    (`instance.Host`, `instance.LevelId`, `INSTANCE_SCHEDULE_ONLY_LEVEL_PARAM`). All helpers are best-effort
+    try/catch → null so a read failure never breaks placement. **No placement/strategy semantics changed.**
+  - Re-ran build (Revit2025, **0 errors**, 2 benign warnings) and `FireProtection.Tests` (**all PASS**).
+- **Decisions**: [[DECISIONS]] **012** recorded (Implemented — static + build-verified; runtime pending).
+  Deliberately diagnostics-only per the "DO NOT change placement strategy blindly" constraint.
+- **ACTUAL-location-is-truth**: actual fields are read from the created instance and are **never**
+  back-filled with requested coordinates. The export must tell the truth about what Revit created.
+- **Open Questions / Blockers**: **Runtime verification still BLOCKED** — no live Revit host here. Cannot
+  yet observe whether the instance is hosted, on which level, and whether it is physically at the requested
+  point. NFPA-13 spacing values remain UNVERIFIED (PDF 2 image-only).
+- **Handoff**: Run the add-in once in Revit 2025 (host `02_FireProtection_Test.rvt` + link
+  `01_Architectural_Test.rvt`, family `Sprinkler - Pendent - Hosted`, type `3/4" Pendent on Drop with
+  Guard`) and return the per-entry diagnostics (see `TODO.md` P0 / `PROJECT_MEMORY.md` §15). Triage:
+  physically-correct-but-wrong-plan ⇒ view-range / `ActualScheduleLevelName` issue — **do not move coords**;
+  else genuine hosting defect. No further code changes without runtime evidence.
+
+---
+
+### 2026-08-25 — Context Compaction: PROJECT_MEMORY + STANDARDS_MEMORY created; doc-drift reconciled
+
+- **Context**: A context-compaction/continuation master prompt asked for ONE authoritative compact context
+  file so future sessions continue without rereading the whole repo or both PDFs. **No production code
+  modified this session** (verified — see below).
+- **Actions Taken**:
+  - Created **`PROJECT_MEMORY.md`** (single source of current truth) and **`STANDARDS_MEMORY.md`**
+    (evidence-grounded standards cache) in the project root.
+  - **Verified actual source vs docs** by reading `RevitSprinklerPlacementService.cs`, all
+    `…/Final/Strategies/*` (`PlacementStrategyContracts`, `CeilingHostResolver`, `FaceBasedPlacementStrategy`,
+    `WorkPlaneBasedPlacementStrategy`, `LevelBasedPlacementStrategy`), and
+    `UI/Models/Sprinklers/BruteForce/SprinklerPlacementResult.cs`.
+  - **Confirmed the code now implements Decision 011** (explicit `IFamilyPlacementStrategy` per proven
+    `FamilyPlacementType`; WorkPlaneBased uses a ceiling face **or** a `SketchPlane` honoring world Z,
+    **never** the Level overload; post-placement spatial validation; structured status codes; requested-vs-
+    actual XYZ recorded). This **supersedes Decision 010**.
+  - Re-confirmed baseline from `.analysis/` logs (Revit2025 build **0 errors**; **14/14** tests) — **not
+    re-run** this session.
+- **DOC-DRIFT FLAGGED (history preserved, not rewritten):** the entry below ("Sprinkler Placement Fix
+  IMPLEMENTED") and `PROGRESS.md` / `TODO.md` / `SPRINKLER_ACTUAL_Z_DIAGNOSTIC.md` still describe the
+  **Decision 010** shape (`isFaceBased` matching `WorkPlaneBased`; `FindCeilingHost` inside the service;
+  a WorkPlaneBased→Level *fallback*; `file:line` refs like `…Service.cs:254-263`). **Those `file:line`
+  references are obsolete** — the code moved to the strategy pattern. They remain correct about the
+  **runtime (0,0,0) root cause**, only wrong about the current **fix shape**. See `PROJECT_MEMORY.md` §0.
+- **Decisions**: [[DECISIONS]] 011 confirmed implemented (STATIC/BUILD-VERIFIED); 010 SUPERSEDED.
+- **Open Questions / Blockers**: **Runtime verification of Decision 011 is still pending / BLOCKED** — no
+  live Revit host in this environment. NFPA-13 spacing values remain **UNVERIFIED** (PDF 2 image-only) — see
+  [[STANDARDS_MEMORY]].
+- **Handoff**: Read `PROJECT_MEMORY.md` then `STANDARDS_MEMORY.md` first. Next action = **runtime-verify
+  placement** in Revit 2025 (host `02_FireProtection_Test.rvt` + link `01_Architectural_Test.rvt`, family
+  `Sprinkler - Pendent - Hosted`): expect actual XYZ ≈ (14.12, 31.95, 12) for Room 1235683, no (0,0,0)
+  instances, strategy `WorkPlaneCeilingFace`/`WorkPlaneSketchPlane`. Do **not** invent NFPA-13 values.
+
+---
+
+### 2026-08-25 — Persistent Project Memory System Created
+
+- **Context**: A master prompt requested a durable, Obsidian-friendly memory system (7 Markdown files)
+  so future OpenCode sessions do not rely on prior chat context. No application code may be modified.
+- **Actions Taken**:
+  - Created the 7 memory files in the project root: `AGENTS.md`, `PROJECT_CONTEXT.md`,
+    `ARCHITECTURE.md`, `DECISIONS.md`, `PROGRESS.md`, `TODO.md`, `SESSION_NOTES.md`.
+  - Grounded all content in actual source (read `FireProtection.Backend.csproj`,
+    `FireProtection.UI.csproj`, `FireProtection.Tests.csproj`, `FireProtectionApplication.cs`,
+    `FireProtectionCommand.cs`) and `TextFile1.txt`.
+  - Explicitly recorded that **"Snowdon" is not an integration** — it is only a sample dataset name in
+    `extractTest.json` and a design note in `TextFile1.txt`. No `Snowdon*` classes exist.
+  - Recorded the prior code-cleanup pass (dead exporters/overloads removed; unused `using`s removed;
+    builds clean across Revit2024/2025/2026; 14/14 tests pass) so it is not lost.
+- **Decisions**: see [[DECISIONS]] (Decisions 001–009 + Undetermined section).
+- **Open Questions / Blockers**:
+  - Runtime Revit placement has never been executed in this environment (no live Revit host).
+  - NFPA13-2022 compliance path and Collision/Smoke/Notification scope are unestablished in the repo.
+- **Handoff**: Next session should (1) prioritize runtime placement verification, (2) encode real
+  NFPA spacing, and (3) resolve the empty-shell Collision/Smoke/Notification tabs — but only after
+  reading the memory files and confirming intent with the user.
+
+---
+
+### 2026-08-25 — Sprinkler Level / Z Placement Diagnostic
+
+- **Context**: Master prompt `SPRINKLER_LEVEL_Z_PLACEMENT_FIX_MASTER_PROMPT.md` asked to diagnose a
+  "First Floor sprinkler appearing in the Ground Floor plan" issue and fix code only if actually wrong.
+- **Actions Taken**: Traced the full pipeline
+  (RoomExtractor → BruteForce Z → ResolveHostLevel → NewFamilyInstance). Verified:
+  - Linked geometry is normalized to host-MEP feet during extraction (no double transform in placement).
+  - Host-level resolution (`ResolveHostLevel` path #1) returns the exact host `Level` for host rooms.
+  - Linked-level resolution (path #2) transforms the link level elevation by the link transform and
+    matches the host Level by elevation — coordinate-correct.
+  - Placement uses the calculated `XYZ` unchanged in both face-based and level-based branches.
+- **Decisions**: Concluded **Case C (Revit View Range / view configuration)**. No code change made
+  (per the prompt's "no unnecessary changes" rule). Full report:
+  `SPRINKLER_LEVEL_Z_PLACEMENT_FIX_REPORT.md`.
+- **Separate finding**: `RoomExtractor.FindCeilingsForRoom` Z-overlap window can match the level-below
+  slab, and `BruteForceCalculationService` `FirstOrDefault(FLAT)` can then pick a lower ceiling as the
+  placement plane. This is a real defect but does NOT cause the reported Ground-Floor symptom (its
+  world Z stays at the room's own level). Tracked in [[TODO]]; not applied.
+- **Validation**: Revit2024/2025/2026 build = 0 errors; `FireProtection.Tests` = 14/14 PASS.
+  Runtime Revit verification NOT performed (no live model in this environment).
+- **Open Questions / Blockers**: Confirm in Revit whether the sprinkler's `Schedule Level`/`Elevation
+  From Level` are correct and whether Ground Floor View Depth/Underlay includes the element's world Z.
+- **Handoff**: If runtime confirms correct world Z + correct Schedule Level, the issue is View Range.
+  Address the ceiling-association weakness only as a deliberate, separate change.
+
+---
+
+### 2026-08-25 — Sprinkler Actual Z Diagnostic (RUNTIME PROOF)
+
+- **Context**: Ran the temporary Z diagnostic (instrumentation added in
+  `RevitSprinklerPlacementService.PlaceSinglePoint`) in Revit 2025 against `02_FireProtection_Test.rvt`
+  (host) + linked `01_Architectural_Test.rvt`. Captured `sprinkler_z_diagnostic.txt`,
+  `sprinkler_placement_result_*.json`, `ModelSnapshot_*.json`.
+- **Key captured numbers (Room 1235683 / L1):**
+  - Candidate Z = 12, Passed Z = 12, Host Level = L1 (elev 0)
+  - **Actual Instance XYZ = 0, 0, 0** (project origin)
+  - `FaceBasedPlacement: False`
+- **Root cause (PROVEN): CASE B — placement-overload / family-hosting bug.**
+  `Sprinkler - Pendent - Hosted` is a hosted family whose `FamilyPlacementType` is `WorkPlaneBased`,
+  but the code only detects `"FaceBased"`, so it used the level-based `NewFamilyInstance(xyz, symbol,
+  level, NonStructural)` overload. A hosted family placed without a host lands at (0,0,0). Link
+  transform is identity, so coordinate transformation is NOT the issue. Elevation/level resolution is
+  correct; the bug is purely the wrong placement overload.
+- **Correction:** Supersedes the earlier static-only conclusion in
+  `SPRINKLER_LEVEL_Z_PLACEMENT_FIX_REPORT.md` (which said Case C / View Range / CODE FIX NOT REQUIRED).
+  That conclusion was wrong; runtime evidence shows a real code bug.
+- **Required fix (identified, NOT implemented):** `RevitSprinklerPlacementService.cs` —
+  `PlaceSinglePoint` must detect `WorkPlaneBased` (and `FaceBased`) as hosted and use the face-based
+  `NewFamilyInstance(hostRef, xyz, dir, symbol)` overload; `FindCeilingHost` must also search linked
+  models and return a linked `Reference` via `Reference.CreateLinkReference`. Also record the ACTUAL
+  `instance.Location` in the placement result (currently it echoes the input point, masking the bug).
+- **Open Questions**: none on root cause; awaiting go-ahead to implement the fix.
+- **Handoff**: confirm in Revit that Actual Instance XYZ ≈ (14.12, 31.95, 12) after the fix; remove the
+  stray (0,0,0) instances from prior runs.
+
+---
+
+### 2026-08-25 — Sprinkler Placement Fix IMPLEMENTED
+
+- **Approved & implemented** the placement-overload fix identified in the diagnostic:
+  - `RevitSprinklerPlacementService.cs`:
+    - `isFaceBased` detection now also matches `FamilyPlacementType.WorkPlaneBased` (ceiling-hosted
+      sprinklers), not just `FaceBased`.
+    - `FindCeilingHost` now searches the host document AND linked models; for linked ceilings it maps the
+      host-space point into link coordinate space and returns a host reference via
+      `linkFaceRef.CreateLinkReference(linkInstance)` — the `Reference.CreateLinkReference(RevitLinkInstance)`
+      **instance** method. (Note: the 2-arg static overload and the `Reference(linkInstance, ref)`
+      constructor do NOT exist in this Revit API build.)
+    - `PlacedSprinklerEntry` now records the ACTUAL `instance.Location` (was echoing the input point,
+      which masked the bug).
+    - Temporary `TEMPORARY Z DIAGNOSTIC` instrumentation removed (field, helper, `using System.IO`).
+- **Build**: Revit2024 and Revit2026 compile clean (0 errors). Revit2025 compiles but the bin copy is
+  blocked by a VS/Revit lock on `FireProtection.UI.dll` (environmental, not a code error).
+- **Verification status**: static only. Runtime Revit verification is the remaining step (re-run the
+  add-in; expect Actual Instance XYZ ≈ (14.12, 31.95, 12) for Room 1235683). The 14/14 unit tests are
+  logic-only and do not exercise Revit placement.
+- **Open**: user to re-run in Revit and confirm; then delete prior (0,0,0) misplaced instances.
+
+### Prior Sessions (summary; no detailed chat history imported)
+
+- **Phase 1 — Model Extraction**: implemented read-only, zero-transaction extraction (levels, rooms,
+  ceilings, obstacles, existing sprinklers) with linked-coordinate normalization. Status: implemented
+  (static). Source of truth: `Services/Model/*`, `Services/Extraction/*`.
+- **Phase 2 — Sprinkler Placement (BruteForce)**: implemented `PlacementInputBuilder`,
+  `BruteForceCalculationService` (X/Y/Z), `RevitSprinklerPlacementService` (actual `FamilyInstance`
+  creation + linked-level resolution), and the WPF BruteForce UI. Status: implemented (static).
+  Documented in `SPRINKLER_POINT_CALCULATION_EXPLAINED.md`.
+- **Code Cleanup**: removed dead `ExportCalculationResult`, `GetDefaultCalculationExportPath`,
+  `Extract`, `ExtractFromHostModel`, 3 `UiLauncher.Show` overloads, and MainWindow 1/2/3-arg
+  constructors; removed unused `using`s. Builds clean; 14/14 tests pass.
+
+> Note: The summaries above are reconstructed from repository evidence (code + prior cleanup). Detailed
+> step-by-step chat history from those sessions is not available in this environment. Treat them as
+> high-confidence but not transcribed.
+
+## 2026-08-26 — Placement Preflight → AUTHORITATIVE probe (Decision 013, corrected)
+
+Goal: the BruteForce UI must block rooms the production pipeline provably cannot place. The first-pass preflight
+(representative centroid point + `WorkPlaneBased == always eligible`) was **runtime-insufficient** — rooms reported
+eligible while actual placement produced `Placed=0, INVALID=N, Failed=N`. Root cause: it never ran the real
+calculation or a real placement probe over the candidate set, so the spatially-invalid (e.g. (0,0,0)) placements
+were invisible to it.
+
+- **Final design (authoritative):** Eligibility is produced **only** by the Backend, but now reuses the *full*
+  placement pipeline. The UI computes each room's **real candidate points** via the exact
+  `BruteForceCalculationService` (`IPlacementInputExporter.CalculateBruteForce`), then the Backend probes **real
+  placement** of every candidate through the same `strategy.Place` / `ResolveHostLevel` / `CeilingHostResolver`
+  path as `PlaceSprinklers`, inside a **rolled-back `Transaction`**. A room is eligible **only if ≥1 candidate
+  creates a `FamilyInstance` that is spatially valid** (deviation ≤ `PlacementValidationToleranceFt`) — the identical
+  success criterion as real placement, so the `INVALID` blind spot is gone. `FireProtection.UI` stays Revit-free.
+- **Backend:** `RevitSprinklerPlacementService.EvaluateRoomEligibility(RoomUiData, IReadOnlyList<CalculatedSprinklerPoint> candidates, family, type)`;
+  fail-closed status codes `NO_CANDIDATE_POINTS` / `NO_PLACEABLE_CANDIDATE` / `NO_VALID_CANDIDATE` / `PREFLIGHT_ERROR`;
+  results cached per (family/type/room) + `ClearEligibilityCache()`.
+- **UI:** `CollectAllVisibleRooms()` builds inputs for every visible room; `RefreshEligibility()` runs the probe and
+  `RoomItemViewModel.SetEligibility` applies it; blocked rooms disabled in grid + Select-All toggle and
+  auto-deselected on family/type change; `CollectSelectedRooms` + `CanExecutePlaceSprinklers` (now gated on
+  `SelectedVisibleEligibleRoomCount`) hard-guard blocked rooms; `[ROOM-ELIGIBILITY]` / `[ROOM-SELECTION-GUARD]`
+  `Debug` diagnostics (§17).
+- **Verification:** UI builds clean (0 errors, 0 warnings). Backend not buildable in this headless CLI
+  (Revit API `CS0246` — environmental); type-correctness checked by inspection against `PlacementContext`,
+  `strategy.Place`, `PlacementOutcome`, `LevelResolution`. **Runtime Revit verification still pending** (no Revit host
+  here) — but the probe IS the real placement path, which is what makes the UI state agree with reality.
+- **Files:** new `UI/Services/PlacementEligibilityResult.cs`; edited `UI/Services/ISprinklerPlacementService.cs`,
+  `UI/ViewModels/Sprinklers/BruteForce/RoomItemViewModel.cs`, `UI/ViewModels/Sprinklers/BruteForce/SprinklerBruteForceViewModel.cs`,
+  `Backend/.../RevitSprinklerPlacementService.cs`. Docs: `DECISIONS.md` (013), `PROJECT_MEMORY.md` (§8b), `PROGRESS.md`.
+
+## Related Documentation
+
+- [[PROJECT_CONTEXT]]
+- [[ARCHITECTURE]]
+- [[DECISIONS]]
+- [[PROGRESS]]
+- [[TODO]]
+- [[SPRINKLER_POINT_CALCULATION_EXPLAINED]]

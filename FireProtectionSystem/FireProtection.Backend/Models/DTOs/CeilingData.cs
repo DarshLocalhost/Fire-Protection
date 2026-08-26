@@ -26,6 +26,12 @@ namespace FireProtection.Backend.Models.DTOs
         [JsonProperty("elementId")]
         public string ElementId { get; set; }
 
+        [JsonProperty("levelId")]
+        public string LevelId { get; set; }
+
+        [JsonProperty("levelName")]
+        public string LevelName { get; set; }
+
         [JsonProperty("ceilingName")]
         public string CeilingName { get; set; }
 

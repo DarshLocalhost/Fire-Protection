@@ -151,10 +151,28 @@ namespace FireProtection.Backend.Services.Model
                     }
 
                     // Ceiling association
+                    double floorZ = levelElevation;
+                    double heightEstimate = 0.0;
+                    if (hostBBox != null && (hostBBox.Max.Z - hostBBox.Min.Z) > 0.5)
+                    {
+                        heightEstimate = hostBBox.Max.Z - hostBBox.Min.Z;
+                    }
+                    else if (room.UnboundedHeight > 0)
+                    {
+                        heightEstimate = room.UnboundedHeight;
+                    }
+                    else
+                    {
+                        heightEstimate = 20.0;
+                    }
+                    double roomTopZ = floorZ + heightEstimate;
+
                     List<CeilingData> matchedCeilings = FindCeilingsForRoom(
                         room,
                         hostLocationPoint,
                         hostBBox,
+                        floorZ,
+                        roomTopZ,
                         ceilingItems);
 
                     // Determine primary ceiling height and type
@@ -401,10 +419,12 @@ namespace FireProtection.Backend.Services.Model
             Room room,
             Point3DData hostLocationPoint,
             BoundingBox3DData hostBBox,
+            double roomBottomZ,
+            double roomTopZ,
             List<CeilingExtractor.ExtractedCeilingItem> ceilingItems)
         {
             List<CeilingData> matches = new List<CeilingData>();
-            if (ceilingItems == null || ceilingItems.Count == 0 || hostBBox == null)
+            if (ceilingItems == null || ceilingItems.Count == 0)
             {
                 return matches;
             }
@@ -413,17 +433,29 @@ namespace FireProtection.Backend.Services.Model
             {
                 if (cItem.HostBoundingBox == null) continue;
 
-                // 2D bounding box intersection test in XY plane
-                bool xyOverlap = !(cItem.HostBoundingBox.Max.X < hostBBox.Min.X ||
-                                   cItem.HostBoundingBox.Min.X > hostBBox.Max.X ||
-                                   cItem.HostBoundingBox.Max.Y < hostBBox.Min.Y ||
-                                   cItem.HostBoundingBox.Min.Y > hostBBox.Max.Y);
+                BoundingBox3DData cBox = cItem.HostBoundingBox;
+
+                // XY overlap between the ceiling footprint and the room footprint/bounding box.
+                // Prefer the room bounding box; fall back to the room location point when no box exists.
+                bool xyOverlap;
+                if (hostBBox != null)
+                {
+                    xyOverlap = SpatialHelpers.XYOverlap(cBox, hostBBox);
+                }
+                else if (hostLocationPoint != null)
+                {
+                    xyOverlap = SpatialHelpers.XYContains(cBox, hostLocationPoint);
+                }
+                else
+                {
+                    xyOverlap = false;
+                }
 
                 if (!xyOverlap) continue;
 
-                // Z test: ceiling bottom should be at or near top of room or above room base
-                if (cItem.HostBoundingBox.Min.Z >= hostBBox.Min.Z - 0.5 &&
-                    cItem.HostBoundingBox.Min.Z <= hostBBox.Max.Z + 5.0)
+                // Z overlap: the ceiling's vertical extent must intersect the room's vertical band.
+                // Generous tolerance handles sloped/stepped ceilings and small height inaccuracies.
+                if (cBox.Min.Z <= roomTopZ + 5.0 && cBox.Max.Z >= roomBottomZ - 0.5)
                 {
                     CeilingData clone = CloneCeilingData(cItem.Dto);
                     clone.IsRoomDirectCeiling = true;
@@ -439,6 +471,8 @@ namespace FireProtection.Backend.Services.Model
             return new CeilingData
             {
                 ElementId = src.ElementId,
+                LevelId = src.LevelId,
+                LevelName = src.LevelName,
                 CeilingName = src.CeilingName,
                 FamilyName = src.FamilyName,
                 TypeName = src.TypeName,

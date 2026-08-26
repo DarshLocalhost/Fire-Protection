@@ -339,20 +339,26 @@
 
                     <Grid Grid.Row="2" Margin="0,0,0,10">
                         <Grid.ColumnDefinitions>
+                            <ColumnDefinition Width="Auto"/>
                             <ColumnDefinition Width="*"/>
                             <ColumnDefinition Width="8"/>
-                            <ColumnDefinition Width="*"/>
+                            <ColumnDefinition Width="Auto"/>
+                            <ColumnDefinition Width="8"/>
+                            <ColumnDefinition Width="Auto"/>
                         </Grid.ColumnDefinitions>
 
-                        <Button Grid.Column="0"
-                                Style="{StaticResource OutlineButtonStyle}"
-                                Content="Select All"
-                                Command="{Binding SelectAllVisibleLevelsCommand}"/>
+                        <CheckBox Grid.Column="0"
+                                  Content="Show levels with rooms only"
+                                  IsChecked="{Binding ShowLevelsWithRoomsOnly, Mode=TwoWay}"
+                                  VerticalAlignment="Center"
+                                  Foreground="{StaticResource TextSecondaryBrush}"
+                                  FontSize="12"/>
 
-                        <Button Grid.Column="2"
+                        <Button Grid.Column="3"
+                                Grid.ColumnSpan="3"
                                 Style="{StaticResource OutlineButtonStyle}"
-                                Content="Clear"
-                                Command="{Binding ClearVisibleLevelSelectionCommand}"/>
+                                Content="{Binding LevelSelectionToggleLabel}"
+                                Command="{Binding ToggleSelectAllLevelsCommand}"/>
                     </Grid>
 
                     <ListBox Grid.Row="3"
@@ -514,16 +520,25 @@
                         </Button>
                     </Grid>
 
-                    <Grid Grid.Row="1" Margin="0,12,0,0" HorizontalAlignment="Right">
-                        <StackPanel Orientation="Horizontal">
-                            <Button Style="{StaticResource OutlineButtonStyle}"
-                                    Content="Select All"
-                                    Command="{Binding SelectAllVisibleRoomsCommand}"
-                                    Margin="0,0,8,0"/>
-                            <Button Style="{StaticResource OutlineButtonStyle}"
-                                    Content="Clear"
-                                    Command="{Binding ClearVisibleRoomSelectionCommand}"/>
-                        </StackPanel>
+                    <Grid Grid.Row="1" Margin="0,12,0,0">
+                        <Grid.ColumnDefinitions>
+                            <ColumnDefinition Width="Auto"/>
+                            <ColumnDefinition Width="*"/>
+                        </Grid.ColumnDefinitions>
+
+                        <CheckBox Grid.Column="0"
+                                  Content="Show eligible rooms only"
+                                  IsChecked="{Binding ShowEligibleRoomsOnly, Mode=TwoWay}"
+                                  VerticalAlignment="Center"
+                                  Foreground="{StaticResource TextSecondaryBrush}"
+                                  FontSize="12"
+                                  Margin="0,0,16,0"/>
+
+                        <Button Grid.Column="1"
+                                Style="{StaticResource OutlineButtonStyle}"
+                                Content="{Binding RoomSelectionToggleLabel}"
+                                Command="{Binding ToggleSelectAllRoomsCommand}"
+                                HorizontalAlignment="Right"/>
                     </Grid>
 
                     <Border Grid.Row="2"
@@ -553,10 +568,30 @@
                             <ItemsControl.ItemTemplate>
                                 <DataTemplate>
 
-                                    <Border BorderBrush="{StaticResource BorderBrush}"
-                                            BorderThickness="0,0,0,1"
-                                            Padding="0,12">
-                                        <Grid>
+                                     <Border BorderBrush="{StaticResource BorderBrush}"
+                                             BorderThickness="0,0,0,1"
+                                             Padding="0,12">
+                                          <Border.Style>
+                                              <Style TargetType="Border">
+                                                  <Style.Triggers>
+                                                      <!-- All non-eligible rooms (BLOCKED / PLACEMENT_ERROR / UNKNOWN) are muted. -->
+                                                      <DataTrigger Binding="{Binding IsEligible}" Value="False">
+                                                          <Setter Property="Opacity" Value="0.5"/>
+                                                      </DataTrigger>
+                                                      <!-- A placement defect gets a distinct red outline (surfaced, never hidden as blocked). -->
+                                                      <DataTrigger Binding="{Binding IsPlacementError}" Value="True">
+                                                          <Setter Property="BorderBrush" Value="#D9534F"/>
+                                                          <Setter Property="BorderThickness" Value="0,0,0,2"/>
+                                                      </DataTrigger>
+                                                      <!-- Undetermined eligibility gets a distinct amber outline. -->
+                                                      <DataTrigger Binding="{Binding IsUnknown}" Value="True">
+                                                          <Setter Property="BorderBrush" Value="#E0A800"/>
+                                                          <Setter Property="BorderThickness" Value="0,0,0,2"/>
+                                                      </DataTrigger>
+                                                  </Style.Triggers>
+                                              </Style>
+                                          </Border.Style>
+                                         <Grid>
                                             <Grid.ColumnDefinitions>
                                                 <ColumnDefinition Width="36"/>
                                                 <ColumnDefinition Width="2.0*"/>
@@ -567,7 +602,9 @@
 
                                             <CheckBox Grid.Column="0"
                                                       IsChecked="{Binding IsSelected, Mode=TwoWay}"
-                                                      VerticalAlignment="Center"/>
+                                                      IsEnabled="{Binding IsEligible}"
+                                                      VerticalAlignment="Center"
+                                                      ToolTip="{Binding EligibilityReason}"/>
 
                                             <TextBlock Grid.Column="1"
                                                        Text="{Binding Name}"

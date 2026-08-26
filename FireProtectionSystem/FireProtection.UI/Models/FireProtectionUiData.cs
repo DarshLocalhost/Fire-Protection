@@ -1,5 +1,6 @@
 ﻿using System.Collections.Generic;
 using Newtonsoft.Json;
+using Newtonsoft.Json.Linq;
 
 namespace FireProtection.UI.Models
 {
@@ -86,6 +87,13 @@ namespace FireProtection.UI.Models
 
         [JsonProperty("requiresHumanReview")]
         public bool RequiresHumanReview { get; set; }
+
+        // Captures the full set of room properties present in the ModelSnapshot JSON
+        // (ceilings, obstacles, existingSprinklers, source, boundary, hazard, etc.) that
+        // are not part of the reduced display model, so they can be forwarded to the
+        // placement-input exporter without requiring the UI to reference Backend DTOs.
+        [JsonExtensionData]
+        public IDictionary<string, JToken> ExtensionData { get; set; }
 
         public RoomUiData()
         {

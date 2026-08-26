@@ -1,0 +1,19 @@
+<Project Sdk="Microsoft.NET.Sdk">
+
+  <PropertyGroup>
+    <OutputType>Exe</OutputType>
+    <TargetFramework>net8.0-windows</TargetFramework>
+    <Nullable>disable</Nullable>
+    <ImplicitUsings>disable</ImplicitUsings>
+    <LangVersion>7.3</LangVersion>
+    <AssemblyName>FireProtection.Tests</AssemblyName>
+    <RootNamespace>FireProtection.Tests</RootNamespace>
+    <CopyLocalLockFileAssemblies>true</CopyLocalLockFileAssemblies>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <ProjectReference Include="..\FireProtection.Backend\FireProtection.Backend.csproj" />
+    <ProjectReference Include="..\FireProtection.UI\FireProtection.UI.csproj" />
+  </ItemGroup>
+
+</Project>

@@ -20,14 +20,18 @@
 
         <!-- Header templates: label per sub-view-model type.
              Underlying ViewModels are unchanged; only the visible header text changes. -->
+        <!-- Tabs were swapped (Preliminary <-> Final): the Collision sub-view now carries
+             the "Final" header and the BruteForce sub-view carries "Preliminary". The
+             underlying ViewModel content/commands are unchanged; only the labels and tab
+             order are swapped. -->
         <DataTemplate x:Key="CollisionHeaderTemplate"
                       DataType="{x:Type vmCollision:SprinklerCollisionViewModel}">
-            <TextBlock Text="Preliminary"/>
+            <TextBlock Text="Final"/>
         </DataTemplate>
 
         <DataTemplate x:Key="BruteForceHeaderTemplate"
                       DataType="{x:Type vmBruteForce:SprinklerBruteForceViewModel}">
-            <TextBlock Text="Final"/>
+            <TextBlock Text="Preliminary"/>
         </DataTemplate>
 
 

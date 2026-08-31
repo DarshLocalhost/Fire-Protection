@@ -62,15 +62,15 @@
 
 | Capability | Status | Verification | Notes |
 |---|---|---|---|
-| UI tab (Smoke Detectors) | 🟡 Shell | static | `SmokeDetectorViewModel` exists, empty. |
-| Extraction / placement logic | 🔴 Not implemented | none | no `SmokeDetectorExtractor`; not in extraction pipeline. |
+| UI tab (Smoke Detectors) | ✅ Implemented (shared base) | static | `SmokeDetectorViewModel` inherits `DevicePlacementViewModelBase`; hosts `DevicePlacementView` + NFPA-72 params (detector type / mount / ceiling slope). Placement disabled (backend deferred). |
+| Extraction / placement logic | 🔴 Not implemented | none | no `SmokeDetectorExtractor`; not in extraction pipeline. Backend device placement deferred (UI-first slice). |
 
 ## Notification Appliance Workflow
 
 | Capability | Status | Verification | Notes |
 |---|---|---|---|
-| UI tab (Notification Appliances) | 🟡 Shell | static | `NotificationApplianceViewModel` exists, empty. |
-| Extraction / placement logic | 🔴 Not implemented | none | not present. |
+| UI tab (Notification Appliances) | ✅ Implemented (shared base) | static | `NotificationApplianceViewModel` inherits `DevicePlacementViewModelBase`; hosts `DevicePlacementView` + NFPA-72 params (appliance type / candela / dBA). Placement disabled (backend deferred). |
+| Extraction / placement logic | 🔴 Not implemented | none | not present. Backend device placement deferred (UI-first slice). |
 
 ## User Interface (WPF)
 

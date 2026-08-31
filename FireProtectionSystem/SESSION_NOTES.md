@@ -16,6 +16,39 @@
 
 ---
 
+### 2026-08-27 — UI-first shared device-placement base (Smoke Detectors + Notification Appliances)
+
+- **Context**: User wanted Smoke Detectors and Notification Appliances to reuse the sprinkler room/level/family
+  selection UI without affecting sprinkler placement. Constraint refined to: only sprinkler *placement method/logic*
+  is frozen; other refactors allowed. Chose approach **(A) pure duplication**: create a new shared base, leave all
+  sprinkler files zero-edited. UI-first: build ViewModels/Views now, backend device (NFPA-72) logic later. Run action
+  decided as "Seam + disabled" (`IDevicePlacementExecutor` + `NotImplementedDeviceExecutor`; button disabled/"Backend pending").
+- **Actions Taken**:
+  - New `FireProtection.UI/ViewModels/Devices/DevicePlacementViewModelBase.cs` (generic levels/rooms selection,
+    family/type, eligibility = Eligible for planning, counts, filter/toggle, `ResetCommand`, disabled
+    `PlaceDevicesCommand` via `IsBackendPending` seam).
+  - New models `DeviceFamilyOption`, `DeviceTypeOption`, `DeviceLevelItemViewModel`, `DeviceRoomItemViewModel`.
+  - New services `IDeviceFamilySource`, `IDevicePlacementExecutor`, `DeviceRoomInputItem`, `NotImplementedDeviceExecutor`.
+  - New shared view `FireProtection.UI/Views/Devices/DevicePlacementView.xaml` (+`.xaml.cs`).
+  - Rewrote `SmokeDetectorViewModel`/`NotificationApplianceViewModel` to inherit the base + device params
+    (detector type/mount/ceiling slope; appliance type/candela/dBA); their XAML now host `DevicePlacementView` +
+    parameter cards (`DeviceParamCombo` resource).
+  - Cleaned `MainWindow.xaml` stray test elements (DockPanel/ListBox).
+  - `dotnet build FireProtection.UI -c Debug` → 0 errors / 0 warnings. Test project compiles (Revit-ref warnings only).
+- **Decisions**: All sprinkler files untouched (frozen). `72-19-PDF 1.pdf` = NFPA 72 (alarm, no sprinkler tables).
+  `Layout...Sprinkler Systems (1).pdf` = image-only scan, no OCR available → NFPA-13 values still unextractable.
+  Per STANDARDS_MEMORY rules 1–4 + Decision 004, do NOT invent FPE values; `GenericSprinklerRuleProvider` stays
+  UNVERIFIED until OCR/real tables provided.
+- **Open Questions / Blockers**: Backend device pipeline deferred (`DeviceType` enum, `IDevicePlacementRules`,
+  `DevicePlacementRequest`, `DevicePlacementService`, generic `BruteForceCalculationService` overload, NFPA-72 rule
+  providers). `dotnet test` cannot run headless (needs RevitAPI.dll / Revit host). OCR install (chosen earlier)
+  still pending to read PDF 2 for sprinkler values.
+- **Handoff**: Implement backend device pipeline (new files only; keep `BruteForceCalculationService` sprinkler
+  method verbatim) and wire real `IDevicePlacementExecutor` to enable placement. Then install local OCR to extract
+  NFPA-13 tables for `GenericSprinklerRuleProvider`.
+
+---
+
 ### 2026-08-26 — Selection/level sync + default-eligible + linked-cache hardening (master prompt: SPRINKLER_SELECTION_LINKED_MODEL_PRODUCTION)
 
 - **Context**: Continuation master prompt required the 3-state eligibility to also drive correct SELECTION behavior

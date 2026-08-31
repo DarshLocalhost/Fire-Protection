@@ -168,8 +168,6 @@
       <TabItem Header="Notification Appliances">
         <ContentControl Content="{Binding NotificationAppliance}" />
       </TabItem>
-      <DockPanel Width="120" Height="100" Background="#FFA87272" />
-      <ListBox Width="120" Height="100" />
     </TabControl>
   </Grid>
 </Window>

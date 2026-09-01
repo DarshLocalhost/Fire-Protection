@@ -36,6 +36,9 @@ FireProtectionSystem.slnx
   `RevitSprinklerPlacementService`, `RevitSprinklerFamilySource`, and `BruteForce/` subfolder
   (`BruteForceCalculationService`, `RoomGeometry`, `GeometryMath`, `BruteForceCalculationConfig`,
   `DefaultHazardPlacementRules`, `IHazardPlacementRules`, `HazardPlacementRuleSet`).
+- `Services/Catalog/` *(planned, Decision 020)* — `CatalogLoader`, `CatalogModels`,
+  `CatalogValidator`. ClosedXML-based reader; fail-fast on schema errors; one workbook, one sheet
+  per category, `CatalogVersion` header.
 - `Models/DTOs/` — `ModelSnapshot`, `RoomData`, `LevelData`, `CeilingData`, `ObstacleData`,
   `ExistingSprinklerData`, `HazardData`, coordinate/bounding-box types.
 - `Models/Hazard/` — `HazardClassifier`, `HazardClass`, `HazardResult`.
@@ -43,7 +46,7 @@ FireProtectionSystem.slnx
 ## 4. UI Architecture
 
 - `Services/` — `UiLauncher`, `ISprinklerPlacementService`, `ISprinklerFamilySource`,
-  `IPlacementInputExporter`.
+  `IPlacementInputExporter`, `IDeviceFamilySource`, `IDevicePlacementExecutor`, `PlacementEligibilityResult`.
 - `Models/` — `FireProtectionUiData` (UI-side mirror of the snapshot), and `Sprinklers/BruteForce/`
   result models (`CalculatedSprinklerPoint`, `RoomCalculationResult`, `BruteForceCalculationResult`,
   `SprinklerPlacementResult`, `CandidatePoint`, `CalculationStatus`).
@@ -53,6 +56,11 @@ FireProtectionSystem.slnx
   `Common/RelayCommand`, `Common/ObservableObject`.
 - `Views/` — `MainWindow.xaml`, `Sprinklers/SprinklerView.xaml`, BruteForce/Collision/Smoke/
   Notification sub-views, and a `HazardClassToBrushConverter` + `SprinklerSubTabHeaderTemplateSelector`.
+- `Catalog/` *(planned, Decision 020)* — `CatalogViewModel`, `CatalogBar` (top bar: file path,
+  version, Browse..., Reload).
+- `Common/` *(planned, Decision 017 + 019)* — `LevelSettingsPopover` (the "⋯" per-level popover for
+  Smoke/Notification metadata), `MissingFamiliesModal` (interactive Proceed/Cancel + "Export
+  missing list to CSV").
 
 ## 5. MVVM Structure
 
@@ -110,24 +118,35 @@ during extraction. The calculation/placement layers never re-transform.
 
 ```mermaid
 flowchart TD
-    VM[SprinklerBruteForceViewModel] --> BLD[PlacementInputBuilder.Build]
-    BLD --> SNAP[PlacementInputSnapshot]
-    SNAP --> CALC[BruteForceCalculationService.Calculate]
+    VM[SprinklerBruteForceViewModel] --> CAT[CatalogViewModel - per-row family/type from Excel]
+    CAT --> ROW[RoomItemViewModel - per-row SelectedFamily / SelectedType / MaxSpacingFt override / BoundaryClearanceFt override]
+    VM --> BLD[PlacementInputBuilder.Build]
+    BLD --> SNAP[PlacementInputSnapshot - with per-row family/type and per-row spacing overrides]
+    SNAP --> CALC[BruteForceCalculationService.Calculate - resolves per-room rule set from base rules + per-row overrides]
     CALC --> PTS[CalculatedSprinklerPoint list]
     PTS --> EXP[PlacementInputJsonExporter.ExportPlacementResult JSON]
+    PTS --> MISS[MissingFamiliesModal - debounced probe on dropdown change AND on Place; Proceed / Cancel; Export missing CSV]
     PTS --> PLACE[RevitSprinklerPlacementService.PlaceSprinklers]
     PLACE --> RES[ResolveHostLevel]
     RES --> LNK[RevitLinkInstance transform / host Level]
-    PLACE --> FAM[FamilySymbol activation]
+    PLACE --> FAM[FamilySymbol activation - resolved per-row]
     PLACE --> FI[doc.Create.NewFamilyInstance -> FamilyInstance]
-    FI --> RES2[placement result JSON + ElementIds]
+    FI --> RES2[placement result JSON + ElementIds + SkippedMissingFamilyCount]
 ```
 
 - `CalculatedSprinklerPoint` carries `X, Y, Z` (already host-MEP feet), `RoomId`, `LevelId`,
   `LevelName`.
 - `RevitSprinklerPlacementService` resolves the host `Level` (handling linked-model `LevelId`s via
-  `ResolveHostLevel`), optionally finds a ceiling host (`FindCeilingHost`), activates the `FamilySymbol`,
-  and creates the instance inside a transaction.
+  `ResolveHostLevel`), optionally finds a ceiling host (`FindCeilingHost`), activates the `FamilySymbol`
+  (per-row), and creates the instance inside a transaction. The Revit family listing
+  (`ISprinklerFamilySource`) is **commented out and gated by `UseRevitFamilyListing=false`** (Decision
+  017); the Excel catalog is the catalog of record and the Revit listing is retained only as a
+  verification layer.
+- `BruteForceCalculationService` resolves the effective `HazardPlacementRuleSet` **per room** by
+  starting from `IHazardPlacementRules.GetRules(hazardClass)` and applying the per-row
+  `MaxSpacingFt` / `BoundaryClearanceFt` overrides when present (Decision 018). A room with an
+  override applied is flagged `IsProvisional=true` on its `RoomCalculationResult`; the eligibility
+  preflight continues to use the un-overridden rule set so the NFPA compliance check is preserved.
 
 ## 9. Hazard Classification Architecture
 
@@ -149,12 +168,14 @@ Revit model (host + linked)
 ModelSnapshot (JSON)
    ↓  FireProtectionCommand serializes to JSON string
 FireProtectionUiData (UI deserializes)
-   ↓  User selects rooms -> PlacementRoomSelection
-PlacementInputSnapshot (PlacementInputBuilder)
-   ↓  BruteForceCalculationService
+   ↓  User selects rooms, picks per-row family/type/spacing overrides
+Catalog (Excel) ←→  CatalogViewModel  (one workbook, one sheet per category, hot-reload)
+   ↓  per-row family/type validated against Excel + Revit (missing-in-model modal)
+PlacementInputSnapshot (PlacementInputBuilder)  — carries per-row family/type + per-row spacing overrides
+   ↓  BruteForceCalculationService  — per-room rule resolution: base IHazardPlacementRules + per-row overrides
 CalculatedSprinklerPoint (X/Y/Z)
    ↓  RevitSprinklerPlacementService
-FamilyInstance (Revit)  +  placement result JSON
+FamilyInstance (Revit)  +  placement result JSON (+ SkippedMissingFamilyCount)
 ```
 
 ## 12. UI → Backend Flow
@@ -187,14 +208,28 @@ The UI depends only on the **interfaces** `ISprinklerPlacementService`, `ISprink
 
 ## 14. Placement Flow (step-by-step)
 
-1. User selects rooms in the UI → `SprinklerBruteForceViewModel` builds `PlacementRoomSelection` items.
-2. `PlacementInputBuilder.Build` produces a `PlacementInputSnapshot`.
-3. `PlacementInputJsonExporter.CalculateBruteForce` runs `BruteForceCalculationService.Calculate`
-   (fine 1 ft candidate grid + 15 ft greedy selection; Z from level/ceiling).
-4. `RevitSprinklerPlacementService.PlaceSprinklers` resolves the host level, finds a ceiling host if
-   possible, activates the symbol, and creates `FamilyInstance`s in a transaction.
-5. Results (placed/failed, `ElementId`s, diagnostics) are returned and exported to
-   `sprinkler_placement_result_*.json`.
+1. User opens the add-in; `CatalogBar` shows the currently loaded Excel path + version (or
+   "no catalog loaded"). A "Browse..." button lets the user pick a workbook each session
+   (Decision 020). A "Reload" button hot-reloads from the same path.
+2. User selects rooms in the UI; each room row carries a family dropdown, a type dropdown
+   (filtered by family), a `MaxSpacingFt` (sprinkler-to-sprinkler) override, a `BoundaryClearanceFt`
+   (wall) override, and a "Reset to default" + "Apply to all eligible rows" pair (Decision 017/018).
+3. On every per-row family dropdown change (debounced) and on Place, the Backend probes the live
+   Revit document for the chosen family/type. Missing entries surface in `MissingFamiliesModal`
+   with "Proceed with available" / "Cancel" + "Export missing list to CSV"
+   (Decision 017). If all rooms on a level fail, the level is auto-deselected.
+4. `PlacementInputBuilder.Build` produces a `PlacementInputSnapshot` carrying per-row
+   family/type + the two spacing overrides.
+5. `PlacementInputJsonExporter.CalculateBruteForce` runs `BruteForceCalculationService.Calculate`,
+   which resolves the effective `HazardPlacementRuleSet` per room (`IHazardPlacementRules.GetRules`
+   + per-row `MaxSpacingFt` / `BoundaryClearanceFt` overrides) — the per-room rule set is what the
+   greedy selection consumes.
+6. `RevitSprinklerPlacementService.PlaceSprinklers` resolves the host level per row, finds a
+   ceiling host if possible, activates the row's symbol, and creates `FamilyInstance`s in a
+   transaction. `SkippedMissingFamilyCount` is incremented for any room whose row's family was
+   not loadable in Revit at the moment of placement.
+7. Results (placed/failed, `ElementId`s, diagnostics, `SkippedMissingFamilyCount`) are returned
+   and exported to `sprinkler_placement_result_*.json`.
 
 ## 15. Important Interfaces
 
@@ -203,7 +238,15 @@ The UI depends only on the **interfaces** `ISprinklerPlacementService`, `ISprink
 - `IFireProtectionExtractionService` — extraction contract.
 - `ISprinklerPlacementService` — placement contract (UI side).
 - `ISprinklerFamilySource` — resolves available sprinkler families/types from the host document.
+  **Decision 017:** implementation is **commented out** (not deleted) and gated by the
+  `UseRevitFamilyListing` config flag (default `false`); the Excel catalog is the catalog of record
+  in v1.
 - `IPlacementInputExporter` — `ExportInput`, `CalculateBruteForce`, `ExportPlacementResult`.
+- `IDeviceFamilySource` / `IDevicePlacementExecutor` — device workflow contracts.
+- `ICatalog` *(planned, Decision 020)* — exposes the loaded Excel catalog (`SprinklerFamilies`,
+  `SmokeDetectorFamilies`, `NotificationApplianceFamilies`, `ApplianceTypeOptions`,
+  `DetectorTypeOptions`, `MountOptions`, `CeilingSlopeOptions`, `CatalogVersion`).
+- `PlacementEligibilityResult` — read-only preflight result the UI consumes to block rooms.
 
 ## 16. Important Dependencies
 
@@ -212,6 +255,8 @@ The UI depends only on the **interfaces** `ISprinklerPlacementService`, `ISprink
 - `FireProtection.Backend` → `FireProtection.UI` (ProjectReference). `FireProtection.UI` does **not**
   reference Backend.
 - `FireProtection.Tests` → Backend + UI.
+- `ClosedXML` *(planned, Decision 020)* — Backend only; used by `CatalogLoader` to read the
+  Excel catalog workbook.
 
 ## 17. Transaction Boundaries
 

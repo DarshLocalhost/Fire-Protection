@@ -4,72 +4,24 @@
              xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
              xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
              xmlns:conv="clr-namespace:FireProtection.UI.Views.Sprinklers.BruteForce.Converters"
+             xmlns:ctrl="clr-namespace:FireProtection.UI.Controls"
              mc:Ignorable="d"
              d:DesignHeight="820" d:DesignWidth="1280"
              Background="Transparent"
              FontFamily="Segoe UI">
 
     <UserControl.Resources>
+        <ResourceDictionary>
+            <ResourceDictionary.MergedDictionaries>
+                <ResourceDictionary Source="/FireProtection.UI;component/Themes/Colors.xaml"/>
+                <ResourceDictionary Source="/FireProtection.UI;component/Themes/Styles.xaml"/>
+            </ResourceDictionary.MergedDictionaries>
 
-        <!-- Colors -->
-        <SolidColorBrush x:Key="AccentBrush" Color="#2563EB"/>
-        <SolidColorBrush x:Key="AccentSoftBrush" Color="#EFF6FF"/>
-        <SolidColorBrush x:Key="TextPrimaryBrush" Color="#0F172A"/>
-        <SolidColorBrush x:Key="TextSecondaryBrush" Color="#64748B"/>
-        <SolidColorBrush x:Key="TextMutedBrush" Color="#94A3B8"/>
-        <SolidColorBrush x:Key="BorderBrush" Color="#E2E8F0"/>
-        <SolidColorBrush x:Key="SurfaceBrush" Color="#FFFFFF"/>
-        <SolidColorBrush x:Key="SubtleBrush" Color="#F8FAFC"/>
-        <SolidColorBrush x:Key="WarningBrush" Color="#D97706"/>
+            <!-- View-specific converters -->
+            <conv:HazardClassToBrushConverter x:Key="HazardBackgroundConverter"/>
+            <conv:HazardClassToBrushConverter x:Key="HazardForegroundConverter" ReturnForeground="True"/>
 
-        <!-- Converters -->
-        <BooleanToVisibilityConverter x:Key="BoolToVis"/>
-        <conv:HazardClassToBrushConverter x:Key="HazardBackgroundConverter"/>
-        <conv:HazardClassToBrushConverter x:Key="HazardForegroundConverter" ReturnForeground="True"/>
-
-        <!-- Text input style -->
-        <Style x:Key="SearchBoxStyle" TargetType="TextBox">
-            <Setter Property="Padding" Value="10,8"/>
-            <Setter Property="BorderBrush" Value="{StaticResource BorderBrush}"/>
-            <Setter Property="BorderThickness" Value="1"/>
-            <Setter Property="Background" Value="{StaticResource SurfaceBrush}"/>
-            <Setter Property="Foreground" Value="{StaticResource TextPrimaryBrush}"/>
-            <Setter Property="FontSize" Value="13"/>
-            <Setter Property="VerticalContentAlignment" Value="Center"/>
-            <Setter Property="Template">
-                <Setter.Value>
-                    <ControlTemplate TargetType="TextBox">
-                        <Border x:Name="Bd"
-                                Background="{TemplateBinding Background}"
-                                BorderBrush="{TemplateBinding BorderBrush}"
-                                BorderThickness="{TemplateBinding BorderThickness}"
-                                CornerRadius="6">
-                            <ScrollViewer x:Name="PART_ContentHost"
-                                          Margin="{TemplateBinding Padding}"
-                                          VerticalAlignment="Center"/>
-                        </Border>
-                        <ControlTemplate.Triggers>
-                            <Trigger Property="IsFocused" Value="True">
-                                <Setter TargetName="Bd" Property="BorderBrush" Value="{StaticResource AccentBrush}"/>
-                            </Trigger>
-                        </ControlTemplate.Triggers>
-                    </ControlTemplate>
-                </Setter.Value>
-            </Setter>
-        </Style>
-
-        <!-- Standard ComboBox style -->
-        <Style x:Key="StandardComboBoxStyle" TargetType="ComboBox">
-            <Setter Property="Padding" Value="10,6"/>
-            <Setter Property="MinHeight" Value="34"/>
-            <Setter Property="BorderBrush" Value="{StaticResource BorderBrush}"/>
-            <Setter Property="BorderThickness" Value="1"/>
-            <Setter Property="Background" Value="{StaticResource SurfaceBrush}"/>
-            <Setter Property="Foreground" Value="{StaticResource TextPrimaryBrush}"/>
-            <Setter Property="FontSize" Value="13"/>
-        </Style>
-
-        <!-- Hazard-class ComboBox style -->
+        <!-- Hazard-class ComboBox style (view-specific due to converter binding) -->
         <Style x:Key="HazardComboBoxStyle" TargetType="ComboBox">
             <Setter Property="FontSize" Value="11"/>
             <Setter Property="FontWeight" Value="SemiBold"/>
@@ -84,107 +36,7 @@
                     Value="{Binding SelectedHazardClass, Converter={StaticResource HazardForegroundConverter}}"/>
             <Setter Property="BorderThickness" Value="0"/>
         </Style>
-
-        <!-- Secondary (outlined) button -->
-        <Style x:Key="OutlineButtonStyle" TargetType="Button">
-            <Setter Property="Background" Value="{StaticResource SurfaceBrush}"/>
-            <Setter Property="Foreground" Value="{StaticResource TextPrimaryBrush}"/>
-            <Setter Property="BorderBrush" Value="{StaticResource BorderBrush}"/>
-            <Setter Property="BorderThickness" Value="1"/>
-            <Setter Property="Padding" Value="12,8"/>
-            <Setter Property="FontSize" Value="13"/>
-            <Setter Property="FontWeight" Value="SemiBold"/>
-            <Setter Property="Cursor" Value="Hand"/>
-            <Setter Property="Template">
-                <Setter.Value>
-                    <ControlTemplate TargetType="Button">
-                        <Border x:Name="Bd"
-                                Background="{TemplateBinding Background}"
-                                BorderBrush="{TemplateBinding BorderBrush}"
-                                BorderThickness="{TemplateBinding BorderThickness}"
-                                CornerRadius="6"
-                                Padding="{TemplateBinding Padding}">
-                            <ContentPresenter HorizontalAlignment="Center"
-                                              VerticalAlignment="Center"/>
-                        </Border>
-                        <ControlTemplate.Triggers>
-                            <Trigger Property="IsMouseOver" Value="True">
-                                <Setter TargetName="Bd" Property="Background" Value="{StaticResource SubtleBrush}"/>
-                                <Setter TargetName="Bd" Property="BorderBrush" Value="{StaticResource AccentBrush}"/>
-                                <Setter Property="Foreground" Value="{StaticResource AccentBrush}"/>
-                            </Trigger>
-                            <Trigger Property="IsEnabled" Value="False">
-                                <Setter Property="Foreground" Value="{StaticResource TextMutedBrush}"/>
-                            </Trigger>
-                        </ControlTemplate.Triggers>
-                    </ControlTemplate>
-                </Setter.Value>
-            </Setter>
-        </Style>
-
-        <!-- Primary (blue) button -->
-        <Style x:Key="PrimaryButtonStyle" TargetType="Button">
-            <Setter Property="Background" Value="{StaticResource AccentBrush}"/>
-            <Setter Property="Foreground" Value="White"/>
-            <Setter Property="BorderThickness" Value="0"/>
-            <Setter Property="Padding" Value="18,10"/>
-            <Setter Property="FontSize" Value="14"/>
-            <Setter Property="FontWeight" Value="SemiBold"/>
-            <Setter Property="Cursor" Value="Hand"/>
-            <Setter Property="Template">
-                <Setter.Value>
-                    <ControlTemplate TargetType="Button">
-                        <Border x:Name="Bd"
-                                Background="{TemplateBinding Background}"
-                                CornerRadius="6"
-                                Padding="{TemplateBinding Padding}">
-                            <ContentPresenter HorizontalAlignment="Center"
-                                              VerticalAlignment="Center"/>
-                        </Border>
-                        <ControlTemplate.Triggers>
-                            <Trigger Property="IsMouseOver" Value="True">
-                                <Setter TargetName="Bd" Property="Background" Value="#1D4ED8"/>
-                            </Trigger>
-                            <Trigger Property="IsEnabled" Value="False">
-                                <Setter TargetName="Bd" Property="Background" Value="#93C5FD"/>
-                            </Trigger>
-                        </ControlTemplate.Triggers>
-                    </ControlTemplate>
-                </Setter.Value>
-            </Setter>
-        </Style>
-
-        <!-- Level list item container style -->
-        <Style x:Key="LevelListBoxItemStyle" TargetType="ListBoxItem">
-            <Setter Property="HorizontalContentAlignment" Value="Stretch"/>
-            <Setter Property="Padding" Value="0"/>
-            <Setter Property="Margin" Value="0,0,0,8"/>
-            <Setter Property="Background" Value="Transparent"/>
-            <Setter Property="BorderThickness" Value="0"/>
-            <Setter Property="Focusable" Value="False"/>
-            <Setter Property="Template">
-                <Setter.Value>
-                    <ControlTemplate TargetType="ListBoxItem">
-                        <Border x:Name="Bd"
-                                Background="{StaticResource SurfaceBrush}"
-                                BorderBrush="{StaticResource BorderBrush}"
-                                BorderThickness="1"
-                                CornerRadius="8">
-                            <ContentPresenter/>
-                        </Border>
-                        <ControlTemplate.Triggers>
-                            <MultiTrigger>
-                                <MultiTrigger.Conditions>
-                                    <Condition Property="IsMouseOver" Value="True"/>
-                                </MultiTrigger.Conditions>
-                                <Setter TargetName="Bd" Property="Background" Value="{StaticResource SubtleBrush}"/>
-                            </MultiTrigger>
-                        </ControlTemplate.Triggers>
-                    </ControlTemplate>
-                </Setter.Value>
-            </Setter>
-        </Style>
-
+        </ResourceDictionary>
     </UserControl.Resources>
 
     <Grid Margin="16">
@@ -197,22 +49,22 @@
 
         <!-- ================= TOP: SPRINKLER CONFIGURATION ================= -->
         <Border Grid.Row="0"
-                Background="{StaticResource SurfaceBrush}"
-                BorderBrush="{StaticResource BorderBrush}"
-                BorderThickness="1"
-                CornerRadius="8">
-            <Grid Margin="18">
+                Style="{StaticResource CardBorder}">
+            <Grid Margin="18,14">
                 <Grid.RowDefinitions>
                     <RowDefinition Height="Auto"/>
                     <RowDefinition Height="12"/>
                     <RowDefinition Height="Auto"/>
                 </Grid.RowDefinitions>
 
-                <TextBlock Grid.Row="0"
-                           Text="SPRINKLER CONFIGURATION"
-                           FontSize="15"
-                           FontWeight="SemiBold"
-                           Foreground="{StaticResource TextPrimaryBrush}"/>
+                <StackPanel Grid.Row="0" Orientation="Horizontal">
+                    <Rectangle Width="3" Height="14"
+                               Fill="{StaticResource BrandBrush}"
+                               Margin="0,0,10,0"
+                               VerticalAlignment="Center"/>
+                    <TextBlock Text="SPRINKLER CONFIGURATION"
+                               Style="{StaticResource EyebrowText}"/>
+                </StackPanel>
 
                 <Grid Grid.Row="2">
                     <Grid.ColumnDefinitions>
@@ -264,13 +116,9 @@
 
             <!-- ================= LEFT: LEVELS ================= -->
             <Border Grid.Row="0" Grid.Column="0"
-                    Background="{StaticResource SurfaceBrush}"
-                    BorderBrush="{StaticResource BorderBrush}"
-                    BorderThickness="1"
-                    CornerRadius="8">
+                    Style="{StaticResource CardBorder}">
 
                 <Grid Margin="14">
-
                     <Grid.RowDefinitions>
                         <RowDefinition Height="Auto"/>
                         <RowDefinition Height="Auto"/>
@@ -285,57 +133,38 @@
                             <ColumnDefinition Width="Auto"/>
                         </Grid.ColumnDefinitions>
 
-                        <TextBlock Text="Level Selection"
-                                   FontSize="15"
-                                   FontWeight="SemiBold"
-                                   Foreground="{StaticResource TextPrimaryBrush}"
-                                   VerticalAlignment="Center"/>
+                        <StackPanel Orientation="Horizontal">
+                            <Rectangle Width="3" Height="14"
+                                       Fill="{StaticResource BrassBrush}"
+                                       Margin="0,0,10,0"
+                                       VerticalAlignment="Center"/>
+                            <TextBlock Text="LEVELS"
+                                       Style="{StaticResource EyebrowText}"/>
+                        </StackPanel>
 
                         <Button Grid.Column="1"
                                 Style="{StaticResource OutlineButtonStyle}"
-                                Command="{Binding ToggleHideUnselectedLevelsCommand}">
-                            <StackPanel Orientation="Horizontal">
-                                <TextBlock Text="👁" FontSize="12" Margin="0,0,6,0" VerticalAlignment="Center"/>
-                                <TextBlock VerticalAlignment="Center">
-                                    <TextBlock.Style>
-                                        <Style TargetType="TextBlock">
-                                            <Setter Property="Text" Value="Hide Unselected"/>
-                                            <Style.Triggers>
-                                                <DataTrigger Binding="{Binding HideUnselectedLevels}" Value="True">
-                                                    <Setter Property="Text" Value="Show All"/>
-                                                </DataTrigger>
-                                            </Style.Triggers>
-                                        </Style>
-                                    </TextBlock.Style>
-                                </TextBlock>
-                            </StackPanel>
+                                Command="{Binding ToggleHideUnselectedLevelsCommand}"
+                                Padding="10,5">
+                            <TextBlock FontSize="11.5" VerticalAlignment="Center">
+                                <TextBlock.Style>
+                                    <Style TargetType="TextBlock">
+                                        <Setter Property="Text" Value="Hide unselected"/>
+                                        <Style.Triggers>
+                                            <DataTrigger Binding="{Binding HideUnselectedLevels}" Value="True">
+                                                <Setter Property="Text" Value="Show all"/>
+                                            </DataTrigger>
+                                        </Style.Triggers>
+                                    </Style>
+                                </TextBlock.Style>
+                            </TextBlock>
                         </Button>
                     </Grid>
 
-                    <Grid Grid.Row="1" Margin="0,12,0,10">
-                        <TextBox Style="{StaticResource SearchBoxStyle}"
-                                 Text="{Binding LevelSearchText, UpdateSourceTrigger=PropertyChanged}"/>
-                        <TextBlock Text="Search levels..."
-                                   Foreground="{StaticResource TextMutedBrush}"
-                                   FontSize="13"
-                                   Margin="12,0,0,0"
-                                   VerticalAlignment="Center"
-                                   IsHitTestVisible="False">
-                            <TextBlock.Style>
-                                <Style TargetType="TextBlock">
-                                    <Setter Property="Visibility" Value="Collapsed"/>
-                                    <Style.Triggers>
-                                        <DataTrigger Binding="{Binding LevelSearchText}" Value="{x:Null}">
-                                            <Setter Property="Visibility" Value="Visible"/>
-                                        </DataTrigger>
-                                        <DataTrigger Binding="{Binding LevelSearchText}" Value="">
-                                            <Setter Property="Visibility" Value="Visible"/>
-                                        </DataTrigger>
-                                    </Style.Triggers>
-                                </Style>
-                            </TextBlock.Style>
-                        </TextBlock>
-                    </Grid>
+                    <ctrl:SearchBox Grid.Row="1"
+                                    Margin="0,12,0,10"
+                                    Text="{Binding LevelSearchText, UpdateSourceTrigger=PropertyChanged}"
+                                    Placeholder="Search levels..."/>
 
                     <Grid Grid.Row="2" Margin="0,0,0,10">
                         <Grid.ColumnDefinitions>
@@ -348,7 +177,7 @@
                         </Grid.ColumnDefinitions>
 
                         <CheckBox Grid.Column="0"
-                                  Content="Show levels with rooms only"
+                                  Content="Levels with rooms only"
                                   IsChecked="{Binding ShowLevelsWithRoomsOnly, Mode=TwoWay}"
                                   VerticalAlignment="Center"
                                   Foreground="{StaticResource TextSecondaryBrush}"
@@ -370,14 +199,13 @@
 
                         <ListBox.ItemTemplate>
                             <DataTemplate>
-
-                                <Grid Margin="12,10">
+                                <Grid Margin="12,9">
                                     <Grid.Style>
                                         <Style TargetType="Grid">
                                             <Setter Property="Opacity" Value="1"/>
                                             <Style.Triggers>
                                                 <DataTrigger Binding="{Binding HasRooms}" Value="False">
-                                                    <Setter Property="Opacity" Value="0.5"/>
+                                                    <Setter Property="Opacity" Value="0.45"/>
                                                     <Setter Property="ToolTip"
                                                             Value="This level has no rooms and cannot be selected for sprinkler placement."/>
                                                 </DataTrigger>
@@ -399,55 +227,52 @@
 
                                     <StackPanel Grid.Column="1">
                                         <TextBlock Text="{Binding Name}"
-                                                   FontSize="14"
+                                                   FontSize="13"
                                                    FontWeight="SemiBold"
-                                                   Foreground="{StaticResource TextPrimaryBrush}"/>
-                                        <TextBlock FontSize="12"
-                                                   Foreground="{StaticResource TextSecondaryBrush}"
+                                                   Foreground="{StaticResource TextPrimaryBrush}"
+                                                   TextTrimming="CharacterEllipsis"/>
+                                        <TextBlock FontSize="11"
+                                                   Style="{StaticResource DataMuted}"
                                                    Margin="0,2,0,0">
-                                            <Run Text="Elev."/>
+                                            <Run Text="ELEV "/>
                                             <Run Text="{Binding ElevationFt,Mode=OneWay, StringFormat={}{0:F2} ft}"/>
                                         </TextBlock>
                                     </StackPanel>
 
-                                    <TextBlock Grid.Column="2"
-                                               VerticalAlignment="Center"
-                                               FontSize="13"
-                                               FontWeight="SemiBold"
-                                               Foreground="{StaticResource TextSecondaryBrush}">
-                                        <Run Text="{Binding SelectedRoomCount, Mode=OneWay}"/>
-                                        <Run Text="/"/>
-                                        <Run Text="{Binding TotalRoomCount, Mode=OneWay}"/>
-                                    </TextBlock>
+                                    <Border Grid.Column="2"
+                                            VerticalAlignment="Center"
+                                            Background="{StaticResource BackgroundOverlayBrush}"
+                                            CornerRadius="3"
+                                            Padding="7,3">
+                                        <TextBlock FontSize="11.5"
+                                                   Style="{StaticResource DataMuted}">
+                                            <Run Text="{Binding SelectedRoomCount, Mode=OneWay}"/>
+                                            <Run Text="/"/>
+                                            <Run Text="{Binding TotalRoomCount, Mode=OneWay}"/>
+                                        </TextBlock>
+                                    </Border>
                                 </Grid>
-
                             </DataTemplate>
                         </ListBox.ItemTemplate>
                     </ListBox>
 
                     <Border Grid.Row="4"
-                            BorderBrush="{StaticResource BorderBrush}"
+                            BorderBrush="{StaticResource DividerBrush}"
                             BorderThickness="0,1,0,0"
                             Padding="0,10,0,0"
                             Margin="0,10,0,0">
                         <TextBlock Text="{Binding SelectedLevelSummary}"
-                                   FontSize="12"
-                                   Foreground="{StaticResource TextSecondaryBrush}"/>
+                                   FontSize="11.5"
+                                   Style="{StaticResource DataMuted}"/>
                     </Border>
-
                 </Grid>
-
             </Border>
 
             <!-- ================= RIGHT: ROOMS ================= -->
             <Border Grid.Row="0" Grid.Column="2"
-                    Background="{StaticResource SurfaceBrush}"
-                    BorderBrush="{StaticResource BorderBrush}"
-                    BorderThickness="1"
-                    CornerRadius="8">
+                    Style="{StaticResource CardBorder}">
 
-                <Grid Margin="18">
-
+                <Grid Margin="18,14">
                     <Grid.RowDefinitions>
                         <RowDefinition Height="Auto"/>
                         <RowDefinition Height="Auto"/>
@@ -465,58 +290,36 @@
 
                         <StackPanel Grid.Column="0" VerticalAlignment="Center">
                             <TextBlock Text="{Binding RoomsHeader}"
-                                       FontSize="18"
+                                       FontSize="17"
                                        FontWeight="SemiBold"
                                        Foreground="{StaticResource TextPrimaryBrush}"/>
                             <TextBlock Text="{Binding RoomsFoundText}"
-                                       FontSize="12"
-                                       Foreground="{StaticResource TextSecondaryBrush}"
-                                       Margin="0,4,0,0"/>
+                                       FontSize="11.5"
+                                       Style="{StaticResource DataMuted}"
+                                       Margin="0,3,0,0"/>
                         </StackPanel>
 
-                        <Grid Grid.Column="1" Width="320" Margin="12,0">
-                            <TextBox Style="{StaticResource SearchBoxStyle}"
-                                     Text="{Binding RoomSearchText, UpdateSourceTrigger=PropertyChanged}"/>
-                            <TextBlock Text="Search rooms by name or number..."
-                                       Foreground="{StaticResource TextMutedBrush}"
-                                       FontSize="13"
-                                       Margin="12,0,0,0"
-                                       VerticalAlignment="Center"
-                                       IsHitTestVisible="False">
+                        <ctrl:SearchBox Grid.Column="1"
+                                        Width="300" Margin="12,0"
+                                        Text="{Binding RoomSearchText, UpdateSourceTrigger=PropertyChanged}"
+                                        Placeholder="Search rooms by name or number..."/>
+
+                        <Button Grid.Column="2"
+                                Style="{StaticResource OutlineButtonStyle}"
+                                Command="{Binding ToggleHideUnselectedRoomsCommand}"
+                                Padding="10,5">
+                            <TextBlock FontSize="11.5" VerticalAlignment="Center">
                                 <TextBlock.Style>
                                     <Style TargetType="TextBlock">
-                                        <Setter Property="Visibility" Value="Collapsed"/>
+                                        <Setter Property="Text" Value="Hide unselected"/>
                                         <Style.Triggers>
-                                            <DataTrigger Binding="{Binding RoomSearchText}" Value="{x:Null}">
-                                                <Setter Property="Visibility" Value="Visible"/>
-                                            </DataTrigger>
-                                            <DataTrigger Binding="{Binding RoomSearchText}" Value="">
-                                                <Setter Property="Visibility" Value="Visible"/>
+                                            <DataTrigger Binding="{Binding HideUnselectedRooms}" Value="True">
+                                                <Setter Property="Text" Value="Show all"/>
                                             </DataTrigger>
                                         </Style.Triggers>
                                     </Style>
                                 </TextBlock.Style>
                             </TextBlock>
-                        </Grid>
-
-                        <Button Grid.Column="2"
-                                Style="{StaticResource OutlineButtonStyle}"
-                                Command="{Binding ToggleHideUnselectedRoomsCommand}">
-                            <StackPanel Orientation="Horizontal">
-                                <TextBlock Text="👁" FontSize="12" Margin="0,0,6,0" VerticalAlignment="Center"/>
-                                <TextBlock VerticalAlignment="Center">
-                                    <TextBlock.Style>
-                                        <Style TargetType="TextBlock">
-                                            <Setter Property="Text" Value="Hide Unselected"/>
-                                            <Style.Triggers>
-                                                <DataTrigger Binding="{Binding HideUnselectedRooms}" Value="True">
-                                                    <Setter Property="Text" Value="Show All"/>
-                                                </DataTrigger>
-                                            </Style.Triggers>
-                                        </Style>
-                                    </TextBlock.Style>
-                                </TextBlock>
-                            </StackPanel>
                         </Button>
                     </Grid>
 
@@ -527,7 +330,7 @@
                         </Grid.ColumnDefinitions>
 
                         <CheckBox Grid.Column="0"
-                                  Content="Show eligible rooms only"
+                                  Content="Eligible rooms only"
                                   IsChecked="{Binding ShowEligibleRoomsOnly, Mode=TwoWay}"
                                   VerticalAlignment="Center"
                                   Foreground="{StaticResource TextSecondaryBrush}"
@@ -541,11 +344,14 @@
                                 HorizontalAlignment="Right"/>
                     </Grid>
 
+                    <!-- Column headers -->
                     <Border Grid.Row="2"
-                            BorderBrush="{StaticResource BorderBrush}"
+                            Background="{StaticResource BackgroundOverlayBrush}"
+                            BorderBrush="{StaticResource DividerBrush}"
                             BorderThickness="0,1,0,1"
-                            Padding="0,10"
-                            Margin="0,12,0,0">
+                            Padding="10,7"
+                            Margin="0,12,0,0"
+                            CornerRadius="3">
                         <Grid>
                             <Grid.ColumnDefinitions>
                                 <ColumnDefinition Width="36"/>
@@ -556,10 +362,10 @@
                             </Grid.ColumnDefinitions>
 
                             <CheckBox Grid.Column="0" IsEnabled="False"/>
-                            <TextBlock Grid.Column="1" Text="Room Name" FontSize="12" FontWeight="SemiBold" Foreground="{StaticResource TextSecondaryBrush}"/>
-                            <TextBlock Grid.Column="2" Text="Area (sq ft)" FontSize="12" FontWeight="SemiBold" Foreground="{StaticResource TextSecondaryBrush}"/>
-                            <TextBlock Grid.Column="3" Text="Hazard Class" FontSize="12" FontWeight="SemiBold" Foreground="{StaticResource TextSecondaryBrush}"/>
-                            <TextBlock Grid.Column="4" Text="Ceiling Height (ft)" FontSize="12" FontWeight="SemiBold" Foreground="{StaticResource TextSecondaryBrush}"/>
+                            <TextBlock Grid.Column="1" Text="ROOM NAME" Style="{StaticResource EyebrowText}"/>
+                            <TextBlock Grid.Column="2" Text="AREA (SQ FT)" Style="{StaticResource EyebrowText}"/>
+                            <TextBlock Grid.Column="3" Text="HAZARD CLASS" Style="{StaticResource EyebrowText}"/>
+                            <TextBlock Grid.Column="4" Text="CEILING (FT)" Style="{StaticResource EyebrowText}"/>
                         </Grid>
                     </Border>
 
@@ -567,31 +373,29 @@
                         <ItemsControl ItemsSource="{Binding RoomsView}">
                             <ItemsControl.ItemTemplate>
                                 <DataTemplate>
-
-                                     <Border BorderBrush="{StaticResource BorderBrush}"
-                                             BorderThickness="0,0,0,1"
-                                             Padding="0,12">
-                                          <Border.Style>
-                                              <Style TargetType="Border">
-                                                  <Style.Triggers>
-                                                      <!-- All non-eligible rooms (BLOCKED / UNDETERMINED) are muted. -->
-                                                      <DataTrigger Binding="{Binding IsEligible}" Value="False">
-                                                          <Setter Property="Opacity" Value="0.5"/>
-                                                      </DataTrigger>
-                                                      <!-- UNDETERMINED (config/infra error) gets a distinct amber outline. -->
-                                                      <DataTrigger Binding="{Binding IsUndetermined}" Value="True">
-                                                          <Setter Property="BorderBrush" Value="#E0A800"/>
-                                                          <Setter Property="BorderThickness" Value="0,0,0,2"/>
-                                                      </DataTrigger>
-                                                      <!-- BLOCKED gets a distinct red outline so the user sees why it cannot be selected. -->
-                                                      <DataTrigger Binding="{Binding IsBlocked}" Value="True">
-                                                          <Setter Property="BorderBrush" Value="#D9534F"/>
-                                                          <Setter Property="BorderThickness" Value="0,0,0,2"/>
-                                                      </DataTrigger>
-                                                  </Style.Triggers>
-                                              </Style>
-                                          </Border.Style>
-                                         <Grid>
+                                    <Border BorderBrush="{StaticResource DividerBrush}"
+                                            BorderThickness="0,0,0,1"
+                                            Padding="10,10">
+                                        <Border.Style>
+                                            <Style TargetType="Border">
+                                                <Style.Triggers>
+                                                    <DataTrigger Binding="{Binding IsEligible}" Value="False">
+                                                        <Setter Property="Opacity" Value="0.5"/>
+                                                    </DataTrigger>
+                                                    <DataTrigger Binding="{Binding IsUndetermined}" Value="True">
+                                                        <Setter Property="BorderBrush" Value="{StaticResource UndeterminedBrush}"/>
+                                                        <Setter Property="BorderThickness" Value="3,0,0,1"/>
+                                                        <Setter Property="Padding" Value="7,10,10,10"/>
+                                                    </DataTrigger>
+                                                    <DataTrigger Binding="{Binding IsBlocked}" Value="True">
+                                                        <Setter Property="BorderBrush" Value="{StaticResource BlockedBrush}"/>
+                                                        <Setter Property="BorderThickness" Value="3,0,0,1"/>
+                                                        <Setter Property="Padding" Value="7,10,10,10"/>
+                                                    </DataTrigger>
+                                                </Style.Triggers>
+                                            </Style>
+                                        </Border.Style>
+                                        <Grid>
                                             <Grid.ColumnDefinitions>
                                                 <ColumnDefinition Width="36"/>
                                                 <ColumnDefinition Width="2.0*"/>
@@ -612,36 +416,36 @@
                                                            FontWeight="SemiBold"
                                                            Foreground="{StaticResource TextPrimaryBrush}"
                                                            TextTrimming="CharacterEllipsis"/>
-                                                <!-- Non-eligible status line (BLOCKED / UNDETERMINED) so the reason is visible inline, not only in the tooltip. -->
-                                                <TextBlock FontSize="11"
-                                                           Margin="0,2,0,0"
+                                                <TextBlock FontSize="10.5"
+                                                           Margin="0,3,0,0"
                                                            TextTrimming="CharacterEllipsis">
                                                     <TextBlock.Style>
-                                                        <Style TargetType="TextBlock">
+                                                        <Style TargetType="TextBlock" BasedOn="{StaticResource DataMuted}">
                                                             <Setter Property="Visibility" Value="Collapsed"/>
                                                             <Style.Triggers>
                                                                 <DataTrigger Binding="{Binding IsEligible}" Value="False">
                                                                     <Setter Property="Visibility" Value="Visible"/>
                                                                 </DataTrigger>
                                                                 <DataTrigger Binding="{Binding IsBlocked}" Value="True">
-                                                                    <Setter Property="Foreground" Value="#D9534F"/>
+                                                                    <Setter Property="Foreground" Value="{StaticResource BlockedOnDarkBrush}"/>
                                                                 </DataTrigger>
                                                                 <DataTrigger Binding="{Binding IsUndetermined}" Value="True">
-                                                                    <Setter Property="Foreground" Value="#E0A800"/>
+                                                                    <Setter Property="Foreground" Value="{StaticResource UndeterminedOnDarkBrush}"/>
                                                                 </DataTrigger>
                                                             </Style.Triggers>
                                                         </Style>
                                                     </TextBlock.Style>
                                                     <Run Text="{Binding EligibilityState, Mode=OneWay}"
                                                          FontWeight="Bold"/>
-                                                    <Run Text=" — "/>
+                                                    <Run Text=" &#x2014; "/>
                                                     <Run Text="{Binding EligibilityReason, Mode=OneWay}"/>
                                                 </TextBlock>
                                             </StackPanel>
 
                                             <TextBlock Grid.Column="2"
                                                        Text="{Binding AreaSqFt, StringFormat={}{0:N2}}"
-                                                       FontSize="13"
+                                                       FontSize="12.5"
+                                                       FontFamily="{StaticResource DataFontFamily}"
                                                        Foreground="{StaticResource TextPrimaryBrush}"
                                                        VerticalAlignment="Center"/>
 
@@ -650,45 +454,42 @@
                                                           ItemsSource="{Binding HazardClassOptionsList}"
                                                           SelectedItem="{Binding SelectedHazardClass, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}"/>
 
-                                                <TextBlock FontSize="11"
-                                                           Foreground="{StaticResource TextSecondaryBrush}"
+                                                <TextBlock FontSize="10.5"
+                                                           Style="{StaticResource DataMuted}"
                                                            Margin="0,4,0,0">
-                                                    <Run Text="Suggested:"/>
+                                                    <Run Text="Suggested: "/>
                                                     <Run Text="{Binding HazardClassSuggested, Mode=OneWay}"/>
                                                 </TextBlock>
 
                                                 <TextBlock Text="{Binding MatchedDisplay}"
-                                                           FontSize="11"
-                                                           Foreground="{StaticResource TextSecondaryBrush}"
+                                                           FontSize="10.5"
+                                                           Style="{StaticResource DataMuted}"
                                                            Margin="0,2,0,0"/>
                                             </StackPanel>
 
                                             <TextBlock Grid.Column="4"
                                                        Text="{Binding CeilingHeightFt, StringFormat={}{0:F2}}"
-                                                       FontSize="13"
+                                                       FontSize="12.5"
+                                                       FontFamily="{StaticResource DataFontFamily}"
                                                        Foreground="{StaticResource TextPrimaryBrush}"
                                                        VerticalAlignment="Center"/>
-
                                         </Grid>
                                     </Border>
-
                                 </DataTemplate>
                             </ItemsControl.ItemTemplate>
                         </ItemsControl>
                     </ScrollViewer>
 
                     <Border Grid.Row="4"
-                            BorderBrush="{StaticResource BorderBrush}"
+                            BorderBrush="{StaticResource DividerBrush}"
                             BorderThickness="0,1,0,0"
                             Padding="0,10,0,0"
                             Margin="0,10,0,0">
                         <TextBlock Text="{Binding RoomsSelectedSummary}"
-                                   FontSize="12"
-                                   Foreground="{StaticResource TextSecondaryBrush}"/>
+                                   FontSize="11.5"
+                                   Style="{StaticResource DataMuted}"/>
                     </Border>
-
                 </Grid>
-
             </Border>
         </Grid>
 
@@ -700,35 +501,24 @@
                 <ColumnDefinition Width="Auto"/>
             </Grid.ColumnDefinitions>
 
-            <Border Grid.Column="0"
-                    Background="{StaticResource AccentSoftBrush}"
-                    CornerRadius="6"
-                    Padding="14,10"
-                    VerticalAlignment="Center">
-                <StackPanel Orientation="Horizontal">
-                    <TextBlock Text="ℹ"
-                               FontSize="14"
-                               Foreground="{StaticResource AccentBrush}"
-                               Margin="0,0,10,0"
-                               VerticalAlignment="Top"/>
-                    <StackPanel>
-                        <TextBlock Text="Hazard class is a suggestion based on room name and contents."
-                                   FontSize="12"
-                                   Foreground="{StaticResource AccentBrush}"/>
-                        <TextBlock Text="Review and adjust each room's hazard class before placement."
-                                   FontSize="12"
-                                   Foreground="{StaticResource AccentBrush}"
-                                   Margin="0,2,0,0"/>
-                    </StackPanel>
+            <ctrl:InfoBanner Grid.Column="0">
+                <StackPanel>
+                    <TextBlock Text="Hazard class is a suggestion based on room name and contents."
+                               FontSize="11.5"
+                               Style="{StaticResource DataMuted}"/>
+                    <TextBlock Text="Review and adjust each room's hazard class before placement."
+                               FontSize="11.5"
+                               Style="{StaticResource DataMuted}"
+                               Margin="0,2,0,0"/>
                 </StackPanel>
-            </Border>
+            </ctrl:InfoBanner>
 
             <Button Grid.Column="1"
                     Style="{StaticResource PrimaryButtonStyle}"
                     Command="{Binding PlaceSprinklersCommand}"
                     Margin="16,0,0,0">
                 <StackPanel Orientation="Horizontal">
-                    <TextBlock Text="⊕" FontSize="14" Margin="0,0,8,0" VerticalAlignment="Center"/>
+                    <TextBlock Text="&#x2295;" FontSize="14" Margin="0,0,8,0" VerticalAlignment="Center"/>
                     <TextBlock Text="Place Sprinklers" VerticalAlignment="Center"/>
                 </StackPanel>
             </Button>
@@ -737,15 +527,13 @@
                     Style="{StaticResource OutlineButtonStyle}"
                     Command="{Binding ResetCommand}"
                     Margin="10,0,0,0"
-                    Padding="18,10">
+                    Padding="18,9">
                 <StackPanel Orientation="Horizontal">
-                    <TextBlock Text="↻" FontSize="13" Margin="0,0,8,0" VerticalAlignment="Center"/>
+                    <TextBlock Text="&#x21BB;" FontSize="13" Margin="0,0,8,0" VerticalAlignment="Center"/>
                     <TextBlock Text="Reset" VerticalAlignment="Center"/>
                 </StackPanel>
             </Button>
-
         </Grid>
-
     </Grid>
 
 </UserControl>

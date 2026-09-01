@@ -1,0 +1,145 @@
+<ResourceDictionary xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+                    xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml">
+
+    <!-- ================= FIRE PROTECTION ENGINEERING PALETTE (LIGHT) =================
+         White professional theme rooted in the material vocabulary of the trade:
+         - NFPA Red:   Safety red on sprinkler pipes, extinguishers, signage (primary action)
+         - Steel:      Conduit / structural steel (secondary surfaces)
+         - Brass:      Sprinkler heads, fittings, gauges (focus/selected accent)
+         - White:      Submittal-sheet content cards
+         ====================================================================== -->
+
+    <!-- Primary Brand: NFPA Safety Red -->
+    <Color x:Key="ColorBrand">#2E86C1</Color>
+    <Color x:Key="ColorBrandHover">#1B4F72</Color>
+    <Color x:Key="ColorBrandLight">#D6EAF8</Color>
+    <Color x:Key="ColorBrandDisabled">#A9CCE3</Color>
+
+    <!-- Secondary: Brass Fitting Gold -->
+    <Color x:Key="ColorBrass">#A98336</Color>
+    <Color x:Key="ColorBrassHover">#8F6D2B</Color>
+    <Color x:Key="ColorBrassLight">#F7EFDC</Color>
+    <Color x:Key="ColorBrassDisabled">#DCD0B2</Color>
+
+    <!-- Surface: white cards on a cool gray page -->
+    <Color x:Key="ColorSurfaceDeep">#EDEFF2</Color>
+    <Color x:Key="ColorSurface">#F6F7F9</Color>
+    <Color x:Key="ColorSurfaceRaised">#FFFFFF</Color>
+    <Color x:Key="ColorSurfaceOverlay">#F1F3F6</Color>
+
+    <!-- Surface: Steel (secondary accents) -->
+    <Color x:Key="ColorSteel">#4A5568</Color>
+    <Color x:Key="ColorSteelLight">#5A6A7D</Color>
+    <Color x:Key="ColorSteelLighter">#3D4A5A</Color>
+
+    <!-- Surface: Paper warm (calculation sheets) -->
+    <Color x:Key="ColorPaper">#FAF9F6</Color>
+    <Color x:Key="ColorPaperLight">#FFFFFF</Color>
+    <Color x:Key="ColorPaperBorder">#E8E2D9</Color>
+
+    <!-- Text -->
+    <Color x:Key="ColorTextOnDark">#1A1D21</Color>
+    <Color x:Key="ColorTextOnDarkMuted">#5A6370</Color>
+    <Color x:Key="ColorTextOnDarkSubtle">#8A94A3</Color>
+    <Color x:Key="ColorTextOnLight">#1A1D21</Color>
+    <Color x:Key="ColorTextOnLightMuted">#5A6370</Color>
+    <Color x:Key="ColorTextOnLightSubtle">#8A94A3</Color>
+
+    <!-- Border / Divider -->
+    <Color x:Key="ColorBorderOnDark">#DFE3E8</Color>
+    <Color x:Key="ColorBorderOnLight">#E8E2D9</Color>
+    <Color x:Key="ColorDivider">#E4E7EB</Color>
+
+    <!-- Status: Eligible (Green - flow/pressure OK) -->
+    <Color x:Key="ColorEligible">#1E8449</Color>
+    <Color x:Key="ColorEligibleLight">#E8F8F0</Color>
+    <Color x:Key="ColorEligibleOnDark">#1E8449</Color>
+
+    <!-- Status: Blocked (Red - no flow/host) -->
+    <Color x:Key="ColorBlocked">#C0392B</Color>
+    <Color x:Key="ColorBlockedLight">#FDEDEC</Color>
+    <Color x:Key="ColorBlockedOnDark">#C0392B</Color>
+
+    <!-- Status: Undetermined (Amber - pressure unknown) -->
+    <Color x:Key="ColorUndetermined">#B9770E</Color>
+    <Color x:Key="ColorUndeterminedLight">#FEF9E7</Color>
+    <Color x:Key="ColorUndeterminedOnDark">#B9770E</Color>
+
+    <!-- Status: Warning/Info (Blue - system info) -->
+    <Color x:Key="ColorInfo">#2E86C1</Color>
+    <Color x:Key="ColorInfoLight">#EBF5FB</Color>
+
+    <!-- ================= BRUSHES (Light Theme Primary) ================= -->
+    <!-- Background -->
+    <SolidColorBrush x:Key="BackgroundBrush" Color="{StaticResource ColorSurface}"/>
+    <SolidColorBrush x:Key="BackgroundSecondaryBrush" Color="{StaticResource ColorSurface}"/>
+    <SolidColorBrush x:Key="BackgroundCardBrush" Color="{StaticResource ColorSurfaceRaised}"/>
+    <SolidColorBrush x:Key="BackgroundOverlayBrush" Color="{StaticResource ColorSurfaceOverlay}"/>
+    <SolidColorBrush x:Key="BackgroundPaperBrush" Color="{StaticResource ColorPaper}"/>
+    <SolidColorBrush x:Key="BackgroundPaperLightBrush" Color="{StaticResource ColorPaperLight}"/>
+
+    <!-- Brand (NFPA Red) -->
+    <SolidColorBrush x:Key="BrandBrush" Color="{StaticResource ColorBrand}"/>
+    <SolidColorBrush x:Key="BrandHoverBrush" Color="{StaticResource ColorBrandHover}"/>
+    <SolidColorBrush x:Key="BrandLightBrush" Color="{StaticResource ColorBrandLight}"/>
+    <SolidColorBrush x:Key="BrandDisabledBrush" Color="{StaticResource ColorBrandDisabled}"/>
+
+    <!-- Brass (Accent for active/selected) -->
+    <SolidColorBrush x:Key="BrassBrush" Color="{StaticResource ColorBrass}"/>
+    <SolidColorBrush x:Key="BrassHoverBrush" Color="{StaticResource ColorBrassHover}"/>
+    <SolidColorBrush x:Key="BrassLightBrush" Color="{StaticResource ColorBrassLight}"/>
+    <SolidColorBrush x:Key="BrassDisabledBrush" Color="{StaticResource ColorBrassDisabled}"/>
+
+    <!-- Steel (Secondary surfaces) -->
+    <SolidColorBrush x:Key="SteelBrush" Color="{StaticResource ColorSteel}"/>
+    <SolidColorBrush x:Key="SteelLightBrush" Color="{StaticResource ColorSteelLight}"/>
+    <SolidColorBrush x:Key="SteelLighterBrush" Color="{StaticResource ColorSteelLighter}"/>
+
+    <!-- Text -->
+    <SolidColorBrush x:Key="TextPrimaryBrush" Color="{StaticResource ColorTextOnDark}"/>
+    <SolidColorBrush x:Key="TextSecondaryBrush" Color="{StaticResource ColorTextOnDarkMuted}"/>
+    <SolidColorBrush x:Key="TextMutedBrush" Color="{StaticResource ColorTextOnDarkSubtle}"/>
+    <SolidColorBrush x:Key="TextInverseBrush" Color="{StaticResource ColorTextOnLight}"/>
+
+    <!-- Text (Paper cards) -->
+    <SolidColorBrush x:Key="TextOnPaperBrush" Color="{StaticResource ColorTextOnLight}"/>
+    <SolidColorBrush x:Key="TextOnPaperMutedBrush" Color="{StaticResource ColorTextOnLightMuted}"/>
+    <SolidColorBrush x:Key="TextOnPaperSubtleBrush" Color="{StaticResource ColorTextOnLightSubtle}"/>
+
+    <!-- Border -->
+    <SolidColorBrush x:Key="BorderBrush" Color="{StaticResource ColorBorderOnDark}"/>
+    <SolidColorBrush x:Key="BorderLightBrush" Color="{StaticResource ColorBorderOnLight}"/>
+    <SolidColorBrush x:Key="DividerBrush" Color="{StaticResource ColorDivider}"/>
+
+    <!-- Status Brushes -->
+    <SolidColorBrush x:Key="EligibleBrush" Color="{StaticResource ColorEligible}"/>
+    <SolidColorBrush x:Key="EligibleLightBrush" Color="{StaticResource ColorEligibleLight}"/>
+    <SolidColorBrush x:Key="EligibleOnDarkBrush" Color="{StaticResource ColorEligibleOnDark}"/>
+
+    <SolidColorBrush x:Key="BlockedBrush" Color="{StaticResource ColorBlocked}"/>
+    <SolidColorBrush x:Key="BlockedLightBrush" Color="{StaticResource ColorBlockedLight}"/>
+    <SolidColorBrush x:Key="BlockedOnDarkBrush" Color="{StaticResource ColorBlockedOnDark}"/>
+
+    <SolidColorBrush x:Key="UndeterminedBrush" Color="{StaticResource ColorUndetermined}"/>
+    <SolidColorBrush x:Key="UndeterminedLightBrush" Color="{StaticResource ColorUndeterminedLight}"/>
+    <SolidColorBrush x:Key="UndeterminedOnDarkBrush" Color="{StaticResource ColorUndeterminedOnDark}"/>
+
+    <SolidColorBrush x:Key="InfoBrush" Color="{StaticResource ColorInfo}"/>
+    <SolidColorBrush x:Key="InfoLightBrush" Color="{StaticResource ColorInfoLight}"/>
+
+    <!-- Focus -->
+    <SolidColorBrush x:Key="FocusBrush" Color="{StaticResource ColorBrass}"/>
+    <SolidColorBrush x:Key="FocusRingBrush" Color="{StaticResource ColorBrass}"/>
+
+    <!-- ================= LEGACY ALIASES =================
+         Other views reference the previous key names; alias them to the new palette
+         so the whole solution compiles and renders consistently. -->
+    <SolidColorBrush x:Key="AccentBrush" Color="{StaticResource ColorBrand}"/>
+    <SolidColorBrush x:Key="AccentSoftBrush" Color="{StaticResource ColorInfoLight}"/>
+    <SolidColorBrush x:Key="AccentHoverBrush" Color="{StaticResource ColorBrandHover}"/>
+    <SolidColorBrush x:Key="AccentDisabledBrush" Color="{StaticResource ColorBrandDisabled}"/>
+    <SolidColorBrush x:Key="SurfaceBrush" Color="{StaticResource ColorSurfaceRaised}"/>
+    <SolidColorBrush x:Key="SubtleBrush" Color="{StaticResource ColorSurfaceOverlay}"/>
+    <SolidColorBrush x:Key="WarningBrush" Color="{StaticResource ColorUndetermined}"/>
+
+</ResourceDictionary>

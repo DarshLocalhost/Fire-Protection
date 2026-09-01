@@ -4,162 +4,18 @@
              xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
              xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
              xmlns:vmDevices="clr-namespace:FireProtection.UI.ViewModels.Devices"
+             xmlns:ctrl="clr-namespace:FireProtection.UI.Controls"
              mc:Ignorable="d"
              d:DesignHeight="820" d:DesignWidth="1280"
              Background="Transparent"
              FontFamily="Segoe UI">
-
     <UserControl.Resources>
-
-        <SolidColorBrush x:Key="AccentBrush" Color="#2563EB"/>
-        <SolidColorBrush x:Key="AccentSoftBrush" Color="#EFF6FF"/>
-        <SolidColorBrush x:Key="TextPrimaryBrush" Color="#0F172A"/>
-        <SolidColorBrush x:Key="TextSecondaryBrush" Color="#64748B"/>
-        <SolidColorBrush x:Key="TextMutedBrush" Color="#94A3B8"/>
-        <SolidColorBrush x:Key="BorderBrush" Color="#E2E8F0"/>
-        <SolidColorBrush x:Key="SurfaceBrush" Color="#FFFFFF"/>
-        <SolidColorBrush x:Key="SubtleBrush" Color="#F8FAFC"/>
-        <SolidColorBrush x:Key="WarningBrush" Color="#D97706"/>
-
-        <BooleanToVisibilityConverter x:Key="BoolToVis"/>
-
-        <Style x:Key="SearchBoxStyle" TargetType="TextBox">
-            <Setter Property="Padding" Value="10,8"/>
-            <Setter Property="BorderBrush" Value="{StaticResource BorderBrush}"/>
-            <Setter Property="BorderThickness" Value="1"/>
-            <Setter Property="Background" Value="{StaticResource SurfaceBrush}"/>
-            <Setter Property="Foreground" Value="{StaticResource TextPrimaryBrush}"/>
-            <Setter Property="FontSize" Value="13"/>
-            <Setter Property="VerticalContentAlignment" Value="Center"/>
-            <Setter Property="Template">
-                <Setter.Value>
-                    <ControlTemplate TargetType="TextBox">
-                        <Border x:Name="Bd"
-                                Background="{TemplateBinding Background}"
-                                BorderBrush="{TemplateBinding BorderBrush}"
-                                BorderThickness="{TemplateBinding BorderThickness}"
-                                CornerRadius="6">
-                            <ScrollViewer x:Name="PART_ContentHost"
-                                          Margin="{TemplateBinding Padding}"
-                                          VerticalAlignment="Center"/>
-                        </Border>
-                        <ControlTemplate.Triggers>
-                            <Trigger Property="IsFocused" Value="True">
-                                <Setter TargetName="Bd" Property="BorderBrush" Value="{StaticResource AccentBrush}"/>
-                            </Trigger>
-                        </ControlTemplate.Triggers>
-                    </ControlTemplate>
-                </Setter.Value>
-            </Setter>
-        </Style>
-
-        <Style x:Key="StandardComboBoxStyle" TargetType="ComboBox">
-            <Setter Property="Padding" Value="10,6"/>
-            <Setter Property="MinHeight" Value="34"/>
-            <Setter Property="BorderBrush" Value="{StaticResource BorderBrush}"/>
-            <Setter Property="BorderThickness" Value="1"/>
-            <Setter Property="Background" Value="{StaticResource SurfaceBrush}"/>
-            <Setter Property="Foreground" Value="{StaticResource TextPrimaryBrush}"/>
-            <Setter Property="FontSize" Value="13"/>
-        </Style>
-
-        <Style x:Key="OutlineButtonStyle" TargetType="Button">
-            <Setter Property="Background" Value="{StaticResource SurfaceBrush}"/>
-            <Setter Property="Foreground" Value="{StaticResource TextPrimaryBrush}"/>
-            <Setter Property="BorderBrush" Value="{StaticResource BorderBrush}"/>
-            <Setter Property="BorderThickness" Value="1"/>
-            <Setter Property="Padding" Value="12,8"/>
-            <Setter Property="FontSize" Value="13"/>
-            <Setter Property="FontWeight" Value="SemiBold"/>
-            <Setter Property="Cursor" Value="Hand"/>
-            <Setter Property="Template">
-                <Setter.Value>
-                    <ControlTemplate TargetType="Button">
-                        <Border x:Name="Bd"
-                                Background="{TemplateBinding Background}"
-                                BorderBrush="{TemplateBinding BorderBrush}"
-                                BorderThickness="{TemplateBinding BorderThickness}"
-                                CornerRadius="6"
-                                Padding="{TemplateBinding Padding}">
-                            <ContentPresenter HorizontalAlignment="Center"
-                                              VerticalAlignment="Center"/>
-                        </Border>
-                        <ControlTemplate.Triggers>
-                            <Trigger Property="IsMouseOver" Value="True">
-                                <Setter TargetName="Bd" Property="Background" Value="{StaticResource SubtleBrush}"/>
-                                <Setter TargetName="Bd" Property="BorderBrush" Value="{StaticResource AccentBrush}"/>
-                                <Setter Property="Foreground" Value="{StaticResource AccentBrush}"/>
-                            </Trigger>
-                            <Trigger Property="IsEnabled" Value="False">
-                                <Setter Property="Foreground" Value="{StaticResource TextMutedBrush}"/>
-                            </Trigger>
-                        </ControlTemplate.Triggers>
-                    </ControlTemplate>
-                </Setter.Value>
-            </Setter>
-        </Style>
-
-        <Style x:Key="PrimaryButtonStyle" TargetType="Button">
-            <Setter Property="Background" Value="{StaticResource AccentBrush}"/>
-            <Setter Property="Foreground" Value="White"/>
-            <Setter Property="BorderThickness" Value="0"/>
-            <Setter Property="Padding" Value="18,10"/>
-            <Setter Property="FontSize" Value="14"/>
-            <Setter Property="FontWeight" Value="SemiBold"/>
-            <Setter Property="Cursor" Value="Hand"/>
-            <Setter Property="Template">
-                <Setter.Value>
-                    <ControlTemplate TargetType="Button">
-                        <Border x:Name="Bd"
-                                Background="{TemplateBinding Background}"
-                                CornerRadius="6"
-                                Padding="{TemplateBinding Padding}">
-                            <ContentPresenter HorizontalAlignment="Center"
-                                              VerticalAlignment="Center"/>
-                        </Border>
-                        <ControlTemplate.Triggers>
-                            <Trigger Property="IsMouseOver" Value="True">
-                                <Setter TargetName="Bd" Property="Background" Value="#1D4ED8"/>
-                            </Trigger>
-                            <Trigger Property="IsEnabled" Value="False">
-                                <Setter TargetName="Bd" Property="Background" Value="#93C5FD"/>
-                            </Trigger>
-                        </ControlTemplate.Triggers>
-                    </ControlTemplate>
-                </Setter.Value>
-            </Setter>
-        </Style>
-
-        <Style x:Key="LevelListBoxItemStyle" TargetType="ListBoxItem">
-            <Setter Property="HorizontalContentAlignment" Value="Stretch"/>
-            <Setter Property="Padding" Value="0"/>
-            <Setter Property="Margin" Value="0,0,0,8"/>
-            <Setter Property="Background" Value="Transparent"/>
-            <Setter Property="BorderThickness" Value="0"/>
-            <Setter Property="Focusable" Value="False"/>
-            <Setter Property="Template">
-                <Setter.Value>
-                    <ControlTemplate TargetType="ListBoxItem">
-                        <Border x:Name="Bd"
-                                Background="{StaticResource SurfaceBrush}"
-                                BorderBrush="{StaticResource BorderBrush}"
-                                BorderThickness="1"
-                                CornerRadius="8">
-                            <ContentPresenter/>
-                        </Border>
-                        <ControlTemplate.Triggers>
-                            <MultiTrigger>
-                                <MultiTrigger.Conditions>
-                                    <Condition Property="IsMouseOver" Value="True"/>
-                                </MultiTrigger.Conditions>
-                                <Setter TargetName="Bd" Property="Background" Value="{StaticResource SubtleBrush}"/>
-                            </MultiTrigger>
-                        </ControlTemplate.Triggers>
-                    </ControlTemplate>
-                </Setter.Value>
-            </Setter>
-        </Style>
-
+        <ResourceDictionary>
+            <ResourceDictionary.MergedDictionaries>
+                <ResourceDictionary Source="/FireProtection.UI;component/Themes/Colors.xaml"/>
+                <ResourceDictionary Source="/FireProtection.UI;component/Themes/Styles.xaml"/>
+            </ResourceDictionary.MergedDictionaries>
+        </ResourceDictionary>
     </UserControl.Resources>
 
     <Grid Margin="16">
@@ -269,7 +125,7 @@
                                 Style="{StaticResource OutlineButtonStyle}"
                                 Command="{Binding ToggleHideUnselectedLevelsCommand}">
                             <StackPanel Orientation="Horizontal">
-                                <TextBlock Text="👁" FontSize="12" Margin="0,0,6,0" VerticalAlignment="Center"/>
+                                <TextBlock Text="&#x1F441;" FontSize="12" Margin="0,0,6,0" VerticalAlignment="Center"/>
                                 <TextBlock VerticalAlignment="Center">
                                     <TextBlock.Style>
                                         <Style TargetType="TextBlock">
@@ -286,30 +142,10 @@
                         </Button>
                     </Grid>
 
-                    <Grid Grid.Row="1" Margin="0,12,0,10">
-                        <TextBox Style="{StaticResource SearchBoxStyle}"
-                                 Text="{Binding LevelSearchText, UpdateSourceTrigger=PropertyChanged}"/>
-                        <TextBlock Text="Search levels..."
-                                   Foreground="{StaticResource TextMutedBrush}"
-                                   FontSize="13"
-                                   Margin="12,0,0,0"
-                                   VerticalAlignment="Center"
-                                   IsHitTestVisible="False">
-                            <TextBlock.Style>
-                                <Style TargetType="TextBlock">
-                                    <Setter Property="Visibility" Value="Collapsed"/>
-                                    <Style.Triggers>
-                                        <DataTrigger Binding="{Binding LevelSearchText}" Value="{x:Null}">
-                                            <Setter Property="Visibility" Value="Visible"/>
-                                        </DataTrigger>
-                                        <DataTrigger Binding="{Binding LevelSearchText}" Value="">
-                                            <Setter Property="Visibility" Value="Visible"/>
-                                        </DataTrigger>
-                                    </Style.Triggers>
-                                </Style>
-                            </TextBlock.Style>
-                        </TextBlock>
-                    </Grid>
+                    <ctrl:SearchBox Grid.Row="1"
+                                    Margin="0,12,0,10"
+                                    Text="{Binding LevelSearchText, UpdateSourceTrigger=PropertyChanged}"
+                                    Placeholder="Search levels..."/>
 
                     <Grid Grid.Row="2" Margin="0,0,0,10">
                         <Grid.ColumnDefinitions>
@@ -443,36 +279,16 @@
                                        Margin="0,4,0,0"/>
                         </StackPanel>
 
-                        <Grid Grid.Column="1" Width="320" Margin="12,0">
-                            <TextBox Style="{StaticResource SearchBoxStyle}"
-                                     Text="{Binding RoomSearchText, UpdateSourceTrigger=PropertyChanged}"/>
-                            <TextBlock Text="Search rooms by name or number..."
-                                       Foreground="{StaticResource TextMutedBrush}"
-                                       FontSize="13"
-                                       Margin="12,0,0,0"
-                                       VerticalAlignment="Center"
-                                       IsHitTestVisible="False">
-                                <TextBlock.Style>
-                                    <Style TargetType="TextBlock">
-                                        <Setter Property="Visibility" Value="Collapsed"/>
-                                        <Style.Triggers>
-                                            <DataTrigger Binding="{Binding RoomSearchText}" Value="{x:Null}">
-                                                <Setter Property="Visibility" Value="Visible"/>
-                                            </DataTrigger>
-                                            <DataTrigger Binding="{Binding RoomSearchText}" Value="">
-                                                <Setter Property="Visibility" Value="Visible"/>
-                                            </DataTrigger>
-                                        </Style.Triggers>
-                                    </Style>
-                                </TextBlock.Style>
-                            </TextBlock>
-                        </Grid>
+                        <ctrl:SearchBox Grid.Column="1"
+                                        Width="320" Margin="12,0"
+                                        Text="{Binding RoomSearchText, UpdateSourceTrigger=PropertyChanged}"
+                                        Placeholder="Search rooms by name or number..."/>
 
                         <Button Grid.Column="2"
                                 Style="{StaticResource OutlineButtonStyle}"
                                 Command="{Binding ToggleHideUnselectedRoomsCommand}">
                             <StackPanel Orientation="Horizontal">
-                                <TextBlock Text="👁" FontSize="12" Margin="0,0,6,0" VerticalAlignment="Center"/>
+                                <TextBlock Text="&#x1F441;" FontSize="12" Margin="0,0,6,0" VerticalAlignment="Center"/>
                                 <TextBlock VerticalAlignment="Center">
                                     <TextBlock.Style>
                                         <Style TargetType="TextBlock">
@@ -546,11 +362,11 @@
                                                         <Setter Property="Opacity" Value="0.5"/>
                                                     </DataTrigger>
                                                     <DataTrigger Binding="{Binding IsUndetermined}" Value="True">
-                                                        <Setter Property="BorderBrush" Value="#E0A800"/>
+                                                        <Setter Property="BorderBrush" Value="{StaticResource UndeterminedBrush}"/>
                                                         <Setter Property="BorderThickness" Value="0,0,0,2"/>
                                                     </DataTrigger>
                                                     <DataTrigger Binding="{Binding IsBlocked}" Value="True">
-                                                        <Setter Property="BorderBrush" Value="#D9534F"/>
+                                                        <Setter Property="BorderBrush" Value="{StaticResource BlockedBrush}"/>
                                                         <Setter Property="BorderThickness" Value="0,0,0,2"/>
                                                     </DataTrigger>
                                                 </Style.Triggers>
@@ -588,17 +404,17 @@
                                                                     <Setter Property="Visibility" Value="Visible"/>
                                                                 </DataTrigger>
                                                                 <DataTrigger Binding="{Binding IsBlocked}" Value="True">
-                                                                    <Setter Property="Foreground" Value="#D9534F"/>
+                                                                    <Setter Property="Foreground" Value="{StaticResource BlockedBrush}"/>
                                                                 </DataTrigger>
                                                                 <DataTrigger Binding="{Binding IsUndetermined}" Value="True">
-                                                                    <Setter Property="Foreground" Value="#E0A800"/>
+                                                                    <Setter Property="Foreground" Value="{StaticResource UndeterminedBrush}"/>
                                                                 </DataTrigger>
                                                             </Style.Triggers>
                                                         </Style>
                                                     </TextBlock.Style>
                                                     <Run Text="{Binding EligibilityState, Mode=OneWay}"
                                                          FontWeight="Bold"/>
-                                                    <Run Text=" — "/>
+                                                    <Run Text=" &#x2014; "/>
                                                     <Run Text="{Binding EligibilityReason, Mode=OneWay}"/>
                                                 </TextBlock>
                                             </StackPanel>
@@ -649,35 +465,24 @@
                 <ColumnDefinition Width="Auto"/>
             </Grid.ColumnDefinitions>
 
-            <Border Grid.Column="0"
-                    Background="{StaticResource AccentSoftBrush}"
-                    CornerRadius="6"
-                    Padding="14,10"
-                    VerticalAlignment="Center">
-                <StackPanel Orientation="Horizontal">
-                    <TextBlock Text="ℹ"
-                               FontSize="14"
+            <ctrl:InfoBanner Grid.Column="0">
+                <StackPanel>
+                    <TextBlock FontSize="12"
                                Foreground="{StaticResource AccentBrush}"
-                               Margin="0,0,10,0"
-                               VerticalAlignment="Top"/>
-                    <StackPanel>
-                        <TextBlock FontSize="12"
-                                   Foreground="{StaticResource AccentBrush}"
-                                   Text="Device placement backend is not yet implemented (UI-first slice)."/>
-                        <TextBlock FontSize="12"
-                                   Foreground="{StaticResource AccentBrush}"
-                                   Margin="0,2,0,0"
-                                   Text="Room/level selection is shared and ready; the Place action is disabled until the NFPA-72 logic lands."/>
-                    </StackPanel>
+                               Text="Device placement backend is not yet implemented (UI-first slice)."/>
+                    <TextBlock FontSize="12"
+                               Foreground="{StaticResource AccentBrush}"
+                               Margin="0,2,0,0"
+                               Text="Room/level selection is shared and ready; the Place action is disabled until the NFPA-72 logic lands."/>
                 </StackPanel>
-            </Border>
+            </ctrl:InfoBanner>
 
             <Button Grid.Column="1"
                     Style="{StaticResource PrimaryButtonStyle}"
                     Command="{Binding PlaceDevicesCommand}"
                     Margin="16,0,0,0">
                 <StackPanel Orientation="Horizontal">
-                    <TextBlock Text="⊕" FontSize="14" Margin="0,0,8,0" VerticalAlignment="Center"/>
+                    <TextBlock Text="&#x2295;" FontSize="14" Margin="0,0,8,0" VerticalAlignment="Center"/>
                     <TextBlock Text="Place Devices" VerticalAlignment="Center"/>
                 </StackPanel>
             </Button>
@@ -688,7 +493,7 @@
                     Margin="10,0,0,0"
                     Padding="18,10">
                 <StackPanel Orientation="Horizontal">
-                    <TextBlock Text="↻" FontSize="13" Margin="0,0,8,0" VerticalAlignment="Center"/>
+                    <TextBlock Text="&#x21BB;" FontSize="13" Margin="0,0,8,0" VerticalAlignment="Center"/>
                     <TextBlock Text="Reset" VerticalAlignment="Center"/>
                 </StackPanel>
             </Button>

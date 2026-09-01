@@ -16,6 +16,61 @@
 
 ---
 
+### 2026-09-01 — Catalog + per-row family/type + per-row spacing override: plan locked (Decisions 017–020)
+
+- **Context**: Senior direction for the next product slice: replace the universal sprinkler family/type
+  combo with **per-row** dropdowns, source the catalog of families + types from a **master Excel/CSV** (not
+  Revit), expose per-row `MaxSpacingFt` ("sprinkler-to-sprinkler space") and `BoundaryClearanceFt`
+  ("wall space") overrides, add a missing-in-model interactive modal, add per-level popovers for Smoke
+  Detector (`DetectorType` / `Mount` / `CeilingSlope`) and Notification Appliance
+  (`ApplianceType` / `Candela` / `NotificationDba`) metadata, and auto-deselect levels when all their
+  rooms fail the family check. Also: keep the Revit family listing around (commented out, not deleted),
+  one shared catalog for v1, user-selectable path each session, "Reload" button, fail-fast load.
+- **Actions Taken** (planning + documentation only; **no code changed this session**):
+  - Resolved all 6 outstanding design questions (Q13 propagate-as-default + room override; Q16
+    detector-rated-for; Q20 room override on Notification; Q25 override must reach the engine; Q33
+    English-only fixed; Q35 one catalog per project for v1).
+  - Locked four new decisions in `DECISIONS.md`:
+    - **017** — Per-row sprinkler family/type + Excel-driven catalog (Sprinkler/Smoke/Notification);
+      catalog schema (one workbook, one sheet per category, `CatalogVersion` header); missing-in-model
+      UX (interactive modal + Proceed/Cancel + "Export missing list to CSV" + per-row availability
+      icon + "Reset to default" + "Apply to all eligible rows"); per-level device popovers; "⋯" button
+      per level; composite (Candela, dBA) pair; `CeilingSlope` = detector-rated-for.
+    - **018** — Per-row `MaxSpacingFt` / `BoundaryClearanceFt` override threads through
+      `BruteForceCalculationService` via nullable fields on `PlacementRoomInput`; per-room
+      `IsProvisional`; preflight keeps the un-overridden rule set; obstacle/ESFR clearances NOT
+      overridable in v1.
+    - **019** — Per-level Smoke/Notification metadata is declarative-only for v1; no algorithmic
+      effect until device placement lands; level value propagates as default to rooms; rooms can override.
+    - **020** — Catalog version shown in top bar; `CatalogLoader` is fail-fast with structured
+      `CatalogIssue` errors; "Reload" hot-reloads; path is session-scoped (no persistence);
+      catalog `HazardClass` falls back to `HazardClassOptions` if invalid.
+  - Added 5 🔵 Planned rows to `PROGRESS.md` (per-row family/type, per-row override, catalog, missing
+    modal, per-level device popover) and **re-emphasized the P0 runtime-verify precedence** in the
+    `PROGRESS.md` "In Progress" block.
+  - Rewrote `TODO.md` to add: P1 catalog (Decision 017 + 020), P1 per-row family/type (Decision 017),
+    P1 per-row spacing override (Decision 018), P2 missing-in-model modal + `SkippedMissingFamilyCount`,
+    P2 per-level Smoke/Notification popover, P3 obstacle/ESFR override deferred; P1 carve-out note
+    for the catalog/per-row work must not be runtime-verified before Decision 011/012.
+- **Decisions**: 017, 018, 019, 020 — see `DECISIONS.md`.
+- **Open Questions / Blockers**:
+  - P0 runtime verification of Decision 011/012 in Revit is still pending and **strictly first** — the
+    catalog/per-row changes are static/UI plumbing and will not be runtime-verified until P0 is closed.
+  - No new file-system artifacts (catalog Excel samples) yet. The first iteration will ship a
+    template `.xlsx` in the repo (path TBD) so the test harness has something to read.
+  - Excel schema column names are locked but their exact ordering within a sheet is not — will mirror
+    the schema above (Category, FamilyName, TypeName, [category-specific], Notes) in the template.
+- **Handoff**:
+  1. **First**: runtime-verify Decision 011/012 in Revit (P0) before any of the catalog/per-row work
+     is touched at runtime. Static implementation of 017–020 may proceed in parallel as long as it
+     does not perturb the placement pipeline or the preflight.
+  2. **Catalog + loader first** (020 + the Backend `Catalog*` files), then a sample `.xlsx` template,
+     then unit tests on the loader.
+  3. Then `RoomItemViewModel` per-row family/type + the catalog-driven dropdowns.
+  4. Then the missing-in-model modal + `SkippedMissingFamilyCount`.
+  5. Then the per-row `MaxSpacingFt` / `BoundaryClearanceFt` override + engine plumbing.
+  6. Then the per-level "⋯" popovers for Smoke/Notification (declarative only).
+
 ### 2026-08-27 — UI-first shared device-placement base (Smoke Detectors + Notification Appliances)
 
 - **Context**: User wanted Smoke Detectors and Notification Appliances to reuse the sprinkler room/level/family

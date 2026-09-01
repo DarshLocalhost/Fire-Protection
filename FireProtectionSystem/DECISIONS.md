@@ -657,3 +657,260 @@ The repository does not currently provide enough evidence to determine the ratio
   full features are planned, deferred, or out of scope is not documented in the repository.
 - **Multi-link / multi-host coordination beyond level resolution** — only linked-level resolution is
   implemented; broader linked-placement strategy is unestablished.
+
+---
+
+## Decision 017 — Per-room sprinkler family/type selection (replaces universal combo) + Excel-driven catalog
+
+### Status
+Accepted (plan locked, 2026-09-01). Implementation pending — not yet coded. See [[TODO]] P1 (catalog + per-row).
+
+### Context
+Today the SprinklerBruteForce UI exposes a single universal sprinkler family + type combo (`SelectedSprinklerFamily`,
+`SelectedSprinklerType` on `SprinklerBruteForceViewModel`) that drives all selected rooms. Seniors requested:
+(a) the family/type selector moves **per-room** as a new column in the room list; (b) the catalog of
+available families and types is sourced from a **master Excel/CSV file** (not directly from the Revit model);
+(c) if a chosen family/type does not exist in the live Revit document, a warning popup lists the missing
+entries and placement proceeds for the available rooms; (d) the Revit family listing logic is **commented
+out (not deleted)** behind a config flag so it can be re-enabled for verification against the catalog. The
+same Excel pattern is required for Smoke Detectors (per-level DetectorType / Mount / CeilingSlope) and
+Notification Appliances (per-level ApplianceType / Candela + dBA as a composite pair).
+
+### Decision
+- **Per-row sprinkler family/type**: each `RoomItemViewModel` carries `SelectedFamily` and `SelectedType`
+  (editable, with "modified" indicator mirroring today's `IsHazardClassOverridden`). Types are filtered
+  by the row's selected family. A default value (propagated from a level default) is seeded; a
+  "Reset to default" button is provided per row. A bulk "Apply to all eligible rows" button is provided
+  per dropdown.
+- **Catalog source = Excel (one workbook, one sheet per category)**, with a `CatalogVersion` metadata row.
+  Proposed schema (locked):
+  - `Sprinklers` sheet: `Category, FamilyName, TypeName, HazardClass, Mount?, Notes?`
+  - `SmokeDetectors` sheet: `Category, FamilyName, TypeName, DetectorType, Mount, CeilingSlope, Notes?`
+  - `NotificationAppliances` sheet: `Category, FamilyName, TypeName, ApplianceType, Candela, NotificationDba, Notes?`
+  (Candela + dBA are presented as a composite pair in the UI; one row = one valid combo.)
+- **Excel is read-only**; the add-in never writes back. The user selects the file **each session** via a
+  file picker (no fixed path). A "Reload catalog" button hot-reloads from disk without restarting Revit.
+- **One catalog serves all projects for v1** (multi-catalog per project deferred).
+- **Revit family listing is commented out, not deleted.** A new config flag `UseRevitFamilyListing`
+  (default `false`) gates it so the catalog is the primary source but the Revit listing can be re-enabled
+  for verification.
+- **Missing-in-model check fires on both** the per-row dropdown change (debounced) AND on Place. Failures
+  surface in an **interactive modal** with "Proceed with available" / "Cancel" and an "Export missing
+  list to CSV" button. Missing-only rooms are skipped; if all rooms on a level fail, the level is
+  auto-deselected. `SprinklerPlacementResult` gains a new `SkippedMissingFamilyCount` counter.
+- **Per-row sprinklers also get two editable override columns**: `MaxSpacingFt` (= "sprinkler-to-sprinkler
+  space") and `BoundaryClearanceFt` (= "wall space"). These thread into the BruteForce engine per room
+  (see [Decision 018](#decision-018--per-room-spacingclearance-override-threads-through-the-bruteforce-engine)).
+- **Smoke Detector / Notification per-level fields** are declarative metadata only for v1 (no algorithmic
+  effect). `DetectorType` / `Mount` / `CeilingSlope` (Smoke) and `ApplianceType` / `Candela + dBA`
+  (Notification) are exposed via a "⋯" popover per level. Level value propagates as a default to rooms
+  on the level; rooms can override.
+- **Smoke `CeilingSlope` semantic = detector-rated-for** (a property of the detector type, not the room;
+  the room's actual slope is already in `CeilingType ∈ {FLAT, SLOPED, STEPPED, NONE}` from extraction).
+- **Catalog column names are English-only and fixed** for v1 (no localization).
+- **Catalog hazard classes**: Excel + hardcoded fallback; Excel wins if present.
+- **Device placement logic is still deferred** (TODO P2). The metadata is recorded on results but does
+  not drive placement yet.
+
+### Why
+- Per-row selection matches the engineering reality (one room can use a pendent, another a sidewall, in
+  the same model) and unblocks the seniors' direction.
+- Excel-as-catalog is the senior-specified source of truth and is easier to maintain than hardcoded lists;
+  the Revit model becomes a runtime availability check, not a catalog.
+- Commenting (not deleting) the Revit listing preserves the ability to cross-check Excel entries against
+  what is actually loaded in the model.
+- Per-room spacing overrides turn the existing `MaxSpacingFt` / `BoundaryClearanceFt` placeholder values
+  into a true engineer-controllable surface — closing the biggest gap in the current "all-15-ft" output.
+
+### Evidence
+- User-direction message: 2026-09-01.
+- Today: `SprinklerBruteForceViewModel.SelectedSprinklerFamily` (single, universal);
+  `RoomItemViewModel.HazardClassOptionsList` (per-row pattern to mirror); `ISprinklerFamilySource`
+  (Revit-backed listing, to be commented out behind `UseRevitFamilyListing`).
+- `DefaultHazardPlacementRules` returns uniform 15 ft placeholders — the values the per-row override
+  will replace.
+
+### Consequences
+- `RoomItemViewModel` gains 4 new properties (`SelectedFamily`, `SelectedType`, `MaxSpacingFtOverride?`,
+  `BoundaryClearanceFtOverride?`) plus per-row "modified"/availability indicators and a reset command.
+- New `CatalogViewModel`, `CatalogBar` view, `LevelSettingsPopover`, `MissingFamiliesModal` view, and
+  an `ICatalog`/`CatalogLoader` service (Backend) using ClosedXML.
+- `PlacementRoomInputItem` gains `SelectedSprinklerFamily`/`SelectedSprinklerType` and the two override
+  fields; `PlacementRoomInput` (Backend) mirrors them.
+- `SprinklerPlacementResult` gains `SkippedMissingFamilyCount`.
+- New package dependency: `ClosedXML` (Backend only).
+- Catalog version is shown in the top bar; load failures (bad schema, missing required fields, unknown
+  enums, duplicate `(Family, Type)`) are surfaced as a single blocking dialog at load time.
+
+### Alternatives Considered
+- *Delete the Revit family listing outright* — rejected: the runtime preflight still needs the Revit
+  model to know if a family is loadable; also defeats the "verify Excel against Revit" use case.
+- *One catalog per project* (forced) — rejected for v1: seniors said "I guess but not sure"; one shared
+  catalog is simpler and can be split later.
+- *Keep spacing overrides display-only* (no engine change) — rejected: the override would be a lie
+  (Decision 018 closes this gap).
+- *Localize the catalog column names* — rejected for v1: schema-stability outweighs the small UX win.
+
+---
+
+## Decision 018 — Per-room spacing/clearance override threads through the BruteForce engine
+
+### Status
+Accepted (plan locked, 2026-09-01). Implementation pending — not yet coded. See [[TODO]] P1 (per-room override).
+
+### Context
+[Decision 017](#decision-017--per-room-sprinkler-familytype-selection-replaces-universal-combo--excel-driven-catalog) introduced
+per-row overrides for `MaxSpacingFt` (sprinkler-to-sprinkler space) and `BoundaryClearanceFt` (wall space).
+The existing `BruteForceCalculationService.Calculate(snapshot, rules, config)` consumes a single
+`IHazardPlacementRules` instance for the whole run; `PlacementRoomInput` carries no override fields. A
+display-only override that doesn't reach the engine would be misleading and unsafe.
+
+### Decision
+- `PlacementRoomInput` (Backend) gains two nullable fields: `OverrideMaxSpacingFt`, `OverrideBoundaryClearanceFt`.
+- `PlacementRoomInputItem` (UI) mirrors them.
+- `BruteForceCalculationService.Calculate` now resolves the effective `HazardPlacementRuleSet` per room by
+  copying the rule returned by `rules.GetRules(hazardClass)` and applying the overrides when present.
+  The override is rejected (clamped + warning) if it exceeds the NFPA 13 hard-limit range for the
+  hazard class; the room's result `IsProvisional` is `true` if either override was applied.
+- The preflight (`EvaluateRoomEligibility`) continues to use the un-overridden rule set (NFPA compliance
+  check); placement is gated on the per-room effective rule set, surfaced in `RoomCalculationResult.Diagnostics`.
+- Obstacle clearance, existing-sprinkler separation, coverage radius, and any future rule values are
+  **not** overridden in v1 (explicit seniors' decision; TODO P3).
+
+### Why
+- A per-row UI override that does not change the engine output is a hazard, not a feature. The seniors'
+  request only makes sense if the override actually moves the calculation.
+- Threading overrides through `PlacementRoomInput` (rather than a new `Func<>` parameter) is the
+  minimal change to `BruteForceCalculationService` and keeps the engine signature stable.
+- Keeping the preflight on the **un-overridden** rule set preserves the NFPA compliance check as the
+  authoritative gate; the override is recorded explicitly per room so the engineer can see what they
+  did.
+
+### Evidence
+- Today: `HazardPlacementRuleSet` (Backend, `BruteForce/`) — `MaxSpacingFt`, `BoundaryClearanceFt`,
+  `ObstacleClearanceFt`, `CoverageRadiusFt`, `ExistingSprinklerSeparationFt`, `IsProvisional`.
+- `DefaultHazardPlacementRules` (uniform 15 ft placeholder, `HasApprovedRules=false`).
+- `BruteForceCalculationService.Calculate(PlacementInputSnapshot, IHazardPlacementRules, BruteForceCalculationConfig)`
+  — one rule instance for the whole snapshot.
+
+### Consequences
+- `BruteForceCalculationConfig` and `IHazardPlacementRules` signatures are unchanged.
+- The per-room rule resolution is internal to `Calculate`; callers do not need to change.
+- `RoomCalculationResult.Diagnostics` gains "Override applied: MaxSpacingFt=12 (rule=15)" entries so the
+  result JSON tells the truth about what spacing was used.
+- `BruteForceCalculationResult.AppliedRulesSummary` becomes a per-hazard summary (existing logic) plus
+  a per-room summary when overrides are in use.
+
+### Alternatives Considered
+- *Keep the override display-only* — rejected: would make the UI column a lie.
+- *Add a `Func<PlacementRoomInput, HazardPlacementRuleSet>` parameter* — rejected as primary: more
+  invasive than nullable fields on `PlacementRoomInput`, and the nullable fields already carry the
+  information the engine needs. (A `Func<>` may still be layered on top later for fully custom rules.)
+- *Allow overriding `ObstacleClearanceFt` and `ExistingSprinklerSeparationFt` too* — rejected for v1
+  (per seniors' Q26 answer).
+- *Make the override global (whole-run) instead of per-room* — rejected: contradicts the per-row UX
+  Decision 017 mandates.
+
+---
+
+## Decision 019 — Per-level device metadata (Smoke Detector + Notification Appliance) is declarative-only for v1
+
+### Status
+Accepted (plan locked, 2026-09-01). Implementation pending — not yet coded.
+
+### Context
+[Decision 017](#decision-017--per-room-sprinkler-familytype-selection-replaces-universal-combo--excel-driven-catalog) introduced
+per-level popover controls for `DetectorType`/`Mount`/`CeilingSlope` (Smoke) and `ApplianceType`/
+`Candela` + `dBA` (Notification). The current backend has no device placement logic; only the UI shells
+exist (`SmokeDetectorViewModel`, `NotificationApplianceViewModel`, `DevicePlacementViewModelBase`).
+
+### Decision
+- The new per-level fields are **recorded on the result DTO only** for v1 — no algorithmic effect on
+  placement. They surface in the UI for the engineer's planning benefit and are written into the
+  placement result JSON when those workflows are eventually implemented.
+- `DetectorType` semantic (locked) = **detector-rated-for** (what slopes this detector is rated for),
+  not the room's actual slope. The room's actual slope is already on `RoomUiData.Geometry.CeilingType`.
+- `ApplianceType` + `Candela` + `dBA` are presented as a single composite enum entry in the dropdown
+  (e.g., "Wall Horn-Strobe 75cd / 89dBA") to prevent impossible combinations.
+- Level value **propagates as the default** to rooms on that level; rooms can override.
+- Catalog source for these fields is the same universal Excel workbook; hazard classes are
+  Excel + hardcoded fallback (Excel wins if present).
+- Full NFPA-72 device placement logic remains TODO P2 (smoke + notification). When implemented, the
+  per-level metadata from this decision will become its inputs.
+
+### Why
+- The seniors' request is forward-looking: it builds the metadata surface that the eventual device
+  placement pipeline will consume. Fabricating algorithmic effect today would mean inventing NFPA-72
+  rules, which is explicitly forbidden (`STANDARDS_MEMORY` rules 1–4 + Decision 004).
+- The semantic distinction (detector-rated vs room-actual) prevents a redundant dropdown that would
+  always show the same value the room already has.
+- Composite (Candela, dBA) prevents invalid states without requiring a runtime cross-check.
+
+### Evidence
+- Today: `DevicePlacementViewModelBase` exists (`FireProtection.UI/ViewModels/Devices/`); the per-level
+  parameters are not yet exposed.
+- `RoomUiData.Geometry.CeilingType` (extraction) is the authoritative room-actual ceiling slope.
+
+### Consequences
+- New `LevelItemViewModel` properties on the device tabs: `SelectedDetectorType`, `SelectedMount`,
+  `SelectedCeilingSlope`, `SelectedApplianceType`, `SelectedCandelaDba`.
+- New per-row fields on the device room VM: the same with per-row overrides.
+- No backend change in v1; DTOs gain optional fields for when the device placement logic lands.
+- UI shows a "Planning only — backend pending" badge so the engineer doesn't expect algorithmic effect.
+
+### Alternatives Considered
+- *Drive smoke-detector / notification placement now* — rejected: no NFPA-72 rule source, no extractor,
+  no placement service. Implementation would fabricate engineering values.
+- *Treat `CeilingSlope` as the room's actual slope* — rejected: redundant with `CeilingType` from
+  extraction; creates two sources of truth for the same fact.
+- *Allow Candela and dBA as independent dropdowns* — rejected: enables impossible combinations and
+  diverges from how real devices are specified.
+
+---
+
+## Decision 020 — Catalog version is shown in the top bar; load is fail-fast with structured errors
+
+### Status
+Accepted (plan locked, 2026-09-01). Implementation pending.
+
+### Context
+The Excel catalog is the source of truth for families, types, and per-level device metadata. Bad data
+at load time (duplicate `(Family, Type)`, missing required fields, unknown enum values, missing
+`CatalogVersion` header row) would otherwise crash later during the eligibility probe — the worst
+possible place to surface catalog errors.
+
+### Decision
+- `CatalogLoader.Load(path)` is fail-fast: any validation error throws `CatalogLoadException` carrying a
+  list of `CatalogIssue { Sheet, Row, Column, Code, Message }` suitable for display in a single dialog.
+- The top bar shows "Catalog: `<file-name>` v`<CatalogVersion>`" when loaded; "(no catalog loaded)"
+  otherwise.
+- A "Reload" button next to the file name re-runs `Load` on the same path without restarting Revit.
+- A "Browse..." button opens a file picker; the path is **session-scoped** (not persisted) per the
+  seniors' Q7 answer.
+- "Apply" of a new catalog triggers a full re-run of `RefreshEligibility` and re-binds every per-row
+  family/type combo (resetting rows whose selection is no longer in the catalog and falling back to
+  the new default for that row).
+- Catalog `HazardClass` values fall back to the hardcoded `HazardClassOptions` list if the catalog
+  omits or invalidates a value (Excel wins if present and valid).
+
+### Why
+- Fail-fast at load avoids leaking catalog errors into the eligibility probe where the root cause
+  is hard to trace.
+- Showing the version in the top bar is cheap; it answers "which catalog did this run use?" without a
+  second file open.
+- Re-binds on reload keep the UI state consistent with the source of truth.
+
+### Evidence
+- Today: no catalog; `ISprinklerFamilySource` (Revit-backed) is the only family source.
+
+### Consequences
+- New `FireProtection.Backend/Services/Catalog/CatalogLoader.cs`, `CatalogModels.cs`, `CatalogValidator.cs`.
+- New UI: `FireProtection.UI/ViewModels/Catalog/CatalogViewModel.cs`, `Views/Catalog/CatalogBar.xaml`.
+- A new package dependency: `ClosedXML` (Backend only; UI references the loaded catalog through the
+  service interface).
+
+### Alternatives Considered
+- *Best-effort load (skip bad rows, log warnings)* — rejected: hides engineering risk; senior-signed
+  direction is "fail-fast and show a popup" (Q12 answer).
+- *Persist the catalog path across sessions* — rejected for v1: seniors said user selects each session
+  (Q7); persistence adds a settings layer not in scope.

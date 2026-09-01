@@ -8,6 +8,11 @@
 > **Decision 011** (placement-strategy pattern; no WorkPlaneBased→Level fallback). The P0 runtime-verify
 > task below is still valid — it now targets the Decision 011 code. **Current truth: `PROJECT_MEMORY.md`
 > §7/§15 + `DECISIONS.md` 011.**
+>
+> ⚠️ **CATALOG / PER-ROW PLAN (2026-09-01):** Decisions 017–020 are now locked in `DECISIONS.md`. The
+> P1/P2 items below tagged "catalog / per-row" cover that work. **P0 runtime-verify remains strictly
+> first** — the catalog and per-row changes are static/UI plumbing and must not be runtime-verified
+> before Decision 011/012 have been runtime-confirmed.
 
 ## P0 — Critical
 
@@ -40,17 +45,66 @@
   - Why: current spacing is explicitly not compliant; every room is `ReviewRequired`.
   - Verification: static + review by a qualified engineer.
   - Notes: keep `HasApprovedRules` flag; flip to true only when real tables are encoded.
+- [ ] **Excel-driven catalog for sprinkler + device families/types (Decision 017 + 020).**
+  - Area: new `FireProtection.Backend/Services/Catalog/CatalogLoader.cs` + `CatalogModels.cs` +
+    `CatalogValidator.cs` (ClosedXML); new `FireProtection.UI/ViewModels/Catalog/CatalogViewModel.cs`
+    + `Views/Catalog/CatalogBar.xaml`; one workbook, one sheet per category, `CatalogVersion` header.
+  - Why: senior direction (2026-09-01). Replaces the implicit "Revit family listing" as the catalog
+    source of truth; the Revit listing is **commented out, not deleted**, behind a `UseRevitFamilyListing`
+    flag so it can be re-enabled for cross-checks.
+  - Verification: static + a sample catalog round-trip in the Revit-free test harness.
+  - Schema: `Sprinklers` (`Category, FamilyName, TypeName, HazardClass, Mount?, Notes?`);
+    `SmokeDetectors` (`Category, FamilyName, TypeName, DetectorType, Mount, CeilingSlope, Notes?`);
+    `NotificationAppliances` (`Category, FamilyName, TypeName, ApplianceType, Candela, NotificationDba, Notes?`).
+  - Catalog `HazardClass` values fall back to `HazardClassOptions` if missing/invalid (Excel wins if
+    present and valid).
+  - User selects the file **each session** (no persisted path); "Reload" button hot-reloads.
+- [ ] **Per-row sprinkler family + type in the room list (Decision 017).**
+  - Area: `FireProtection.UI/ViewModels/Sprinklers/BruteForce/RoomItemViewModel.cs` +
+    `SprinklerBruteForceViewModel.cs` + `Views/Sprinklers/BruteForce/SprinklerBruteForceView.xaml`;
+    `FireProtection.UI/Services/IPlacementInputExporter.cs` + `PlacementRoomInputItem`;
+    `FireProtection.Backend/Models/Placement/Sprinklers/Final/PlacementRoomInput.cs`.
+  - Why: senior direction (2026-09-01). One family per room, types filtered by family, "modified"
+    indicator, "Reset to default" + "Apply to all eligible rows" per dropdown. Replaces the current
+    universal `SelectedSprinklerFamily` / `SelectedSprinklerType` on the parent VM.
+  - Verification: static.
+  - Pair with: missing-in-model modal (see P2), `SkippedMissingFamilyCount` (P2).
+- [ ] **Per-row `MaxSpacingFt` / `BoundaryClearanceFt` override threads through the BruteForce engine (Decision 018).**
+  - Area: `PlacementRoomInput` (nullable `OverrideMaxSpacingFt`, `OverrideBoundaryClearanceFt`);
+    `BruteForceCalculationService.Calculate` (per-room rule resolution; `IsProvisional` per-room
+    when an override is in use); `RoomCalculationResult.Diagnostics` records "Override applied"
+    lines; `RoomItemViewModel` gains the two new columns + range-hint tooltip.
+  - Why: senior direction (2026-09-01). The override column is a hazard if it doesn't reach the
+    engine (Decision 018). NFPA 13 hard limits clamp + warn.
+  - Verification: static + targeted unit tests.
+  - Out of scope (v1): `ObstacleClearanceFt`, `ExistingSprinklerSeparationFt`, `CoverageRadiusFt`.
+
 - [ ] **Handle sloped / unsupported ceilings robustly.**
   - Area: `BruteForceCalculationService` Z resolution.
   - Why: sloped/stepped/missing ceilings fall back to `LevelElevation + CeilingHeight` and are flagged.
   - Verification: static + runtime spot-check.
 - [ ] **Expand Revit-free test coverage.**
   - Area: `FireProtection.Tests`.
-  - Why: only 14 tests; extraction, placement-input building, and obstacle logic are largely untested.
+  - Why: only 14 tests; extraction, placement-input building, obstacle logic, catalog loader, and
+    per-room rule override are largely untested.
   - Verification: static (automated).
 
 ## P2 — Medium
 
+- [ ] **Missing-in-model modal + `SkippedMissingFamilyCount` (Decision 017).**
+  - Area: new `FireProtection.UI/Views/Common/MissingFamiliesModal.xaml`; per-row family-availability
+    probe (debounced) on dropdown change AND on Place; auto-deselect level when all its rooms fail;
+    `SprinklerPlacementResult.SkippedMissingFamilyCount`; "Export missing list to CSV" button.
+  - Why: senior direction (2026-09-01).
+  - Verification: static + runtime.
+- [ ] **Per-level Smoke/Notification declarative metadata (Decision 019).**
+  - Area: new `FireProtection.UI/Views/Common/LevelSettingsPopover.xaml` ("⋯" button per level);
+    per-level `SelectedDetectorType` / `SelectedMount` / `SelectedCeilingSlope` (Smoke);
+    per-level `SelectedApplianceType` / `SelectedCandelaDba` (Notification, composite pair);
+    per-room override mirroring today's hazard pattern.
+  - Why: senior direction (2026-09-01). Declarative metadata only for v1 (no algorithmic effect
+    until device placement lands). `CeilingSlope` = detector-rated-for, not room-actual.
+  - Verification: static.
 - [ ] **Implement Collision workflow logic.**
   - Area: `SprinklerCollisionViewModel` + extraction/calculation/placement for collisions.
   - Why: UI tab is an empty shell.
@@ -111,12 +165,19 @@
   - Why: generic prompts keep referencing Snowdon; it is only sample data. This is recorded in
     [[PROJECT_CONTEXT]] and [[DECISIONS]]; keep reinforcing to avoid fabricated work.
   - Verification: n/a.
+- [ ] **Extend per-row override to other rule fields (Decision 018, deferred).**
+  - Area: `ObstacleClearanceFt`, `ExistingSprinklerSeparationFt`, `CoverageRadiusFt`.
+  - Why: senior said "not considering obstacles now"; revisit when obstacle placement is built.
+  - Verification: static.
 
 ## Deferred / Uncertain (do not act without clarification)
 
-- [ ] **NFPA13-2022 compliance strategy end-to-end** — intent not established in the repo.
+- [ ] **NFPA13-2022 compliance strategy end-to-end** — intent not established in the repo. (P1
+      covers the engine + per-row override plumbing; the actual approved values still need a
+      qualified engineer.)
 - [ ] **Broader multi-link placement beyond level resolution** — not designed yet.
 - [ ] **Snowdon integration** — does not exist; treat as out of scope unless explicitly requested.
+- [ ] **Multi-catalog per project** — locked to one shared catalog for v1 (Decision 020).
 
 ## Verification Notes
 

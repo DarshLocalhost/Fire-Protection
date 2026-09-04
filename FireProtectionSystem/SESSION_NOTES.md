@@ -16,7 +16,62 @@
 
 ---
 
-### 2026-09-01 — Catalog + per-row family/type + per-row spacing override: plan locked (Decisions 017–020)
+### 2026-09-02 — ClosedXML "Browse → load Excel" popup: missing/mis-redirected runtime dependencies (deployment fix)
+
+- **Context**: Clicking **Browse** in the catalog bar and selecting a workbook produced an error popup
+  ("Failed to load catalog: …"). The load path itself is fine — `CatalogLoader` (ClosedXML) never got a
+  chance to run because the add-in's **deployed dependency set was incomplete and its binding redirects
+  pointed at versions that do not exist**. Verified with `AssemblyName.GetAssemblyName` on the NuGet cache
+  and by walking every `.nuspec` in the ClosedXML 0.104.1 dependency graph.
+- **Root causes (four, all in deployment — no product logic was wrong):**
+  1. **Revit 2025/2026 (net8.0): `System.IO.Packaging.dll` was never deployed.**
+     `DocumentFormat.OpenXml.Framework 3.0.1` requires it on `net8.0`, and it is **not** part of the .NET 8
+     shared framework — so the first `.xlsx` open threw `FileNotFoundException`. (On `.NETFramework4.6` the
+     nuspec uses the `WindowsBase` framework assembly instead, so net48 must *not* get a second copy.)
+  2. **Revit 2025/2026: three netstandard2.0 facades were being deployed that must not be.**
+     `System.Memory` / `System.Buffers` / `System.Numerics.Vectors` are **in-box on .NET 8**; shipping the
+     netstandard2.0 *implementations* next to the add-in gives the loader a second `Span<T>`/`Memory<T>`
+     type identity, which breaks ClosedXML with `TypeLoadException`/`MissingMethodException` at
+     workbook-open time. Now excluded, and stale copies are deleted by the deploy target.
+  3. **Revit 2024 (net48): `System.Runtime.CompilerServices.Unsafe.dll` was never deployed** even though
+     `FireProtection.Backend.dll.config` already contained a binding redirect for it (proving the intent).
+     `System.Memory 4.5.5` needs it on .NET Framework, where it is not in-box.
+  4. **All three net48 binding redirects targeted NuGet *package* versions, not *assembly* versions** —
+     `newVersion` was `4.5.5.0` / `4.6.1.0` / `4.5.0.0`, but the deployed assemblies are **4.0.1.2**,
+     **4.0.5.0**, **4.1.4.0**. A redirect to a version no assembly has fails the load outright.
+- **Actions Taken**:
+  - `FireProtection.Backend/FireProtection.Backend.csproj` — added `SystemIoPackagingNet8` (net8.0 build) to
+    the Revit2025/2026 copy set; added `SystemUnsafeNet48` (`6.0.0/lib/net461`) to the Revit2024 copy set;
+    removed `System.Memory`/`System.Buffers`/`System.Numerics.Vectors` from the net8 copy set; added a
+    `Delete` of those stale facades from the addins folder for the net8 configs.
+  - `FireProtection.Backend/FireProtection.Backend.dll.config` — corrected all three `newVersion` values to
+    the real assembly versions and documented the package-vs-assembly-version trap.
+  - `FireProtection.UI/ViewModels/Catalog/CatalogViewModel.cs` — `TryLoad` now reports
+    `ExceptionType: message` plus the full inner-exception chain (new `Describe`). Plain `ex.Message` was
+    useless for exactly this class of failure (`TypeInitializationException` hides the real cause in
+    `InnerException`), which is why the popup named no cause.
+  - `FireProtection.Tests/BruteForceSelectionTests.cs` — `FakePlacementService` was missing
+    `ISprinklerPlacementService.ProbeMissingFamilies` (added by Decision 017), so the whole test project
+    failed to compile (`CS0535`) as soon as anything forced a rebuild. Implemented as "no missing families".
+- **Verification**:
+  - **BUILD**: `Revit2025` **0 errors**; `Revit2024` **0 errors**.
+  - **DEPLOY (verified by listing the addins folders)**: 2025 now contains `System.IO.Packaging.dll` and no
+    longer contains the three facades; 2024 now contains `System.Runtime.CompilerServices.Unsafe.dll`.
+    Confirmed via `.nuspec` walk that `System.IO.Packaging` is the *only* out-of-box dependency in the
+    net8 graph, so both dependency sets are now complete.
+  - **TEST**: `FireProtection.Tests` (Revit2025) — **ALL TESTS PASSED**, including `CatalogLoaderTests`
+    and the template round-trip, which exercise real ClosedXML `.xlsx` read/write on .NET 8.
+  - **RUNTIME (Revit)**: still to be confirmed by the user — restart Revit so the new DLL set is loaded.
+- **Open Questions / Blockers**: If a popup still appears it will now name the exception type and inner
+  chain — that text identifies whether it is a remaining load failure or a genuine schema rejection
+  (`CatalogLoader` is fail-fast: a workbook without a `CatalogVersion` header, with duplicate
+  `(FamilyName, TypeName)`, or a NotificationAppliance row without `Candela` is *rejected by design*).
+  A known-good workbook to test with: `FireProtection.Backend/Resources/Catalogs/CatalogTemplate.xlsx`.
+- **Handoff**: Restart Revit before retesting. Unrelated pre-existing gap noticed, not touched:
+  `Newtonsoft.Json.dll` is not copied for the net8 configs (it is absent from `bin/Revit2025`), so those
+  hosts rely on Revit's own copy.
+
+---
 
 - **Context**: Senior direction for the next product slice: replace the universal sprinkler family/type
   combo with **per-row** dropdowns, source the catalog of families + types from a **master Excel/CSV** (not
@@ -70,6 +125,114 @@
   4. Then the missing-in-model modal + `SkippedMissingFamilyCount`.
   5. Then the per-row `MaxSpacingFt` / `BoundaryClearanceFt` override + engine plumbing.
   6. Then the per-level "⋯" popovers for Smoke/Notification (declarative only).
+
+### 2026-09-01 — Catalog + per-row family/type + per-row spacing override + device popovers: implemented (static)
+
+- **Context**: Built the catalog + per-row + device-popover slice that was planned in the
+  2026-09-01 plan-locked session. Static-only — no Revit runtime verification yet (P0 still open).
+- **Actions Taken** (new files):
+  - `FireProtection.Backend/Services/Catalog/CatalogModels.cs`, `CatalogValidator.cs`, `CatalogLoader.cs`,
+    `CatalogService.cs`, `FireProtectionConfig.cs`.
+  - `FireProtection.Backend/Resources/Catalogs/CatalogTemplate.xlsx` (generated by `CatalogTemplateGenerator`).
+  - `FireProtection.Backend/Resources/Catalogs/README.md` (authoring guide).
+  - `FireProtection.UI/Services/ICatalog.cs` (Revit-free interface + `SmokeDetectorCatalogEntry` /
+    `NotificationApplianceCatalogEntry` DTOs).
+  - `FireProtection.UI/Converters/InverseBoolConverter.cs`.
+  - `FireProtection.UI/ViewModels/Catalog/CatalogViewModel.cs`.
+  - `FireProtection.UI/Views/Catalog/CatalogBar.xaml(.cs)`.
+  - `FireProtection.UI/Views/Common/MissingFamiliesModal.xaml(.cs)`.
+  - `FireProtection.UI/Views/Common/LevelSettingsPopover.xaml(.cs)`.
+  - `FireProtection.Tests/CatalogTemplateGenerator.cs`, `CatalogLoaderRunner.cs`,
+    `CatalogLoaderTests.cs`, `BruteForceOverrideTests.cs`.
+  - `FireProtection.CatalogStandalone/` (small headless test runner that links catalog + engine
+    files into a net8.0-windows exe so the new logic can be exercised in this CLI environment
+    without a live Revit host).
+- **Actions Taken** (modified files):
+  - `FireProtection.Backend/FireProtection.Backend.csproj` — added `ClosedXML 0.104.1`.
+  - `FireProtection.Backend/Services/Placement/RevitSprinklerFamilySource.cs` — the Revit family
+    listing body is **commented out** and gated by `FireProtectionConfig.UseRevitFamilyListing`
+    (default `false`). Not deleted.
+  - `FireProtection.Backend/Commands/FireProtectionCommand.cs` — wires the catalog factory.
+  - `FireProtection.Backend/Models/Placement/Sprinklers/Final/PlacementRoomInput.cs` — added
+    nullable `SelectedSprinklerFamilyName` / `SelectedSprinklerTypeName` / `OverrideMaxSpacingFt` /
+    `OverrideBoundaryClearanceFt` (Decisions 017, 018).
+  - `FireProtection.Backend/Services/Placement/Sprinklers/Final/PlacementInputBuilder.cs` +
+    `PlacementInputJsonExporter.cs` — plumb the new fields through the selection → input path.
+  - `FireProtection.Backend/Services/Placement/Sprinklers/Final/BruteForce/BruteForceCalculationService.cs`
+    — `ApplyPerRoomOverrides(hazard, room, result)` clones the rule from
+    `IHazardPlacementRules.GetRules(hazardClass)` and applies the nullable per-row overrides;
+    out-of-range `MaxSpacingFt` is clamped to the provisional ceiling; `IsProvisional` is set
+    per-room when an override is in use; the diagnostic line records "Override applied: …".
+  - `FireProtection.Backend/Services/Placement/Sprinklers/Final/RevitSprinklerPlacementService.cs` —
+    `PlaceSprinklers` now resolves symbols **per row** (Decision 017), activating each distinct
+    (family, type) once. `ProbeMissingFamilies(calcResult)` is the read-only pre-place probe
+    driven by the per-row `RoomCalculationResult.SprinklerFamilyName` / `SprinklerTypeName`. New
+    `SprinklerPlacementResult.SkippedMissingFamilyCount` counter.
+  - `FireProtection.UI/ViewModels/Sprinklers/BruteForce/RoomItemViewModel.cs` — per-row
+    `SelectedFamily` / `SelectedType` / `MaxSpacingFtOverride` / `BoundaryClearanceFtOverride` /
+    `FamilyAvailability` + `SetCatalogDefaults` / `ResetFamilyAndTypeToDefault` /
+    `ResetSpacingOverridesToDefault` / `Apply*ToAllEligible` commands. New
+    `FamilyAvailability` enum.
+  - `FireProtection.UI/ViewModels/Sprinklers/BruteForce/SprinklerBruteForceViewModel.cs` — ctor
+    takes `ICatalog catalog`; `SeedPerRowCatalogDefaults()` populates per-row dropdowns;
+    `ApplyFamily/Type/MaxSpacing/BoundaryClearanceToAllEligibleCommand` set; per-row family/type
+    + spacing overrides flow into `PlacementRoomInputItem`. Missing-family modal invoked
+    pre-place.
+  - `FireProtection.UI/Views/Sprinklers/BruteForce/SprinklerBruteForceView.xaml(.cs)` — four new
+    columns (Family combo, Type combo, S→S ft textbox, Wall ft textbox, AVAIL label) +
+    per-row "Reset" button.
+  - `FireProtection.UI/Models/Sprinklers/BruteForce/RoomCalculationResult.cs` — new
+    `SprinklerFamilyName` / `SprinklerTypeName`.
+  - `FireProtection.UI/Models/Sprinklers/BruteForce/SprinklerPlacementResult.cs` — new
+    `SkippedMissingFamilyCount`.
+  - `FireProtection.UI/ViewModels/MainWindowViewModel.cs`, `SprinklerViewModel.cs` — ctor chain
+    threads `CatalogViewModel` through to `SprinklerBruteForceViewModel`.
+  - `FireProtection.UI/Views/MainWindow.xaml(.cs)`, `Services/UiLauncher.cs` — add `CatalogBar`
+    above the tabs; new constructor overload accepts a `CatalogViewModel`.
+  - `FireProtection.UI/ViewModels/Devices/DevicePlacementViewModelBase.cs` — abstract
+    `OpenLevelSettings(level)` + helper for per-level default propagation.
+  - `FireProtection.UI/ViewModels/Devices/DeviceLevelItemViewModel.cs` — per-level
+    `DetectorType` / `Mount` / `CeilingSlope` / `ApplianceType` / `CandelaDba` with
+    `PropagateToRooms`.
+  - `FireProtection.UI/ViewModels/Devices/DeviceRoomItemViewModel.cs` — per-row
+    `GetOverride/SetOverride/ClearAllOverrides` + typed accessors
+    (`DetectorTypeOverride`, `MountOverride`, …).
+  - `FireProtection.UI/ViewModels/SmokeDetectors/SmokeDetectorViewModel.cs` +
+    `NotificationAppliances/NotificationApplianceViewModel.cs` — `OpenLevelSettings` opens the
+    popover with the device-specific fields.
+  - `FireProtection.UI/Views/Devices/DevicePlacementView.xaml(.cs)` — "⋯" button per level
+    opens the popover.
+  - `FireProtection.UI/Themes/Styles.xaml` — registers `InverseBoolConverter`.
+  - `FireProtection.Tests/Program.cs` — `Main(string[] args)` parses `generate-template` /
+    `validate-catalog`; `RunAll` calls the new tests.
+- **Tests** (headless standalone, all PASS — 22/22):
+  - Catalog: valid workbook, missing CatalogVersion, duplicate (Family, Type), empty path,
+    missing file, empty sheet, unknown HazardClass, CatalogService lookups, missing Candela,
+    template round-trip.
+  - BruteForceOverride: tighter MaxSpacing increases count, larger BoundaryClearance reduces
+    candidates, out-of-range is clamped, override marks room ReviewRequired, no-override is
+    deterministic.
+- **Decisions**: 017, 018, 019, 020 — now `Implemented (static)`. See `DECISIONS.md`.
+- **Open Questions / Blockers**:
+  - P0 runtime verification of Decision 011/012 in Revit is still pending and **strictly first**.
+  - The catalog/per-row changes are **static-only**; they have NOT been runtime-verified in
+    Revit. The placement path now resolves symbols per-row, but the live-Revit behavior
+    (activation + Symbol resolution + work-plane / face-based placement) is unchanged from
+    Decision 011; the per-row path uses the same code.
+  - The `UseRevitFamilyListing` flag defaults to `false`; the Revit family listing is
+    commented out. To re-enable (for cross-checks), flip the flag in
+    `FireProtectionConfig.UseRevitFamilyListing`.
+  - ClosedXML 0.104.1 was added; no `MSB3277` warnings observed on net8.0-windows.
+- **Handoff**:
+  1. First action: runtime-verify Decision 011/012 in Revit (P0) before any runtime work on
+     the new catalog / per-row / device-popover code.
+  2. If P0 passes: open a session that runtime-verifies the per-row family/type placement path
+     (set up a model with a couple of rooms, run BruteForce, check the placement result JSON
+     includes per-row `FamilyPlacementType` / `HostingStrategy` and `SkippedMissingFamilyCount`
+     is 0 for a clean run).
+  3. NFPA13-2022 hazard-specific rule values (TODO P1) — encode real tables and flip
+     `DefaultHazardPlacementRules.HasApprovedRules` to `true`. The per-row override path
+     already accommodates tighter values.
 
 ### 2026-08-27 — UI-first shared device-placement base (Smoke Detectors + Notification Appliances)
 

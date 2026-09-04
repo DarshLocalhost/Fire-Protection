@@ -50,11 +50,11 @@
 | Ceiling-host detection for placement | ✅ Implemented | static | `CeilingHostResolver.FindCeilingHost` searches host + linked ceilings, returns a downward-face `Reference` (link refs via `CreateLinkReference`). **Decision 011:** `WorkPlaneBased` uses that ceiling face, else a `SketchPlane` honoring world Z — it **never** uses the Level overload (no WorkPlaneBased→Level fallback). ~~Earlier note claimed a Level fallback (Decision 010, superseded).~~ Runtime pending. |
 | Actual host/level read-back diagnostics | ✅ Implemented | static | **Decision 012 (2026-08-25):** success path records `ActualHostElementId/Name`, `ActualInstanceLevelId/Name`, `ActualScheduleLevelName` read back from the created instance (best-effort, read-only) + `FamilyPlacementType`/`HostCeilingElementId`/`LinkInstanceName`. Diagnostics-only; no placement semantics changed. Distinguishes a hosting defect from a view-range/level-association symptom in one run. Runtime pending. |
 | NFPA13-2022 compliant spacing | 🔴 Not implemented | none | provisional 15 ft only; `HasApprovedRules=false`. |
-| Per-row sprinkler family/type (universal → per-room) | 🔵 Planned | none | **Decision 017.** Per-row family + type dropdowns in the room list, types filtered by family, "modified" indicator, "Reset to default" + "Apply to all eligible rows". |
-| Per-row `MaxSpacingFt` / `BoundaryClearanceFt` override | 🔵 Planned | none | **Decision 018.** Nullable fields on `PlacementRoomInput`; `BruteForceCalculationService` resolves the per-room rule set; `IsProvisional` per-room when an override is in use. Obstacle + existing-sprinkler separation NOT overridable in v1. |
-| Excel-driven catalog (Sprinkler/Smoke/Notification) | 🔵 Planned | none | **Decision 020.** One workbook, one sheet per category, `CatalogVersion` header, fail-fast `CatalogLoader` (ClosedXML, Backend). User-selectable path each session + "Reload" button. Catalog version in top bar. |
-| Missing-in-model modal (interactive Proceed/Cancel + CSV export) | 🔵 Planned | none | **Decision 017.** Fires on per-row dropdown change (debounced) AND on Place. Auto-deselects level if all rooms fail. `SprinklerPlacementResult.SkippedMissingFamilyCount` added. |
-| Per-level Smoke/Notification declarative metadata (popover "⋯") | 🔵 Planned | none | **Decision 019.** UI-only for v1. `CeilingSlope` = detector-rated-for (not room-actual). Candela+dBA = composite pair. Level value propagates as default to rooms; rooms can override. |
+| Per-row sprinkler family/type (universal → per-room) | ✅ Implemented | static | **Decision 017 (2026-09-01).** Per-row family + type dropdowns in the room list, types filtered by family, "modified" indicator, "Reset to default" + "Apply to all eligible rows". Backed by `ICatalog` (Excel). Missing-family modal flow wired in the placement path. |
+| Per-row `MaxSpacingFt` / `BoundaryClearanceFt` override | ✅ Implemented | static | **Decision 018 (2026-09-01).** Nullable fields on `PlacementRoomInput`; `BruteForceCalculationService.ApplyPerRoomOverrides` clones the rule returned by `IHazardPlacementRules.GetRules(hazardClass)` and applies the per-row overrides when present. Per-room `IsProvisional` is set when an override is in use; the preflight continues to use the un-overridden rule set so the NFPA compliance check is preserved. Out-of-range `MaxSpacingFt` is clamped to the provisional ceiling (15 ft) and a diagnostic line is recorded. Obstacle + existing-sprinkler separation NOT overridable in v1. |
+| Excel-driven catalog (Sprinkler/Smoke/Notification) | ✅ Implemented | static | **Decision 020 (2026-09-01).** One workbook, one sheet per category, `CatalogVersion` header, fail-fast `CatalogLoader` (ClosedXML, Backend). User-selectable path each session + "Reload" button (no persistence). Catalog version in top bar. 8 catalog tests + 5 BruteForce override tests PASS in the headless standalone runner (`FireProtection.CatalogStandalone`). |
+| Missing-in-model modal (interactive Proceed/Cancel + CSV export) | ✅ Implemented | static | **Decision 017 (2026-09-01).** `MissingFamiliesModal` shows `(Room, Family, Type)` for missing entries; "Proceed with available" / "Cancel" + "Export missing list to CSV" button. `ISprinklerPlacementService.ProbeMissingFamilies(calcResult)` reads the per-row family/type from `RoomCalculationResult` and probes the live Revit document. `SprinklerPlacementResult.SkippedMissingFamilyCount` tracks the per-row skip count; `RevitSprinklerPlacementService.PlaceSprinklers` now resolves symbols **per room** (Decision 017) and groups activations. |
+| Per-level Smoke/Notification declarative metadata (popover "⋯") | ✅ Implemented | static | **Decision 019 (2026-09-01).** UI-only. `LevelSettingsPopover` ("⋯" button per level) drives `DeviceLevelItemViewModel` (smoke: DetectorType/Mount/CeilingSlope; notification: ApplianceType + composite Candela+dBA). Level value propagates as default to rooms via `DeviceRoomItemViewModel.GetOverride/SetOverride`; rooms can override. "Planning only — backend pending" badge. No algorithmic effect until device placement lands. |
 
 ## Collision Workflow
 
@@ -203,26 +203,10 @@
 
 ## In Progress
 
-- **Excel-driven catalog + per-row sprinkler family/type (Decision 017).** Plan locked 2026-09-01;
-  implementation pending. Affects `RoomItemViewModel` (per-row family/type), `SprinklerBruteForceViewModel`
-  (catalog + bulk-apply + missing-in-model modal), `IPlacementInputExporter` / `PlacementRoomInputItem`
-  (per-row family/type), `SprinklerPlacementResult` (`SkippedMissingFamilyCount`), new
-  `Catalog`/`CatalogLoader`/`CatalogValidator` services (Backend, ClosedXML), new `CatalogViewModel`,
-  `CatalogBar`, `MissingFamiliesModal`, `LevelSettingsPopover` views (UI). The Revit family listing
-  is **commented out** behind a `UseRevitFamilyListing` flag, not deleted.
-- **Per-row `MaxSpacingFt` / `BoundaryClearanceFt` override (Decision 018).** Plan locked 2026-09-01;
-  implementation pending. Threads through `PlacementRoomInput` (nullable overrides) and
-  `BruteForceCalculationService` (per-room rule resolution; `IsProvisional` per-room when an override
-  is in use). Preflight continues to use the un-overridden rule set.
-- **Per-level Smoke/Notification declarative metadata (Decision 019).** Plan locked 2026-09-01;
-  implementation pending. UI-only for v1 (no algorithmic effect until device placement lands).
-- **Catalog version + fail-fast load (Decision 020).** Plan locked 2026-09-01; implementation pending.
-  ClosedXML in Backend; top bar shows catalog path + version; load errors surface in a single dialog.
-
 - Active fix awaiting **runtime verification in Revit**: confirm placed sprinkler `instance.Location`
   ≈ (14.12, 31.95, 12) for `02_FireProtection_Test` (host) + `01_Architectural_Test` (link). Then remove
   any stray misplaced (0,0,0) instances from prior runs. **P0 — must complete before any of the
-  per-row / catalog work is runtime-verified.**
+  catalog / per-row / device-popover work is runtime-verified.**
 - Next verification gap after that: **NFPA-compliant spacing** (replacing provisional 15 ft values).
 
 ## Completed Milestones
@@ -233,6 +217,17 @@
 - End-to-end documentation (`SPRINKLER_POINT_CALCULATION_EXPLAINED.md`) — written.
 - Dead-code cleanup — completed and verified.
 - Plan for catalog + per-row family/type + per-row spacing override (Decisions 017–020) — locked.
+- **Catalog + per-row family/type + per-row spacing override + device-popover implementation
+  (Decisions 017, 018, 019, 020) — implemented (static, 2026-09-01).** Backend
+  `CatalogLoader` / `CatalogService` (ClosedXML), `ICatalog` (UI), `CatalogViewModel` +
+  `CatalogBar` (top bar with Browse/Reload/version), per-row `SelectedFamily` / `SelectedType` /
+  `MaxSpacingFtOverride` / `BoundaryClearanceFtOverride` + bulk-apply commands, per-row
+  `MissingFamiliesModal` (Proceed/Cancel + "Export missing list to CSV") +
+  `SkippedMissingFamilyCount`, per-row symbol resolution in `PlaceSprinklers`,
+  `BruteForceCalculationService.ApplyPerRoomOverrides` (NFPA clamp + per-room `IsProvisional`),
+  `LevelSettingsPopover` (⋯ per level) for Smoke Detector / Notification Appliance declarative
+  metadata. 22/22 standalone tests pass (`FireProtection.CatalogStandalone`).
+  **Runtime verification in Revit is still P0-first** — none of this has been live-Revit-verified.
 
 ## Related Documentation
 

@@ -1,6 +1,7 @@
 using System;
 using System.Collections.Generic;
 using System.Linq;
+using ClosedXML.Excel;
 using FireProtection.Backend.Models.DTOs;
 using FireProtection.Backend.Models.Hazard;
 using FireProtection.Backend.Models.Placement.Sprinklers.Final;
@@ -13,8 +14,26 @@ namespace FireProtection.Tests
     {
         private static int _failures;
 
-        private static void Main()
+        private static void Main(string[] args)
         {
+            if (args != null && args.Length >= 1)
+            {
+                if (string.Equals(args[0], "generate-template", StringComparison.OrdinalIgnoreCase))
+                {
+                    string path = args.Length >= 2 ? args[1] : "CatalogTemplate.xlsx";
+                    CatalogTemplateGenerator.Generate(path);
+                    Console.WriteLine("Generated catalog template at: " + System.IO.Path.GetFullPath(path));
+                    return;
+                }
+                if (string.Equals(args[0], "validate-catalog", StringComparison.OrdinalIgnoreCase))
+                {
+                    string path = args.Length >= 2 ? args[1] : "CatalogTemplate.xlsx";
+                    int exit = CatalogLoaderRunner.Run(path);
+                    Environment.Exit(exit);
+                    return;
+                }
+            }
+
             RunAll();
             Console.WriteLine();
             if (_failures == 0)
@@ -45,6 +64,38 @@ namespace FireProtection.Tests
             TestInvalidBoundary();
             TestNoValidCandidates();
             TestDeterministicRepeatedCalculation();
+            CatalogLoaderTests.RunAll();
+
+            // Both of these self-report and throw on failure rather than incrementing _failures.
+            Console.WriteLine();
+            Console.WriteLine("Test: BruteForceOverrideTests");
+            RunGuarded("BruteForceOverrideTests", BruteForceOverrideTests.RunAll);
+            Console.WriteLine();
+            Console.WriteLine("Test: BruteForceSelectionTests");
+            RunGuarded("BruteForceSelectionTests", BruteForceSelectionTests.RunAll);
+            Console.WriteLine();
+            Console.WriteLine("Test: UiDefaultsTests");
+            RunGuarded("UiDefaultsTests", UiDefaultsTests.RunAll);
+            Console.WriteLine();
+            Console.WriteLine("Test: Phase7Tests");
+            RunGuarded("Phase7Tests", Phase7Tests.RunAll);
+        }
+
+        /// <summary>
+        /// Runs a suite that signals failure by throwing, folding the outcome into this runner's
+        /// failure count so one failing suite does not hide the rest.
+        /// </summary>
+        private static void RunGuarded(string suiteName, Action run)
+        {
+            try
+            {
+                run();
+            }
+            catch (Exception ex)
+            {
+                Console.WriteLine("  FAIL: " + suiteName + " threw - " + ex.Message);
+                _failures++;
+            }
         }
 
         // ---------------------------------------------------------------

@@ -18,7 +18,9 @@
         </ResourceDictionary>
     </UserControl.Resources>
 
-    <Grid Margin="16">
+    <!-- No top margin: the hosting device tab already puts its parameter card 16px in from the
+         edge and leaves a 12px gutter above this control, so the cards below line up with it. -->
+    <Grid Margin="16,0,16,16">
         <Grid.RowDefinitions>
             <RowDefinition Height="Auto"/>
             <RowDefinition Height="16"/>
@@ -31,7 +33,7 @@
                 Background="{StaticResource SurfaceBrush}"
                 BorderBrush="{StaticResource BorderBrush}"
                 BorderThickness="1"
-                CornerRadius="8">
+                CornerRadius="6">
             <Grid Margin="18">
                 <Grid.RowDefinitions>
                     <RowDefinition Height="Auto"/>
@@ -45,50 +47,38 @@
                            FontWeight="SemiBold"
                            Foreground="{StaticResource TextPrimaryBrush}"/>
 
-                <Grid Grid.Row="2">
-                    <Grid.ColumnDefinitions>
-                        <ColumnDefinition Width="170"/>
-                        <ColumnDefinition Width="320"/>
-                        <ColumnDefinition Width="32"/>
-                        <ColumnDefinition Width="170"/>
-                        <ColumnDefinition Width="320"/>
-                        <ColumnDefinition Width="*"/>
-                    </Grid.ColumnDefinitions>
+                <!-- Label packed directly against its own control (10px), 36px between pairs, so a
+                     caption reads as belonging to the combo beside it. WrapPanel so the pairs wrap
+                     rather than clip when the window is narrow. -->
+                <WrapPanel Grid.Row="2">
+                    <StackPanel Orientation="Horizontal" Margin="0,0,36,6">
+                        <TextBlock Text="Device Family" Style="{StaticResource FieldLabel}"/>
+                        <ComboBox Width="300"
+                                  Style="{StaticResource StandardComboBoxStyle}"
+                                  ItemsSource="{Binding DeviceFamilies}"
+                                  SelectedItem="{Binding SelectedDeviceFamily, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}"
+                                  DisplayMemberPath="FamilyName"/>
+                    </StackPanel>
 
-                    <TextBlock Grid.Column="0"
-                               Text="Device Family"
-                               FontSize="13"
-                               FontWeight="SemiBold"
-                               Foreground="{StaticResource TextPrimaryBrush}"
-                               VerticalAlignment="Center"/>
-
-                    <ComboBox Grid.Column="1"
-                              Style="{StaticResource StandardComboBoxStyle}"
-                              ItemsSource="{Binding DeviceFamilies}"
-                              SelectedItem="{Binding SelectedDeviceFamily, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}"
-                              DisplayMemberPath="FamilyName"/>
-
-                    <TextBlock Grid.Column="3"
-                               Text="Device Type"
-                               FontSize="13"
-                               FontWeight="SemiBold"
-                               Foreground="{StaticResource TextPrimaryBrush}"
-                               VerticalAlignment="Center"/>
-
-                    <ComboBox Grid.Column="4"
-                              Style="{StaticResource StandardComboBoxStyle}"
-                              ItemsSource="{Binding DeviceTypes}"
-                              SelectedItem="{Binding SelectedDeviceType, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}"
-                              DisplayMemberPath="TypeName"
-                              IsEnabled="{Binding IsDeviceFamilySelected}"/>
-                </Grid>
+                    <StackPanel Orientation="Horizontal" Margin="0,0,0,6">
+                        <TextBlock Text="Device Type" Style="{StaticResource FieldLabel}"/>
+                        <ComboBox Width="300"
+                                  Style="{StaticResource StandardComboBoxStyle}"
+                                  ItemsSource="{Binding DeviceTypes}"
+                                  SelectedItem="{Binding SelectedDeviceType, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}"
+                                  DisplayMemberPath="TypeName"
+                                  IsEnabled="{Binding IsDeviceFamilySelected}"/>
+                    </StackPanel>
+                </WrapPanel>
             </Grid>
         </Border>
 
         <!-- ================= MAIN CONTENT ================= -->
         <Grid Grid.Row="2">
             <Grid.ColumnDefinitions>
-                <ColumnDefinition Width="300"/>
+                <!-- Proportional with a floor and a ceiling: the levels pane no longer eats a fixed 300px
+                     out of a narrow window, and never grows past 320px on a wide one. -->
+                <ColumnDefinition Width="0.28*" MinWidth="220" MaxWidth="320"/>
                 <ColumnDefinition Width="16"/>
                 <ColumnDefinition Width="*"/>
             </Grid.ColumnDefinitions>
@@ -98,7 +88,7 @@
                     Background="{StaticResource SurfaceBrush}"
                     BorderBrush="{StaticResource BorderBrush}"
                     BorderThickness="1"
-                    CornerRadius="8">
+                    CornerRadius="6">
 
                 <Grid Margin="14">
                     <Grid.RowDefinitions>
@@ -176,6 +166,8 @@
                              Background="Transparent"
                              BorderThickness="0"
                              ScrollViewer.HorizontalScrollBarVisibility="Disabled"
+                             VirtualizingPanel.IsVirtualizing="True"
+                             VirtualizingPanel.VirtualizationMode="Recycling"
                              ItemContainerStyle="{StaticResource LevelListBoxItemStyle}">
 
                         <ListBox.ItemTemplate>
@@ -198,6 +190,7 @@
                                         <ColumnDefinition Width="Auto"/>
                                         <ColumnDefinition Width="*"/>
                                         <ColumnDefinition Width="Auto"/>
+                                        <ColumnDefinition Width="Auto"/>
                                     </Grid.ColumnDefinitions>
 
                                     <CheckBox Grid.Column="0"
@@ -219,7 +212,17 @@
                                         </TextBlock>
                                     </StackPanel>
 
-                                    <TextBlock Grid.Column="2"
+                                    <Button Grid.Column="2"
+                                            Style="{StaticResource OutlineButtonStyle}"
+                                            Content="&#x22EF;"
+                                            Padding="6,2"
+                                            Margin="0,0,8,0"
+                                            ToolTip="Level settings (declarative metadata only)"
+                                            Click="LevelSettingsButton_Click"
+                                            Tag="{Binding}"
+                                            VerticalAlignment="Center"/>
+
+                                    <TextBlock Grid.Column="3"
                                                VerticalAlignment="Center"
                                                FontSize="13"
                                                FontWeight="SemiBold"
@@ -250,7 +253,7 @@
                     Background="{StaticResource SurfaceBrush}"
                     BorderBrush="{StaticResource BorderBrush}"
                     BorderThickness="1"
-                    CornerRadius="8">
+                    CornerRadius="6">
 
                 <Grid Margin="18">
                     <Grid.RowDefinitions>
@@ -305,26 +308,48 @@
                         </Button>
                     </Grid>
 
-                    <Grid Grid.Row="1" Margin="0,12,0,0">
-                        <Grid.ColumnDefinitions>
-                            <ColumnDefinition Width="Auto"/>
-                            <ColumnDefinition Width="*"/>
-                        </Grid.ColumnDefinitions>
-
-                        <CheckBox Grid.Column="0"
-                                  Content="Show eligible rooms only"
-                                  IsChecked="{Binding ShowEligibleRoomsOnly, Mode=TwoWay}"
-                                  VerticalAlignment="Center"
-                                  Foreground="{StaticResource TextSecondaryBrush}"
-                                  FontSize="12"
-                                  Margin="0,0,16,0"/>
-
-                        <Button Grid.Column="1"
-                                Style="{StaticResource OutlineButtonStyle}"
+                    <StackPanel Grid.Row="1" Margin="0,12,0,0">
+                        <Button Style="{StaticResource OutlineButtonStyle}"
                                 Content="{Binding RoomSelectionToggleLabel}"
                                 Command="{Binding ToggleSelectAllRoomsCommand}"
                                 HorizontalAlignment="Right"/>
-                    </Grid>
+
+                        <!-- Bulk edit (item 8, list 2) + re-run policy (item 3, list 2). WrapPanel so a narrow
+                             window wraps rather than clips. Both act on the rooms that are selected. -->
+                        <WrapPanel Margin="0,10,0,0" Orientation="Horizontal">
+                            <TextBlock Text="If room already has devices"
+                                       FontSize="12"
+                                       FontWeight="SemiBold"
+                                       Foreground="{StaticResource TextSecondaryBrush}"
+                                       VerticalAlignment="Center"
+                                       Margin="0,0,8,6"/>
+                            <ComboBox Width="210"
+                                      Margin="0,0,18,6"
+                                      Style="{StaticResource StandardComboBoxStyle}"
+                                      ItemsSource="{Binding ExistingDevicePolicyOptionLabels}"
+                                      SelectedItem="{Binding SelectedExistingDevicePolicyLabel, Mode=TwoWay}"
+                                      ToolTip="{Binding ExistingDevicePolicyTooltip}"/>
+
+                            <Button Content="Apply family/type to selected"
+                                    Style="{StaticResource OutlineButtonStyle}"
+                                    Padding="10,4"
+                                    Margin="0,0,6,6"
+                                    Command="{Binding ApplyFamilyToSelectedCommand}"
+                                    ToolTip="Copies the Device Family and Type chosen above onto every selected room."/>
+                            <Button Content="Clear overrides"
+                                    Style="{StaticResource OutlineButtonStyle}"
+                                    Padding="10,4"
+                                    Margin="0,0,12,6"
+                                    Command="{Binding ClearRoomOverridesForSelectedCommand}"
+                                    ToolTip="Resets Family/Type on every selected room back to the tab selection."/>
+
+                            <TextBlock Text="{Binding BulkTargetSummary}"
+                                       FontSize="12"
+                                       Foreground="{StaticResource TextSecondaryBrush}"
+                                       VerticalAlignment="Center"
+                                       Margin="0,0,0,6"/>
+                        </WrapPanel>
+                    </StackPanel>
 
                     <Border Grid.Row="2"
                             BorderBrush="{StaticResource BorderBrush}"
@@ -332,117 +357,125 @@
                             Padding="0,10"
                             Margin="0,12,0,0">
                         <Grid>
+                            <!-- Column widths and per-column margins are duplicated verbatim in the row
+                                 DataTemplate below; the two must be edited together or the header stops
+                                 lining up with its values. Numeric columns are centred so they sit clear
+                                 of the Family / Type combos instead of crowding them. The last column here
+                                 is a scrollbar reserve: the list's scrollbar takes that width out of the
+                                 rows but not out of this header, so without it every column drifts. -->
                             <Grid.ColumnDefinitions>
                                 <ColumnDefinition Width="36"/>
-                                <ColumnDefinition Width="2.0*"/>
-                                <ColumnDefinition Width="1.1*"/>
-                                <ColumnDefinition Width="1.6*"/>
-                                <ColumnDefinition Width="1.6*"/>
+                                <ColumnDefinition Width="2.2*"/>
+                                <ColumnDefinition Width="1.0*"/>
+                                <ColumnDefinition Width="1.0*"/>
+                                <ColumnDefinition Width="2.4*"/>
+                                <ColumnDefinition Width="17"/>
                             </Grid.ColumnDefinitions>
 
-                            <CheckBox Grid.Column="0" IsEnabled="False"/>
-                            <TextBlock Grid.Column="1" Text="Room Name" FontSize="12" FontWeight="SemiBold" Foreground="{StaticResource TextSecondaryBrush}"/>
-                            <TextBlock Grid.Column="2" Text="Area (sq ft)" FontSize="12" FontWeight="SemiBold" Foreground="{StaticResource TextSecondaryBrush}"/>
-                            <TextBlock Grid.Column="3" Text="Ceiling Height (ft)" FontSize="12" FontWeight="SemiBold" Foreground="{StaticResource TextSecondaryBrush}"/>
-                            <TextBlock Grid.Column="4" Text="Eligibility" FontSize="12" FontWeight="SemiBold" Foreground="{StaticResource TextSecondaryBrush}"/>
+                            <CheckBox Grid.Column="0" IsEnabled="False" VerticalAlignment="Center"/>
+                            <TextBlock Grid.Column="1" Text="Room Name" Margin="0,0,16,0" VerticalAlignment="Center" FontSize="12" FontWeight="SemiBold" Foreground="{StaticResource TextSecondaryBrush}"/>
+                            <TextBlock Grid.Column="2" Text="{Binding AreaColumnHeader}" Margin="0,0,16,0" VerticalAlignment="Center" TextAlignment="Center" FontSize="12" FontWeight="SemiBold" Foreground="{StaticResource TextSecondaryBrush}"/>
+                            <TextBlock Grid.Column="3" Text="{Binding CeilingColumnHeader}" Margin="0,0,20,0" VerticalAlignment="Center" TextAlignment="Center" FontSize="12" FontWeight="SemiBold" Foreground="{StaticResource TextSecondaryBrush}"/>
+                            <!-- 7 = the combo's own left padding, so this header lines up with the text
+                                 inside the combo below rather than with its border. -->
+                            <TextBlock Grid.Column="4" Text="Family / Type" Margin="7,0,4,0" VerticalAlignment="Center" FontSize="12" FontWeight="SemiBold" Foreground="{StaticResource TextSecondaryBrush}"/>
                         </Grid>
                     </Border>
 
-                    <ScrollViewer Grid.Row="3" VerticalScrollBarVisibility="Auto">
-                        <ItemsControl ItemsSource="{Binding RoomsView}">
-                            <ItemsControl.ItemTemplate>
+                    <!-- Virtualized room list (item 1). An ItemsControl inside a ScrollViewer measures with
+                         infinite height and realizes EVERY row; giving the ItemsControl its own template with
+                         the ScrollViewer inside it plus a recycling VirtualizingStackPanel realizes only the
+                         visible rows. Checkbox state lives on the ViewModel, so scrolling never loses a tick. -->
+                    <ItemsControl Grid.Row="3"
+                                  ItemsSource="{Binding RoomsView}"
+                                  VirtualizingPanel.IsVirtualizing="True"
+                                  VirtualizingPanel.VirtualizationMode="Recycling"
+                                  VirtualizingPanel.ScrollUnit="Pixel"
+                                  ScrollViewer.CanContentScroll="True">
+                        <ItemsControl.Template>
+                            <ControlTemplate TargetType="ItemsControl">
+                                <ScrollViewer CanContentScroll="True"
+                                              VerticalScrollBarVisibility="Visible"
+                                              HorizontalScrollBarVisibility="Disabled"
+                                              Focusable="False">
+                                    <ItemsPresenter/>
+                                </ScrollViewer>
+                            </ControlTemplate>
+                        </ItemsControl.Template>
+                        <ItemsControl.ItemsPanel>
+                            <ItemsPanelTemplate>
+                                <VirtualizingStackPanel Orientation="Vertical"/>
+                            </ItemsPanelTemplate>
+                        </ItemsControl.ItemsPanel>
+                        <ItemsControl.ItemTemplate>
                                 <DataTemplate>
                                     <Border BorderBrush="{StaticResource BorderBrush}"
                                             BorderThickness="0,0,0,1"
                                             Padding="0,12">
-                                        <Border.Style>
-                                            <Style TargetType="Border">
-                                                <Style.Triggers>
-                                                    <DataTrigger Binding="{Binding IsEligible}" Value="False">
-                                                        <Setter Property="Opacity" Value="0.5"/>
-                                                    </DataTrigger>
-                                                    <DataTrigger Binding="{Binding IsUndetermined}" Value="True">
-                                                        <Setter Property="BorderBrush" Value="{StaticResource UndeterminedBrush}"/>
-                                                        <Setter Property="BorderThickness" Value="0,0,0,2"/>
-                                                    </DataTrigger>
-                                                    <DataTrigger Binding="{Binding IsBlocked}" Value="True">
-                                                        <Setter Property="BorderBrush" Value="{StaticResource BlockedBrush}"/>
-                                                        <Setter Property="BorderThickness" Value="0,0,0,2"/>
-                                                    </DataTrigger>
-                                                </Style.Triggers>
-                                            </Style>
-                                        </Border.Style>
-                                        <Grid>
+                                        <!-- MinHeight keeps every row the same height, so the columns read
+                                             as straight vertical lines down the list. -->
+                                        <Grid MinHeight="44">
+                                            <!-- Must stay identical to the header Grid above, minus its
+                                                 trailing scrollbar-reserve column (the scrollbar already
+                                                 takes that width out of this grid). -->
                                             <Grid.ColumnDefinitions>
                                                 <ColumnDefinition Width="36"/>
-                                                <ColumnDefinition Width="2.0*"/>
-                                                <ColumnDefinition Width="1.1*"/>
-                                                <ColumnDefinition Width="1.6*"/>
-                                                <ColumnDefinition Width="1.6*"/>
+                                                <ColumnDefinition Width="2.2*"/>
+                                                <ColumnDefinition Width="1.0*"/>
+                                                <ColumnDefinition Width="1.0*"/>
+                                                <ColumnDefinition Width="2.4*"/>
                                             </Grid.ColumnDefinitions>
 
                                             <CheckBox Grid.Column="0"
                                                       IsChecked="{Binding IsSelected, Mode=TwoWay}"
-                                                      IsEnabled="{Binding IsEligible}"
-                                                      VerticalAlignment="Center"
-                                                      ToolTip="{Binding EligibilityReason}"/>
+                                                      VerticalAlignment="Center"/>
 
-                                            <StackPanel Grid.Column="1" VerticalAlignment="Center">
-                                                <TextBlock Text="{Binding Name}"
-                                                           FontSize="13"
-                                                           FontWeight="SemiBold"
-                                                           Foreground="{StaticResource TextPrimaryBrush}"
-                                                           TextTrimming="CharacterEllipsis"/>
-                                                <TextBlock FontSize="11"
-                                                           Margin="0,2,0,0"
-                                                           TextTrimming="CharacterEllipsis">
-                                                    <TextBlock.Style>
-                                                        <Style TargetType="TextBlock">
-                                                            <Setter Property="Visibility" Value="Collapsed"/>
-                                                            <Style.Triggers>
-                                                                <DataTrigger Binding="{Binding IsEligible}" Value="False">
-                                                                    <Setter Property="Visibility" Value="Visible"/>
-                                                                </DataTrigger>
-                                                                <DataTrigger Binding="{Binding IsBlocked}" Value="True">
-                                                                    <Setter Property="Foreground" Value="{StaticResource BlockedBrush}"/>
-                                                                </DataTrigger>
-                                                                <DataTrigger Binding="{Binding IsUndetermined}" Value="True">
-                                                                    <Setter Property="Foreground" Value="{StaticResource UndeterminedBrush}"/>
-                                                                </DataTrigger>
-                                                            </Style.Triggers>
-                                                        </Style>
-                                                    </TextBlock.Style>
-                                                    <Run Text="{Binding EligibilityState, Mode=OneWay}"
-                                                         FontWeight="Bold"/>
-                                                    <Run Text=" &#x2014; "/>
-                                                    <Run Text="{Binding EligibilityReason, Mode=OneWay}"/>
-                                                </TextBlock>
-                                            </StackPanel>
+                                            <TextBlock Grid.Column="1"
+                                                       Text="{Binding Name}"
+                                                       Margin="0,0,16,0"
+                                                       FontSize="13"
+                                                       FontWeight="SemiBold"
+                                                       Foreground="{StaticResource TextPrimaryBrush}"
+                                                       TextTrimming="CharacterEllipsis"
+                                                       VerticalAlignment="Center"
+                                                       ToolTip="{Binding Name}"/>
 
                                             <TextBlock Grid.Column="2"
                                                        Text="{Binding AreaSqFt, StringFormat={}{0:N2}}"
+                                                       Margin="0,0,16,0"
                                                        FontSize="13"
+                                                       TextAlignment="Center"
                                                        Foreground="{StaticResource TextPrimaryBrush}"
                                                        VerticalAlignment="Center"/>
 
                                             <TextBlock Grid.Column="3"
                                                        Text="{Binding CeilingHeightFt, StringFormat={}{0:F2}}"
+                                                       Margin="0,0,20,0"
                                                        FontSize="13"
+                                                       TextAlignment="Center"
                                                        Foreground="{StaticResource TextPrimaryBrush}"
                                                        VerticalAlignment="Center"/>
 
-                                            <TextBlock Grid.Column="4"
-                                                       Text="{Binding EligibilityState, Mode=OneWay}"
-                                                       FontSize="12"
-                                                       FontWeight="SemiBold"
-                                                       Foreground="{StaticResource TextSecondaryBrush}"
-                                                       VerticalAlignment="Center"/>
+                                            <!-- Per-row Family / Type override (item 5 + 7). The tab's
+                                                 universal selection is this row's default; changing it here
+                                                 overrides only this room. The Type list follows this row's
+                                                 own Family via DeviceRoomItemViewModel's types resolver. -->
+                                            <StackPanel Grid.Column="4" VerticalAlignment="Center" Margin="0,0,4,0">
+                                                <ComboBox Style="{StaticResource CellComboBoxStyle}"
+                                                          ItemsSource="{Binding AvailableFamilies}"
+                                                          SelectedItem="{Binding SelectedFamily, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}"
+                                                          ToolTip="Device family for this room. Defaults to the tab selection above."/>
+                                                <ComboBox Style="{StaticResource CellComboBoxStyle}"
+                                                          Margin="0,4,0,0"
+                                                          ItemsSource="{Binding AvailableTypes}"
+                                                          SelectedItem="{Binding SelectedType, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}"
+                                                          ToolTip="Device type for this room. The list follows this row's family."/>
+                                            </StackPanel>
                                         </Grid>
                                     </Border>
                                 </DataTemplate>
                             </ItemsControl.ItemTemplate>
                         </ItemsControl>
-                    </ScrollViewer>
 
                     <Border Grid.Row="4"
                             BorderBrush="{StaticResource BorderBrush}"
@@ -463,6 +496,8 @@
                 <ColumnDefinition Width="*"/>
                 <ColumnDefinition Width="Auto"/>
                 <ColumnDefinition Width="Auto"/>
+                <ColumnDefinition Width="Auto"/>
+                <ColumnDefinition Width="Auto"/>
             </Grid.ColumnDefinitions>
 
             <ctrl:InfoBanner Grid.Column="0">
@@ -477,7 +512,27 @@
                 </StackPanel>
             </ctrl:InfoBanner>
 
-            <Button Grid.Column="1"
+            <!-- Progress + cancel (item 3). Plumbed through IDevicePlacementExecutor so it works the moment
+                 the device backend lands; with the placeholder executor there is nothing to report. -->
+            <TextBlock Grid.Column="1"
+                       Text="{Binding PlacementProgressText}"
+                       FontSize="12"
+                       Foreground="{StaticResource TextSecondaryBrush}"
+                       MaxWidth="260"
+                       TextTrimming="CharacterEllipsis"
+                       VerticalAlignment="Center"
+                       Margin="16,0,0,0"
+                       ToolTip="{Binding PlacementProgressText}"/>
+
+            <Button Grid.Column="2"
+                    Style="{StaticResource OutlineButtonStyle}"
+                    Command="{Binding CancelPlacementCommand}"
+                    Content="Cancel"
+                    Padding="14,10"
+                    Margin="10,0,0,0"
+                    Visibility="{Binding CanCancelPlacement, Converter={StaticResource BoolToVis}}"/>
+
+            <Button Grid.Column="3"
                     Style="{StaticResource PrimaryButtonStyle}"
                     Command="{Binding PlaceDevicesCommand}"
                     Margin="16,0,0,0">
@@ -487,7 +542,7 @@
                 </StackPanel>
             </Button>
 
-            <Button Grid.Column="2"
+            <Button Grid.Column="4"
                     Style="{StaticResource OutlineButtonStyle}"
                     Command="{Binding ResetCommand}"
                     Margin="10,0,0,0"

@@ -21,8 +21,11 @@ namespace FireProtection.Tests
 
         public void Set(string roomId, PlacementEligibilityResult r) => _map[roomId] = r;
 
+        // Phase 7 added the progress reporter and the duplicate-handling policy to the contract.
+        // These tests cover the eligibility/selection contract only, so both are ignored here.
         public SprinklerPlacementResult PlaceSprinklers(
-            string selectedFamilyName, string selectedTypeName, BruteForceCalculationResult calcResult) => null;
+            string selectedFamilyName, string selectedTypeName, BruteForceCalculationResult calcResult,
+            IPlacementProgress progress, ExistingDevicePolicy existingDevicePolicy) => null;
 
         public PlacementEligibilityResult EvaluateRoomEligibility(
             RoomUiData room, IReadOnlyList<CalculatedSprinklerPoint> candidates,
@@ -32,6 +35,11 @@ namespace FireProtection.Tests
                 : PlacementEligibilityResult.Undetermined("no-result", PlacementEligibilityStatusCodes.PreflightError);
 
         public void ClearEligibilityCache() { }
+
+        // Decision 017 added this member to ISprinklerPlacementService. These tests cover the
+        // eligibility/selection contract only, so the fake reports "no missing families".
+        public IReadOnlyList<MissingFamilyEntry> ProbeMissingFamilies(BruteForceCalculationResult calcResult) =>
+            new List<MissingFamilyEntry>();
     }
 
     public static class BruteForceSelectionTests
@@ -94,18 +102,21 @@ namespace FireProtection.Tests
             Assert(!Find(vm, "C").IsSelected && !Find(vm, "C").IsEligible, "C blocked -> unchecked");
             Assert(!Find(vm, "D").IsSelected && !Find(vm, "D").IsEligible, "D undetermined -> unchecked");
 
-            // B — Room Select All selects only ELIGIBLE
-            vm.ToggleSelectAllRoomsCommand.Execute(null);
-            Assert(Find(vm, "A").IsSelected && Find(vm, "B").IsSelected, "Select All selects eligible A/B");
-            Assert(!Find(vm, "C").IsSelected && !Find(vm, "D").IsSelected, "Select All skips non-eligible C/D");
+            // B / C — the single Room toggle is a real toggle: `select = !AreAllSelectableRoomsSelected`.
+            // Block A just established that the eligible rooms are ALREADY selected by default
+            // (ApplyDefaultSelection), so the first press is the "Clear All" half and the second is the
+            // "Select All" half. Both halves must leave BLOCKED/UNDETERMINED rooms untouched.
+            Assert(vm.AreAllSelectableRoomsSelected, "toggle starts in the 'Clear All' state");
 
-            // C — Room Clear All deselects eligible; non-eligible stay unchecked
             vm.ToggleSelectAllRoomsCommand.Execute(null);
             Assert(!Find(vm, "A").IsSelected && !Find(vm, "B").IsSelected, "Clear All deselects eligible A/B");
             Assert(!Find(vm, "C").IsSelected && !Find(vm, "D").IsSelected, "Clear All leaves non-eligible unchecked");
 
-            // D / E — level selection synchronizes only its eligible rooms
-            vm.ToggleSelectAllRoomsCommand.Execute(null); // A,B selected
+            vm.ToggleSelectAllRoomsCommand.Execute(null);
+            Assert(Find(vm, "A").IsSelected && Find(vm, "B").IsSelected, "Select All selects eligible A/B");
+            Assert(!Find(vm, "C").IsSelected && !Find(vm, "D").IsSelected, "Select All skips non-eligible C/D");
+
+            // D / E — level selection synchronizes only its eligible rooms (A,B are selected here).
             var l1 = vm.Levels[0];
             l1.IsSelected = false;
             Assert(!Find(vm, "A").IsSelected && !Find(vm, "B").IsSelected, "Clearing L1 deselects its eligible rooms");

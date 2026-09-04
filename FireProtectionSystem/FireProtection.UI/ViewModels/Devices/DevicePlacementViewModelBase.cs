@@ -2,6 +2,7 @@ using FireProtection.UI.Models;
 using FireProtection.UI.Models.Sprinklers.BruteForce;
 using FireProtection.UI.Services;
 using FireProtection.UI.ViewModels.Common;
+using FireProtection.UI.ViewModels.Catalog;
 using FireProtection.UI.ViewModels.Devices;
 using Newtonsoft.Json.Linq;
 using System;
@@ -30,14 +31,18 @@ namespace FireProtection.UI.ViewModels.Devices
     {
         private readonly IDeviceFamilySource _deviceFamilySource;
         private readonly IDevicePlacementExecutor _deviceExecutor;
+        private readonly CatalogViewModel _catalogVm;
 
         private string _levelSearchText;
         private string _roomSearchText;
         private bool _hideUnselectedLevels;
         private bool _hideUnselectedRooms;
-        private bool _showEligibleRoomsOnly;
         private bool _showLevelsWithRoomsOnly;
         private bool _isPlacementRunning;
+        private bool _canCancelPlacement;
+        private string _placementProgressText;
+        private PlacementProgressReporter _progressReporter;
+        private string _selectedExistingDevicePolicyLabel = ExistingDevicePolicyOptions.SkipRoomLabel;
         private string _placementStatusMessage;
 
         private DeviceFamilyOption _selectedDeviceFamily;
@@ -46,11 +51,13 @@ namespace FireProtection.UI.ViewModels.Devices
         protected DevicePlacementViewModelBase(
             FireProtectionUiData data,
             IDeviceFamilySource deviceFamilySource = null,
-            IDevicePlacementExecutor deviceExecutor = null)
+            IDevicePlacementExecutor deviceExecutor = null,
+            CatalogViewModel catalogViewModel = null)
         {
             Data = data;
             _deviceFamilySource = deviceFamilySource;
             _deviceExecutor = deviceExecutor;
+            _catalogVm = catalogViewModel;
 
             Levels = new ObservableCollection<DeviceLevelItemViewModel>();
             AllRooms = new ObservableCollection<DeviceRoomItemViewModel>();
@@ -75,6 +82,12 @@ namespace FireProtection.UI.ViewModels.Devices
             }
 
             LoadDeviceFamilies();
+            SeedPerRowDeviceDefaults();
+
+            if (_catalogVm != null)
+            {
+                _catalogVm.PropertyChanged += OnCatalogViewModelPropertyChanged;
+            }
 
             LevelsView = CollectionViewSource.GetDefaultView(Levels);
             LevelsView.Filter = FilterLevel;
@@ -101,7 +114,18 @@ namespace FireProtection.UI.ViewModels.Devices
 
             ResetCommand = new RelayCommand(_ => Reset());
 
-            RefreshEligibility();
+            CancelPlacementCommand = new RelayCommand(
+                _ => ExecuteCancelPlacement(),
+                _ => CanExecuteCancelPlacement());
+
+            ApplyFamilyToSelectedCommand = new RelayCommand(
+                _ => ApplyUniversalFamilyTypeToSelected(),
+                _ => CanBulkEdit());
+
+            ClearRoomOverridesForSelectedCommand = new RelayCommand(
+                _ => ClearOverridesForSelected(),
+                _ => CanBulkEdit());
+
             ApplyDefaultSelection();
 
             OnPropertyChanged(nameof(AreAllSelectableLevelsSelected));
@@ -170,19 +194,6 @@ namespace FireProtection.UI.ViewModels.Devices
             }
         }
 
-        public bool ShowEligibleRoomsOnly
-        {
-            get => _showEligibleRoomsOnly;
-            set
-            {
-                if (SetProperty(ref _showEligibleRoomsOnly, value))
-                {
-                    RoomsView.Refresh();
-                    RaiseRoomCounts();
-                }
-            }
-        }
-
         public bool ShowLevelsWithRoomsOnly
         {
             get => _showLevelsWithRoomsOnly;
@@ -218,8 +229,10 @@ namespace FireProtection.UI.ViewModels.Devices
                     ValidateSelectedTypeForCurrentFamily();
                     OnPropertyChanged(nameof(IsDeviceFamilySelected));
                     OnPropertyChanged(nameof(IsDeviceTypeSelected));
+                    // The top-level selection is the default for every row: re-seed rows still on
+                    // the old default and leave user-overridden rows alone.
+                    SeedPerRowDeviceDefaults();
                     CommandManager.InvalidateRequerySuggested();
-                    RefreshEligibility();
                 }
             }
         }
@@ -232,8 +245,8 @@ namespace FireProtection.UI.ViewModels.Devices
                 if (SetProperty(ref _selectedDeviceType, value))
                 {
                     OnPropertyChanged(nameof(IsDeviceTypeSelected));
+                    SeedPerRowDeviceDefaults();
                     CommandManager.InvalidateRequerySuggested();
-                    RefreshEligibility();
                 }
             }
         }
@@ -272,54 +285,6 @@ namespace FireProtection.UI.ViewModels.Devices
             }
         }
 
-        public int VisibleEligibleRoomCount
-        {
-            get
-            {
-                int count = 0;
-                if (RoomsView != null)
-                    foreach (object obj in RoomsView)
-                        if (obj is DeviceRoomItemViewModel r && r.IsEligible) count++;
-                return count;
-            }
-        }
-
-        public int SelectedVisibleEligibleRoomCount
-        {
-            get
-            {
-                int count = 0;
-                if (RoomsView != null)
-                    foreach (object obj in RoomsView)
-                        if (obj is DeviceRoomItemViewModel r && r.IsEligible && r.IsSelected) count++;
-                return count;
-            }
-        }
-
-        public int VisibleBlockedRoomCount
-        {
-            get
-            {
-                int count = 0;
-                if (RoomsView != null)
-                    foreach (object obj in RoomsView)
-                        if (obj is DeviceRoomItemViewModel r && r.IsBlocked) count++;
-                return count;
-            }
-        }
-
-        public int VisibleUndeterminedRoomCount
-        {
-            get
-            {
-                int count = 0;
-                if (RoomsView != null)
-                    foreach (object obj in RoomsView)
-                        if (obj is DeviceRoomItemViewModel r && r.IsUndetermined) count++;
-                return count;
-            }
-        }
-
         public string RoomsHeader
         {
             get
@@ -340,16 +305,7 @@ namespace FireProtection.UI.ViewModels.Devices
             get
             {
                 int visible = VisibleRoomCount;
-                int eligible = VisibleEligibleRoomCount;
-                int blocked = VisibleBlockedRoomCount;
-                int undetermined = VisibleUndeterminedRoomCount;
-                string baseText = visible + (visible == 1 ? " room shown" : " rooms shown");
-                var parts = new List<string>();
-                if (eligible > 0) parts.Add(eligible + " eligible");
-                if (blocked > 0) parts.Add(blocked + " blocked");
-                if (undetermined > 0) parts.Add(undetermined + " undetermined");
-                if (parts.Count == 0) return baseText;
-                return baseText + " (" + string.Join(", ", parts) + ")";
+                return visible + (visible == 1 ? " room shown" : " rooms shown");
             }
         }
 
@@ -357,15 +313,9 @@ namespace FireProtection.UI.ViewModels.Devices
         {
             get
             {
-                int selected = SelectedVisibleEligibleRoomCount;
-                int eligible = VisibleEligibleRoomCount;
-                int blocked = VisibleBlockedRoomCount;
-                int undetermined = VisibleUndeterminedRoomCount;
-                string baseSummary = selected + " of " + eligible + " eligible rooms selected";
-                var extra = new List<string>();
-                if (blocked > 0) extra.Add(blocked + " blocked");
-                if (undetermined > 0) extra.Add(undetermined + " undetermined");
-                return extra.Count == 0 ? baseSummary : baseSummary + " (" + string.Join(", ", extra) + ")";
+                int selected = SelectedVisibleRoomCount;
+                int visible = VisibleRoomCount;
+                return selected + " of " + visible + (visible == 1 ? " room selected" : " rooms selected");
             }
         }
 
@@ -382,13 +332,124 @@ namespace FireProtection.UI.ViewModels.Devices
             AreAllSelectableLevelsSelected ? "Clear All" : "Select All";
 
         public bool AreAllSelectableRoomsSelected =>
-            AllRooms.Any(r => r.IsEligible) && AllRooms.Where(r => r.IsEligible).All(r => r.IsSelected);
+            AllRooms.Count > 0 && AllRooms.All(r => r.IsSelected);
 
         public string RoomSelectionToggleLabel =>
             AreAllSelectableRoomsSelected ? "Clear All" : "Select All";
 
         public ICommand PlaceDevicesCommand { get; }
         public ICommand ResetCommand { get; }
+        public ICommand CancelPlacementCommand { get; }
+        public ICommand ApplyFamilyToSelectedCommand { get; }
+        public ICommand ClearRoomOverridesForSelectedCommand { get; }
+
+        // ----- Progress + cancel (item 3) ------------------------------------------------------------
+
+        public string PlacementProgressText
+        {
+            get { return _placementProgressText; }
+            private set { _placementProgressText = value; OnPropertyChanged(); OnPropertyChanged(nameof(IsPlacementProgressVisible)); }
+        }
+
+        public bool IsPlacementProgressVisible => !string.IsNullOrEmpty(PlacementProgressText);
+
+        public bool CanCancelPlacement
+        {
+            get { return _canCancelPlacement; }
+            private set { _canCancelPlacement = value; OnPropertyChanged(); }
+        }
+
+        private void OnPlacementProgress(int completed, int total, string label)
+        {
+            PlacementProgressText = total > 0 ? label + "  (" + completed + "/" + total + ")" : label;
+            PlacementStatusMessage = PlacementProgressText;
+        }
+
+        private bool CanExecuteCancelPlacement()
+        {
+            return IsPlacementRunning && CanCancelPlacement && _progressReporter != null;
+        }
+
+        private void ExecuteCancelPlacement()
+        {
+            if (_progressReporter == null) return;
+            _progressReporter.RequestCancel();
+            CanCancelPlacement = false;
+            PlacementProgressText = "Cancelling - finishing the current room, then rolling back...";
+            CommandManager.InvalidateRequerySuggested();
+        }
+
+        // ----- Re-run / existing-device policy (list-2 item 3) --------------------------------------
+
+        public string[] ExistingDevicePolicyOptionLabels => ExistingDevicePolicyOptions.Labels;
+
+        /// <summary>Explains the three re-run options in one tooltip, so the combo does not need three labels.</summary>
+        public string ExistingDevicePolicyTooltip => ExistingDevicePolicyOptions.Explanation;
+
+        // ----- Unit-aware column headers (list-2 item 5) --------------------------------------------
+        // Only the suffix follows the project's display unit; stored values stay in decimal feet.
+        // Areas are deliberately NOT converted, so the area header stays sq ft.
+
+        public string CeilingColumnHeader => "Ceiling Height " + UnitDisplay.HeaderSuffix;
+        public string AreaColumnHeader => "Area (sq ft)";
+        public string UnitSuffix => UnitDisplay.Suffix;
+
+        /// <summary>Defaults to Skip so a second Place never silently doubles the devices in a room.</summary>
+        public string SelectedExistingDevicePolicyLabel
+        {
+            get { return _selectedExistingDevicePolicyLabel; }
+            set
+            {
+                if (_selectedExistingDevicePolicyLabel == value) return;
+                _selectedExistingDevicePolicyLabel = value;
+                OnPropertyChanged();
+                OnPropertyChanged(nameof(ExistingDevicePolicySelection));
+            }
+        }
+
+        public ExistingDevicePolicy ExistingDevicePolicySelection =>
+            ExistingDevicePolicyOptions.Parse(_selectedExistingDevicePolicyLabel);
+
+        // ----- Bulk edit (list-2 item 8) -----------------------------------------------------------
+        // Target = the checked rooms. On the device tabs the editable per-room values are the family/type
+        // and the device attributes, so bulk edit pushes the universal selection down and can clear per-row
+        // overrides back to the level / universal value.
+
+        private IEnumerable<DeviceRoomItemViewModel> BulkTargets => AllRooms.Where(r => r.IsSelected);
+
+        public int BulkTargetCount => BulkTargets.Count();
+
+        public string BulkTargetSummary
+        {
+            get
+            {
+                int count = BulkTargetCount;
+                return count == 1 ? "1 selected room" : count + " selected rooms";
+            }
+        }
+
+        private bool CanBulkEdit() => BulkTargets.Any();
+
+        private void ApplyUniversalFamilyTypeToSelected()
+        {
+            if (SelectedDeviceFamily == null) return;
+
+            string family = SelectedDeviceFamily.FamilyName;
+            string type = SelectedDeviceType != null ? SelectedDeviceType.TypeName : null;
+
+            foreach (DeviceRoomItemViewModel room in BulkTargets.ToList())
+            {
+                room.SelectedFamily = family;
+                room.AvailableTypes = GetCatalogTypesForFamily(family) ?? new List<string>();
+                room.SelectedType = type;
+            }
+        }
+
+        private void ClearOverridesForSelected()
+        {
+            foreach (DeviceRoomItemViewModel room in BulkTargets.ToList())
+                room.ResetFamilyAndTypeToDefault();
+        }
 
         private void LoadDeviceFamilies()
         {
@@ -397,9 +458,15 @@ namespace FireProtection.UI.ViewModels.Devices
             SelectedDeviceFamily = null;
             SelectedDeviceType = null;
 
-            if (_deviceFamilySource == null) return;
+            // The Excel catalog is the source of truth (Decision 017). IDeviceFamilySource is only a
+            // fallback for a host that lists families out of the open Revit document.
+            IReadOnlyList<DeviceFamilyOption> families = GetCatalogFamilyOptions();
 
-            IReadOnlyList<DeviceFamilyOption> families = _deviceFamilySource.GetAvailableFamilies();
+            if ((families == null || families.Count == 0) && _deviceFamilySource != null)
+            {
+                families = _deviceFamilySource.GetAvailableFamilies();
+            }
+
             if (families == null) return;
 
             foreach (DeviceFamilyOption family in families)
@@ -407,6 +474,136 @@ namespace FireProtection.UI.ViewModels.Devices
                 if (family != null)
                     DeviceFamilies.Add(family);
             }
+
+            if (DeviceFamilies.Count > 0)
+            {
+                // Give the tab a usable universal default instead of an empty combo.
+                SelectedDeviceFamily = DeviceFamilies[0];
+                if (DeviceTypes.Count > 0) SelectedDeviceType = DeviceTypes[0];
+            }
+        }
+
+        /// <summary>
+        /// Builds the family/type options for this device category out of the loaded catalog.
+        /// Concrete VMs map their own sheet (SmokeDetectors / NotificationAppliances).
+        /// </summary>
+        protected virtual IReadOnlyList<DeviceFamilyOption> GetCatalogFamilyOptions()
+        {
+            return new List<DeviceFamilyOption>();
+        }
+
+        /// <summary>Family -&gt; type names for this device category, from the catalog.</summary>
+        protected virtual IReadOnlyList<string> GetCatalogTypesForFamily(string familyName)
+        {
+            return new List<string>();
+        }
+
+        /// <summary>The loaded catalog, or null when the user has not picked a workbook yet.</summary>
+        protected ICatalog Catalog
+        {
+            get { return _catalogVm != null ? _catalogVm.Catalog : null; }
+        }
+
+        /// <summary>True when a workbook is loaded and carries rows for this device category.</summary>
+        public bool IsCatalogLoaded
+        {
+            get
+            {
+                IReadOnlyList<DeviceFamilyOption> families = GetCatalogFamilyOptions();
+                return families != null && families.Count > 0;
+            }
+        }
+
+        public string CatalogStatusMessage
+        {
+            get
+            {
+                if (_catalogVm == null || _catalogVm.Catalog == null || !_catalogVm.Catalog.IsLoaded)
+                    return "No catalog loaded — pick the catalog workbook in the top bar to populate the "
+                           + DeviceDisplayName.ToLowerInvariant() + " options.";
+                if (!IsCatalogLoaded)
+                    return "The loaded catalog has no rows for " + DeviceDisplayName.ToLowerInvariant() + ".";
+                return null;
+            }
+        }
+
+        /// <summary>
+        /// Pushes the tab's universal Family/Type onto every room row as that row's default, and
+        /// gives each row the family -&gt; types resolver so its Type combo follows its own Family.
+        /// Rows the user overrode are preserved (Decision 019).
+        /// </summary>
+        protected void SeedPerRowDeviceDefaults()
+        {
+            IReadOnlyList<string> familyNames = DeviceFamilies
+                .Where(f => f != null && !string.IsNullOrWhiteSpace(f.FamilyName))
+                .Select(f => f.FamilyName)
+                .ToList();
+
+            // Resolve the effective universal default once — every row and every level gets the same
+            // value, so resolving it per row would let a null tab selection wipe a just-seeded row.
+            string defaultFamily = null;
+            string defaultType = null;
+
+            if (familyNames.Count > 0)
+            {
+                string wantedFamily = SelectedDeviceFamily != null ? SelectedDeviceFamily.FamilyName : null;
+                defaultFamily = !string.IsNullOrEmpty(wantedFamily)
+                                && familyNames.Contains(wantedFamily, StringComparer.OrdinalIgnoreCase)
+                    ? wantedFamily
+                    : familyNames[0];
+
+                IReadOnlyList<string> types = GetCatalogTypesForFamily(defaultFamily) ?? new List<string>();
+                string wantedType = SelectedDeviceType != null ? SelectedDeviceType.TypeName : null;
+                defaultType = !string.IsNullOrEmpty(wantedType)
+                              && types.Contains(wantedType, StringComparer.OrdinalIgnoreCase)
+                    ? wantedType
+                    : (types.Count > 0 ? types[0] : null);
+            }
+
+            // Level defaults first: their propagation must not overwrite the row seeding below.
+            foreach (DeviceLevelItemViewModel level in Levels)
+            {
+                level.DeviceFamily = defaultFamily;
+                level.DeviceType = defaultType;
+            }
+
+            foreach (DeviceRoomItemViewModel room in AllRooms)
+            {
+                room.SetTypesResolver(GetCatalogTypesForFamily);
+                room.AvailableFamilies = familyNames;
+                room.SetDeviceDefaults(defaultFamily, defaultType);
+            }
+        }
+
+        private void OnCatalogViewModelPropertyChanged(object sender, PropertyChangedEventArgs e)
+        {
+            if (e == null) return;
+            if (e.PropertyName != nameof(CatalogViewModel.IsLoaded)
+                && e.PropertyName != nameof(CatalogViewModel.TotalRowCount)
+                && e.PropertyName != nameof(CatalogViewModel.CatalogVersion)
+                && e.PropertyName != nameof(CatalogViewModel.SourcePath))
+                return;
+
+            LoadDeviceFamilies();
+            SeedPerRowDeviceDefaults();
+            OnCatalogChanged();
+
+            // The catalog supplies the family/type every row needs, so re-apply the default selection here
+            // too - otherwise a catalog load could leave the device tabs with nothing checked while the
+            // sprinkler tab arrives fully selected.
+            ApplyDefaultSelection();
+
+            OnPropertyChanged(nameof(IsCatalogLoaded));
+            OnPropertyChanged(nameof(CatalogStatusMessage));
+            CommandManager.InvalidateRequerySuggested();
+        }
+
+        /// <summary>
+        /// Called after a catalog load/reload so a concrete VM can re-raise its own
+        /// catalog-derived option lists (detector types, mounts, candela, ...).
+        /// </summary>
+        protected virtual void OnCatalogChanged()
+        {
         }
 
         private void RefreshDeviceTypesForSelectedFamily()
@@ -425,26 +622,28 @@ namespace FireProtection.UI.ViewModels.Devices
 
         private void ValidateSelectedTypeForCurrentFamily()
         {
-            if (SelectedDeviceType == null) return;
-            if (SelectedDeviceFamily == null)
+            if (SelectedDeviceFamily == null || DeviceTypes.Count == 0)
             {
                 SelectedDeviceType = null;
                 return;
             }
 
-            bool stillValid = DeviceTypes.Any(t =>
+            // DeviceTypes only ever holds the selected family's types, so a family change always fails
+            // this check and lands on the new family's first type: Type is never left blank and never
+            // keeps a type that belonged to the previous family.
+            bool stillValid = SelectedDeviceType != null && DeviceTypes.Any(t =>
                 string.Equals(t.FamilyName, SelectedDeviceType.FamilyName, StringComparison.OrdinalIgnoreCase) &&
                 string.Equals(t.TypeName, SelectedDeviceType.TypeName, StringComparison.OrdinalIgnoreCase));
 
             if (!stillValid)
-                SelectedDeviceType = null;
+                SelectedDeviceType = DeviceTypes[0];
         }
 
         private bool CanExecutePlaceDevices()
         {
             if (IsBackendPending) return false;
             if (IsPlacementRunning) return false;
-            if (SelectedVisibleEligibleRoomCount == 0) return false;
+            if (SelectedVisibleRoomCount == 0) return false;
             if (SelectedDeviceFamily == null) return false;
             if (SelectedDeviceType == null) return false;
             if (!string.Equals(SelectedDeviceType.FamilyName, SelectedDeviceFamily.FamilyName, StringComparison.OrdinalIgnoreCase)) return false;
@@ -456,7 +655,7 @@ namespace FireProtection.UI.ViewModels.Devices
             if (IsBackendPending)
             {
                 PlacementStatusMessage = "Device placement backend is not yet implemented.";
-                MessageBox.Show(
+                Dialogs.Show(
                     "Device placement backend is not yet implemented. Room/level selection is available for planning only.",
                     DeviceDisplayName,
                     MessageBoxButton.OK,
@@ -466,8 +665,24 @@ namespace FireProtection.UI.ViewModels.Devices
 
             if (IsPlacementRunning) return;
 
+            // Replace deletes existing devices. Undoable, but destructive enough to confirm explicitly.
+            if (ExistingDevicePolicySelection == ExistingDevicePolicy.ReplaceExisting &&
+                !Dialogs.Confirm(
+                    "Replace will DELETE the existing " + DeviceDisplayName.ToLowerInvariant()
+                    + " devices inside every selected room before placing the new set.\n\nThis can be undone in "
+                    + "Revit (the run is a single undo entry), but the existing devices and any data on them will "
+                    + "be gone.\n\nContinue?",
+                    "Replace existing devices"))
+            {
+                PlacementStatusMessage = "Placement cancelled.";
+                return;
+            }
+
             IsPlacementRunning = true;
             PlacementStatusMessage = "Placing devices...";
+            PlacementProgressText = "Starting...";
+            _progressReporter = new PlacementProgressReporter(OnPlacementProgress);
+            CanCancelPlacement = true;
 
             try
             {
@@ -476,10 +691,16 @@ namespace FireProtection.UI.ViewModels.Devices
                 if (roomSelections.Count == 0)
                 {
                     PlacementStatusMessage = "No selected rooms with usable geometry.";
+                    Dialogs.Show("No selected rooms have usable geometry.", DeviceDisplayName,
+                        MessageBoxButton.OK, MessageBoxImage.Warning);
                     return;
                 }
 
-                PlacementRunReport report = _deviceExecutor.ExecutePlacement(roomSelections);
+                FireProtectionLog.Info(DeviceDisplayName + ": placement run started for "
+                    + roomSelections.Count + " room(s), policy " + ExistingDevicePolicySelection + ".");
+
+                PlacementRunReport report = _deviceExecutor.ExecutePlacement(
+                    roomSelections, _progressReporter, ExistingDevicePolicySelection);
                 LastDeviceResult = report;
 
                 PlacementStatusMessage =
@@ -489,15 +710,53 @@ namespace FireProtection.UI.ViewModels.Devices
             catch (Exception ex)
             {
                 PlacementStatusMessage = "Placement failed: " + ex.Message;
+                FireProtectionLog.Error(DeviceDisplayName + ": placement failed.", ex);
+                Dialogs.Show("Placement failed:\n\n" + ex.Message, DeviceDisplayName,
+                    MessageBoxButton.OK, MessageBoxImage.Error);
             }
             finally
             {
                 IsPlacementRunning = false;
+                CanCancelPlacement = false;
+                PlacementProgressText = null;
+                _progressReporter = null;
                 CommandManager.InvalidateRequerySuggested();
             }
         }
 
         public PlacementRunReport LastDeviceResult { get; private set; }
+
+        // -------------------------------------------------------------------------------------------
+        // Universal (tab) default -> per-level default -> per-row override (Decision 019).
+        // The tab's combo is the universal default. DeviceLevelItemViewModel does the level -> row
+        // propagation itself; the base only owns the tab -> level step.
+        // -------------------------------------------------------------------------------------------
+
+        /// <summary>
+        /// Pushes a new tab-scope (universal) attribute default down to every level that was still on the
+        /// previous universal value; each level then propagates it to its rows that have no override.
+        /// A level (or row) the user customised keeps its own value — item 7 / Decision 019 semantics.
+        /// </summary>
+        protected void PropagateUniversalDefault(string key, string oldValue, string newValue)
+        {
+            if (string.IsNullOrEmpty(key)) return;
+
+            foreach (DeviceLevelItemViewModel level in Levels)
+            {
+                if (level == null) continue;
+
+                string current = level.GetDefault(key);
+                bool levelWasCustomised = !string.IsNullOrEmpty(current)
+                    && !string.Equals(current, oldValue ?? string.Empty, StringComparison.OrdinalIgnoreCase);
+                if (levelWasCustomised) continue;
+
+                level.SetDefault(key, newValue);
+            }
+        }
+
+        /// <summary>Opens the per-level settings popover (Decision 019). Concrete VMs populate
+        /// the field keys/labels/options and apply the result to the level VM.</summary>
+        public abstract void OpenLevelSettings(DeviceLevelItemViewModel level);
 
         private List<DeviceRoomInputItem> CollectSelectedRooms()
         {
@@ -512,7 +771,6 @@ namespace FireProtection.UI.ViewModels.Devices
                 foreach (DeviceRoomItemViewModel roomVm in levelVm.Rooms)
                 {
                     if (!roomVm.IsSelected) continue;
-                    if (!roomVm.IsEligible) continue;
 
                     RoomUiData roomData = roomVm.Room;
                     if (roomData == null) continue;
@@ -542,8 +800,13 @@ namespace FireProtection.UI.ViewModels.Devices
                         Polygon = polyCopy,
 
                         FullRoomJson = BuildFullRoomJson(roomData),
-                        SelectedFamilyName = SelectedDeviceFamily?.FamilyName,
-                        SelectedTypeName = SelectedDeviceType?.TypeName
+                        // Per-row override wins; the tab's universal selection is the fallback.
+                        SelectedFamilyName = !string.IsNullOrEmpty(roomVm.SelectedFamily)
+                            ? roomVm.SelectedFamily
+                            : SelectedDeviceFamily?.FamilyName,
+                        SelectedTypeName = !string.IsNullOrEmpty(roomVm.SelectedType)
+                            ? roomVm.SelectedType
+                            : SelectedDeviceType?.TypeName
                     });
                 }
             }
@@ -586,7 +849,6 @@ namespace FireProtection.UI.ViewModels.Devices
         {
             DeviceRoomItemViewModel room = obj as DeviceRoomItemViewModel;
             if (room == null) return false;
-            if (ShowEligibleRoomsOnly && !room.IsEligible) return false;
             if (room.ParentLevel == null || !room.ParentLevel.IsSelected) return false;
             if (HideUnselectedRooms && !room.IsSelected) return false;
             return MatchesRoomSearch(room);
@@ -613,7 +875,7 @@ namespace FireProtection.UI.ViewModels.Devices
         private void ToggleSelectAllRooms()
         {
             bool select = !AreAllSelectableRoomsSelected;
-            foreach (DeviceRoomItemViewModel room in AllRooms.Where(r => r.IsEligible))
+            foreach (DeviceRoomItemViewModel room in AllRooms)
                 room.IsSelected = select;
         }
 
@@ -627,7 +889,7 @@ namespace FireProtection.UI.ViewModels.Devices
                     bool select = levelVm.IsSelected;
                     foreach (DeviceRoomItemViewModel room in levelVm.Rooms)
                     {
-                        room.IsSelected = room.IsEligible ? select : false;
+                        room.IsSelected = select;
                     }
                 }
 
@@ -635,6 +897,13 @@ namespace FireProtection.UI.ViewModels.Devices
                 OnPropertyChanged(nameof(LevelSelectionToggleLabel));
                 OnPropertyChanged(nameof(AreAllSelectableRoomsSelected));
                 OnPropertyChanged(nameof(RoomSelectionToggleLabel));
+            }
+            else if (e.PropertyName == nameof(DeviceLevelItemViewModel.DeviceFamily)
+                     || e.PropertyName == nameof(DeviceLevelItemViewModel.DeviceType))
+            {
+                // The level default has already propagated into its non-overridden rows; refresh the
+                // counters so the header text follows.
+                RaiseRoomCounts();
             }
         }
 
@@ -645,41 +914,32 @@ namespace FireProtection.UI.ViewModels.Devices
                 OnPropertyChanged(nameof(AreAllSelectableRoomsSelected));
                 OnPropertyChanged(nameof(RoomSelectionToggleLabel));
             }
+            else if (e.PropertyName == nameof(DeviceRoomItemViewModel.SelectedFamily)
+                     || e.PropertyName == nameof(DeviceRoomItemViewModel.SelectedType)
+                     || (e.PropertyName != null && e.PropertyName.StartsWith("Override_", StringComparison.Ordinal)))
+            {
+                OnPropertyChanged(nameof(AreAllSelectableRoomsSelected));
+                OnPropertyChanged(nameof(RoomSelectionToggleLabel));
+                RaiseRoomCounts();
+            }
         }
 
         /// <summary>
-        /// Evaluates placement eligibility for a single room. In the UI-first slice (no device backend) every
-        /// room is reported Eligible so the user can plan layouts; the action remains disabled via
-        /// <see cref="IsBackendPending"/>. When the device backend lands, override this to run the real
-        /// NFPA-72 preflight and return BLOCKED / UNDETERMINED as appropriate.
+        /// Helper for concrete VMs: the effective value of a per-level/per-row device attribute
+        /// (row override first, then the level default the row was given).
         /// </summary>
-        protected virtual PlacementEligibilityResult EvaluateRoomEligibility(DeviceRoomItemViewModel roomVm)
+        protected static string GetEffectiveAttribute(DeviceRoomItemViewModel roomVm, string key)
         {
-            return PlacementEligibilityResult.Eligible(new PlacementEligibilityResult
-            {
-                Reason = "Device backend pending — selectable for layout planning only."
-            });
+            if (roomVm == null || string.IsNullOrEmpty(key)) return null;
+            return roomVm.GetEffective(key);
         }
 
-        private void RefreshEligibility()
-        {
-            foreach (DeviceRoomItemViewModel roomVm in AllRooms)
-            {
-                PlacementEligibilityResult result = EvaluateRoomEligibility(roomVm);
-                bool wasEligible = roomVm.IsEligible;
-                roomVm.SetEligibility(result);
-
-                if (!roomVm.IsEligible)
-                    roomVm.IsSelected = false;
-                else if (!wasEligible)
-                    roomVm.IsSelected = true;
-            }
-
-            OnPropertyChanged(nameof(AreAllSelectableRoomsSelected));
-            OnPropertyChanged(nameof(RoomSelectionToggleLabel));
-        }
-
-        private void ApplyDefaultSelection()
+        /// <summary>
+        /// Selects every level that has rooms and every room on it - the same "arrive ready to place"
+        /// default the sprinkler tab uses. Only ever selects, never clears, so it is safe to call
+        /// repeatedly: concrete VMs call it again once their attribute defaults are seeded.
+        /// </summary>
+        protected void ApplyDefaultSelection()
         {
             foreach (DeviceLevelItemViewModel level in Levels)
             {
@@ -688,7 +948,6 @@ namespace FireProtection.UI.ViewModels.Devices
 
                 foreach (DeviceRoomItemViewModel room in level.Rooms)
                 {
-                    if (!room.IsEligible) continue;
                     room.IsSelected = true;
                 }
             }
@@ -726,6 +985,8 @@ namespace FireProtection.UI.ViewModels.Devices
             OnPropertyChanged(nameof(SelectedVisibleRoomCount));
             OnPropertyChanged(nameof(RoomsFoundText));
             OnPropertyChanged(nameof(RoomsSelectedSummary));
+            OnPropertyChanged(nameof(BulkTargetCount));
+            OnPropertyChanged(nameof(BulkTargetSummary));
         }
 
         private void Reset()
@@ -735,22 +996,32 @@ namespace FireProtection.UI.ViewModels.Devices
             HideUnselectedLevels = false;
             HideUnselectedRooms = false;
 
-            SelectedDeviceFamily = null;
-            SelectedDeviceType = null;
-            DeviceTypes.Clear();
-
             foreach (DeviceLevelItemViewModel level in Levels)
             {
                 level.IsSelected = false;
                 foreach (DeviceRoomItemViewModel room in level.Rooms)
                 {
                     room.IsSelected = false;
+                    // Drop per-row overrides so the row falls back to the tab/level default.
+                    room.ClearAllOverrides();
                 }
             }
 
+            // Re-seed the universal family/type from the catalog, then push it back onto every row
+            // (which also clears any per-row family/type override).
+            LoadDeviceFamilies();
+            OnCatalogChanged();
+            foreach (DeviceRoomItemViewModel room in AllRooms)
+            {
+                room.ResetFamilyAndTypeToDefault();
+            }
+            SeedPerRowDeviceDefaults();
+
             PlacementStatusMessage = null;
-            RefreshEligibility();
             ApplyDefaultSelection();
+
+            OnPropertyChanged(nameof(IsCatalogLoaded));
+            OnPropertyChanged(nameof(CatalogStatusMessage));
             CommandManager.InvalidateRequerySuggested();
         }
     }

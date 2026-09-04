@@ -4,6 +4,7 @@ using System.ComponentModel;
 using System.Runtime.CompilerServices;
 using FireProtection.UI.Models;
 using FireProtection.UI.Services;
+using FireProtection.UI.ViewModels.Catalog;
 using FireProtection.UI.ViewModels.Sprinklers.BruteForce;
 using FireProtection.UI.ViewModels.Sprinklers.Collision;
 
@@ -14,19 +15,19 @@ namespace FireProtection.UI.ViewModels.Sprinklers
         private object _selectedSubTabViewModel;
 
         public SprinklerViewModel()
-            : this(null, null, null)
+            : this(null, null, null, null)
         {
         }
 
         public SprinklerViewModel(FireProtectionUiData data)
-            : this(data, null, null)
+            : this(data, null, null, null)
         {
         }
 
         public SprinklerViewModel(
             FireProtectionUiData data,
             ISprinklerFamilySource sprinklerFamilySource)
-            : this(data, null, sprinklerFamilySource)
+            : this(data, null, sprinklerFamilySource, null)
         {
         }
 
@@ -43,15 +44,27 @@ namespace FireProtection.UI.ViewModels.Sprinklers
             IPlacementInputExporter placementInputExporter,
             ISprinklerFamilySource sprinklerFamilySource,
             ISprinklerPlacementService sprinklerPlacementService)
+            : this(data, placementInputExporter, sprinklerFamilySource, sprinklerPlacementService, null)
+        {
+        }
+
+        public SprinklerViewModel(
+            FireProtectionUiData data,
+            IPlacementInputExporter placementInputExporter,
+            ISprinklerFamilySource sprinklerFamilySource,
+            ISprinklerPlacementService sprinklerPlacementService,
+            CatalogViewModel catalog)
         {
             Data = data;
 
             Collision = new SprinklerCollisionViewModel(data);
-            BruteForce = new SprinklerBruteForceViewModel(data, placementInputExporter, sprinklerFamilySource, sprinklerPlacementService);
+            BruteForce = new SprinklerBruteForceViewModel(
+                data,
+                placementInputExporter,
+                sprinklerFamilySource,
+                sprinklerPlacementService,
+                catalog);
 
-            // Tabs swapped (Preliminary <-> Final). The BruteForce sub-view now occupies the
-            // "Preliminary" position and the Collision sub-view the "Final" position. The
-            // ViewModels themselves (and their commands/actions) are unchanged.
             SubTabViewModels = new ObservableCollection<object>
             {
                 BruteForce,

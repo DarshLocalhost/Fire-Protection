@@ -27,6 +27,13 @@ namespace FireProtection.Backend.Services.Placement.Sprinklers.Final
         public List<ObstacleData> Obstacles { get; set; }
         public List<ExistingSprinklerData> ExistingSprinklers { get; set; }
         public SourceReferenceData Source { get; set; }
+
+        // Per-row overrides (Decisions 017, 018). When non-null these override the
+        // universal selection passed to PlacementInputBuilder.Build for THIS room only.
+        public string SelectedSprinklerFamilyName { get; set; }
+        public string SelectedSprinklerTypeName { get; set; }
+        public double? OverrideMaxSpacingFt { get; set; }
+        public double? OverrideBoundaryClearanceFt { get; set; }
     }
 
     public static class PlacementInputBuilder
@@ -112,7 +119,11 @@ namespace FireProtection.Backend.Services.Placement.Sprinklers.Final
                         Ceilings = sel.Ceilings ?? new List<CeilingData>(),
                         Obstacles = sel.Obstacles ?? new List<ObstacleData>(),
                         ExistingSprinklers = sel.ExistingSprinklers ?? new List<ExistingSprinklerData>(),
-                        Source = sel.Source ?? new SourceReferenceData()
+                        Source = sel.Source ?? new SourceReferenceData(),
+                        SelectedSprinklerFamilyName = sel.SelectedSprinklerFamilyName,
+                        SelectedSprinklerTypeName = sel.SelectedSprinklerTypeName,
+                        OverrideMaxSpacingFt = sel.OverrideMaxSpacingFt,
+                        OverrideBoundaryClearanceFt = sel.OverrideBoundaryClearanceFt
                     };
 
                     snapshot.Rooms.Add(roomInput);

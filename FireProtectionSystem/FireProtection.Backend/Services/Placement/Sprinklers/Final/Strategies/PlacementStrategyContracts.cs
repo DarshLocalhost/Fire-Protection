@@ -14,6 +14,7 @@ namespace FireProtection.Backend.Services.Placement.Sprinklers.Final.Strategies
         public const string PlacedButInvalid = "PLACED_BUT_INVALID";
         public const string PlacementFailed = "PLACEMENT_FAILED";
         public const string SkippedDuplicate = "SKIPPED_DUPLICATE";
+        public const string SkippedRoomHasDevices = "SKIPPED_ROOM_HAS_DEVICES";
 
         // Failure reason codes (§26).
         public const string NonFiniteCoordinates = "NON_FINITE_COORDINATES";
@@ -25,6 +26,10 @@ namespace FireProtection.Backend.Services.Placement.Sprinklers.Final.Strategies
         public const string RevitCreationFailed = "REVIT_CREATION_FAILED";
         public const string PostPlacementValidationFailed = "POST_PLACEMENT_VALIDATION_FAILED";
         public const string Duplicate = "DUPLICATE";
+
+        /// <summary>The candidate point fell outside its own room polygon in host coordinates — refused before
+        /// any element was created. Non-zero counts here point at a coordinate-space (linked-model transform) bug.</summary>
+        public const string OutsideRoomBoundary = "OUTSIDE_ROOM_BOUNDARY";
     }
 
     /// <summary>

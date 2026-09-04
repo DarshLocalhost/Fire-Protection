@@ -12,6 +12,19 @@ namespace FireProtection.UI.Services
     /// </summary>
     public interface IDevicePlacementExecutor
     {
-        PlacementRunReport ExecutePlacement(IReadOnlyList<DeviceRoomInputItem> items);
+        /// <summary>
+        /// Runs the device placement for the given rooms.
+        /// </summary>
+        /// <param name="progress">
+        /// Optional progress + cancellation channel. Implementations report once per room and must honour
+        /// cancellation at room boundaries only, rolling the whole run back so a cancelled run creates nothing.
+        /// </param>
+        /// <param name="existingDevicePolicy">
+        /// What to do with rooms that already contain devices of this kind, i.e. what a second Place does.
+        /// </param>
+        PlacementRunReport ExecutePlacement(
+            IReadOnlyList<DeviceRoomInputItem> items,
+            IPlacementProgress progress = null,
+            ExistingDevicePolicy existingDevicePolicy = ExistingDevicePolicy.SkipRoom);
     }
 }

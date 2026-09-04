@@ -1,0 +1,110 @@
+<Window x:Class="FireProtection.UI.Views.Common.MissingFamiliesModal"
+        xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+        xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+        mc:Ignorable="d"
+        Title="Families Not Found In Model"
+        Width="640" Height="480"
+        WindowStartupLocation="CenterOwner"
+        WindowStyle="ToolWindow"
+        ResizeMode="CanResizeWithGrip"
+        ShowInTaskbar="False"
+        Background="{DynamicResource BackgroundBrush}"
+        FontFamily="Segoe UI">
+
+    <Window.Resources>
+        <ResourceDictionary>
+            <ResourceDictionary.MergedDictionaries>
+                <ResourceDictionary Source="/FireProtection.UI;component/Themes/Colors.xaml"/>
+                <ResourceDictionary Source="/FireProtection.UI;component/Themes/Styles.xaml"/>
+            </ResourceDictionary.MergedDictionaries>
+        </ResourceDictionary>
+    </Window.Resources>
+
+    <Grid Margin="16">
+        <Grid.RowDefinitions>
+            <RowDefinition Height="Auto"/>
+            <RowDefinition Height="Auto"/>
+            <RowDefinition Height="*"/>
+            <RowDefinition Height="Auto"/>
+            <RowDefinition Height="Auto"/>
+        </Grid.RowDefinitions>
+
+        <StackPanel Grid.Row="0" Orientation="Horizontal" Margin="0,0,0,8">
+            <Rectangle Width="3" Height="14" Fill="{StaticResource BrandBrush}" Margin="0,0,10,0" VerticalAlignment="Center"/>
+            <TextBlock Text="FAMILIES NOT FOUND IN MODEL" Style="{StaticResource EyebrowText}"/>
+        </StackPanel>
+
+        <TextBlock Grid.Row="1"
+                   x:Name="HeaderText"
+                   Text="The following rooms reference families or types that are not loaded in the current Revit model."
+                   FontSize="12.5"
+                   Foreground="{StaticResource TextPrimaryBrush}"
+                   TextWrapping="Wrap"
+                   Margin="0,0,0,8"/>
+
+        <Border Grid.Row="2"
+                BorderBrush="{StaticResource DividerBrush}"
+                BorderThickness="1"
+                Background="{StaticResource BackgroundOverlayBrush}">
+            <ListBox x:Name="MissingList"
+                     Background="Transparent"
+                     BorderThickness="0"
+                     ScrollViewer.HorizontalScrollBarVisibility="Disabled"
+                     HorizontalContentAlignment="Stretch">
+                <ListBox.ItemTemplate>
+                    <DataTemplate>
+                        <Grid Margin="6,6">
+                            <Grid.ColumnDefinitions>
+                                <ColumnDefinition Width="*"/>
+                                <ColumnDefinition Width="2*"/>
+                                <ColumnDefinition Width="2*"/>
+                            </Grid.ColumnDefinitions>
+                            <TextBlock Grid.Column="0" Text="{Binding RoomName}" FontSize="12" TextTrimming="CharacterEllipsis"/>
+                            <TextBlock Grid.Column="1" Text="{Binding FamilyName}" FontSize="12" TextTrimming="CharacterEllipsis" Margin="8,0,0,0"/>
+                            <TextBlock Grid.Column="2" Text="{Binding TypeName}" FontSize="12" TextTrimming="CharacterEllipsis" Margin="8,0,0,0"/>
+                        </Grid>
+                    </DataTemplate>
+                </ListBox.ItemTemplate>
+            </ListBox>
+        </Border>
+
+        <TextBlock Grid.Row="3"
+                   x:Name="SummaryText"
+                   Text=""
+                   FontSize="11.5"
+                   Foreground="{StaticResource TextSecondaryBrush}"
+                   Margin="0,8,0,8"
+                   TextWrapping="Wrap"/>
+
+        <Grid Grid.Row="4" Margin="0,8,0,0">
+            <Grid.ColumnDefinitions>
+                <ColumnDefinition Width="*"/>
+                <ColumnDefinition Width="Auto"/>
+                <ColumnDefinition Width="8"/>
+                <ColumnDefinition Width="Auto"/>
+                <ColumnDefinition Width="8"/>
+                <ColumnDefinition Width="Auto"/>
+            </Grid.ColumnDefinitions>
+
+            <Button Grid.Column="1"
+                    Style="{StaticResource OutlineButtonStyle}"
+                    Content="Export missing list (CSV)"
+                    Click="ExportCsvButton_Click"
+                    Padding="14,6"/>
+            <Button Grid.Column="3"
+                    Style="{StaticResource OutlineButtonStyle}"
+                    Content="Cancel"
+                    Click="CancelButton_Click"
+                    Padding="18,6"
+                    IsCancel="True"/>
+            <Button Grid.Column="5"
+                    Style="{StaticResource PrimaryButtonStyle}"
+                    Content="Proceed with available"
+                    Click="ProceedButton_Click"
+                    Padding="18,6"
+                    IsDefault="True"/>
+        </Grid>
+    </Grid>
+</Window>

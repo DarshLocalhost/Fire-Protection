@@ -66,50 +66,37 @@
                                Style="{StaticResource EyebrowText}"/>
                 </StackPanel>
 
-                <Grid Grid.Row="2">
-                    <Grid.ColumnDefinitions>
-                        <ColumnDefinition Width="170"/>
-                        <ColumnDefinition Width="320"/>
-                        <ColumnDefinition Width="32"/>
-                        <ColumnDefinition Width="170"/>
-                        <ColumnDefinition Width="320"/>
-                        <ColumnDefinition Width="*"/>
-                    </Grid.ColumnDefinitions>
+                <!-- WrapPanel, not StackPanel: each label+combo pair is one unit, so on a narrow window
+                     the pairs wrap onto a second line instead of the last combo being clipped. -->
+                <WrapPanel Grid.Row="2">
+                    <StackPanel Orientation="Horizontal" Margin="0,0,36,6">
+                        <TextBlock Text="Sprinkler Family" Style="{StaticResource FieldLabel}"/>
+                        <ComboBox Width="300"
+                                  Style="{StaticResource StandardComboBoxStyle}"
+                                  ItemsSource="{Binding SprinklerFamilies}"
+                                  SelectedItem="{Binding SelectedSprinklerFamily, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}"
+                                  DisplayMemberPath="FamilyName"/>
+                    </StackPanel>
 
-                    <TextBlock Grid.Column="0"
-                               Text="Sprinkler Family"
-                               FontSize="13"
-                               FontWeight="SemiBold"
-                               Foreground="{StaticResource TextPrimaryBrush}"
-                               VerticalAlignment="Center"/>
-
-                    <ComboBox Grid.Column="1"
-                              Style="{StaticResource StandardComboBoxStyle}"
-                              ItemsSource="{Binding SprinklerFamilies}"
-                              SelectedItem="{Binding SelectedSprinklerFamily, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}"
-                              DisplayMemberPath="FamilyName"/>
-
-                    <TextBlock Grid.Column="3"
-                               Text="Sprinkler Type"
-                               FontSize="13"
-                               FontWeight="SemiBold"
-                               Foreground="{StaticResource TextPrimaryBrush}"
-                               VerticalAlignment="Center"/>
-
-                    <ComboBox Grid.Column="4"
-                              Style="{StaticResource StandardComboBoxStyle}"
-                              ItemsSource="{Binding SprinklerTypes}"
-                              SelectedItem="{Binding SelectedSprinklerType, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}"
-                              DisplayMemberPath="TypeName"
-                              IsEnabled="{Binding IsSprinklerFamilySelected}"/>
-                </Grid>
+                    <StackPanel Orientation="Horizontal" Margin="0,0,0,6">
+                        <TextBlock Text="Sprinkler Type" Style="{StaticResource FieldLabel}"/>
+                        <ComboBox Width="300"
+                                  Style="{StaticResource StandardComboBoxStyle}"
+                                  ItemsSource="{Binding SprinklerTypes}"
+                                  SelectedItem="{Binding SelectedSprinklerType, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}"
+                                  DisplayMemberPath="TypeName"
+                                  IsEnabled="{Binding IsSprinklerFamilySelected}"/>
+                    </StackPanel>
+                </WrapPanel>
             </Grid>
         </Border>
 
         <!-- ================= MAIN CONTENT ================= -->
         <Grid Grid.Row="2">
             <Grid.ColumnDefinitions>
-                <ColumnDefinition Width="300"/>
+                <!-- Proportional with a floor and a ceiling: the levels pane no longer eats a fixed 300px
+                     out of a narrow window, and never grows past 320px on a wide one. -->
+                <ColumnDefinition Width="0.28*" MinWidth="220" MaxWidth="320"/>
                 <ColumnDefinition Width="16"/>
                 <ColumnDefinition Width="*"/>
             </Grid.ColumnDefinitions>
@@ -195,6 +182,8 @@
                              Background="Transparent"
                              BorderThickness="0"
                              ScrollViewer.HorizontalScrollBarVisibility="Disabled"
+                             VirtualizingPanel.IsVirtualizing="True"
+                             VirtualizingPanel.VirtualizationMode="Recycling"
                              ItemContainerStyle="{StaticResource LevelListBoxItemStyle}">
 
                         <ListBox.ItemTemplate>
@@ -323,26 +312,99 @@
                         </Button>
                     </Grid>
 
-                    <Grid Grid.Row="1" Margin="0,12,0,0">
-                        <Grid.ColumnDefinitions>
-                            <ColumnDefinition Width="Auto"/>
-                            <ColumnDefinition Width="*"/>
-                        </Grid.ColumnDefinitions>
+                    <StackPanel Grid.Row="1" Margin="0,12,0,0">
+                        <Grid>
+                            <Grid.ColumnDefinitions>
+                                <ColumnDefinition Width="Auto"/>
+                                <ColumnDefinition Width="*"/>
+                            </Grid.ColumnDefinitions>
 
-                        <CheckBox Grid.Column="0"
-                                  Content="Eligible rooms only"
-                                  IsChecked="{Binding ShowEligibleRoomsOnly, Mode=TwoWay}"
-                                  VerticalAlignment="Center"
-                                  Foreground="{StaticResource TextSecondaryBrush}"
-                                  FontSize="12"
-                                  Margin="0,0,16,0"/>
+                            <CheckBox Grid.Column="0"
+                                      Content="Eligible rooms only"
+                                      IsChecked="{Binding ShowEligibleRoomsOnly, Mode=TwoWay}"
+                                      VerticalAlignment="Center"
+                                      Foreground="{StaticResource TextSecondaryBrush}"
+                                      FontSize="12"
+                                      Margin="0,0,16,0"/>
 
-                        <Button Grid.Column="1"
-                                Style="{StaticResource OutlineButtonStyle}"
-                                Content="{Binding RoomSelectionToggleLabel}"
-                                Command="{Binding ToggleSelectAllRoomsCommand}"
-                                HorizontalAlignment="Right"/>
-                    </Grid>
+                            <Button Grid.Column="1"
+                                    Style="{StaticResource OutlineButtonStyle}"
+                                    Content="{Binding RoomSelectionToggleLabel}"
+                                    Command="{Binding ToggleSelectAllRoomsCommand}"
+                                    HorizontalAlignment="Right"/>
+                        </Grid>
+
+                        <!-- Bulk edit (item 8, list 2) + re-run policy (item 3, list 2). A WrapPanel so a narrow
+                             window wraps these controls instead of clipping them. Every Apply targets only the
+                             rooms that are both selected and eligible - see BulkTargetSummary. -->
+                        <WrapPanel Margin="0,10,0,0" Orientation="Horizontal">
+                            <TextBlock Text="IF ROOM ALREADY HAS DEVICES"
+                                       Style="{StaticResource EyebrowText}"
+                                       VerticalAlignment="Center"
+                                       Margin="0,0,8,6"/>
+                            <ComboBox Width="210"
+                                      Margin="0,0,18,6"
+                                      Style="{StaticResource StandardComboBoxStyle}"
+                                      ItemsSource="{Binding ExistingDevicePolicyOptionLabels}"
+                                      SelectedItem="{Binding SelectedExistingDevicePolicyLabel, Mode=TwoWay}"
+                                      ToolTip="{Binding ExistingDevicePolicyTooltip}"/>
+
+                            <TextBlock Text="{Binding SpacingColumnHeader}"
+                                       Style="{StaticResource EyebrowText}"
+                                       VerticalAlignment="Center"
+                                       Margin="0,0,6,6"/>
+                            <TextBox Width="64"
+                                     Margin="0,0,6,6"
+                                     Style="{StaticResource NumericCellInputStyle}"
+                                     Text="{Binding BulkSpacingInput, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}"/>
+                            <Button Content="Apply"
+                                    Style="{StaticResource OutlineButtonStyle}"
+                                    Padding="10,4"
+                                    Margin="0,0,18,6"
+                                    Command="{Binding ApplySpacingToSelectedCommand}"/>
+
+                            <TextBlock Text="{Binding ClearanceColumnHeader}"
+                                       Style="{StaticResource EyebrowText}"
+                                       VerticalAlignment="Center"
+                                       Margin="0,0,6,6"/>
+                            <TextBox Width="64"
+                                     Margin="0,0,6,6"
+                                     Style="{StaticResource NumericCellInputStyle}"
+                                     Text="{Binding BulkClearanceInput, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}"/>
+                            <Button Content="Apply"
+                                    Style="{StaticResource OutlineButtonStyle}"
+                                    Padding="10,4"
+                                    Margin="0,0,18,6"
+                                    Command="{Binding ApplyClearanceToSelectedCommand}"/>
+
+                            <Button Content="Apply family to selected"
+                                    Style="{StaticResource OutlineButtonStyle}"
+                                    Padding="10,4"
+                                    Margin="0,0,6,6"
+                                    Command="{Binding ApplyFamilyToSelectedCommand}"
+                                    CommandParameter="{Binding SelectedSprinklerFamily.FamilyName}"
+                                    ToolTip="Copies the universal Family (and its first Type) onto every selected, eligible room."/>
+                            <Button Content="Apply type"
+                                    Style="{StaticResource OutlineButtonStyle}"
+                                    Padding="10,4"
+                                    Margin="0,0,6,6"
+                                    Command="{Binding ApplyTypeToSelectedCommand}"
+                                    CommandParameter="{Binding SelectedSprinklerType.TypeName}"
+                                    ToolTip="Copies the universal Type onto every selected, eligible room that offers it."/>
+                            <Button Content="Clear overrides"
+                                    Style="{StaticResource OutlineButtonStyle}"
+                                    Padding="10,4"
+                                    Margin="0,0,12,6"
+                                    Command="{Binding ClearOverridesForSelectedCommand}"
+                                    ToolTip="Resets Family/Type and both spacing overrides on every selected, eligible room."/>
+
+                            <TextBlock Text="{Binding BulkTargetSummary}"
+                                       Style="{StaticResource DataMuted}"
+                                       FontSize="11.5"
+                                       VerticalAlignment="Center"
+                                       Margin="0,0,0,6"/>
+                        </WrapPanel>
+                    </StackPanel>
 
                     <!-- Column headers -->
                     <Border Grid.Row="2"
@@ -353,25 +415,74 @@
                             Margin="0,12,0,0"
                             CornerRadius="3">
                         <Grid>
+                            <!-- Column widths and per-column margins are duplicated verbatim in the row
+                                 DataTemplate below; edit the two together or the header stops lining up
+                                 with its values. Two rules keep them honest:
+                                 1. The action column is a FIXED width, not Auto. Auto measures its own
+                                    content, and the header's cell is empty while every row holds a Reset
+                                    button - that alone shifted every star column ~60px out of step.
+                                 2. The last header column is a scrollbar reserve. The list's scrollbar sits
+                                    inside the rows' width but not the header's, so without it the rows
+                                    lose ~17px the header keeps.
+                                 AREA and the ceiling height are centred in slightly wider columns so they
+                                 sit clear of the HAZARD and FAMILY / TYPE combos next to them. -->
                             <Grid.ColumnDefinitions>
                                 <ColumnDefinition Width="36"/>
+                                <ColumnDefinition Width="2.4*"/>
+                                <ColumnDefinition Width="0.9*"/>
+                                <ColumnDefinition Width="1.5*"/>
+                                <ColumnDefinition Width="0.8*"/>
                                 <ColumnDefinition Width="2.0*"/>
-                                <ColumnDefinition Width="1.1*"/>
-                                <ColumnDefinition Width="1.6*"/>
-                                <ColumnDefinition Width="1.1*"/>
+                                <ColumnDefinition Width="0.85*"/>
+                                <ColumnDefinition Width="0.85*"/>
+                                <ColumnDefinition Width="76"/>
+                                <ColumnDefinition Width="17"/>
                             </Grid.ColumnDefinitions>
 
-                            <CheckBox Grid.Column="0" IsEnabled="False"/>
-                            <TextBlock Grid.Column="1" Text="ROOM NAME" Style="{StaticResource EyebrowText}"/>
-                            <TextBlock Grid.Column="2" Text="AREA (SQ FT)" Style="{StaticResource EyebrowText}"/>
-                            <TextBlock Grid.Column="3" Text="HAZARD CLASS" Style="{StaticResource EyebrowText}"/>
-                            <TextBlock Grid.Column="4" Text="CEILING (FT)" Style="{StaticResource EyebrowText}"/>
+                            <CheckBox Grid.Column="0" IsEnabled="False" VerticalAlignment="Center"/>
+                            <TextBlock Grid.Column="1" Text="ROOM NAME" Margin="0,0,12,0" Style="{StaticResource EyebrowText}"/>
+                            <!-- Length headers carry the project's display unit (item 5). Areas stay ft², which is
+                                 why the AREA header is explicit rather than unit-aware. -->
+                            <TextBlock Grid.Column="2" Text="{Binding AreaColumnHeader}" Margin="0,0,18,0" TextAlignment="Center" Style="{StaticResource EyebrowTextRight}"/>
+                            <!-- 7 = the combo's own left padding, so these headers line up with the text
+                                 inside the combo below rather than with its border. -->
+                            <TextBlock Grid.Column="3" Text="HAZARD" Margin="7,0,12,0" Style="{StaticResource EyebrowText}"/>
+                            <TextBlock Grid.Column="4" Text="{Binding CeilingColumnHeader}" Margin="0,0,18,0" TextAlignment="Center" Style="{StaticResource EyebrowTextRight}"/>
+                            <TextBlock Grid.Column="5" Text="FAMILY / TYPE" Margin="7,0,12,0" Style="{StaticResource EyebrowText}"/>
+                            <!-- 19 = the column's 12px gutter + the input box's 7px padding, so the header's
+                                 right edge lines up with the digits inside the box rather than with its border. -->
+                            <TextBlock Grid.Column="6" Text="{Binding SpacingColumnHeader}" Margin="0,0,19,0" Style="{StaticResource EyebrowTextRight}"/>
+                            <TextBlock Grid.Column="7" Text="{Binding ClearanceColumnHeader}" Margin="0,0,19,0" Style="{StaticResource EyebrowTextRight}"/>
                         </Grid>
                     </Border>
 
-                    <ScrollViewer Grid.Row="3" VerticalScrollBarVisibility="Auto">
-                        <ItemsControl ItemsSource="{Binding RoomsView}">
-                            <ItemsControl.ItemTemplate>
+                    <!-- Virtualized room list (item 1). An ItemsControl inside a ScrollViewer measures with
+                         infinite height and therefore realizes EVERY row, which is why a large model felt slow.
+                         Giving the ItemsControl its own template with the ScrollViewer INSIDE it, plus a
+                         VirtualizingStackPanel with recycling, realizes only the visible rows. Row selection is
+                         unaffected: IsSelected lives on the ViewModel, so scrolling never loses a tick. -->
+                    <ItemsControl Grid.Row="3"
+                                  ItemsSource="{Binding RoomsView}"
+                                  VirtualizingPanel.IsVirtualizing="True"
+                                  VirtualizingPanel.VirtualizationMode="Recycling"
+                                  VirtualizingPanel.ScrollUnit="Pixel"
+                                  ScrollViewer.CanContentScroll="True">
+                        <ItemsControl.Template>
+                            <ControlTemplate TargetType="ItemsControl">
+                                <ScrollViewer CanContentScroll="True"
+                                              VerticalScrollBarVisibility="Visible"
+                                              HorizontalScrollBarVisibility="Disabled"
+                                              Focusable="False">
+                                    <ItemsPresenter/>
+                                </ScrollViewer>
+                            </ControlTemplate>
+                        </ItemsControl.Template>
+                        <ItemsControl.ItemsPanel>
+                            <ItemsPanelTemplate>
+                                <VirtualizingStackPanel Orientation="Vertical"/>
+                            </ItemsPanelTemplate>
+                        </ItemsControl.ItemsPanel>
+                        <ItemsControl.ItemTemplate>
                                 <DataTemplate>
                                     <Border BorderBrush="{StaticResource DividerBrush}"
                                             BorderThickness="0,0,0,1"
@@ -395,13 +506,23 @@
                                                 </Style.Triggers>
                                             </Style>
                                         </Border.Style>
-                                        <Grid>
+                                        <!-- MinHeight keeps every row the same height whether or not it
+                                             renders the optional eligibility sub-line, so the column
+                                             rules stay straight down the list. -->
+                                        <Grid MinHeight="48">
+                                            <!-- Must stay identical to the header Grid above, minus its
+                                                 trailing scrollbar-reserve column (the scrollbar already
+                                                 takes that width out of this grid). -->
                                             <Grid.ColumnDefinitions>
                                                 <ColumnDefinition Width="36"/>
+                                                <ColumnDefinition Width="2.4*"/>
+                                                <ColumnDefinition Width="0.9*"/>
+                                                <ColumnDefinition Width="1.5*"/>
+                                                <ColumnDefinition Width="0.8*"/>
                                                 <ColumnDefinition Width="2.0*"/>
-                                                <ColumnDefinition Width="1.1*"/>
-                                                <ColumnDefinition Width="1.6*"/>
-                                                <ColumnDefinition Width="1.1*"/>
+                                                <ColumnDefinition Width="0.85*"/>
+                                                <ColumnDefinition Width="0.85*"/>
+                                                <ColumnDefinition Width="76"/>
                                             </Grid.ColumnDefinitions>
 
                                             <CheckBox Grid.Column="0"
@@ -410,15 +531,20 @@
                                                       VerticalAlignment="Center"
                                                       ToolTip="{Binding EligibilityReason}"/>
 
-                                            <StackPanel Grid.Column="1" VerticalAlignment="Center">
+                                            <StackPanel Grid.Column="1" VerticalAlignment="Center" Margin="0,0,12,0">
                                                 <TextBlock Text="{Binding Name}"
                                                            FontSize="13"
                                                            FontWeight="SemiBold"
                                                            Foreground="{StaticResource TextPrimaryBrush}"
-                                                           TextTrimming="CharacterEllipsis"/>
+                                                           TextTrimming="CharacterEllipsis"
+                                                           ToolTip="{Binding Name}"/>
+                                                <!-- Short, status-code-derived reason: the full sentence
+                                                     never fits this column and used to clip mid-word
+                                                     ("Sprinkler f…"). Full text is in the tooltip. -->
                                                 <TextBlock FontSize="10.5"
                                                            Margin="0,3,0,0"
-                                                           TextTrimming="CharacterEllipsis">
+                                                           TextTrimming="CharacterEllipsis"
+                                                           ToolTip="{Binding EligibilityReason}">
                                                     <TextBlock.Style>
                                                         <Style TargetType="TextBlock" BasedOn="{StaticResource DataMuted}">
                                                             <Setter Property="Visibility" Value="Collapsed"/>
@@ -438,47 +564,104 @@
                                                     <Run Text="{Binding EligibilityState, Mode=OneWay}"
                                                          FontWeight="Bold"/>
                                                     <Run Text=" &#x2014; "/>
-                                                    <Run Text="{Binding EligibilityReason, Mode=OneWay}"/>
+                                                    <Run Text="{Binding EligibilityShortReason, Mode=OneWay}"/>
                                                 </TextBlock>
                                             </StackPanel>
 
                                             <TextBlock Grid.Column="2"
-                                                       Text="{Binding AreaSqFt, StringFormat={}{0:N2}}"
-                                                       FontSize="12.5"
-                                                       FontFamily="{StaticResource DataFontFamily}"
-                                                       Foreground="{StaticResource TextPrimaryBrush}"
-                                                       VerticalAlignment="Center"/>
+                                                       Text="{Binding AreaSqFt, StringFormat={}{0:N1}}"
+                                                       Margin="0,0,18,0"
+                                                       TextAlignment="Center"
+                                                       Style="{StaticResource DataNumeric}"/>
 
-                                            <StackPanel Grid.Column="3" VerticalAlignment="Center">
+                                            <StackPanel Grid.Column="3" VerticalAlignment="Center" Margin="0,0,12,0">
                                                 <ComboBox Style="{StaticResource HazardComboBoxStyle}"
                                                           ItemsSource="{Binding HazardClassOptionsList}"
                                                           SelectedItem="{Binding SelectedHazardClass, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}"/>
-
                                                 <TextBlock FontSize="10.5"
                                                            Style="{StaticResource DataMuted}"
-                                                           Margin="0,4,0,0">
+                                                           Margin="0,4,0,0"
+                                                           TextWrapping="Wrap"
+                                                           ToolTip="{Binding HazardClassSuggested}">
                                                     <Run Text="Suggested: "/>
                                                     <Run Text="{Binding HazardClassSuggested, Mode=OneWay}"/>
                                                 </TextBlock>
-
-                                                <TextBlock Text="{Binding MatchedDisplay}"
-                                                           FontSize="10.5"
-                                                           Style="{StaticResource DataMuted}"
-                                                           Margin="0,2,0,0"/>
                                             </StackPanel>
 
                                             <TextBlock Grid.Column="4"
                                                        Text="{Binding CeilingHeightFt, StringFormat={}{0:F2}}"
-                                                       FontSize="12.5"
-                                                       FontFamily="{StaticResource DataFontFamily}"
-                                                       Foreground="{StaticResource TextPrimaryBrush}"
-                                                       VerticalAlignment="Center"/>
+                                                       Margin="0,0,18,0"
+                                                       TextAlignment="Center"
+                                                       Style="{StaticResource DataNumeric}"/>
+
+                                            <StackPanel Grid.Column="5" VerticalAlignment="Center" Margin="0,0,12,0">
+                                                <ComboBox x:Name="FamilyCombo"
+                                                          Style="{StaticResource CellComboBoxStyle}"
+                                                          ItemsSource="{Binding AvailableFamilies}"
+                                                          SelectedItem="{Binding SelectedFamily, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}"
+                                                          ToolTip="{Binding SelectedFamily}"/>
+                                                <ComboBox x:Name="TypeCombo"
+                                                          Style="{StaticResource CellComboBoxStyle}"
+                                                          Margin="0,4,0,0"
+                                                          ItemsSource="{Binding AvailableTypes}"
+                                                          SelectedItem="{Binding SelectedType, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}"
+                                                          ToolTip="{Binding SelectedType}"/>
+                                            </StackPanel>
+
+                                            <!-- Inline validation (item 8): bound to a validated string, so a
+                                                 non-numeric or non-positive entry is refused at the cell and the
+                                                 last good value is kept. Blank clears the override. -->
+                                            <TextBox Grid.Column="6"
+                                                     Margin="0,0,12,0"
+                                                     VerticalAlignment="Center"
+                                                     Text="{Binding MaxSpacingInput, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}">
+                                                <TextBox.ToolTip>
+                                                    <ToolTip Content="{Binding MaxSpacingTooltip}"/>
+                                                </TextBox.ToolTip>
+                                                <TextBox.Style>
+                                                    <Style TargetType="TextBox" BasedOn="{StaticResource NumericCellInputStyle}">
+                                                        <Style.Triggers>
+                                                            <DataTrigger Binding="{Binding HasMaxSpacingError}" Value="True">
+                                                                <Setter Property="BorderBrush" Value="{StaticResource BlockedBrush}"/>
+                                                                <Setter Property="BorderThickness" Value="1.5"/>
+                                                            </DataTrigger>
+                                                        </Style.Triggers>
+                                                    </Style>
+                                                </TextBox.Style>
+                                            </TextBox>
+
+                                            <TextBox Grid.Column="7"
+                                                     Margin="0,0,12,0"
+                                                     VerticalAlignment="Center"
+                                                     Text="{Binding BoundaryClearanceInput, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}">
+                                                <TextBox.ToolTip>
+                                                    <ToolTip Content="{Binding BoundaryClearanceTooltip}"/>
+                                                </TextBox.ToolTip>
+                                                <TextBox.Style>
+                                                    <Style TargetType="TextBox" BasedOn="{StaticResource NumericCellInputStyle}">
+                                                        <Style.Triggers>
+                                                            <DataTrigger Binding="{Binding HasBoundaryClearanceError}" Value="True">
+                                                                <Setter Property="BorderBrush" Value="{StaticResource BlockedBrush}"/>
+                                                                <Setter Property="BorderThickness" Value="1.5"/>
+                                                            </DataTrigger>
+                                                        </Style.Triggers>
+                                                    </Style>
+                                                </TextBox.Style>
+                                            </TextBox>
+
+                                            <Button Grid.Column="8"
+                                                    Style="{StaticResource OutlineButtonStyle}"
+                                                    Content="Reset"
+                                                    Padding="8,3"
+                                                    HorizontalAlignment="Right"
+                                                    Click="RoomResetButton_Click"
+                                                    Tag="{Binding}"
+                                                    VerticalAlignment="Center"/>
                                         </Grid>
                                     </Border>
                                 </DataTemplate>
                             </ItemsControl.ItemTemplate>
                         </ItemsControl>
-                    </ScrollViewer>
 
                     <Border Grid.Row="4"
                             BorderBrush="{StaticResource DividerBrush}"
@@ -499,6 +682,8 @@
                 <ColumnDefinition Width="*"/>
                 <ColumnDefinition Width="Auto"/>
                 <ColumnDefinition Width="Auto"/>
+                <ColumnDefinition Width="Auto"/>
+                <ColumnDefinition Width="Auto"/>
             </Grid.ColumnDefinitions>
 
             <ctrl:InfoBanner Grid.Column="0">
@@ -513,7 +698,28 @@
                 </StackPanel>
             </ctrl:InfoBanner>
 
-            <Button Grid.Column="1"
+            <!-- Progress + cancel (item 3). Placement runs on Revit's own UI thread, so the text is
+                 refreshed by pumping the dispatcher between rooms; Cancel is honoured at room
+                 boundaries and rolls the whole run back. -->
+            <TextBlock Grid.Column="1"
+                       Text="{Binding PlacementProgressText}"
+                       Style="{StaticResource DataMuted}"
+                       FontSize="11.5"
+                       MaxWidth="260"
+                       TextTrimming="CharacterEllipsis"
+                       VerticalAlignment="Center"
+                       Margin="16,0,0,0"
+                       ToolTip="{Binding PlacementProgressText}"/>
+
+            <Button Grid.Column="2"
+                    Style="{StaticResource OutlineButtonStyle}"
+                    Command="{Binding CancelPlacementCommand}"
+                    Content="Cancel"
+                    Padding="14,9"
+                    Margin="10,0,0,0"
+                    Visibility="{Binding CanCancelPlacement, Converter={StaticResource BoolToVis}}"/>
+
+            <Button Grid.Column="3"
                     Style="{StaticResource PrimaryButtonStyle}"
                     Command="{Binding PlaceSprinklersCommand}"
                     Margin="16,0,0,0">
@@ -523,7 +729,7 @@
                 </StackPanel>
             </Button>
 
-            <Button Grid.Column="2"
+            <Button Grid.Column="4"
                     Style="{StaticResource OutlineButtonStyle}"
                     Command="{Binding ResetCommand}"
                     Margin="10,0,0,0"

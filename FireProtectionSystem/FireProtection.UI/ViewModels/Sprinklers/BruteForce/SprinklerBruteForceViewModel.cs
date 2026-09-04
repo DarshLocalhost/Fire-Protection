@@ -1,8 +1,10 @@
 using FireProtection.UI.Models;
 using FireProtection.UI.Models.Sprinklers.BruteForce;
 using FireProtection.UI.Services;
+using FireProtection.UI.ViewModels.Catalog;
 using FireProtection.UI.ViewModels.Common;
 using FireProtection.UI.ViewModels.Sprinklers.BruteForce;
+using FireProtection.UI.Views.Common;
 using Newtonsoft.Json.Linq;
 using System;
 using System.Collections.Generic;
@@ -21,6 +23,8 @@ namespace FireProtection.UI.ViewModels.Sprinklers.BruteForce
         private readonly IPlacementInputExporter _placementInputExporter;
         private readonly ISprinklerFamilySource _sprinklerFamilySource;
         private readonly ISprinklerPlacementService _sprinklerPlacementService;
+        private readonly CatalogViewModel _catalogViewModel;
+        private ICatalog _catalog;
         private string _levelSearchText;
         private string _roomSearchText;
         private bool _hideUnselectedLevels;
@@ -28,6 +32,16 @@ namespace FireProtection.UI.ViewModels.Sprinklers.BruteForce
         private bool _showEligibleRoomsOnly;
         private bool _showLevelsWithRoomsOnly;
         private bool _isPlacementRunning;
+        private bool _canCancelPlacement;
+        private string _placementProgressText;
+        private PlacementProgressReporter _progressReporter;
+        private string _selectedExistingDevicePolicyLabel = ExistingDevicePolicyOptions.SkipRoomLabel;
+        private string _bulkSpacingInput;
+        private string _bulkClearanceInput;
+
+        // Set while a family/type cascade or a catalog reload is moving several selections at once, so the
+        // (expensive, Revit-transactional) per-room eligibility probe runs once at the end instead of per move.
+        private bool _suppressEligibilityRefresh;
         private string _placementStatusMessage;
 
         private SprinklerFamilyOption _selectedSprinklerFamily;
@@ -63,11 +77,44 @@ namespace FireProtection.UI.ViewModels.Sprinklers.BruteForce
             IPlacementInputExporter placementInputExporter,
             ISprinklerFamilySource sprinklerFamilySource,
             ISprinklerPlacementService sprinklerPlacementService)
+            : this(data, placementInputExporter, sprinklerFamilySource, sprinklerPlacementService, (ICatalog)null)
+        {
+        }
+
+        /// <summary>
+        /// Preferred overload. Takes the live <see cref="CatalogViewModel"/> rather than an
+        /// <see cref="ICatalog"/> snapshot: the catalog starts unloaded (the user picks the workbook
+        /// in the top bar after this view model is built), so the family/type lists have to be
+        /// rebuilt when the catalog is loaded or reloaded.
+        /// </summary>
+        public SprinklerBruteForceViewModel(
+            FireProtectionUiData data,
+            IPlacementInputExporter placementInputExporter,
+            ISprinklerFamilySource sprinklerFamilySource,
+            ISprinklerPlacementService sprinklerPlacementService,
+            CatalogViewModel catalogViewModel)
+            : this(data, placementInputExporter, sprinklerFamilySource, sprinklerPlacementService,
+                   catalogViewModel != null ? catalogViewModel.Catalog : null)
+        {
+            _catalogViewModel = catalogViewModel;
+            if (_catalogViewModel != null)
+            {
+                _catalogViewModel.PropertyChanged += OnCatalogViewModelPropertyChanged;
+            }
+        }
+
+        public SprinklerBruteForceViewModel(
+            FireProtectionUiData data,
+            IPlacementInputExporter placementInputExporter,
+            ISprinklerFamilySource sprinklerFamilySource,
+            ISprinklerPlacementService sprinklerPlacementService,
+            ICatalog catalog)
         {
             Data = data;
             _placementInputExporter = placementInputExporter;
             _sprinklerFamilySource = sprinklerFamilySource;
             _sprinklerPlacementService = sprinklerPlacementService;
+            _catalog = catalog;
 
             Levels = new ObservableCollection<LevelItemViewModel>();
             AllRooms = new ObservableCollection<RoomItemViewModel>();
@@ -114,11 +161,40 @@ namespace FireProtection.UI.ViewModels.Sprinklers.BruteForce
             foreach (RoomItemViewModel room in AllRooms)
                 room.PropertyChanged += OnRoomItemPropertyChanged;
 
+            SeedPerRowCatalogDefaults();
+
             PlaceSprinklersCommand = new RelayCommand(
                 _ => ExecutePlaceSprinklers(),
                 _ => CanExecutePlaceSprinklers());
 
             ResetCommand = new RelayCommand(_ => Reset());
+
+            CancelPlacementCommand = new RelayCommand(
+                _ => ExecuteCancelPlacement(),
+                _ => CanExecuteCancelPlacement());
+
+            ApplyFamilyToSelectedCommand = new RelayCommand(
+                p => ApplyFamilyToSelected(p as string),
+                p => CanBulkEdit());
+
+            ApplyTypeToSelectedCommand = new RelayCommand(
+                p => ApplyTypeToSelected(p as string),
+                p => CanBulkEdit());
+
+            ApplySpacingToSelectedCommand = new RelayCommand(
+                _ => ApplySpacingToSelected(),
+                _ => CanBulkEdit());
+
+            ApplyClearanceToSelectedCommand = new RelayCommand(
+                _ => ApplyClearanceToSelected(),
+                _ => CanBulkEdit());
+
+            ClearOverridesForSelectedCommand = new RelayCommand(
+                _ => ClearOverridesForSelected(),
+                _ => CanBulkEdit());
+
+            ResetRowToDefaultCommand = new RelayCommand(
+                p => ResetRowToDefault(p as RoomItemViewModel));
 
             // Evaluate placement eligibility for every room against the (initially unselected)
             // family/type BEFORE default selection, so ApplyDefaultSelection only selects rooms
@@ -252,10 +328,25 @@ namespace FireProtection.UI.ViewModels.Sprinklers.BruteForce
             {
                 if (SetProperty(ref _selectedSprinklerFamily, value))
                 {
-                    RefreshSprinklerTypesForSelectedFamily();
-                    ValidateSelectedTypeForCurrentFamily();
+                    // The type cascade below moves SelectedSprinklerType, whose setter also refreshes
+                    // eligibility — that would run the per-room Revit probe twice for one family change.
+                    bool previousSuppress = _suppressEligibilityRefresh;
+                    _suppressEligibilityRefresh = true;
+                    try
+                    {
+                        RefreshSprinklerTypesForSelectedFamily();
+                        ValidateSelectedTypeForCurrentFamily();
+                    }
+                    finally
+                    {
+                        _suppressEligibilityRefresh = previousSuppress;
+                    }
+
                     OnPropertyChanged(nameof(IsSprinklerFamilySelected));
                     OnPropertyChanged(nameof(IsSprinklerTypeSelected));
+                    // The top-level selection is the default for every row: re-seed rows that are
+                    // still on the old default and leave user-overridden rows alone.
+                    SeedPerRowCatalogDefaults();
                     CommandManager.InvalidateRequerySuggested();
                     RefreshEligibility();
                 }
@@ -270,6 +361,7 @@ namespace FireProtection.UI.ViewModels.Sprinklers.BruteForce
                 if (SetProperty(ref _selectedSprinklerType, value))
                 {
                     OnPropertyChanged(nameof(IsSprinklerTypeSelected));
+                    SeedPerRowCatalogDefaults();
                     CommandManager.InvalidateRequerySuggested();
                     RefreshEligibility();
                 }
@@ -443,24 +535,167 @@ namespace FireProtection.UI.ViewModels.Sprinklers.BruteForce
 
         public ICommand PlaceSprinklersCommand { get; }
         public ICommand ResetCommand { get; }
+        public ICommand CancelPlacementCommand { get; }
+        public ICommand ApplyFamilyToSelectedCommand { get; }
+        public ICommand ApplyTypeToSelectedCommand { get; }
+        public ICommand ApplySpacingToSelectedCommand { get; }
+        public ICommand ApplyClearanceToSelectedCommand { get; }
+        public ICommand ClearOverridesForSelectedCommand { get; }
+        public ICommand ResetRowToDefaultCommand { get; }
+
+        // ----- Progress + cancel (item 3) ------------------------------------------------------------
+
+        /// <summary>"Room 4 of 37: Office 210  (3/37)" while a run is in flight; null when idle.</summary>
+        public string PlacementProgressText
+        {
+            get { return _placementProgressText; }
+            private set { _placementProgressText = value; OnPropertyChanged(); OnPropertyChanged(nameof(IsPlacementProgressVisible)); }
+        }
+
+        public bool IsPlacementProgressVisible => !string.IsNullOrEmpty(PlacementProgressText);
+
+        public bool CanCancelPlacement
+        {
+            get { return _canCancelPlacement; }
+            private set { _canCancelPlacement = value; OnPropertyChanged(); }
+        }
+
+        // ----- Re-run / existing-device policy (list-2 item 3) --------------------------------------
+
+        public string[] ExistingDevicePolicyOptionLabels => ExistingDevicePolicyOptions.Labels;
+
+        /// <summary>Explains the three re-run options in one tooltip, so the combo does not need three labels.</summary>
+        public string ExistingDevicePolicyTooltip => ExistingDevicePolicyOptions.Explanation;
+
+        /// <summary>Bound to the policy combo. Defaults to Skip so a second Place never silently doubles up
+        /// devices in a room that already has them.</summary>
+        public string SelectedExistingDevicePolicyLabel
+        {
+            get { return _selectedExistingDevicePolicyLabel; }
+            set
+            {
+                if (_selectedExistingDevicePolicyLabel == value) return;
+                _selectedExistingDevicePolicyLabel = value;
+                OnPropertyChanged();
+                OnPropertyChanged(nameof(ExistingDevicePolicySelection));
+            }
+        }
+
+        public ExistingDevicePolicy ExistingDevicePolicySelection =>
+            ExistingDevicePolicyOptions.Parse(_selectedExistingDevicePolicyLabel);
+
+        // ----- Bulk-edit inputs (list-2 item 8) ----------------------------------------------------
+
+        public string BulkSpacingInput
+        {
+            get { return _bulkSpacingInput; }
+            set { _bulkSpacingInput = value; OnPropertyChanged(); }
+        }
+
+        public string BulkClearanceInput
+        {
+            get { return _bulkClearanceInput; }
+            set { _bulkClearanceInput = value; OnPropertyChanged(); }
+        }
+
+        // ----- Unit-aware column headers (list-2 item 5) -------------------------------------------
+        // Only the suffix is unit-aware; stored values stay in decimal feet. Areas are deliberately NOT
+        // converted, so the AREA header stays ft^2.
+
+        public string CeilingColumnHeader => "CEILING " + UnitDisplay.HeaderSuffix;
+        public string SpacingColumnHeader => "S→S " + UnitDisplay.HeaderSuffix;
+        public string ClearanceColumnHeader => "WALL " + UnitDisplay.HeaderSuffix;
+        public string AreaColumnHeader => "AREA (FT²)";
+        public string UnitSuffix => UnitDisplay.Suffix;
 
         private void LoadSprinklerFamilies()
         {
-            SprinklerFamilies.Clear();
-            SprinklerTypes.Clear();
-            SelectedSprinklerFamily = null;
-            SelectedSprinklerType = null;
+            // Rebuilding the lists moves Selected* several times, and every move would queue a
+            // per-room Revit eligibility probe. Suppress those and refresh once at the end.
+            bool previousSuppress = _suppressEligibilityRefresh;
+            _suppressEligibilityRefresh = true;
 
-            if (_sprinklerFamilySource == null) return;
-
-            IReadOnlyList<SprinklerFamilyOption> families = _sprinklerFamilySource.GetAvailableFamilies();
-            if (families == null) return;
-
-            foreach (SprinklerFamilyOption family in families)
+            try
             {
-                if (family != null)
+                SprinklerFamilies.Clear();
+                SprinklerTypes.Clear();
+                SelectedSprinklerFamily = null;
+                SelectedSprinklerType = null;
+
+                // Decision 017: the Excel catalog is the source of truth for families + types.
+                // ISprinklerFamilySource (the Revit-document listing) is only a fallback and returns
+                // an empty list unless FireProtectionConfig.UseRevitFamilyListing is turned on.
+                foreach (SprinklerFamilyOption family in BuildFamilyOptionsFromCatalog())
+                {
                     SprinklerFamilies.Add(family);
+                }
+
+                if (SprinklerFamilies.Count == 0 && _sprinklerFamilySource != null)
+                {
+                    IReadOnlyList<SprinklerFamilyOption> families = _sprinklerFamilySource.GetAvailableFamilies();
+                    if (families != null)
+                    {
+                        foreach (SprinklerFamilyOption family in families)
+                        {
+                            if (family != null)
+                                SprinklerFamilies.Add(family);
+                        }
+                    }
+                }
+
+                // Never leave the tab sitting on an empty combo: default to the first catalog family.
+                // The setter cascades to that family's first type.
+                if (SprinklerFamilies.Count > 0)
+                {
+                    SelectedSprinklerFamily = SprinklerFamilies[0];
+                }
             }
+            finally
+            {
+                _suppressEligibilityRefresh = previousSuppress;
+            }
+        }
+
+        private IReadOnlyList<SprinklerFamilyOption> BuildFamilyOptionsFromCatalog()
+        {
+            List<SprinklerFamilyOption> options = new List<SprinklerFamilyOption>();
+            if (_catalog == null) return options;
+
+            IReadOnlyList<string> familyNames = _catalog.GetSprinklerFamilies();
+            if (familyNames == null) return options;
+
+            foreach (string familyName in familyNames)
+            {
+                if (string.IsNullOrWhiteSpace(familyName)) continue;
+
+                IReadOnlyList<string> typeNames = _catalog.GetSprinklerTypesForFamily(familyName);
+                List<SprinklerTypeOption> types = new List<SprinklerTypeOption>();
+                if (typeNames != null)
+                {
+                    foreach (string typeName in typeNames)
+                    {
+                        if (string.IsNullOrWhiteSpace(typeName)) continue;
+                        types.Add(new SprinklerTypeOption { FamilyName = familyName, TypeName = typeName });
+                    }
+                }
+
+                options.Add(new SprinklerFamilyOption { FamilyName = familyName, Types = types });
+            }
+
+            return options;
+        }
+
+        private void OnCatalogViewModelPropertyChanged(object sender, PropertyChangedEventArgs e)
+        {
+            if (e == null) return;
+            if (e.PropertyName != nameof(CatalogViewModel.Catalog)) return;
+
+            _catalog = _catalogViewModel != null ? _catalogViewModel.Catalog : null;
+
+            LoadSprinklerFamilies();
+            SeedPerRowCatalogDefaults();
+            RefreshEligibility();
+            CommandManager.InvalidateRequerySuggested();
         }
 
         private void RefreshSprinklerTypesForSelectedFamily()
@@ -479,19 +714,21 @@ namespace FireProtection.UI.ViewModels.Sprinklers.BruteForce
 
         private void ValidateSelectedTypeForCurrentFamily()
         {
-            if (SelectedSprinklerType == null) return;
-            if (SelectedSprinklerFamily == null)
+            if (SelectedSprinklerFamily == null || SprinklerTypes.Count == 0)
             {
                 SelectedSprinklerType = null;
                 return;
             }
 
-            bool stillValid = SprinklerTypes.Any(t =>
+            // SprinklerTypes only ever holds the selected family's types, so a family change always
+            // fails this check and lands on the new family's first type: Type is never left blank and
+            // never keeps a type that belonged to the previous family.
+            bool stillValid = SelectedSprinklerType != null && SprinklerTypes.Any(t =>
                 string.Equals(t.FamilyName, SelectedSprinklerType.FamilyName, StringComparison.OrdinalIgnoreCase) &&
                 string.Equals(t.TypeName, SelectedSprinklerType.TypeName, StringComparison.OrdinalIgnoreCase));
 
             if (!stillValid)
-                SelectedSprinklerType = null;
+                SelectedSprinklerType = SprinklerTypes[0];
         }
 
         private bool CanExecutePlaceSprinklers()
@@ -512,15 +749,76 @@ namespace FireProtection.UI.ViewModels.Sprinklers.BruteForce
             if (!string.IsNullOrEmpty(validationMessage))
             {
                 PlacementStatusMessage = validationMessage;
-                MessageBox.Show(
-                    validationMessage,
-                    "Place Sprinklers",
-                    MessageBoxButton.OK,
-                    MessageBoxImage.Warning);
+                Dialogs.Show(validationMessage, "Place Sprinklers", MessageBoxButton.OK, MessageBoxImage.Warning);
                 return;
             }
 
+            // Replace deletes existing devices. It is undoable (the whole run is one undo entry), but it is still
+            // destructive, so it is confirmed explicitly rather than applied on a combo-box selection alone.
+            if (ExistingDevicePolicySelection == ExistingDevicePolicy.ReplaceExisting &&
+                !Dialogs.Confirm(
+                    "Replace will DELETE the existing sprinklers inside every selected room before placing the new "
+                    + "set.\n\nThis can be undone in Revit (the run is a single undo entry), but the existing devices "
+                    + "and any data on them will be gone.\n\nContinue?",
+                    "Replace existing sprinklers"))
+            {
+                PlacementStatusMessage = "Placement cancelled.";
+                return; 
+            }
+
+            // Placement creates real Revit elements inside a Transaction, which is illegal from a modeless
+            // window's WPF handler. Queue it for a valid Revit API context; IsPlacementRunning is set here
+            // so the button disables the moment the user clicks, not when Revit gets round to the work.
             IsPlacementRunning = true;
+            PlacementStatusMessage = "Waiting for Revit...";
+            PlacementProgressText = "Waiting for Revit...";
+            _progressReporter = new PlacementProgressReporter(OnPlacementProgress);
+            CanCancelPlacement = true;
+            CommandManager.InvalidateRequerySuggested();
+
+            RevitApi.Run(PlaceSprinklersCore, OnPlacementFailed);
+        }
+
+        /// <summary>Progress callback from the placement service (runs on Revit's UI thread, which is also the
+        /// WPF thread, so the ViewModel can be written to directly).</summary>
+        private void OnPlacementProgress(int completed, int total, string label)
+        {
+            PlacementProgressText = total > 0
+                ? label + "  (" + completed + "/" + total + ")"
+                : label;
+            PlacementStatusMessage = PlacementProgressText;
+        }
+
+        private bool CanExecuteCancelPlacement()
+        {
+            return IsPlacementRunning && CanCancelPlacement && _progressReporter != null;
+        }
+
+        private void ExecuteCancelPlacement()
+        {
+            if (_progressReporter == null) return;
+            _progressReporter.RequestCancel();
+            CanCancelPlacement = false;
+            PlacementProgressText = "Cancelling - finishing the current room, then rolling back...";
+            CommandManager.InvalidateRequerySuggested();
+        }
+
+        private void OnPlacementFailed(Exception ex)
+        {
+            IsPlacementRunning = false;
+            CanCancelPlacement = false;
+            PlacementProgressText = null;
+            PlacementStatusMessage = "Placement failed: " + ex.Message;
+            FireProtectionLog.Error("Sprinkler placement failed.", ex);
+            CommandManager.InvalidateRequerySuggested();
+
+            Dialogs.Show("Placement failed:\n\n" + ex.Message, "Place Sprinklers",
+                MessageBoxButton.OK, MessageBoxImage.Error);
+        }
+
+        /// <summary>Body of <see cref="ExecutePlaceSprinklers"/>; always runs in a valid Revit API context.</summary>
+        private void PlaceSprinklersCore()
+        {
             PlacementStatusMessage = "Exporting placement input snapshot...";
 
             try
@@ -530,11 +828,8 @@ namespace FireProtection.UI.ViewModels.Sprinklers.BruteForce
                 if (roomSelections.Count == 0)
                 {
                     PlacementStatusMessage = "No selected rooms with usable geometry.";
-                    MessageBox.Show(
-                        "No selected rooms have usable geometry.",
-                        "Place Sprinklers",
-                        MessageBoxButton.OK,
-                        MessageBoxImage.Warning);
+                    Dialogs.Show("No selected rooms have usable geometry.", "Place Sprinklers",
+                        MessageBoxButton.OK, MessageBoxImage.Warning);
                     return;
                 }
 
@@ -585,6 +880,47 @@ namespace FireProtection.UI.ViewModels.Sprinklers.BruteForce
                     sb.AppendLine("compliance is implied. Human review is required.");
                 }
 
+                // Decision 017: probe the live Revit document for missing families BEFORE
+                // we attempt placement. If any row's chosen family/type is not loadable,
+                // show the missing-families modal so the user can proceed with the available
+                // rooms or cancel and fix the catalog.
+                if (_sprinklerPlacementService != null)
+                {
+                    try
+                    {
+                        IReadOnlyList<MissingFamilyEntry> missing = _sprinklerPlacementService.ProbeMissingFamilies(calc);
+                        if (missing != null && missing.Count > 0)
+                        {
+                            List<MissingFamiliesModal.MissingEntry> uiEntries = new List<MissingFamiliesModal.MissingEntry>();
+                            foreach (MissingFamilyEntry m in missing)
+                            {
+                                if (m == null) continue;
+                                uiEntries.Add(new MissingFamiliesModal.MissingEntry
+                                {
+                                    RoomName = m.RoomName ?? m.RoomId ?? "<unknown room>",
+                                    FamilyName = m.FamilyName ?? string.Empty,
+                                    TypeName = m.TypeName ?? string.Empty
+                                });
+                            }
+                            // Dialogs.Owner is the tool window: the only window WPF will accept as an owner
+                            // here (Application.Current.MainWindow was never shown through WPF under Revit).
+                            bool proceed = MissingFamiliesModal.ShowDialog(Dialogs.Owner, uiEntries);
+                            if (!proceed)
+                            {
+                                PlacementStatusMessage = "Placement cancelled: missing families were not resolved.";
+                                return;
+                            }
+                            sb.AppendLine();
+                            sb.AppendLine("Proceeding with " + (calc.Rooms.Count - missing.Count) + " of " + calc.Rooms.Count + " room(s); " + missing.Count + " skipped (missing family).");
+                        }
+                    }
+                    catch (Exception probeEx)
+                    {
+                        sb.AppendLine();
+                        sb.AppendLine("Warning: missing-family probe failed: " + probeEx.Message + " (proceeding with placement).");
+                    }
+                }
+
                 // Phase 2: actual Revit FamilyInstance placement (does nothing if no service is wired).
                 bool didPlace = false;
                 string placementPath = null;
@@ -594,7 +930,9 @@ namespace FireProtection.UI.ViewModels.Sprinklers.BruteForce
                     SprinklerPlacementResult placement = _sprinklerPlacementService.PlaceSprinklers(
                         familyName,
                         typeName,
-                        calc);
+                        calc,
+                        _progressReporter,
+                        ExistingDevicePolicySelection);
 
                     LastPlacementResult = placement;
                     didPlace = true;
@@ -621,7 +959,7 @@ namespace FireProtection.UI.ViewModels.Sprinklers.BruteForce
                     }
                 }
 
-                MessageBox.Show(
+                Dialogs.Show(
                     sb.ToString(),
                     didPlace ? "Place Sprinklers — Result" : "Place Sprinklers — BruteForce Result",
                     MessageBoxButton.OK,
@@ -630,7 +968,8 @@ namespace FireProtection.UI.ViewModels.Sprinklers.BruteForce
             catch (Exception ex)
             {
                 PlacementStatusMessage = "Export failed: " + ex.Message;
-                MessageBox.Show(
+                FireProtectionLog.Error("Sprinkler placement run failed.", ex);
+                Dialogs.Show(
                     "Failed to export placement input JSON:\n\n" + ex.Message,
                     "Place Sprinklers",
                     MessageBoxButton.OK,
@@ -639,6 +978,9 @@ namespace FireProtection.UI.ViewModels.Sprinklers.BruteForce
             finally
             {
                 IsPlacementRunning = false;
+                CanCancelPlacement = false;
+                PlacementProgressText = null;
+                _progressReporter = null;
                 CommandManager.InvalidateRequerySuggested();
             }
         }
@@ -682,9 +1024,6 @@ namespace FireProtection.UI.ViewModels.Sprinklers.BruteForce
                     if (!roomVm.IsSelected) continue;
                     if (!roomVm.IsEligible)
                     {
-                        // Hard guard: only ELIGIBLE rooms reach the placement pipeline. BLOCKED and UNDETERMINED
-                        // rooms are rejected (rejecting an undetermined room does NOT mean it was "blocked" —
-                        // the distinction is preserved on the room's EligibilityState).
                         System.Diagnostics.Debug.WriteLine(
                             $"[ROOM-SELECTION-GUARD] RoomId={roomVm.Room?.RoomId} State={roomVm.EligibilityState} " +
                             $"IsEligible={roomVm.IsEligible} IsSelected={roomVm.IsSelected} -> REJECTED");
@@ -708,8 +1047,6 @@ namespace FireProtection.UI.ViewModels.Sprinklers.BruteForce
                         }
                     }
 
-                    // Forward the complete room payload so the placement input retains
-                    // ceilings, obstacles, existing sprinklers, and source metadata.
                     JObject fullRoomJson = BuildFullRoomJson(roomData);
 
                     list.Add(new PlacementRoomInputItem
@@ -727,6 +1064,10 @@ namespace FireProtection.UI.ViewModels.Sprinklers.BruteForce
                         Polygon = polyCopy,
 
                         EffectiveHazardClass = roomVm.SelectedHazardClass,
+                        SelectedSprinklerFamilyName = roomVm.SelectedFamily,
+                        SelectedSprinklerTypeName = roomVm.SelectedType,
+                        OverrideMaxSpacingFt = roomVm.MaxSpacingFtOverride,
+                        OverrideBoundaryClearanceFt = roomVm.BoundaryClearanceFtOverride,
                         FullRoomJson = fullRoomJson
                     });
                 }
@@ -869,8 +1210,25 @@ namespace FireProtection.UI.ViewModels.Sprinklers.BruteForce
         /// so they stay selectable until the user picks a family (the Place command is gated separately).
         /// Any room that becomes blocked is automatically deselected so a stale selection can never
         /// reach placement.
+        /// <para>
+        /// The probe opens a (rolled-back) Revit transaction, so it is queued through
+        /// <see cref="RevitApi"/>: the tool window is modeless and its WPF handlers are not a valid
+        /// Revit API context. The queued work runs on the Revit main thread that owns this window, so it
+        /// may write to the ViewModels directly.
+        /// </para>
         /// </summary>
         private void RefreshEligibility()
+        {
+            if (_sprinklerPlacementService == null) return;
+            if (_suppressEligibilityRefresh) return;
+
+            RevitApi.Run(
+                RefreshEligibilityCore,
+                ex => System.Diagnostics.Debug.WriteLine("[ROOM-ELIGIBILITY] refresh failed: " + ex.Message));
+        }
+
+        /// <summary>Body of <see cref="RefreshEligibility"/>; always runs in a valid Revit API context.</summary>
+        private void RefreshEligibilityCore()
         {
             if (_sprinklerPlacementService == null) return;
 
@@ -1001,6 +1359,12 @@ namespace FireProtection.UI.ViewModels.Sprinklers.BruteForce
                         CeilingType = roomData.Geometry?.CeilingType,
                         Polygon = polyCopy,
                         EffectiveHazardClass = roomVm.SelectedHazardClass,
+                        // The preflight must see exactly what placement will see, otherwise a row
+                        // whose family/type/spacing was overridden is judged on different inputs.
+                        SelectedSprinklerFamilyName = roomVm.SelectedFamily,
+                        SelectedSprinklerTypeName = roomVm.SelectedType,
+                        OverrideMaxSpacingFt = roomVm.MaxSpacingFtOverride,
+                        OverrideBoundaryClearanceFt = roomVm.BoundaryClearanceFtOverride,
                         FullRoomJson = BuildFullRoomJson(roomData)
                     });
                 }
@@ -1045,6 +1409,8 @@ namespace FireProtection.UI.ViewModels.Sprinklers.BruteForce
             OnPropertyChanged(nameof(SelectedRoomCount));
             OnPropertyChanged(nameof(SelectedVisibleRoomCount));
             OnPropertyChanged(nameof(RoomsSelectedSummary));
+            OnPropertyChanged(nameof(BulkTargetCount));
+            OnPropertyChanged(nameof(BulkTargetSummary));
 
             if (HideUnselectedRooms)
             {
@@ -1061,6 +1427,8 @@ namespace FireProtection.UI.ViewModels.Sprinklers.BruteForce
             OnPropertyChanged(nameof(SelectedVisibleRoomCount));
             OnPropertyChanged(nameof(RoomsFoundText));
             OnPropertyChanged(nameof(RoomsSelectedSummary));
+            OnPropertyChanged(nameof(BulkTargetCount));
+            OnPropertyChanged(nameof(BulkTargetSummary));
         }
 
         private void Reset()
@@ -1081,13 +1449,162 @@ namespace FireProtection.UI.ViewModels.Sprinklers.BruteForce
                 {
                     room.IsSelected = false;
                     room.ResetHazardClassToDefault();
+                    room.ResetFamilyAndTypeToDefault();
+                    room.ResetSpacingOverridesToDefault();
                 }
             }
 
             PlacementStatusMessage = null;
+            SeedPerRowCatalogDefaults();
             RefreshEligibility();
             ApplyDefaultSelection();
             CommandManager.InvalidateRequerySuggested();
+        }
+
+        // ---------------------------------------------------------------------------------------
+        // Per-row catalog seeding + bulk-apply (Decision 017)
+        // ---------------------------------------------------------------------------------------
+
+        private void SeedPerRowCatalogDefaults()
+        {
+            IReadOnlyList<string> catalogFamilies = _catalog == null
+                ? (IReadOnlyList<string>)new List<string>()
+                : _catalog.GetSprinklerFamilies();
+            string defaultFamily = SelectedSprinklerFamily != null ? SelectedSprinklerFamily.FamilyName : null;
+            string defaultType = SelectedSprinklerType != null ? SelectedSprinklerType.TypeName : null;
+
+            foreach (RoomItemViewModel room in AllRooms)
+            {
+                // Give the row its own family -> types lookup, so changing Family on that row
+                // repopulates that row's Type combo. Without it the row kept whichever list was
+                // written here at startup and the Type dropdown ignored the row's Family.
+                room.SetTypesResolver(ResolveSprinklerTypesForFamily);
+
+                if (catalogFamilies.Count > 0)
+                {
+                    room.AvailableFamilies = catalogFamilies;
+                    string family = !string.IsNullOrEmpty(defaultFamily) && catalogFamilies.Contains(defaultFamily, StringComparer.OrdinalIgnoreCase)
+                        ? defaultFamily
+                        : catalogFamilies[0];
+                    IReadOnlyList<string> types = ResolveSprinklerTypesForFamily(family);
+                    room.AvailableTypes = types;
+                    string type = !string.IsNullOrEmpty(defaultType) && types.Contains(defaultType, StringComparer.OrdinalIgnoreCase)
+                        ? defaultType
+                        : (types.Count > 0 ? types[0] : null);
+                    room.SetCatalogDefaults(family, type, null, null);
+                }
+                else
+                {
+                    room.AvailableFamilies = new List<string>();
+                    room.AvailableTypes = new List<string>();
+                    room.SetCatalogDefaults(null, null, null, null);
+                }
+            }
+        }
+
+        private IReadOnlyList<string> ResolveSprinklerTypesForFamily(string family)
+        {
+            if (_catalog == null || string.IsNullOrEmpty(family)) return new List<string>();
+            return _catalog.GetSprinklerTypesForFamily(family) ?? (IReadOnlyList<string>)new List<string>();
+        }
+
+        // ----- Bulk edit (list-2 item 8) -------------------------------------------------------------
+        // Target = the rooms the user has actually checked AND that are eligible. Checked-but-blocked rooms
+        // are left alone: writing overrides onto a room the pipeline cannot place would be busywork.
+
+        private IEnumerable<RoomItemViewModel> BulkTargets => AllRooms.Where(r => r.IsSelected && r.IsEligible);
+
+        public int BulkTargetCount => BulkTargets.Count();
+
+        public string BulkTargetSummary
+        {
+            get
+            {
+                int count = BulkTargetCount;
+                return count == 1 ? "1 selected room" : count + " selected rooms";
+            }
+        }
+
+        private bool CanBulkEdit()
+        {
+            return BulkTargets.Any();
+        }
+
+        private void ApplyFamilyToSelected(string family)
+        {
+            if (string.IsNullOrEmpty(family)) return;
+            foreach (RoomItemViewModel room in BulkTargets.ToList())
+            {
+                room.SelectedFamily = family;
+                IReadOnlyList<string> types = ResolveSprinklerTypesForFamily(family);
+                room.AvailableTypes = types;
+                room.SelectedType = types.Count > 0 ? types[0] : null;
+            }
+        }
+
+        private void ApplyTypeToSelected(string type)
+        {
+            if (string.IsNullOrEmpty(type)) return;
+            foreach (RoomItemViewModel room in BulkTargets.ToList())
+            {
+                if (string.IsNullOrEmpty(room.SelectedFamily)) continue;
+                IReadOnlyList<string> types = ResolveSprinklerTypesForFamily(room.SelectedFamily);
+                if (types != null && types.Contains(type, StringComparer.OrdinalIgnoreCase))
+                    room.SelectedType = type;
+            }
+        }
+
+        /// <summary>Applies the bulk spacing box to every target room. The box is validated the same way as the
+        /// per-row cells, so an unparseable value is refused here rather than silently clearing the override.</summary>
+        private void ApplySpacingToSelected()
+        {
+            if (!TryReadBulkValue(BulkSpacingInput, out double? feet, "Sprinkler-to-sprinkler spacing")) return;
+            foreach (RoomItemViewModel room in BulkTargets.ToList())
+                room.MaxSpacingFtOverride = feet;
+        }
+
+        private void ApplyClearanceToSelected()
+        {
+            if (!TryReadBulkValue(BulkClearanceInput, out double? feet, "Wall clearance")) return;
+            foreach (RoomItemViewModel room in BulkTargets.ToList())
+                room.BoundaryClearanceFtOverride = feet;
+        }
+
+        /// <summary>Clears every per-row override on the target rooms - Family/Type back to the universal
+        /// selection, spacing/clearance back to the level or universal value (Decision 019 resolution order).</summary>
+        private void ClearOverridesForSelected()
+        {
+            foreach (RoomItemViewModel room in BulkTargets.ToList())
+            {
+                room.ResetFamilyAndTypeToDefault();
+                room.ResetSpacingOverridesToDefault();
+            }
+        }
+
+        /// <summary>Blank clears the override; anything else must parse as a positive length in the current display
+        /// unit. Returns false (with a dialog) when the text is unusable.</summary>
+        private static bool TryReadBulkValue(string text, out double? feet, string fieldName)
+        {
+            feet = null;
+            if (string.IsNullOrWhiteSpace(text)) return true;   // blank = clear the override
+
+            double parsed;
+            string error;
+            if (!UnitDisplay.TryParseToFeet(text, out parsed, out error))
+            {
+                Dialogs.Show(fieldName + ": " + error, "Bulk edit", MessageBoxButton.OK, MessageBoxImage.Warning);
+                return false;
+            }
+
+            feet = parsed;
+            return true;
+        }
+
+        private void ResetRowToDefault(RoomItemViewModel room)
+        {
+            if (room == null) return;
+            room.ResetFamilyAndTypeToDefault();
+            room.ResetSpacingOverridesToDefault();
         }
     }
 }

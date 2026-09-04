@@ -57,6 +57,26 @@ namespace FireProtection.Backend.Models.Placement.Sprinklers.Final
         [JsonProperty("existingSprinklers")]
         public List<ExistingSprinklerData> ExistingSprinklers { get; set; }
 
+        /// <summary>
+        /// Per-room sprinkler family override (Decision 017). When non-null, this drives
+        /// the catalog/placement pipeline for this room (overrides the universal selection
+        /// in the <c>CalculateBruteForce</c> entry point).
+        /// </summary>
+        [JsonProperty("selectedSprinklerFamilyName")]
+        public string SelectedSprinklerFamilyName { get; set; }
+
+        /// <summary>Per-room sprinkler type override (Decision 017).</summary>
+        [JsonProperty("selectedSprinklerTypeName")]
+        public string SelectedSprinklerTypeName { get; set; }
+
+        /// <summary>Per-room MaxSpacingFt override in feet (Decision 018). null = use rule-set default.</summary>
+        [JsonProperty("overrideMaxSpacingFt")]
+        public double? OverrideMaxSpacingFt { get; set; }
+
+        /// <summary>Per-room BoundaryClearanceFt (wall) override in feet (Decision 018). null = use rule-set default.</summary>
+        [JsonProperty("overrideBoundaryClearanceFt")]
+        public double? OverrideBoundaryClearanceFt { get; set; }
+
         [JsonProperty("source")]
         public SourceReferenceData Source { get; set; }
 

@@ -1,0 +1,71 @@
+<Project Sdk="Microsoft.NET.Sdk">
+
+  <PropertyGroup>
+    <OutputType>Exe</OutputType>
+    <TargetFramework>net8.0-windows</TargetFramework>
+    <Nullable>disable</Nullable>
+    <ImplicitUsings>disable</ImplicitUsings>
+    <LangVersion>7.3</LangVersion>
+    <AssemblyName>FireProtection.CatalogStandalone</AssemblyName>
+    <RootNamespace>FireProtection.CatalogStandalone</RootNamespace>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <PackageReference Include="ClosedXML" Version="0.104.1" />
+    <PackageReference Include="Newtonsoft.Json" Version="13.0.4" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <Compile Include="..\FireProtection.Backend\Services\Catalog\CatalogModels.cs" Link="CatalogModels.cs" />
+    <Compile Include="..\FireProtection.Backend\Services\Catalog\CatalogValidator.cs" Link="CatalogValidator.cs" />
+    <Compile Include="..\FireProtection.Backend\Services\Catalog\CatalogLoader.cs" Link="CatalogLoader.cs" />
+    <Compile Include="..\FireProtection.Backend\Services\Catalog\CatalogService.cs" Link="CatalogService.cs" />
+    <Compile Include="..\FireProtection.Backend\Services\Catalog\FireProtectionConfig.cs" Link="FireProtectionConfig.cs" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <Compile Include="..\FireProtection.Backend\Models\Hazard\HazardClass.cs" Link="HazardClass.cs" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <Compile Include="..\FireProtection.Backend\Models\DTOs\Point3DData.cs" Link="Point3DData.cs" />
+    <Compile Include="..\FireProtection.Backend\Models\DTOs\CeilingData.cs" Link="CeilingData.cs" />
+    <Compile Include="..\FireProtection.Backend\Models\DTOs\BoundaryData.cs" Link="BoundaryData.cs" />
+    <Compile Include="..\FireProtection.Backend\Models\DTOs\ObstacleData.cs" Link="ObstacleData.cs" />
+    <Compile Include="..\FireProtection.Backend\Models\DTOs\ExistingSprinklerData.cs" Link="ExistingSprinklerData.cs" />
+    <Compile Include="..\FireProtection.Backend\Services\Placement\Sprinklers\Final\BruteForce\BruteForceCalculationConfig.cs" Link="BruteForceCalculationConfig.cs" />
+    <Compile Include="..\FireProtection.Backend\Services\Placement\Sprinklers\Final\BruteForce\IHazardPlacementRules.cs" Link="IHazardPlacementRules.cs" />
+    <Compile Include="..\FireProtection.Backend\Services\Placement\Sprinklers\Final\BruteForce\HazardPlacementRuleSet.cs" Link="HazardPlacementRuleSet.cs" />
+    <Compile Include="..\FireProtection.Backend\Services\Placement\Sprinklers\Final\BruteForce\DefaultHazardPlacementRules.cs" Link="DefaultHazardPlacementRules.cs" />
+    <Compile Include="..\FireProtection.Backend\Services\Placement\Sprinklers\Final\BruteForce\GeometryMath.cs" Link="GeometryMath.cs" />
+    <Compile Include="..\FireProtection.Backend\Services\Placement\Sprinklers\Final\BruteForce\RoomGeometry.cs" Link="RoomGeometry.cs" />
+    <Compile Include="..\FireProtection.Backend\Services\Placement\Sprinklers\Final\BruteForce\BruteForceCalculationService.cs" Link="BruteForceCalculationService.cs" />
+    <Compile Include="..\FireProtection.Backend\Models\Placement\Sprinklers\Final\PlacementRoomInput.cs" Link="PlacementRoomInput.cs" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <Compile Include="..\FireProtection.UI\Models\Sprinklers\BruteForce\CalculatedSprinklerPoint.cs" Link="CalculatedSprinklerPoint.cs" />
+    <Compile Include="..\FireProtection.UI\Models\Sprinklers\BruteForce\CalculationStatus.cs" Link="CalculationStatus.cs" />
+    <Compile Include="..\FireProtection.UI\Models\Sprinklers\BruteForce\RoomCalculationResult.cs" Link="RoomCalculationResult.cs" />
+    <Compile Include="..\FireProtection.UI\Models\Sprinklers\BruteForce\BruteForceCalculationResult.cs" Link="BruteForceCalculationResult.cs" />
+    <Compile Include="..\FireProtection.UI\Models\Sprinklers\BruteForce\CandidatePoint.cs" Link="CandidatePoint.cs" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <Compile Include="..\FireProtection.UI\ViewModels\Sprinklers\BruteForce\HazardClassOptions.cs" Link="HazardClassOptions.cs" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <Compile Include="..\FireProtection.UI\Services\ICatalog.cs" Link="ICatalog.cs" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <Compile Remove="Program.cs" />
+    <Compile Include="..\FireProtection.Tests\CatalogTemplateGenerator.cs" Link="CatalogTemplateGenerator.cs" />
+    <Compile Include="..\FireProtection.Tests\CatalogLoaderRunner.cs" Link="CatalogLoaderRunner.cs" />
+    <Compile Include="..\FireProtection.Tests\CatalogLoaderTests.cs" Link="CatalogLoaderTests.cs" />
+    <Compile Include="..\FireProtection.Tests\BruteForceOverrideTests.cs" Link="BruteForceOverrideTests.cs" />
+    <Compile Include="Program.cs" />
+  </ItemGroup>
+
+</Project>

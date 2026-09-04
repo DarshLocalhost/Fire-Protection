@@ -10,7 +10,10 @@ namespace FireProtection.UI.Services
     /// </summary>
     public class NotImplementedDeviceExecutor : IDevicePlacementExecutor
     {
-        public PlacementRunReport ExecutePlacement(IReadOnlyList<DeviceRoomInputItem> items)
+        public PlacementRunReport ExecutePlacement(
+            IReadOnlyList<DeviceRoomInputItem> items,
+            IPlacementProgress progress = null,
+            ExistingDevicePolicy existingDevicePolicy = ExistingDevicePolicy.SkipRoom)
         {
             return new PlacementRunReport
             {

@@ -14,10 +14,19 @@ namespace FireProtection.UI.Services
         /// Creates real Revit FamilyInstance sprinklers for every calculated point in <paramref name="calcResult"/>,
         /// resolving the selected FamilySymbol dynamically and handling level/host/transaction concerns.
         /// </summary>
+        /// <param name="progress">
+        /// Optional progress + cancellation channel. Reported once per room; cancellation is honoured at room
+        /// boundaries and rolls the whole run back, so a cancelled run places nothing.
+        /// </param>
+        /// <param name="existingDevicePolicy">
+        /// What to do with rooms that already contain sprinklers, i.e. what a second run does.
+        /// </param>
         SprinklerPlacementResult PlaceSprinklers(
             string selectedFamilyName,
             string selectedTypeName,
-            BruteForceCalculationResult calcResult);
+            BruteForceCalculationResult calcResult,
+            IPlacementProgress progress = null,
+            ExistingDevicePolicy existingDevicePolicy = ExistingDevicePolicy.SkipRoom);
 
         /// <summary>
         /// Authoritative pre-placement eligibility / preflight for a single room given the currently selected
@@ -39,5 +48,21 @@ namespace FireProtection.UI.Services
         /// (family/type/level/model state) so the next probe is authoritative, not stale.
         /// </summary>
         void ClearEligibilityCache();
+
+        /// <summary>
+        /// Read-only probe that lists (Room, Family, Type) entries whose chosen family/type
+        /// is not loadable in the current Revit model (Decision 017). Returns an empty
+        /// list when every row's family is available. No elements are created.
+        /// </summary>
+        System.Collections.Generic.IReadOnlyList<MissingFamilyEntry> ProbeMissingFamilies(
+            BruteForceCalculationResult calcResult);
+    }
+
+    public sealed class MissingFamilyEntry
+    {
+        public string RoomId { get; set; }
+        public string RoomName { get; set; }
+        public string FamilyName { get; set; }
+        public string TypeName { get; set; }
     }
 }

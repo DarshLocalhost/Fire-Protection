@@ -28,6 +28,12 @@ namespace FireProtection.UI.Models.Sprinklers.BruteForce
 
         public int SkippedDuplicateCount { get; set; }
 
+        /// <summary>Rooms that were skipped because the chosen family/type is not loaded in the
+        /// live Revit model at placement time (Decision 017). Distinct from
+        /// <see cref="FailedSprinklerCount"/> (placement attempted and failed) and
+        /// <see cref="SkippedDuplicateCount"/> (placement would have collided with an existing sprinkler).</summary>
+        public int SkippedMissingFamilyCount { get; set; }
+
         /// <summary>Subset of <see cref="PlacedSprinklerCount"/> that passed post-placement spatial validation (§23).</summary>
         public int PlacedAndValidCount { get; set; }
 
@@ -36,6 +42,24 @@ namespace FireProtection.UI.Models.Sprinklers.BruteForce
 
         /// <summary>Proven Revit FamilyPlacementType of the selected family (diagnostic; replaces log-string noise). §26/§28.</summary>
         public string ResolvedFamilyPlacementType { get; set; }
+
+        /// <summary>
+        /// True when the user cancelled the run. A cancelled run is rolled back whole — nothing is created —
+        /// so this is not a partial success.
+        /// </summary>
+        public bool WasCancelled { get; set; }
+
+        /// <summary>Rooms left untouched because they already contained sprinklers (Skip policy).</summary>
+        public int SkippedExistingRoomCount { get; set; }
+
+        /// <summary>Existing sprinklers deleted before placing the new set (Replace policy).</summary>
+        public int ReplacedExistingCount { get; set; }
+
+        /// <summary>
+        /// Points refused because they fell outside their own room boundary. Non-zero here almost always means a
+        /// coordinate-space bug (a linked-model point that was never transformed into host coordinates).
+        /// </summary>
+        public int SkippedOutsideRoomCount { get; set; }
 
         public bool Success => FailedSprinklerCount == 0 && PlacedButInvalidCount == 0 && PlacedSprinklerCount > 0;
 
@@ -54,9 +78,11 @@ namespace FireProtection.UI.Models.Sprinklers.BruteForce
 
         public string SummaryText()
         {
-            string header = Success
-                ? "Sprinkler placement complete."
-                : "Sprinkler placement completed with warnings.";
+            string header = WasCancelled
+                ? "Sprinkler placement cancelled - the run was rolled back and nothing was created."
+                : Success
+                    ? "Sprinkler placement complete."
+                    : "Sprinkler placement completed with warnings.";
 
             var sb = new System.Text.StringBuilder();
             sb.AppendLine(header);
@@ -70,6 +96,12 @@ namespace FireProtection.UI.Models.Sprinklers.BruteForce
             sb.AppendLine($"Failed          : {FailedSprinklerCount}");
             if (SkippedDuplicateCount > 0)
                 sb.AppendLine($"Skipped (dup)   : {SkippedDuplicateCount}");
+            if (SkippedExistingRoomCount > 0)
+                sb.AppendLine($"Rooms skipped   : {SkippedExistingRoomCount} (already had sprinklers)");
+            if (ReplacedExistingCount > 0)
+                sb.AppendLine($"Replaced        : {ReplacedExistingCount} existing sprinkler(s) deleted");
+            if (SkippedOutsideRoomCount > 0)
+                sb.AppendLine($"Outside room    : {SkippedOutsideRoomCount} (check coordinates)");
             if (!string.IsNullOrEmpty(ResolvedFamilyPlacementType))
                 sb.AppendLine($"Placement type  : {ResolvedFamilyPlacementType}");
             sb.AppendLine($"Warnings        : {Warnings.Count}");

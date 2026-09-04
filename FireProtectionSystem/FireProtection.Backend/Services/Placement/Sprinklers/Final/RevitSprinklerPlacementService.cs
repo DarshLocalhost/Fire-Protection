@@ -1,5 +1,6 @@
 using System;
 using System.Collections.Generic;
+using System.Globalization;
 using System.Linq;
 using Autodesk.Revit.DB;
 using FireProtection.Backend.Services.Placement.Sprinklers.Final.Strategies;
@@ -21,6 +22,10 @@ namespace FireProtection.Backend.Services.Placement.Sprinklers.Final
         private readonly RevitSprinklerPlacementConfig _config;
         private readonly CeilingHostResolver _ceilingHostResolver;
         private readonly IReadOnlyList<IFamilyPlacementStrategy> _strategies;
+
+        /// <summary>Timestamp written into every traceability stamp of this run (one value per service instance,
+        /// so all elements from one Place share an identifiable batch marker).</summary>
+        private readonly string _runStampUtc = DateTime.UtcNow.ToString("yyyy-MM-dd HH:mm 'UTC'", CultureInfo.InvariantCulture);
 
         public RevitSprinklerPlacementService(Document hostDocument)
             : this(hostDocument, RevitSprinklerPlacementConfig.Default())
@@ -46,8 +51,12 @@ namespace FireProtection.Backend.Services.Placement.Sprinklers.Final
         public SprinklerPlacementResult PlaceSprinklers(
             string selectedFamilyName,
             string selectedTypeName,
-            BruteForceCalculationResult calcResult)
+            BruteForceCalculationResult calcResult,
+            IPlacementProgress progress = null,
+            ExistingDevicePolicy existingDevicePolicy = ExistingDevicePolicy.SkipRoom)
         {
+            if (progress == null) progress = NullPlacementProgress.Instance;
+
             var result = new SprinklerPlacementResult
             {
                 TimestampUtc = DateTime.UtcNow.ToString("o"),
@@ -70,55 +79,105 @@ namespace FireProtection.Backend.Services.Placement.Sprinklers.Final
                 return result;
             }
 
-            // 1. Resolve FamilySymbol dynamically by name (never by hard-coded ElementId).
-            string symbolError;
-            FamilySymbol symbol = ResolveSymbol(_hostDocument, selectedFamilyName, selectedTypeName, out symbolError);
-            if (symbol == null)
-            {
-                result.Errors.Add(symbolError ?? "Sprinkler family/type could not be resolved.");
-                return result;
-            }
+            FireProtectionLog.Info("Placement run started: " + result.RoomsProcessed + " room(s), "
+                + result.CalculatedSprinklerCount + " calculated point(s), family '" + selectedFamilyName
+                + "' / type '" + selectedTypeName + "', existing-device policy " + existingDevicePolicy + ".");
 
-            // Pre-collect existing sprinkler locations for a minimal duplicate safety check.
-            IReadOnlyList<XYZ> existingSprinklerPoints = _config.SkipNearDuplicates
-                ? CollectExistingSprinklerPoints(_hostDocument)
+            // Decision 017: per-row family/type comes from RoomCalculationResult; the universal selection is
+            // only a fallback for rooms that did not override it. Per-row resolution is done in the loop below.
+            // Existing sprinklers are collected once, with element ids, because they drive three things: the
+            // coincident-point guard, the "this room already has devices" policy and the Replace policy.
+            List<ExistingSprinkler> existingSprinklers = CollectExistingSprinklers(_hostDocument);
+            List<XYZ> existingPoints = _config.SkipNearDuplicates
+                ? existingSprinklers.Select(e => e.Point).ToList()
                 : new List<XYZ>();
 
-            // --- PHASE 2: Prove the actual family placement type (do NOT infer from the name). ---
-            // Revit FamilyPlacementType (version-agnostic string compare) selects the strategy below:
-            //   FaceBased       -> requires a host face reference.
-            //   WorkPlaneBased  -> hosted on a work plane (ceiling face, else a SketchPlane through the point).
-            //   OneLevelBased   -> standard level-based placement.
-            string actualPlacementType = "Unknown";
-            try
+            // One TransactionGroup around the run: it gives the whole run a single named undo entry and keeps
+            // it atomic if it ever grows a second transaction. Cancel rolls the group back, so a cancelled run
+            // leaves the model exactly as it was.
+            using (TransactionGroup group = new TransactionGroup(_hostDocument, "Fire Protection: Place Sprinklers"))
             {
-                actualPlacementType = symbol.Family?.FamilyPlacementType.ToString() ?? "None";
-            }
-            catch
-            {
-                actualPlacementType = "Unknown";
+                group.Start();
+
+                RunPlacementTransaction(
+                    calcResult, selectedFamilyName, selectedTypeName,
+                    existingSprinklers, existingPoints, progress, existingDevicePolicy, result);
+
+                if (result.WasCancelled) group.RollBack();
+                else group.Assimilate();
             }
 
-            // §26/§28: carry the proven placement type structurally on the result (machine-readable),
-            // instead of emitting a throwaway diagnostic log string into Warnings.
-            result.ResolvedFamilyPlacementType = actualPlacementType;
+            if (result.WasCancelled)
+            {
+                // The rollback undid every element, so the per-room detail now describes elements that do not
+                // exist. Reporting rolled-back elements as "placed" would be a false success.
+                result.Rooms.Clear();
+                result.ReplacedExistingCount = 0;
+                result.SkippedExistingRoomCount = 0;
+                result.SkippedOutsideRoomCount = 0;
+                result.SkippedMissingFamilyCount = 0;
+            }
 
-            // 2. Single batch transaction: activate symbol, place valid points, commit.
-            using (Transaction transaction = new Transaction(_hostDocument, "FireProtection Place Sprinklers"))
+            result.PlacedSprinklerCount = result.Rooms.Sum(r => r.Placed.Count);
+            result.PlacedAndValidCount = result.Rooms.Sum(r => r.Placed.Count(p => p.IsSpatiallyValid));
+            result.PlacedButInvalidCount = result.Rooms.Sum(r => r.Placed.Count(p => !p.IsSpatiallyValid));
+            result.FailedSprinklerCount = result.Rooms.Sum(r => r.Failed.Count);
+            result.SkippedDuplicateCount = result.Rooms.Sum(r => r.Failed.Count(f => f.SkippedDueToDuplicate));
+
+            FireProtectionLog.Info("Placement run finished: placed " + result.PlacedSprinklerCount
+                + " (valid " + result.PlacedAndValidCount + ", invalid " + result.PlacedButInvalidCount
+                + "), failed " + result.FailedSprinklerCount + ", rooms skipped " + result.SkippedExistingRoomCount
+                + ", replaced " + result.ReplacedExistingCount + ", outside room " + result.SkippedOutsideRoomCount
+                + (result.WasCancelled ? ", CANCELLED (rolled back)" : string.Empty) + ".");
+
+            return result;
+        }
+
+        /// <summary>
+        /// The placement transaction itself: activates symbols, walks the rooms, honours the existing-device
+        /// policy, reports progress and stops at a room boundary when the user cancels.
+        /// </summary>
+        private void RunPlacementTransaction(
+            BruteForceCalculationResult calcResult,
+            string selectedFamilyName,
+            string selectedTypeName,
+            List<ExistingSprinkler> existingSprinklers,
+            List<XYZ> existingSprinklerPoints,
+            IPlacementProgress progress,
+            ExistingDevicePolicy existingDevicePolicy,
+            SprinklerPlacementResult result)
+        {
+            using (Transaction transaction = new Transaction(_hostDocument, "Place Sprinklers"))
             {
                 transaction.Start();
 
                 bool committed = false;
                 try
                 {
-                    // Activate once per batch, not per point.
-#pragma warning disable CS0618 // FamilySymbol.Activate is deprecated in some Revit versions but required for placement.
-                    if (!symbol.IsActive)
-                        symbol.Activate();
-#pragma warning restore CS0618
+                    HashSet<string> activatedKeys = new HashSet<string>(StringComparer.OrdinalIgnoreCase);
+                    Dictionary<string, FamilySymbol> symbolCache =
+                        new Dictionary<string, FamilySymbol>(StringComparer.OrdinalIgnoreCase);
+                    string resolvedPlacementType = null;
+                    int totalRooms = calcResult.Rooms.Count;
+                    int roomIndex = 0;
 
                     foreach (RoomCalculationResult room in calcResult.Rooms)
                     {
+                        roomIndex++;
+
+                        // Cancellation is polled only at room boundaries, never mid-element: no half-placed room is
+                        // ever left behind, and the group rollback in the caller undoes everything placed so far.
+                        if (progress.IsCancellationRequested)
+                        {
+                            result.WasCancelled = true;
+                            FireProtectionLog.Warn("Placement cancelled by the user after "
+                                + (roomIndex - 1) + " of " + totalRooms + " room(s); rolling the run back.");
+                            break;
+                        }
+
+                        progress.Report(roomIndex - 1, totalRooms,
+                            "Room " + roomIndex + " of " + totalRooms + ": " + (room.RoomName ?? room.RoomId));
+
                         PlacementRoomResult roomResult = new PlacementRoomResult
                         {
                             RoomId = room.RoomId,
@@ -132,16 +191,93 @@ namespace FireProtection.Backend.Services.Placement.Sprinklers.Final
                             continue;
                         }
 
+                        // Re-run handling: what a second Place does to a room that already contains sprinklers.
+                        List<ExistingSprinkler> inRoom = ExistingSprinklersInRoom(existingSprinklers, room);
+                        if (inRoom.Count > 0)
+                        {
+                            if (existingDevicePolicy == ExistingDevicePolicy.SkipRoom)
+                            {
+                                result.SkippedExistingRoomCount++;
+                                result.Warnings.Add("Room '" + (room.RoomName ?? room.RoomId) + "' already has "
+                                    + inRoom.Count + " sprinkler(s) - left untouched (policy: skip).");
+                                result.Rooms.Add(roomResult);
+                                continue;
+                            }
+
+                            if (existingDevicePolicy == ExistingDevicePolicy.ReplaceExisting)
+                            {
+                                result.ReplacedExistingCount +=
+                                    DeleteExistingSprinklers(inRoom, existingSprinklers, existingSprinklerPoints, result);
+                            }
+                            // AddAnyway: fall through - the coincident-point guard in PlaceSinglePoint still applies.
+                        }
+
+                        string family = !string.IsNullOrEmpty(room.SprinklerFamilyName) ? room.SprinklerFamilyName : selectedFamilyName;
+                        string type = !string.IsNullOrEmpty(room.SprinklerTypeName) ? room.SprinklerTypeName : selectedTypeName;
+                        string key = family + "::" + type;
+
+                        FamilySymbol symbol;
+                        if (!symbolCache.TryGetValue(key, out symbol) || symbol == null)
+                        {
+                            string symbolError;
+                            symbol = ResolveSymbol(_hostDocument, family, type, out symbolError);
+                            if (symbol == null)
+                            {
+                                result.SkippedMissingFamilyCount++;
+                                result.Warnings.Add(
+                                    "Skipped room '" + (room.RoomName ?? room.RoomId)
+                                    + "': family '" + family + "' / type '" + type
+                                    + "' is not loaded in the active Revit document ("
+                                    + (symbolError ?? "not found") + ").");
+                                result.Rooms.Add(roomResult);
+                                continue;
+                            }
+                            if (activatedKeys.Add(key) && !symbol.IsActive)
+                            {
+#pragma warning disable CS0618
+                                symbol.Activate();
+#pragma warning restore CS0618
+                            }
+                            symbolCache[key] = symbol;
+                        }
+
+                        string placementType = ResolvePlacementType(symbol, ref resolvedPlacementType);
+                        if (string.IsNullOrEmpty(result.ResolvedFamilyPlacementType))
+                        {
+                            result.ResolvedFamilyPlacementType = placementType;
+                        }
+
                         foreach (CalculatedSprinklerPoint point in room.Points)
                         {
+                            // Coordinate-space guard: a candidate must fall inside its own room polygon in HOST
+                            // coordinates. One that does not is almost always an untransformed linked-model point,
+                            // and creating it would drop a sprinkler far outside the room.
+                            if (!IsPointInsideRoom(point, room))
+                            {
+                                result.SkippedOutsideRoomCount++;
+                                roomResult.Failed.Add(new FailedSprinklerEntry
+                                {
+                                    X = point.X,
+                                    Y = point.Y,
+                                    Z = point.Z,
+                                    RoomId = room.RoomId,
+                                    LevelId = point.LevelId,
+                                    ErrorCode = PlacementStatusCodes.OutsideRoomBoundary,
+                                    Reason = "Point falls outside its own room boundary in host coordinates - refused "
+                                        + "(check the linked-model coordinate transform)."
+                                });
+                                continue;
+                            }
+
                             PlaceSinglePoint(
                                 _hostDocument,
                                 symbol,
-                                actualPlacementType,
+                                placementType,
                                 point,
                                 existingSprinklerPoints,
                                 roomResult,
-                                result);
+                                result,
+                                room);
                         }
 
                         result.Rooms.Add(roomResult);
@@ -153,6 +289,7 @@ namespace FireProtection.Backend.Services.Placement.Sprinklers.Final
                 catch (Exception ex)
                 {
                     result.Errors.Add("Transaction failed: " + ex.Message);
+                    FireProtectionLog.Error("Sprinkler placement transaction failed.", ex);
                     if (!committed)
                     {
                         try { transaction.RollBack(); }
@@ -160,14 +297,14 @@ namespace FireProtection.Backend.Services.Placement.Sprinklers.Final
                     }
                 }
             }
+        }
 
-            result.PlacedSprinklerCount = result.Rooms.Sum(r => r.Placed.Count);
-            result.PlacedAndValidCount = result.Rooms.Sum(r => r.Placed.Count(p => p.IsSpatiallyValid));
-            result.PlacedButInvalidCount = result.Rooms.Sum(r => r.Placed.Count(p => !p.IsSpatiallyValid));
-            result.FailedSprinklerCount = result.Rooms.Sum(r => r.Failed.Count);
-            result.SkippedDuplicateCount = result.Rooms.Sum(r => r.Failed.Count(f => f.SkippedDueToDuplicate));
-
-            return result;
+        private string ResolvePlacementType(FamilySymbol symbol, ref string cached)
+        {
+            if (cached != null) return cached;
+            try { cached = symbol?.Family?.FamilyPlacementType.ToString() ?? "None"; }
+            catch { cached = "Unknown"; }
+            return cached;
         }
 
         // ----- Pre-placement eligibility / preflight (single source of truth with actual placement) -----
@@ -394,6 +531,42 @@ namespace FireProtection.Backend.Services.Placement.Sprinklers.Final
             _eligibilityCache.Clear();
         }
 
+        /// <inheritdoc />
+        public IReadOnlyList<MissingFamilyEntry> ProbeMissingFamilies(BruteForceCalculationResult calcResult)
+        {
+            List<MissingFamilyEntry> missing = new List<MissingFamilyEntry>();
+            if (calcResult == null || calcResult.Rooms == null) return missing;
+
+            HashSet<string> checkedKeys = new HashSet<string>(StringComparer.OrdinalIgnoreCase);
+
+            foreach (RoomCalculationResult room in calcResult.Rooms)
+            {
+                if (room == null) continue;
+                if (room.Points == null || room.Points.Count == 0) continue;
+
+                string family = room.SprinklerFamilyName;
+                string type = room.SprinklerTypeName;
+                if (string.IsNullOrEmpty(family) || string.IsNullOrEmpty(type)) continue;
+
+                string key = family + "::" + type;
+                if (!checkedKeys.Add(key)) continue;
+
+                string error;
+                if (ResolveSymbol(_hostDocument, family, type, out error) == null)
+                {
+                    missing.Add(new MissingFamilyEntry
+                    {
+                        RoomId = room.RoomId,
+                        RoomName = room.RoomName,
+                        FamilyName = family,
+                        TypeName = type
+                    });
+                }
+            }
+
+            return missing;
+        }
+
         private (FamilySymbol Symbol, string PlacementType, IFamilyPlacementStrategy Strategy, string Error) ResolveFamily(
             string familyName,
             string typeName)
@@ -432,7 +605,8 @@ namespace FireProtection.Backend.Services.Placement.Sprinklers.Final
             CalculatedSprinklerPoint point,
             IReadOnlyList<XYZ> existingSprinklerPoints,
             PlacementRoomResult roomResult,
-            SprinklerPlacementResult result)
+            SprinklerPlacementResult result,
+            RoomCalculationResult room = null)
         {
             // Validate point before any Revit interaction.
             if (point == null || !IsFinite(point.X, point.Y, point.Z))
@@ -573,6 +747,11 @@ namespace FireProtection.Backend.Services.Placement.Sprinklers.Final
                 }
 
                 FamilyInstance instance = outcome.Instance;
+
+                // Traceability stamp: write what produced this element onto the instance itself, so a reviewer
+                // opening the model months later can tell tool-placed devices from hand-placed ones and can see
+                // whether the geometry came from an approved rule set or the provisional placeholder.
+                StampTraceability(instance, room);
 
                 // --- §23 POST-PLACEMENT VALIDATION ---
                 // Read the ACTUAL instance location and compare it with the requested point. A gross
@@ -839,10 +1018,19 @@ namespace FireProtection.Backend.Services.Placement.Sprinklers.Final
             return found;
         }
 
-        private static IReadOnlyList<XYZ> CollectExistingSprinklerPoints(Document doc)
+        /// <summary>An existing sprinkler in the host document: its id and location. The id is what makes the
+        /// Replace policy possible; the point drives the coincident-point guard and the "room already has
+        /// devices" test.</summary>
+        private sealed class ExistingSprinkler
         {
-            var points = new List<XYZ>();
-            if (doc == null) return points;
+            public ElementId Id;
+            public XYZ Point;
+        }
+
+        private static List<ExistingSprinkler> CollectExistingSprinklers(Document doc)
+        {
+            var found = new List<ExistingSprinkler>();
+            if (doc == null) return found;
 
             FilteredElementCollector collector = new FilteredElementCollector(doc)
                 .OfCategory(BuiltInCategory.OST_Sprinklers)
@@ -852,11 +1040,136 @@ namespace FireProtection.Backend.Services.Placement.Sprinklers.Final
             {
                 if (element is FamilyInstance fi && fi.Location is LocationPoint lp)
                 {
-                    points.Add(lp.Point);
+                    found.Add(new ExistingSprinkler { Id = fi.Id, Point = lp.Point });
                 }
             }
 
-            return points;
+            return found;
+        }
+
+        /// <summary>
+        /// Existing sprinklers whose plan position falls inside this room's polygon and whose elevation is within
+        /// <see cref="PlacementConfig.ExistingDeviceZWindowFt"/> of the room's calculated points. The Z window keeps
+        /// a sprinkler on the floor above from being mistaken for one in this room (rooms are 2D polygons here, so
+        /// elevation is the only thing separating stacked rooms).
+        /// </summary>
+        private List<ExistingSprinkler> ExistingSprinklersInRoom(List<ExistingSprinkler> all, RoomCalculationResult room)
+        {
+            var hits = new List<ExistingSprinkler>();
+            if (all == null || all.Count == 0 || room == null || room.Polygon == null || room.Polygon.Count < 3)
+                return hits;
+
+            double? referenceZ = room.Points != null && room.Points.Count > 0 ? room.Points[0].Z : (double?)null;
+
+            foreach (ExistingSprinkler existing in all)
+            {
+                if (existing == null || existing.Point == null) continue;
+                if (!IsPointInPolygon(existing.Point.X, existing.Point.Y, room.Polygon)) continue;
+                if (referenceZ.HasValue &&
+                    Math.Abs(existing.Point.Z - referenceZ.Value) > _config.ExistingDeviceZWindowFt) continue;
+                hits.Add(existing);
+            }
+
+            return hits;
+        }
+
+        /// <summary>Deletes the given existing sprinklers (Replace policy) and drops them from the in-memory
+        /// caches so they cannot later block a new point as a "duplicate". Returns the number deleted.</summary>
+        private int DeleteExistingSprinklers(
+            List<ExistingSprinkler> toDelete,
+            List<ExistingSprinkler> all,
+            List<XYZ> existingPoints,
+            SprinklerPlacementResult result)
+        {
+            int deleted = 0;
+            foreach (ExistingSprinkler existing in toDelete)
+            {
+                try
+                {
+                    _hostDocument.Delete(existing.Id);
+                }
+                catch (Exception ex)
+                {
+                    result.Warnings.Add("Could not delete existing sprinkler " + existing.Id + ": " + ex.Message);
+                    continue;
+                }
+
+                deleted++;
+                all.Remove(existing);
+                existingPoints.RemoveAll(p => p != null && existing.Point != null && p.IsAlmostEqualTo(existing.Point));
+            }
+
+            return deleted;
+        }
+
+        /// <summary>
+        /// True when the candidate lies inside its own room polygon (host coordinates), within the boundary
+        /// tolerance. Rooms without a usable polygon are not blocked — the guard can only refuse what it can prove.
+        /// </summary>
+        private static bool IsPointInsideRoom(CalculatedSprinklerPoint point, RoomCalculationResult room)
+        {
+            if (point == null) return false;
+            if (room == null || room.Polygon == null || room.Polygon.Count < 3) return true;
+            return IsPointInPolygon(point.X, point.Y, room.Polygon);
+        }
+
+        /// <summary>Standard ray-casting point-in-polygon test on the XY plane (feet). Points exactly on an edge
+        /// may fall either way; that is harmless here because boundary clearance already keeps candidates off the
+        /// wall, and the caller only uses this to catch grossly misplaced (untransformed) points.</summary>
+        private static bool IsPointInPolygon(double x, double y, List<double[]> polygon)
+        {
+            bool inside = false;
+            int count = polygon.Count;
+
+            for (int i = 0, j = count - 1; i < count; j = i++)
+            {
+                double[] pi = polygon[i];
+                double[] pj = polygon[j];
+                if (pi == null || pi.Length < 2 || pj == null || pj.Length < 2) continue;
+
+                bool straddles = (pi[1] > y) != (pj[1] > y);
+                if (!straddles) continue;
+
+                double t = (y - pi[1]) / (pj[1] - pi[1]);
+                if (x < pi[0] + t * (pj[0] - pi[0])) inside = !inside;
+            }
+
+            return inside;
+        }
+
+        /// <summary>
+        /// Writes the traceability stamp onto a created instance: the tool, the run timestamp and the spacing /
+        /// clearance actually applied, flagged PROVISIONAL whenever the geometry came from the placeholder rule
+        /// set rather than an approved NFPA-13 rule set. Best-effort and never fatal — a read-only or
+        /// missing Comments parameter must not fail a placement.
+        /// </summary>
+        private void StampTraceability(FamilyInstance instance, RoomCalculationResult room)
+        {
+            if (instance == null) return;
+
+            try
+            {
+                Parameter comments = instance.get_Parameter(BuiltInParameter.ALL_MODEL_INSTANCE_COMMENTS);
+                if (comments == null || comments.IsReadOnly) return;
+
+                var sb = new System.Text.StringBuilder();
+                sb.Append("FireProtection auto-placed ").Append(_runStampUtc);
+                if (room != null)
+                {
+                    if (room.AppliedMaxSpacingFt.HasValue)
+                        sb.Append(" | spacing ").Append(room.AppliedMaxSpacingFt.Value.ToString("F2", CultureInfo.InvariantCulture)).Append(" ft");
+                    if (room.AppliedBoundaryClearanceFt.HasValue)
+                        sb.Append(" | wall ").Append(room.AppliedBoundaryClearanceFt.Value.ToString("F2", CultureInfo.InvariantCulture)).Append(" ft");
+                    if (!room.RulesApproved)
+                        sb.Append(" | PROVISIONAL RULES - NOT NFPA-13 APPROVED");
+                }
+
+                comments.Set(sb.ToString());
+            }
+            catch
+            {
+                /* stamping is diagnostic metadata, never a reason to fail a placement */
+            }
         }
 
         private static bool IsFinite(double x, double y, double z)
@@ -955,6 +1268,14 @@ namespace FireProtection.Backend.Services.Placement.Sprinklers.Final
         /// 0.5 ft accommodates legitimate host-face snapping while still catching gross misplacement.
         /// </summary>
         public double PlacementValidationToleranceFt { get; set; } = 0.5;
+
+        /// <summary>
+        /// Vertical window (feet) within which an existing sprinkler counts as belonging to the room being
+        /// processed. Rooms are compared as 2D polygons, so without this window a sprinkler on the floor above
+        /// or below would look like it was inside this room. 6 ft is under any realistic floor-to-floor height
+        /// and comfortably wider than the ceiling-height variation inside one room.
+        /// </summary>
+        public double ExistingDeviceZWindowFt { get; set; } = 6.0;
 
         public static RevitSprinklerPlacementConfig Default() => new RevitSprinklerPlacementConfig();
     }

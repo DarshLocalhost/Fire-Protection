@@ -29,24 +29,25 @@ namespace FireProtection.Backend.Services.Extraction
         /// </summary>
         public string ExportToFile(ModelSnapshot snapshot, string targetFilePath = null)
         {
-            if (snapshot == null) throw new ArgumentNullException(nameof(snapshot));
+            //if (snapshot == null) throw new ArgumentNullException(nameof(snapshot));
 
-            string resolvedPath = targetFilePath;
-            if (string.IsNullOrWhiteSpace(resolvedPath))
-            {
-                resolvedPath = GetDefaultExportFilePath(snapshot);
-            }
+            //string resolvedPath = targetFilePath;
+            //if (string.IsNullOrWhiteSpace(resolvedPath))
+            //{
+            //    resolvedPath = GetDefaultExportFilePath(snapshot);
+            //}
 
-            string dir = Path.GetDirectoryName(resolvedPath);
-            if (!string.IsNullOrEmpty(dir) && !Directory.Exists(dir))
-            {
-                Directory.CreateDirectory(dir);
-            }
+            //string dir = Path.GetDirectoryName(resolvedPath);
+            //if (!string.IsNullOrEmpty(dir) && !Directory.Exists(dir))
+            //{
+            //    Directory.CreateDirectory(dir);
+            //}
 
-            string json = Serialize(snapshot);
-            File.WriteAllText(resolvedPath, json);
+            //string json = Serialize(snapshot);
+            //File.WriteAllText(resolvedPath, json);
 
-            return resolvedPath;
+            //return resolvedPath;
+            return null;
         }
 
         /// <summary>

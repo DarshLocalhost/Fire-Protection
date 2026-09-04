@@ -3,14 +3,20 @@
         xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
         xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
         xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+        xmlns:vmCatalog="clr-namespace:FireProtection.UI.ViewModels.Catalog"
         xmlns:vmNotif="clr-namespace:FireProtection.UI.ViewModels.NotificationAppliances"
         xmlns:vmSmoke="clr-namespace:FireProtection.UI.ViewModels.SmokeDetectors"
         xmlns:vmSprinklers="clr-namespace:FireProtection.UI.ViewModels.Sprinklers"
+        xmlns:vCatalog="clr-namespace:FireProtection.UI.Views.Catalog"
         xmlns:vNotif="clr-namespace:FireProtection.UI.Views.NotificationAppliances"
         xmlns:vSmoke="clr-namespace:FireProtection.UI.Views.SmokeDetectors"
         xmlns:vSprinklers="clr-namespace:FireProtection.UI.Views.Sprinklers"
         Width="1400"
         Height="900"
+        MinWidth="1040"
+        MinHeight="620"
+        ResizeMode="CanResize"
+        SizeToContent="Manual"
         Background="{DynamicResource BackgroundBrush}"
         FontFamily="Segoe UI"
         Title="Fire Protection System"
@@ -37,6 +43,7 @@
   </Window.Resources>
   <Grid Background="{DynamicResource BackgroundBrush}">
     <Grid.RowDefinitions>
+      <RowDefinition Height="Auto" />
       <RowDefinition Height="Auto" />
       <RowDefinition Height="*" />
     </Grid.RowDefinitions>
@@ -87,7 +94,7 @@
                 Background="{x:Null}"
                 ItemContainerStyle="{StaticResource TopTabItemStyle}"
                 Style="{StaticResource TopTabControlStyle}"
-                Grid.Row="1">
+                Grid.Row="2">
           <TabItem Header="Sprinklers">
             <ContentControl Content="{Binding Sprinkler}" />
           </TabItem>
@@ -98,5 +105,10 @@
             <ContentControl Content="{Binding NotificationAppliance}" />
           </TabItem>
         </TabControl>
+
+    <!-- Catalog top bar (Decision 020) -->
+    <vCatalog:CatalogBar Grid.Row="1"
+                         Margin="16,0,16,0"
+                         DataContext="{Binding Catalog}"/>
   </Grid>
 </Window>

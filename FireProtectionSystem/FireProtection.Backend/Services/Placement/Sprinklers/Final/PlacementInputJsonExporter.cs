@@ -102,7 +102,11 @@ namespace FireProtection.Backend.Services.Placement.Sprinklers.Final
                     EffectiveHazardClass = item.EffectiveHazardClass,
                     CeilingHeightFt = item.CeilingHeightFt,
                     CeilingType = item.CeilingType,
-                    Polygon = item.Polygon ?? new List<double[]>()
+                    Polygon = item.Polygon ?? new List<double[]>(),
+                    SelectedSprinklerFamilyName = item.SelectedSprinklerFamilyName,
+                    SelectedSprinklerTypeName = item.SelectedSprinklerTypeName,
+                    OverrideMaxSpacingFt = item.OverrideMaxSpacingFt,
+                    OverrideBoundaryClearanceFt = item.OverrideBoundaryClearanceFt
                 };
 
                 RoomData roomData = null;

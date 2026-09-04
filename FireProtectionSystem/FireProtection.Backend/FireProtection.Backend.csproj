@@ -172,6 +172,9 @@
 
 	<ItemGroup>
 		<PackageReference Include="Newtonsoft.Json" Version="13.0.4" />
+		<PackageReference Include="ClosedXML" Version="0.104.1">
+			<Private>true</Private>
+		</PackageReference>
 	</ItemGroup>
 
 
@@ -223,6 +226,19 @@
 
 
 		<!-- ======================================================= -->
+		<!-- Copy FireProtection.Backend.dll.config (binding redirects) -->
+		<!-- Without this the net48 host (Revit 2024) refuses to load   -->
+		<!-- the higher-version System.Memory / System.Buffers / etc.   -->
+		<!-- transitives that ClosedXML 0.104.1 ships. The .NET 8 hosts -->
+		<!-- ignore this file but it does not harm them.                 -->
+		<!-- ======================================================= -->
+
+		<Copy SourceFiles="$(MSBuildThisFileDirectory)FireProtection.Backend.dll.config"
+		      DestinationFiles="$(RevitAddinsDirectory)\FireProtection.Backend.dll.config"
+		      SkipUnchangedFiles="true" />
+
+
+		<!-- ======================================================= -->
 		<!-- Copy Newtonsoft.Json (single compatible build)          -->
 		<!-- Revit loads its own Newtonsoft.Json first; this co-located -->
 		<!-- copy provides a genuine, full 13.0.0.0 fallback so the  -->
@@ -230,6 +246,118 @@
 		<!-- ======================================================= -->
 
 		<Copy SourceFiles="$(TargetDir)Newtonsoft.Json.dll" DestinationFolder="$(RevitAddinsDirectory)" SkipUnchangedFiles="true" Condition="Exists('$(TargetDir)Newtonsoft.Json.dll')" />
+
+
+		<!-- ======================================================= -->
+		<!-- Copy ClosedXML + transitive deps from the NuGet cache    -->
+		<!-- The Revit API reference path + Private=False interferes -->
+		<!-- with MSBuild's automatic package-to-bin copy, so we     -->
+		<!-- resolve the DLLs directly from the NuGet package cache   -->
+		<!-- and copy them to the Revit addins folder. The exact      -->
+		<!-- paths are pinned to ClosedXML 0.104.1 + transitives;    -->
+		<!-- if you bump ClosedXML, update the paths below OR use    -->
+		<!-- the (slower) "$(NuGetPackageRoot)" property expansion.    -->
+		<!--                                                            -->
+		<!-- CRITICAL: each Revit host version must receive the       -->
+		<!-- TFM-matched DLL variant only. Mixing the netstandard2.0 -->
+		<!-- and netstandard2.1 variants in the same addins folder   -->
+		<!-- causes the loader to bind the wrong one — the net48 host -->
+		<!-- ends up trying to load the netstandard2.1 variant which -->
+		<!-- transitively depends on `netstandard.dll` (a .NET Core   -->
+		<!-- forwarder not present on .NET Framework 4.8). The split  -->
+		<!-- by $(Configuration) below ensures the right DLLs are     -->
+		<!-- copied for the right host.                                -->
+		<!-- ======================================================= -->
+
+		<PropertyGroup>
+			<ClosedXmlNet48>$(USERPROFILE)\.nuget\packages\closedxml\0.104.1\lib\netstandard2.0\ClosedXML.dll</ClosedXmlNet48>
+			<ClosedXmlNet8>$(USERPROFILE)\.nuget\packages\closedxml\0.104.1\lib\netstandard2.1\ClosedXML.dll</ClosedXmlNet8>
+			<ClosedXmlParserNet48>$(USERPROFILE)\.nuget\packages\closedxml.parser\1.2.0\lib\netstandard2.0\ClosedXML.Parser.dll</ClosedXmlParserNet48>
+			<ClosedXmlParserNet8>$(USERPROFILE)\.nuget\packages\closedxml.parser\1.2.0\lib\netstandard2.1\ClosedXML.Parser.dll</ClosedXmlParserNet8>
+			<DocumentFormatNet48>$(USERPROFILE)\.nuget\packages\documentformat.openxml\3.0.1\lib\net46\DocumentFormat.OpenXml.dll</DocumentFormatNet48>
+			<DocumentFormatNet8>$(USERPROFILE)\.nuget\packages\documentformat.openxml\3.0.1\lib\net8.0\DocumentFormat.OpenXml.dll</DocumentFormatNet8>
+			<DocumentFormatFrameworkNet48>$(USERPROFILE)\.nuget\packages\documentformat.openxml.framework\3.0.1\lib\net46\DocumentFormat.OpenXml.Framework.dll</DocumentFormatFrameworkNet48>
+			<DocumentFormatFrameworkNet8>$(USERPROFILE)\.nuget\packages\documentformat.openxml.framework\3.0.1\lib\net8.0\DocumentFormat.OpenXml.Framework.dll</DocumentFormatFrameworkNet8>
+			<SixLaborsFontsNet48>$(USERPROFILE)\.nuget\packages\sixlabors.fonts\1.0.0\lib\netstandard2.0\SixLabors.Fonts.dll</SixLaborsFontsNet48>
+			<SixLaborsFontsNet8>$(USERPROFILE)\.nuget\packages\sixlabors.fonts\1.0.0\lib\netstandard2.1\SixLabors.Fonts.dll</SixLaborsFontsNet8>
+			<ExcelNumberFormatNet48>$(USERPROFILE)\.nuget\packages\excelnumberformat\1.1.0\lib\netstandard2.0\ExcelNumberFormat.dll</ExcelNumberFormatNet48>
+			<ExcelNumberFormatNet8>$(USERPROFILE)\.nuget\packages\excelnumberformat\1.1.0\lib\netstandard2.0\ExcelNumberFormat.dll</ExcelNumberFormatNet8>
+			<!-- Second-order transitives (used by DocumentFormat.OpenXml and ClosedXML.Parser). The
+			     net48 host needs the netstandard2.0 builds; the net8 hosts need the
+			     netstandard2.1 / net8.0 builds. Pinning exact versions is safer than wildcards
+			     because DocumentFormat.OpenXml 3.0.1 specifically asks for System.Memory 4.0.1.1
+			     (redirected to 4.5.5 at runtime) and the netstandard2.1 variant pulls in a
+			     netstandard.dll forwarder that net48 does not have. -->
+			<SystemMemoryNet48>$(USERPROFILE)\.nuget\packages\system.memory\4.5.5\lib\netstandard2.0\System.Memory.dll</SystemMemoryNet48>
+			<SystemMemoryNet8>$(USERPROFILE)\.nuget\packages\system.memory\4.5.5\lib\netstandard2.0\System.Memory.dll</SystemMemoryNet8>
+			<SystemBuffersNet48>$(USERPROFILE)\.nuget\packages\system.buffers\4.6.1\lib\net462\System.Buffers.dll</SystemBuffersNet48>
+			<SystemBuffersNet8>$(USERPROFILE)\.nuget\packages\system.buffers\4.6.1\lib\netstandard2.0\System.Buffers.dll</SystemBuffersNet8>
+			<SystemNumericsVectorsNet48>$(USERPROFILE)\.nuget\packages\system.numerics.vectors\4.5.0\lib\net46\System.Numerics.Vectors.dll</SystemNumericsVectorsNet48>
+			<SystemNumericsVectorsNet8>$(USERPROFILE)\.nuget\packages\system.numerics.vectors\4.5.0\lib\netstandard2.0\System.Numerics.Vectors.dll</SystemNumericsVectorsNet8>
+			<!-- REQUIRED by System.Memory 4.5.5 on .NET Framework (net48 / Revit 2024): the
+			     Unsafe assembly is NOT part of .NET Framework, so it must be deployed or the
+			     first ClosedXML call fails with "Could not load file or assembly
+			     'System.Runtime.CompilerServices.Unsafe'". A binding redirect for it already
+			     existed in FireProtection.Backend.dll.config, but the DLL itself was never
+			     copied. In-box on .NET 8, so the net8 hosts must NOT receive it. -->
+			<SystemUnsafeNet48>$(USERPROFILE)\.nuget\packages\system.runtime.compilerservices.unsafe\6.0.0\lib\net461\System.Runtime.CompilerServices.Unsafe.dll</SystemUnsafeNet48>
+			<!-- REQUIRED by DocumentFormat.OpenXml.Framework 3.0.1 on net8.0 (Revit 2025/2026):
+			     System.IO.Packaging is a NuGet package, NOT part of the .NET 8 shared framework,
+			     so opening any .xlsx throws FileNotFoundException without it. On .NETFramework4.6
+			     the package's nuspec uses the WindowsBase framework assembly instead, so the
+			     net48 host must NOT receive it (a second copy would conflict with WindowsBase). -->
+			<SystemIoPackagingNet8>$(USERPROFILE)\.nuget\packages\system.io.packaging\8.0.0\lib\net8.0\System.IO.Packaging.dll</SystemIoPackagingNet8>
+		</PropertyGroup>
+
+		<!-- net48 variant for Revit 2024 -->
+		<ItemGroup Condition="'$(Configuration)' == 'Revit2024'">
+			<ClosedXmlRuntimeDlls Include="$(ClosedXmlNet48)" />
+			<ClosedXmlRuntimeDlls Include="$(ClosedXmlParserNet48)" />
+			<ClosedXmlRuntimeDlls Include="$(DocumentFormatNet48)" />
+			<ClosedXmlRuntimeDlls Include="$(DocumentFormatFrameworkNet48)" />
+			<ClosedXmlRuntimeDlls Include="$(SixLaborsFontsNet48)" />
+			<ClosedXmlRuntimeDlls Include="$(ExcelNumberFormatNet48)" />
+			<ClosedXmlRuntimeDlls Include="$(SystemMemoryNet48)" />
+			<ClosedXmlRuntimeDlls Include="$(SystemBuffersNet48)" />
+			<ClosedXmlRuntimeDlls Include="$(SystemNumericsVectorsNet48)" />
+			<ClosedXmlRuntimeDlls Include="$(SystemUnsafeNet48)" />
+		</ItemGroup>
+
+		<!-- net8.0 variant for Revit 2025 / 2026                                          -->
+		<!-- System.Memory / System.Buffers / System.Numerics.Vectors / Unsafe are IN-BOX   -->
+		<!-- on .NET 8 and are deliberately NOT deployed: shipping the netstandard2.0       -->
+		<!-- implementations next to the add-in makes the loader resolve a SECOND           -->
+		<!-- Span<T>/Memory<T> type identity, which breaks ClosedXML with TypeLoadException -->
+		<!-- / MissingMethodException at workbook-open time. Only the genuinely missing     -->
+		<!-- out-of-band package (System.IO.Packaging) is deployed.                          -->
+		<ItemGroup Condition="'$(Configuration)' == 'Revit2025' Or&#xD;&#xA;                 '$(Configuration)' == 'Revit2026'">
+			<ClosedXmlRuntimeDlls Include="$(ClosedXmlNet8)" />
+			<ClosedXmlRuntimeDlls Include="$(ClosedXmlParserNet8)" />
+			<ClosedXmlRuntimeDlls Include="$(DocumentFormatNet8)" />
+			<ClosedXmlRuntimeDlls Include="$(DocumentFormatFrameworkNet8)" />
+			<ClosedXmlRuntimeDlls Include="$(SixLaborsFontsNet8)" />
+			<ClosedXmlRuntimeDlls Include="$(ExcelNumberFormatNet8)" />
+			<ClosedXmlRuntimeDlls Include="$(SystemIoPackagingNet8)" />
+		</ItemGroup>
+
+		<!-- Remove stale netstandard2.0 facades left by earlier deployments of this add-in -->
+		<!-- (they are in-box on .NET 8 and cause duplicate Span<T> type identities).        -->
+		<ItemGroup Condition="'$(Configuration)' == 'Revit2025' Or&#xD;&#xA;                 '$(Configuration)' == 'Revit2026'">
+			<StaleNet8Facades Include="$(RevitAddinsDirectory)\System.Memory.dll" />
+			<StaleNet8Facades Include="$(RevitAddinsDirectory)\System.Buffers.dll" />
+			<StaleNet8Facades Include="$(RevitAddinsDirectory)\System.Numerics.Vectors.dll" />
+			<StaleNet8Facades Include="$(RevitAddinsDirectory)\System.Runtime.CompilerServices.Unsafe.dll" />
+		</ItemGroup>
+
+		<Delete Files="@(StaleNet8Facades)" ContinueOnError="true" Condition="'$(Configuration)' == 'Revit2025' Or&#xD;&#xA;                 '$(Configuration)' == 'Revit2026'" />
+
+		<Message Text="Deploying ClosedXML runtime dependencies for $(Configuration) to $(RevitAddinsDirectory):" Importance="High" />
+		<Message Text="    @(ClosedXmlRuntimeDlls, '&#x0A;    ')" Importance="High" />
+
+		<Copy SourceFiles="@(ClosedXmlRuntimeDlls)"
+		      DestinationFolder="$(RevitAddinsDirectory)"
+		      SkipUnchangedFiles="true"
+		      Condition="Exists('%(Identity)')" />
 
 
 		<!-- ======================================================= -->
@@ -250,7 +378,7 @@
 		<!-- ===== Application registration (Ribbon) ===== -->
 		<WriteLinesToFile File="$(IntermediateOutputPath)FireProtectionSystem.addin" Overwrite="false" Lines="  &lt;AddIn Type=&quot;Application&quot;&gt;" Encoding="UTF-8" />
 		<WriteLinesToFile File="$(IntermediateOutputPath)FireProtectionSystem.addin" Overwrite="false" Lines="    &lt;Name&gt;Fire Protection System&lt;/Name&gt;" Encoding="UTF-8" />
-		<WriteLinesToFile File="$(IntermediateOutputPath)FireProtectionSystem.addin" Overwrite="false" Lines="    &lt;Assembly&gt;$(TargetPath)&lt;/Assembly&gt;" Encoding="UTF-8" />
+		<WriteLinesToFile File="$(IntermediateOutputPath)FireProtectionSystem.addin" Overwrite="false" Lines="    &lt;Assembly&gt;$(RevitAddinsDirectory)\FireProtection.Backend.dll&lt;/Assembly&gt;" Encoding="UTF-8" />
 		<WriteLinesToFile File="$(IntermediateOutputPath)FireProtectionSystem.addin" Overwrite="false" Lines="    &lt;AddInId&gt;7E6F5F2A-8C2B-4F43-A8C8-4C8D2B9F6A11&lt;/AddInId&gt;" Encoding="UTF-8" />
 		<WriteLinesToFile File="$(IntermediateOutputPath)FireProtectionSystem.addin" Overwrite="false" Lines="    &lt;FullClassName&gt;FireProtection.Backend.Revit.FireProtectionApplication&lt;/FullClassName&gt;" Encoding="UTF-8" />
 		<WriteLinesToFile File="$(IntermediateOutputPath)FireProtectionSystem.addin" Overwrite="false" Lines="    &lt;VendorId&gt;FPS&lt;/VendorId&gt;" Encoding="UTF-8" />

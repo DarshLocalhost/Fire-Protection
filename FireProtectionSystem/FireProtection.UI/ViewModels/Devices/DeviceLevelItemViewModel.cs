@@ -14,6 +14,13 @@ namespace FireProtection.UI.ViewModels.Devices
     {
         private bool _isSelected;
         private int _selectedRoomCount;
+        private string _detectorType;
+        private string _mount;
+        private string _ceilingSlope;
+        private string _applianceType;
+        private string _candelaDba;
+        private string _deviceFamily;
+        private string _deviceType;
 
         public DeviceLevelItemViewModel(LevelUiData level)
         {
@@ -71,6 +78,106 @@ namespace FireProtection.UI.ViewModels.Devices
         {
             get => _selectedRoomCount;
             private set => SetProperty(ref _selectedRoomCount, value);
+        }
+
+        public string DetectorType
+        {
+            get => _detectorType;
+            set { if (SetProperty(ref _detectorType, value)) { PropagateToRooms("DetectorType"); } }
+        }
+
+        public string Mount
+        {
+            get => _mount;
+            set { if (SetProperty(ref _mount, value)) { PropagateToRooms("Mount"); } }
+        }
+
+        public string CeilingSlope
+        {
+            get => _ceilingSlope;
+            set { if (SetProperty(ref _ceilingSlope, value)) { PropagateToRooms("CeilingSlope"); } }
+        }
+
+        public string ApplianceType
+        {
+            get => _applianceType;
+            set { if (SetProperty(ref _applianceType, value)) { PropagateToRooms("ApplianceType"); } }
+        }
+
+        public string CandelaDba
+        {
+            get => _candelaDba;
+            set { if (SetProperty(ref _candelaDba, value)) { PropagateToRooms("CandelaDba"); } }
+        }
+
+        /// <summary>
+        /// Level default for the device family. Propagates into every room on this level that is
+        /// still on the previous default; rows the user overrode keep their own selection.
+        /// </summary>
+        public string DeviceFamily
+        {
+            get => _deviceFamily;
+            set { if (SetProperty(ref _deviceFamily, value)) { PropagateFamilyTypeToRooms(); } }
+        }
+
+        /// <summary>Level default for the device type. See <see cref="DeviceFamily"/>.</summary>
+        public string DeviceType
+        {
+            get => _deviceType;
+            set { if (SetProperty(ref _deviceType, value)) { PropagateFamilyTypeToRooms(); } }
+        }
+
+        public string GetDefault(string key)
+        {
+            if (string.IsNullOrEmpty(key)) return null;
+            switch (key)
+            {
+                case "DetectorType": return _detectorType;
+                case "Mount": return _mount;
+                case "CeilingSlope": return _ceilingSlope;
+                case "ApplianceType": return _applianceType;
+                case "CandelaDba": return _candelaDba;
+                case "DeviceFamily": return _deviceFamily;
+                case "DeviceType": return _deviceType;
+                default: return null;
+            }
+        }
+
+        public void SetDefault(string key, string value)
+        {
+            if (string.IsNullOrEmpty(key)) return;
+            switch (key)
+            {
+                case "DetectorType": DetectorType = value; break;
+                case "Mount": Mount = value; break;
+                case "CeilingSlope": CeilingSlope = value; break;
+                case "ApplianceType": ApplianceType = value; break;
+                case "CandelaDba": CandelaDba = value; break;
+                case "DeviceFamily": DeviceFamily = value; break;
+                case "DeviceType": DeviceType = value; break;
+            }
+        }
+
+        private void PropagateFamilyTypeToRooms()
+        {
+            if (Rooms == null) return;
+            foreach (DeviceRoomItemViewModel room in Rooms)
+            {
+                if (room == null) continue;
+                room.SetDeviceDefaults(_deviceFamily, _deviceType);
+            }
+        }
+
+        private void PropagateToRooms(string key)
+        {
+            if (Rooms == null) return;
+            string newDefault = GetDefault(key);
+            foreach (DeviceRoomItemViewModel room in Rooms)
+            {
+                if (room == null) continue;
+                // Always push the level default; the row keeps showing its own override if it has one.
+                room.SetLevelDefault(key, newDefault);
+            }
         }
 
         private void RecalculateSelectedRoomCount()

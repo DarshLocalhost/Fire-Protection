@@ -21,6 +21,22 @@ namespace FireProtection.UI.Services
         public string CeilingType { get; set; }
         public List<double[]> Polygon { get; set; }
 
+        /// <summary>
+        /// Per-row sprinkler family (Decision 017). Replaces the universal
+        /// <see cref="IPlacementInputExporter.CalculateBruteForce"/>'s
+        /// <c>selectedFamilyName</c> argument when the room's per-row value is set.
+        /// </summary>
+        public string SelectedSprinklerFamilyName { get; set; }
+
+        /// <summary>Per-row sprinkler type (Decision 017).</summary>
+        public string SelectedSprinklerTypeName { get; set; }
+
+        /// <summary>Per-row spacing override in feet (Decision 018). null = use rule-set default.</summary>
+        public double? OverrideMaxSpacingFt { get; set; }
+
+        /// <summary>Per-row boundary (wall) clearance override in feet (Decision 018). null = use rule-set default.</summary>
+        public double? OverrideBoundaryClearanceFt { get; set; }
+
         // Full room payload (ceilings, obstacles, existingSprinklers, source, etc.) captured
         // from the ModelSnapshot JSON and forwarded to the exporter. The Backend rehydrates
         // its own DTOs from this, avoiding any circular project dependency.

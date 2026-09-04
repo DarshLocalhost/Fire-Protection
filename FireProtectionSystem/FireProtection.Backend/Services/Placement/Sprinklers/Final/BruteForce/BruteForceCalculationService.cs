@@ -41,6 +41,17 @@ namespace FireProtection.Backend.Services.Placement.Sprinklers.Final.BruteForce
                 return result;
             }
 
+            int overrideCount = 0;
+            foreach (PlacementRoomInput r in snapshot.Rooms)
+            {
+                if (r == null) continue;
+                if (r.OverrideMaxSpacingFt.HasValue || r.OverrideBoundaryClearanceFt.HasValue) overrideCount++;
+            }
+            if (overrideCount > 0)
+            {
+                result.AppliedRulesSummary += " " + overrideCount + " room(s) use per-room spacing/clearance overrides.";
+            }
+
             foreach (PlacementRoomInput room in snapshot.Rooms)
             {
                 RoomCalculationResult roomResult;
@@ -55,6 +66,8 @@ namespace FireProtection.Backend.Services.Placement.Sprinklers.Final.BruteForce
                         RoomId = room?.RoomId,
                         RoomName = room?.RoomName,
                         RoomNumber = room?.RoomNumber,
+                        SprinklerFamilyName = room?.SelectedSprinklerFamilyName,
+                        SprinklerTypeName = room?.SelectedSprinklerTypeName,
                         Status = CalculationStatus.Failed
                     };
                     roomResult.Errors.Add("Unexpected calculation error: " + ex.Message);
@@ -88,6 +101,8 @@ namespace FireProtection.Backend.Services.Placement.Sprinklers.Final.BruteForce
                 RoomId = room.RoomId,
                 RoomName = room.RoomName,
                 RoomNumber = room.RoomNumber,
+                SprinklerFamilyName = room.SelectedSprinklerFamilyName,
+                SprinklerTypeName = room.SelectedSprinklerTypeName,
                 Status = CalculationStatus.Success
             };
 
@@ -104,7 +119,15 @@ namespace FireProtection.Backend.Services.Placement.Sprinklers.Final.BruteForce
 
             // ---- Hazard ----
             HazardClass hazardClass = ParseHazardClass(room.EffectiveHazardClass, result);
-            HazardPlacementRuleSet ruleSet = rules.GetRules(hazardClass);
+            HazardPlacementRuleSet baseRuleSet = rules.GetRules(hazardClass);
+            HazardPlacementRuleSet ruleSet = ApplyPerRoomOverrides(baseRuleSet, room, result);
+
+            // Carried onto the result so placement can prove points fall inside this room and can stamp the
+            // spacing it actually used onto each created element.
+            result.Polygon = outer;
+            result.AppliedMaxSpacingFt = ruleSet.MaxSpacingFt;
+            result.AppliedBoundaryClearanceFt = ruleSet.BoundaryClearanceFt;
+            result.RulesApproved = rules.HasApprovedRules;
 
             // ---- Ceiling / placement plane (Z) ----
             bool ceilingUnsupported = false;
@@ -500,6 +523,96 @@ namespace FireProtection.Backend.Services.Placement.Sprinklers.Final.BruteForce
             }
 
             return points;
+        }
+
+        // ------------------------------------------------------------------
+        // Per-room rule overrides (Decision 018)
+        // ------------------------------------------------------------------
+
+        private static HazardPlacementRuleSet ApplyPerRoomOverrides(
+            HazardPlacementRuleSet baseRuleSet,
+            PlacementRoomInput room,
+            RoomCalculationResult result)
+        {
+            if (baseRuleSet == null) return null;
+            if (room == null) return baseRuleSet;
+            if (!room.OverrideMaxSpacingFt.HasValue && !room.OverrideBoundaryClearanceFt.HasValue)
+            {
+                return baseRuleSet;
+            }
+
+            HazardPlacementRuleSet effective = new HazardPlacementRuleSet
+            {
+                HazardClass = baseRuleSet.HazardClass,
+                MaxSpacingFt = baseRuleSet.MaxSpacingFt,
+                CoverageRadiusFt = baseRuleSet.CoverageRadiusFt,
+                ObstacleClearanceFt = baseRuleSet.ObstacleClearanceFt,
+                BoundaryClearanceFt = baseRuleSet.BoundaryClearanceFt,
+                ExistingSprinklerSeparationFt = baseRuleSet.ExistingSprinklerSeparationFt,
+                IsProvisional = baseRuleSet.IsProvisional || true,
+                Notes = baseRuleSet.Notes
+            };
+
+            if (room.OverrideMaxSpacingFt.HasValue)
+            {
+                double requested = room.OverrideMaxSpacingFt.Value;
+                double clamped = ClampToNfpa13MaxSpacing(effective.HazardClass, requested, out string clampNote);
+                effective.MaxSpacingFt = clamped;
+                if (result != null)
+                {
+                    string note = "Override applied: MaxSpacingFt=" + clamped.ToString("F2")
+                        + " ft (rule=" + baseRuleSet.MaxSpacingFt.ToString("F2") + " ft, requested=" + requested.ToString("F2") + " ft)";
+                    if (!string.IsNullOrEmpty(clampNote)) note += " - " + clampNote;
+                    result.Diagnostics.Add(note);
+                }
+            }
+
+            if (room.OverrideBoundaryClearanceFt.HasValue)
+            {
+                double requested = room.OverrideBoundaryClearanceFt.Value;
+                double clamped = Math.Max(0.0, requested);
+                effective.BoundaryClearanceFt = clamped;
+                if (result != null)
+                {
+                    result.Diagnostics.Add("Override applied: BoundaryClearanceFt=" + clamped.ToString("F2")
+                        + " ft (rule=" + baseRuleSet.BoundaryClearanceFt.ToString("F2")
+                        + " ft, requested=" + requested.ToString("F2") + " ft)");
+                }
+            }
+
+            if (result != null)
+            {
+                if (result.Status == CalculationStatus.Success)
+                {
+                    result.Status = CalculationStatus.ReviewRequired;
+                }
+                result.Warnings.Add(
+                    "Per-room spacing override applied; values are not NFPA13-2022 approved. Review required.");
+            }
+
+            return effective;
+        }
+
+        private static double ClampToNfpa13MaxSpacing(HazardClass hazardClass, double requestedFt, out string note)
+        {
+            // NFPA 13 hard-limit ceilings per the current placeholder rule set (15 ft). The
+            // current authoritative values are not yet encoded; the placeholder is the only
+            // hard ceiling we can enforce. Engineers can request tighter (smaller) values.
+            note = null;
+            const double provisionalCeilingFt = 15.0;
+            if (requestedFt > provisionalCeilingFt)
+            {
+                note = "Requested MaxSpacingFt " + requestedFt.ToString("F2")
+                    + " ft exceeds the current provisional ceiling (" + provisionalCeilingFt.ToString("F2")
+                    + " ft); clamped to " + provisionalCeilingFt.ToString("F2") + " ft.";
+                return provisionalCeilingFt;
+            }
+            if (requestedFt <= 0.0)
+            {
+                note = "Requested MaxSpacingFt <= 0; rejected.";
+                return 0.0;
+            }
+            return requestedFt;
         }
 
         private sealed class ObstacleBox

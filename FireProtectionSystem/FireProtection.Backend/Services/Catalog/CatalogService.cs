@@ -112,6 +112,32 @@ namespace FireProtection.Backend.Services.Catalog
             }
         }
 
+        /// <summary>
+        /// Returns the <c>Mount</c> value (e.g. <c>"Pendent"</c>, <c>"Sidewall"</c>,
+        /// <c>"Upright"</c>) for the given sprinkler (family, type), or <c>null</c>
+        /// if no row matches. Comparison is case-insensitive and trims whitespace.
+        /// Used by the device-placement resolver to refine
+        /// <see cref="DevicePlacementBehavior"/> into the mount-specific bucket
+        /// (CeilingOverhead vs WallSidewall).
+        /// </summary>
+        public string GetSprinklerMount(string familyName, string typeName)
+        {
+            if (string.IsNullOrWhiteSpace(familyName) || string.IsNullOrWhiteSpace(typeName)) return null;
+            if (_catalog == null || _catalog.Sprinklers == null) return null;
+
+            string fam = familyName.Trim();
+            string typ = typeName.Trim();
+            for (int i = 0; i < _catalog.Sprinklers.Count; i++)
+            {
+                SprinklerCatalogRow r = _catalog.Sprinklers[i];
+                if (r == null) continue;
+                if (!string.Equals(r.FamilyName?.Trim(), fam, StringComparison.OrdinalIgnoreCase)) continue;
+                if (!string.Equals(r.TypeName?.Trim(), typ, StringComparison.OrdinalIgnoreCase)) continue;
+                return r.Mount;
+            }
+            return null;
+        }
+
         public IReadOnlyList<string> AvailableDetectorTypes
         {
             get

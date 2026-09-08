@@ -69,6 +69,33 @@ namespace FireProtection.Backend.Models.Placement.Sprinklers.Final
         [JsonProperty("selectedSprinklerTypeName")]
         public string SelectedSprinklerTypeName { get; set; }
 
+        /// <summary>
+        /// Per-room PROVEN Revit's <c>FamilyPlacementType</c> string (e.g.
+        /// <c>"FaceBased"</c> / <c>"WorkPlaneBased"</c> / <c>"OneLevelBased"</c>).
+        /// Resolved at the Revit-aware boundary by
+        /// <see cref="FireProtection.Backend.Services.Placement.RevitSprinklerFamilySource"/>
+        /// from the per-row <see cref="SelectedSprinklerFamilyName"/> /
+        /// <see cref="SelectedSprinklerTypeName"/>. <c>null</c> when the family/type
+        /// was not resolved.
+        ///
+        /// Step 2 carries this value into the calculation input WITHOUT changing
+        /// the calculation algorithm. The future candidate generator will read it
+        /// to switch between candidate modes.
+        /// </summary>
+        [JsonProperty("selectedSprinklerFamilyPlacementType")]
+        public string SelectedSprinklerFamilyPlacementType { get; set; }
+
+        /// <summary>
+        /// Per-room plain, Revit-free classification of the placement behavior required
+        /// by the per-row sprinkler family/type. Default
+        /// <see cref="DevicePlacementBehavior.Unknown"/> when the per-row family/type
+        /// was not resolved. Step 2 only carries this value through the pipeline;
+        /// <see cref="FireProtection.Backend.Services.Placement.Sprinklers.Final.BruteForce.BruteForceCalculationService"/>
+        /// does not yet read it.
+        /// </summary>
+        [JsonProperty("selectedSprinklerPlacementBehavior")]
+        public DevicePlacementBehavior SelectedSprinklerPlacementBehavior { get; set; } = DevicePlacementBehavior.Unknown;
+
         /// <summary>Per-room MaxSpacingFt override in feet (Decision 018). null = use rule-set default.</summary>
         [JsonProperty("overrideMaxSpacingFt")]
         public double? OverrideMaxSpacingFt { get; set; }
@@ -76,6 +103,15 @@ namespace FireProtection.Backend.Models.Placement.Sprinklers.Final
         /// <summary>Per-room BoundaryClearanceFt (wall) override in feet (Decision 018). null = use rule-set default.</summary>
         [JsonProperty("overrideBoundaryClearanceFt")]
         public double? OverrideBoundaryClearanceFt { get; set; }
+
+        /// <summary>
+        /// Per-row sprinkler orientation: <c>"pendent"</c>, <c>"upright"</c>, or
+        /// <c>"sidewall"</c>. Drives <see cref="FireProtection.Backend.Services.Placement.Sprinklers.Final.BruteForce.HazardPlacementRuleSet.GetOrientationAdjustment"/>
+        /// which scales MaxSpacing / CoverageRadius per NFPA 13 §10.2 (sidewall gets a
+        /// tighter spacing multiplier). <c>null</c> / empty / unknown = no adjustment (1.0).
+        /// </summary>
+        [JsonProperty("selectedSprinklerOrientation")]
+        public string SelectedSprinklerOrientation { get; set; }
 
         [JsonProperty("source")]
         public SourceReferenceData Source { get; set; }

@@ -23,18 +23,39 @@ namespace FireProtection.Backend.Services.Placement.Sprinklers.Final
 
         private readonly IReadOnlyList<ObstacleData> _globalObstacles;
         private readonly IReadOnlyList<ExistingSprinklerData> _globalExistingSprinklers;
+        private readonly DeviceContextResolver _resolver;
 
         public PlacementInputJsonExporter()
-            : this(null, null)
+            : this(null, null, null)
         {
         }
 
         public PlacementInputJsonExporter(
             IReadOnlyList<ObstacleData> globalObstacles,
             IReadOnlyList<ExistingSprinklerData> globalExistingSprinklers)
+            : this(globalObstacles, globalExistingSprinklers, null)
+        {
+        }
+
+        /// <summary>
+        /// Step 2 — the optional <paramref name="resolver"/> is the small
+        /// Backend-internal <see cref="DeviceContextResolver"/> delegate produced
+        /// by the Revit-aware boundary (the <c>RevitSprinklerFamilySource</c>).
+        /// When <c>null</c> (the original Step 1 constructor), the builder leaves
+        /// the per-row context at the Step 1 default — fully backward compatible.
+        ///
+        /// This delegate-only form keeps the <c>FireProtection.UI</c>-defined
+        /// <c>ISprinklerFamilySource</c> interface untouched and avoids forcing
+        /// the UI to declare Revit-aware resolution methods.
+        /// </summary>
+        public PlacementInputJsonExporter(
+            IReadOnlyList<ObstacleData> globalObstacles,
+            IReadOnlyList<ExistingSprinklerData> globalExistingSprinklers,
+            DeviceContextResolver resolver)
         {
             _globalObstacles = globalObstacles;
             _globalExistingSprinklers = globalExistingSprinklers;
+            _resolver = resolver;
         }
 
         public PlacementInputExportResult ExportInput(
@@ -51,7 +72,8 @@ namespace FireProtection.Backend.Services.Placement.Sprinklers.Final
                     projectName,
                     selectedFamilyName,
                     selectedTypeName,
-                    selections);
+                    selections,
+                    _resolver);
 
                 string exportPath = Export(snapshot);
 
@@ -79,7 +101,7 @@ namespace FireProtection.Backend.Services.Placement.Sprinklers.Final
         /// Builds the per-room selection DTOs from the UI-supplied items, rehydrating the full room
         /// payload (ceilings, source) and re-associating global obstacles/existing sprinklers.
         /// Shared by <see cref="ExportInput"/> and <see cref="CalculateBruteForce"/>.
-        /// </summary>
+        /// </summary>/
         private List<PlacementRoomSelection> BuildSelections(IReadOnlyList<PlacementRoomInputItem> selectedRooms)
         {
             List<PlacementRoomSelection> selections = new List<PlacementRoomSelection>();
@@ -162,7 +184,8 @@ namespace FireProtection.Backend.Services.Placement.Sprinklers.Final
                 projectName,
                 selectedFamilyName,
                 selectedTypeName,
-                selections);
+                selections,
+                _resolver);
 
             BruteForceCalculationConfig config = BruteForceCalculationConfig.Default();
             IHazardPlacementRules rules = new DefaultHazardPlacementRules();

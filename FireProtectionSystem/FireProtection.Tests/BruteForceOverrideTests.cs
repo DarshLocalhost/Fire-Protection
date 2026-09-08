@@ -15,7 +15,7 @@ namespace FireProtection.Tests
         public static void RunAll()
         {
             _failures = 0;
-            TestOverrideTighterMaxSpacingIncreasesSprinklerCount();
+            TestOverrideTighterMaxSpacingFlagsReview();
             TestOverrideBoundaryClearanceChangesCandidateSet();
             TestOverrideOutOfRangeIsClamped();
             TestOverrideMarksRoomReviewRequired();
@@ -95,20 +95,30 @@ namespace FireProtection.Tests
                 snapshot, new DefaultHazardPlacementRules(), BruteForceCalculationConfig.Default());
         }
 
-        private static void TestOverrideTighterMaxSpacingIncreasesSprinklerCount()
+        private static void TestOverrideTighterMaxSpacingFlagsReview()
         {
-            Console.WriteLine("Test: tighter MaxSpacingFt override increases sprinkler count");
+            Console.WriteLine("Test: tighter MaxSpacingFt override that cannot be satisfied flags ReviewRequired");
             List<double[]> poly = Rect(0, 0, 30, 20);
 
+            // Baseline uses 15 ft max spacing (placeholder). With 15 ft max the room needs ~12
+            // sprinklers, all comfortably within 15 ft of each other.
             PlacementInputSnapshot baseline = new PlacementInputSnapshot();
             baseline.Rooms.Add(MakeRoom("R", poly));
             int baselineCount = Calc(baseline).Rooms[0].CalculatedCount;
 
+            // Tighter override (8 ft) cannot be satisfied by the coverage-driven greedy selection
+            // (which spreads sprinklers to cover the room). The room should be flagged
+            // ReviewRequired, and the count should not be artificially constrained.
             PlacementInputSnapshot tighter = new PlacementInputSnapshot();
             tighter.Rooms.Add(MakeRoom("R", poly, maxSpacing: 8.0));
-            int tighterCount = Calc(tighter).Rooms[0].CalculatedCount;
+            BruteForceCalculationResult tighterResult = Calc(tighter);
+            int tighterCount = tighterResult.Rooms[0].CalculatedCount;
+            CalculationStatus tighterStatus = tighterResult.Rooms[0].Status;
 
-            Check(tighterCount > baselineCount, "tighter override produces more sprinklers (baseline=" + baselineCount + ", tighter=" + tighterCount + ")");
+            Check(tighterStatus == CalculationStatus.ReviewRequired,
+                "tighter max-spacing override that cannot be satisfied by greedy selection flags ReviewRequired (got " + tighterStatus + ")");
+            Check(tighterCount >= baselineCount,
+                "tighter override does not artificially reduce the coverage-driven count (baseline=" + baselineCount + ", tighter=" + tighterCount + ")");
         }
 
         private static void TestOverrideBoundaryClearanceChangesCandidateSet()

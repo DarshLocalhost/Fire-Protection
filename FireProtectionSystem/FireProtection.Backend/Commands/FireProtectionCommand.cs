@@ -57,11 +57,30 @@ namespace FireProtection.Backend.Commands
 
                 string json = JsonConvert.SerializeObject(snapshot, Formatting.Indented);
 
-                RevitSprinklerFamilySource sprinklerFamilySource = new RevitSprinklerFamilySource(hostDocument);
+                // CatalogHolder is a tiny shared mutable reference to the current
+                // ICatalog. The Revit-aware family source (and its resolver
+                // delegate) is constructed BEFORE the user picks a catalog file,
+                // so the resolver cannot capture a catalog at construction time.
+                // Instead, it reads the holder lazily on every call — the
+                // CatalogViewModel writes the holder when the user loads a file.
+                CatalogHolder catalogHolder = new CatalogHolder();
 
+                // The family source's resolver looks up the Mount column from the
+                // CURRENT catalog. Passing the holder's Current getter as a
+                // delegate makes the lookup lazy and survives catalog reloads.
+                RevitSprinklerFamilySource sprinklerFamilySource = new RevitSprinklerFamilySource(
+                    hostDocument, () => catalogHolder.Current);
+
+                // Step 2 — pass the Revit-aware device-context resolver (produced by
+                // sprinklerFamilySource) into the placement input exporter so the
+                // per-row (and universal) device placement context can be resolved
+                // at the Revit-aware boundary and carried on every PlacementRoomInput.
+                // The calculation engine itself does not yet read the context; the
+                // calculation algorithm is unchanged byte-for-byte.
                 PlacementInputJsonExporter inputExporter = new PlacementInputJsonExporter(
                     snapshot.Obstacles,
-                    snapshot.ExistingSprinklers);
+                    snapshot.ExistingSprinklers,
+                    sprinklerFamilySource.GetDeviceContextResolver());
 
                 RevitSprinklerPlacementService placementService = new RevitSprinklerPlacementService(hostDocument);
 
@@ -70,7 +89,11 @@ namespace FireProtection.Backend.Commands
                 // (ClosedXML), so the Backend constructs the CatalogService and the UI consumes
                 // it through ICatalog. The catalog starts unloaded — the user picks a file in
                 // the top bar.
-                CatalogViewModel catalogViewModel = new CatalogViewModel(BuildCatalogFromPath);
+                //
+                // The viewmodel receives the holder so it can write the loaded
+                // catalog into it on every successful TryLoad — the family
+                // source's resolver then sees the new catalog on its next call.
+                CatalogViewModel catalogViewModel = new CatalogViewModel(BuildCatalogFromPath, catalogHolder);
 
                 // Modeless + owned by Revit's main window: Revit stays fully usable while the tool is open.
                 UiLauncher.Show(

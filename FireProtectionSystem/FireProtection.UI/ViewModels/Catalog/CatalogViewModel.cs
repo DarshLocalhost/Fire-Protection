@@ -12,18 +12,34 @@ namespace FireProtection.UI.ViewModels.Catalog
     public class CatalogViewModel : ObservableObject
     {
         private readonly Func<string, ICatalog> _loader;
+        private readonly CatalogHolder _holder;
         private ICatalog _catalog;
         private string _lastError;
         private bool _isLoading;
 
         public CatalogViewModel()
-            : this(null)
+            : this(null, null)
         {
         }
 
         public CatalogViewModel(Func<string, ICatalog> loader)
+            : this(loader, null)
+        {
+        }
+
+        /// <summary>
+        /// When <paramref name="holder"/> is supplied, this viewmodel writes the
+        /// loaded catalog into <see cref="CatalogHolder.Current"/> on every
+        /// successful <see cref="TryLoad"/>. The Revit-aware
+        /// <c>RevitSprinklerFamilySource</c> reads the holder lazily so its
+        /// mount-lookup sees the user's current catalog at call time, not the
+        /// catalog that existed at startup (which is usually <c>null</c> —
+        /// the user picks the file after the add-in starts).
+        /// </summary>
+        public CatalogViewModel(Func<string, ICatalog> loader, CatalogHolder holder)
         {
             _loader = loader;
+            _holder = holder;
         }
 
         public ICatalog Catalog
@@ -38,6 +54,7 @@ namespace FireProtection.UI.ViewModels.Catalog
                     OnPropertyChanged(nameof(SourcePath));
                     OnPropertyChanged(nameof(TotalRowCount));
                     OnPropertyChanged(nameof(DisplayHeader));
+                    if (_holder != null) _holder.Current = value;
                 }
             }
         }

@@ -42,6 +42,7 @@ namespace FireProtection.UI.ViewModels.Sprinklers.BruteForce
         // Set while a family/type cascade or a catalog reload is moving several selections at once, so the
         // (expensive, Revit-transactional) per-room eligibility probe runs once at the end instead of per move.
         private bool _suppressEligibilityRefresh;
+        private bool _isEligibilityRefreshing;
         private string _placementStatusMessage;
 
         private SprinklerFamilyOption _selectedSprinklerFamily;
@@ -734,6 +735,7 @@ namespace FireProtection.UI.ViewModels.Sprinklers.BruteForce
         private bool CanExecutePlaceSprinklers()
         {
             if (IsPlacementRunning) return false;
+            if (_isEligibilityRefreshing) return false;
             if (SelectedVisibleEligibleRoomCount == 0) return false;
             if (SelectedSprinklerFamily == null) return false;
             if (SelectedSprinklerType == null) return false;
@@ -1222,9 +1224,17 @@ namespace FireProtection.UI.ViewModels.Sprinklers.BruteForce
             if (_sprinklerPlacementService == null) return;
             if (_suppressEligibilityRefresh) return;
 
+            _isEligibilityRefreshing = true;
+            CommandManager.InvalidateRequerySuggested();
+
             RevitApi.Run(
                 RefreshEligibilityCore,
-                ex => System.Diagnostics.Debug.WriteLine("[ROOM-ELIGIBILITY] refresh failed: " + ex.Message));
+                ex =>
+                {
+                    _isEligibilityRefreshing = false;
+                    CommandManager.InvalidateRequerySuggested();
+                    System.Diagnostics.Debug.WriteLine("[ROOM-ELIGIBILITY] refresh failed: " + ex.Message);
+                });
         }
 
         /// <summary>Body of <see cref="RefreshEligibility"/>; always runs in a valid Revit API context.</summary>
@@ -1315,6 +1325,9 @@ namespace FireProtection.UI.ViewModels.Sprinklers.BruteForce
 
             OnPropertyChanged(nameof(AreAllSelectableRoomsSelected));
             OnPropertyChanged(nameof(RoomSelectionToggleLabel));
+
+            _isEligibilityRefreshing = false;
+            CommandManager.InvalidateRequerySuggested();
         }
 
         /// <summary>
@@ -1540,6 +1553,7 @@ namespace FireProtection.UI.ViewModels.Sprinklers.BruteForce
                 room.AvailableTypes = types;
                 room.SelectedType = types.Count > 0 ? types[0] : null;
             }
+            RefreshEligibility();
         }
 
         private void ApplyTypeToSelected(string type)
@@ -1552,6 +1566,7 @@ namespace FireProtection.UI.ViewModels.Sprinklers.BruteForce
                 if (types != null && types.Contains(type, StringComparer.OrdinalIgnoreCase))
                     room.SelectedType = type;
             }
+            RefreshEligibility();
         }
 
         /// <summary>Applies the bulk spacing box to every target room. The box is validated the same way as the
@@ -1605,6 +1620,7 @@ namespace FireProtection.UI.ViewModels.Sprinklers.BruteForce
             if (room == null) return;
             room.ResetFamilyAndTypeToDefault();
             room.ResetSpacingOverridesToDefault();
+            room.ResetHazardClassToDefault();
         }
     }
 }

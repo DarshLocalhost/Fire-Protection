@@ -106,6 +106,10 @@ namespace FireProtection.Backend.Services.Placement.Sprinklers.Final.Strategies
                 const double tol = 0.5;
                 if (point.X < bb.Min.X - tol || point.X > bb.Max.X + tol) continue;
                 if (point.Y < bb.Min.Y - tol || point.Y > bb.Max.Y + tol) continue;
+                // Z-range pre-filter: skip ceilings whose vertical extent doesn't
+                // overlap the search point. For linked ceilings (useLevelFilter=false)
+                // this avoids expensive geometry iteration on ceilings at other levels.
+                if (point.Z < bb.Min.Z - tol || point.Z > bb.Max.Z + tol) continue;
 
                 GeometryElement geom = ceiling.get_Geometry(geomOptions);
                 if (geom == null) continue;

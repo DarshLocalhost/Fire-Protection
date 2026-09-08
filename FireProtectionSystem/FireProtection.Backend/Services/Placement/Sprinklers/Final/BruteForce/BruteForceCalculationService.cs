@@ -266,25 +266,29 @@ namespace FireProtection.Backend.Services.Placement.Sprinklers.Final.BruteForce
                 }
             }
 
-            // ---- Ceiling-height adjustment (NFPA 13 §11.1 / §C.11) ----
-            // For high ceilings the standard requires a reduction factor on the maximum spacing:
+            // ---- Ceiling-height adjustment (NFPA 13 §11.1 / §C.11 / Table 21.2.3.1) ----
+            // NFPA 13 Table 21.2.3.1 specifies ceiling-height spacing reduction factors
+            // ONLY for Light Hazard. For OH/EH classes, different rules apply (§21.2.3.2)
+            // and are not modeled here — the class-wide CeilingHeightAdjustmentFactor
+            // captures the hazard-class safety margin instead.
             //   ceiling height > 10 ft: factor 1.0 (no change)
             //   ceiling height > 12 ft: factor 0.95
             //   ceiling height > 15 ft: factor 0.90
             //   ceiling height > 20 ft: factor 0.85
             //   ceiling height > 25 ft: factor 0.80
-            // For sloped ceilings the slope reduces coverage area (water travels further down the
-            // slope); the rule-set's GetCeilingSlopeAdjustment supplies a class-specific multiplier.
-            // The combined adjustment reduces BOTH MaxSpacing and CoverageRadius proportionally so
-            // the resulting layout still satisfies the higher-hazard requirement of high rooms.
+            // Only MaxSpacingFt is reduced — NFPA 13 does not reduce coverage radius.
             double ceilingHeightFt = room.CeilingHeightFt.HasValue
                 ? room.CeilingHeightFt.Value
                 : Math.Max(0, placementZ - room.LevelElevationFt);
             double heightFactor = 1.0;
-            if (ceilingHeightFt > 25.0) heightFactor = 0.80;
-            else if (ceilingHeightFt > 20.0) heightFactor = 0.85;
-            else if (ceilingHeightFt > 15.0) heightFactor = 0.90;
-            else if (ceilingHeightFt > 12.0) heightFactor = 0.95;
+            bool isLightHazard = ruleSet.HazardClass == HazardClass.Light;
+            if (isLightHazard)
+            {
+                if (ceilingHeightFt > 25.0) heightFactor = 0.80;
+                else if (ceilingHeightFt > 20.0) heightFactor = 0.85;
+                else if (ceilingHeightFt > 15.0) heightFactor = 0.90;
+                else if (ceilingHeightFt > 12.0) heightFactor = 0.95;
+            }
 
             double slopeFactor = 1.0;
             if (bestCeiling != null && !string.Equals(bestCeiling.SlopeType, "FLAT", StringComparison.OrdinalIgnoreCase))
@@ -293,43 +297,50 @@ namespace FireProtection.Backend.Services.Placement.Sprinklers.Final.BruteForce
                 if (slopeFactor <= 0) slopeFactor = 1.0;
             }
 
-            // Combined factor — never worsens spacing below the user's override, but reduces
-            // for high or sloped ceilings. The rule-set field CeilingHeightAdjustmentFactor is
-            // a CLASS-WIDE multiplier (1.0 default, 0.75–0.9 for higher-hazard classes).
+            // Combined factor — reduces MaxSpacingFt for high or sloped ceilings.
+            // CoverageRadiusFt is NOT reduced (NFPA 13 only restricts spacing).
+            // The rule-set field CeilingHeightAdjustmentFactor is a CLASS-WIDE multiplier
+            // (1.0 default, 0.75–0.9 for higher-hazard classes) applied separately from
+            // the height/slope factors.
             double combinedFactor = heightFactor * slopeFactor * ruleSet.CeilingHeightAdjustmentFactor;
             if (combinedFactor < 1.0)
             {
                 double newMax = ruleSet.MaxSpacingFt * combinedFactor;
-                double newCoverage = ruleSet.CoverageRadiusFt * combinedFactor;
                 if (newMax < ruleSet.MaxSpacingFt - 1e-9)
                 {
                     result.Diagnostics.Add(
                         $"Ceiling-height adjustment applied: factor={combinedFactor:F3} (height={ceilingHeightFt:F2}ft, slope={slopeFactor:F2}, class={ruleSet.CeilingHeightAdjustmentFactor:F2}). " +
-                        $"MaxSpacingFt: {ruleSet.MaxSpacingFt:F2} -> {newMax:F2} ft, CoverageRadiusFt: {ruleSet.CoverageRadiusFt:F2} -> {newCoverage:F2} ft.");
+                        $"MaxSpacingFt: {ruleSet.MaxSpacingFt:F2} -> {newMax:F2} ft.");
                     ruleSet.MaxSpacingFt = newMax;
-                    ruleSet.CoverageRadiusFt = newCoverage;
                     result.AppliedMaxSpacingFt = newMax;
                 }
             }
 
             // ---- Orientation adjustment (NFPA 13 §10.2) ----
-            // Sidewall sprinklers have a different spray pattern (half-circle) than pendent or
-            // upright, so the standard allows a tighter spacing. The rule set supplies a
-            // class-specific multiplier; the per-row SelectedSprinklerOrientation drives it.
-            // null / empty / unknown orientation = no adjustment (multiplier 1.0).
+            // Sidewall sprinklers have a half-circle spray pattern, so NFPA 13 limits their
+            // coverage to approximately HALF that of pendent/upright sprinklers. The spacing
+            // is reduced by the orientation factor, and the coverage radius is reduced by
+            // sqrt(2) to model the half-circle pattern (area = pi*r^2/2 ≈ pi*(r/sqrt(2))^2).
+            // null / empty / unknown orientation = no adjustment.
+            bool isSidewallOrientation = string.Equals(room.SelectedSprinklerOrientation, "sidewall", StringComparison.OrdinalIgnoreCase);
             double orientationFactor = ruleSet.GetOrientationAdjustment(room.SelectedSprinklerOrientation);
             if (orientationFactor > 0 && orientationFactor < 1.0)
             {
                 double prevMax = ruleSet.MaxSpacingFt;
-                double prevCoverage = ruleSet.CoverageRadiusFt;
                 double newMaxO = prevMax * orientationFactor;
-                double newCoverageO = prevCoverage * orientationFactor;
                 result.Diagnostics.Add(
                     $"Orientation adjustment applied: orientation='{room.SelectedSprinklerOrientation}', factor={orientationFactor:F3}. " +
-                    $"MaxSpacingFt: {prevMax:F2} -> {newMaxO:F2} ft, CoverageRadiusFt: {prevCoverage:F2} -> {newCoverageO:F2} ft.");
+                    $"MaxSpacingFt: {prevMax:F2} -> {newMaxO:F2} ft.");
                 ruleSet.MaxSpacingFt = newMaxO;
-                ruleSet.CoverageRadiusFt = newCoverageO;
                 result.AppliedMaxSpacingFt = newMaxO;
+            }
+            if (isSidewallOrientation && ruleSet.CoverageRadiusFt > 0)
+            {
+                double prevCoverage = ruleSet.CoverageRadiusFt;
+                double sidewallCoverage = prevCoverage / Math.Sqrt(2.0);
+                result.Diagnostics.Add(
+                    $"Sidewall coverage halved: CoverageRadiusFt: {prevCoverage:F2} -> {sidewallCoverage:F2} ft (half-circle spray pattern).");
+                ruleSet.CoverageRadiusFt = sidewallCoverage;
             }
 
             // ---- Candidate generation ----
@@ -637,6 +648,25 @@ namespace FireProtection.Backend.Services.Placement.Sprinklers.Final.BruteForce
                 }
             }
 
+            // 3c. POST-SELECTION COVERAGE AREA VALIDATION (NFPA 13 §5.2):
+            //     Each sprinkler's coverage area must not exceed the hazard-class maximum.
+            //     The greedy selector uses CoverageRadiusFt as a circular approximation;
+            //     this check validates that the actual per-sprinkler polygon area (room area
+            //     / sprinkler count) does not exceed MaxCoverageAreaSqFt. For rectangular
+            //     rooms the actual coverage can differ from the circular approximation.
+            if (ruleSet.MaxCoverageAreaSqFt > 0 && selected.Count > 0 && room.AreaSqFt > 0)
+            {
+                double perSprinklerArea = room.AreaSqFt / selected.Count;
+                if (perSprinklerArea > ruleSet.MaxCoverageAreaSqFt + 1e-6)
+                {
+                    result.Warnings.Add(
+                        $"Per-sprinkler coverage area ({perSprinklerArea:F1} sq ft) exceeds " +
+                        $"MaxCoverageAreaSqFt={ruleSet.MaxCoverageAreaSqFt:F1} sq ft for {ruleSet.HazardClass}. " +
+                        $"Review required (consider adding more sprinklers or reducing spacing).");
+                    result.Status = CalculationStatus.ReviewRequired;
+                }
+            }
+
             // 4. POST-SELECTION COVERAGE GAP DETECTION: the greedy places a sprinkler at
             //    every VALID candidate that is uncovered AND not too close to a placed
             //    sprinkler. MinSpacingFt can leave a gap when a candidate that would cover
@@ -663,10 +693,14 @@ namespace FireProtection.Backend.Services.Placement.Sprinklers.Final.BruteForce
                     for (double sx = geometry.MinX; sx <= geometry.MaxX + config.ToleranceFt; sx += sampleStep)
                     {
                         if (!geometry.IsPointInsideRoom(sx, sy, config.ToleranceFt)) continue;
-                        // Skip sample points inside obstacles (those are not "room" to cover).
+                        // Skip sample points inside obstacles at the placement plane (those are
+                        // not "room" to cover). Only skip obstacles whose vertical extent
+                        // actually overlaps the placement Z — a low beam should not exclude
+                        // ceiling-level sample points.
                         bool insideObstacle = false;
                         foreach (ObstacleBox box in obstacleBoxes)
                         {
+                            if (!box.SpansZ(placementZ, config.ToleranceFt)) continue;
                             if (GeometryMath.InsideExpandedBox(sx, sy, box.MinX, box.MinY, box.MaxX, box.MaxY, 0.0))
                             {
                                 insideObstacle = true; break;
@@ -779,8 +813,16 @@ namespace FireProtection.Backend.Services.Placement.Sprinklers.Final.BruteForce
             }
             if (polygon == null || polygon.Count < 3) return candidates;
 
-            double standOff = ruleSet.BoundaryClearanceFt > 0 ? ruleSet.BoundaryClearanceFt : 0.5;
-            double step = ruleSet.MaxSpacingFt > 0 ? ruleSet.MaxSpacingFt : 12.0;
+            // NFPA 13 §11.3: sidewall deflector distance from wall is 4-6 inches (0.33-0.5 ft).
+            // Use a dedicated standoff rather than BoundaryClearanceFt (which is 1.0-2.0 ft for
+            // general room boundary clearance and places candidates too far from the wall).
+            const double sidewallStandoffFt = 0.5;
+            double standOff = sidewallStandoffFt;
+
+            // NFPA 13 §11.3: sidewall step along the wall is based on the throw distance,
+            // not the pendent MaxSpacingFt. Use the rule-set MaxSpacingFt (already
+            // orientation-adjusted) as the step, with a floor to avoid degenerate spacing.
+            double step = ruleSet.MaxSpacingFt > 0 ? ruleSet.MaxSpacingFt : 6.0;
 
             int totalGenerated = 0;
             int rejectedOutside = 0;
@@ -1233,17 +1275,16 @@ namespace FireProtection.Backend.Services.Placement.Sprinklers.Final.BruteForce
 
         private static double ClampToNfpa13MaxSpacing(HazardClass hazardClass, double requestedFt, out string note)
         {
-            // NFPA 13 hard-limit ceilings per the current placeholder rule set (15 ft). The
-            // current authoritative values are not yet encoded; the placeholder is the only
-            // hard ceiling we can enforce. Engineers can request tighter (smaller) values.
+            // NFPA 13 hard-limit ceilings per hazard class. Engineers can request tighter
+            // (smaller) values, but values exceeding the class ceiling are clamped.
             note = null;
-            const double provisionalCeilingFt = 15.0;
-            if (requestedFt > provisionalCeilingFt)
+            double ceilingFt = GetNfpa13MaxSpacingCeiling(hazardClass);
+            if (requestedFt > ceilingFt)
             {
                 note = "Requested MaxSpacingFt " + requestedFt.ToString("F2")
-                    + " ft exceeds the current provisional ceiling (" + provisionalCeilingFt.ToString("F2")
-                    + " ft); clamped to " + provisionalCeilingFt.ToString("F2") + " ft.";
-                return provisionalCeilingFt;
+                    + " ft exceeds NFPA 13 ceiling for " + hazardClass + " (" + ceilingFt.ToString("F2")
+                    + " ft); clamped to " + ceilingFt.ToString("F2") + " ft.";
+                return ceilingFt;
             }
             if (requestedFt <= 0.0)
             {
@@ -1251,6 +1292,26 @@ namespace FireProtection.Backend.Services.Placement.Sprinklers.Final.BruteForce
                 return 0.0;
             }
             return requestedFt;
+        }
+
+        /// <summary>
+        /// Returns the NFPA 13 maximum permitted sprinkler spacing (feet) for the given hazard class.
+        /// Light=15, OH1/OH2=12, EH1/EH2=10.
+        /// </summary>
+        private static double GetNfpa13MaxSpacingCeiling(HazardClass hazardClass)
+        {
+            switch (hazardClass)
+            {
+                case HazardClass.EH1:
+                case HazardClass.EH2:
+                    return 10.0;
+                case HazardClass.OH1:
+                case HazardClass.OH2:
+                    return 12.0;
+                case HazardClass.Light:
+                default:
+                    return 15.0;
+            }
         }
 
         private sealed class ObstacleBox

@@ -654,8 +654,8 @@
                                                     Content="Reset"
                                                     Padding="8,3"
                                                     HorizontalAlignment="Right"
-                                                    Click="RoomResetButton_Click"
-                                                    Tag="{Binding}"
+                                                    Command="{Binding DataContext.ResetRowToDefaultCommand, RelativeSource={RelativeSource AncestorType=ItemsControl}}"
+                                                    CommandParameter="{Binding}"
                                                     VerticalAlignment="Center"/>
                                         </Grid>
                                     </Border>

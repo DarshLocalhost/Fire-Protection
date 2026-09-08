@@ -696,11 +696,12 @@ namespace FireProtection.Backend.Services.Placement.Sprinklers.Final.BruteForce
                         // Skip sample points inside obstacles at the placement plane (those are
                         // not "room" to cover). Only skip obstacles whose vertical extent
                         // actually overlaps the placement Z — a low beam should not exclude
-                        // ceiling-level sample points.
+                        // ceiling-level sample points. Use the Z from the first placed point.
                         bool insideObstacle = false;
+                        double placementZForGapCheck = selected[0].Z;
                         foreach (ObstacleBox box in obstacleBoxes)
                         {
-                            if (!box.SpansZ(placementZ, config.ToleranceFt)) continue;
+                            if (!box.SpansZ(placementZForGapCheck, config.ToleranceFt)) continue;
                             if (GeometryMath.InsideExpandedBox(sx, sy, box.MinX, box.MinY, box.MaxX, box.MaxY, 0.0))
                             {
                                 insideObstacle = true; break;

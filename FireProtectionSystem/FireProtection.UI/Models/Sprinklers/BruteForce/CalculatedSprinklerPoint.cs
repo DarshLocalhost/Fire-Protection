@@ -19,6 +19,13 @@ namespace FireProtection.UI.Models.Sprinklers.BruteForce
         /// </summary>
         public string LevelName { get; set; }
 
+        /// <summary>
+        /// Index of the polygon edge this point was generated from (sidewall only).
+        /// The placement layer uses this to find the wall face to host on.
+        /// Null for ceiling-grid candidates.
+        /// </summary>
+        public int? WallEdgeIndex { get; set; }
+
         public override string ToString()
         {
             return $"({X:F3}, {Y:F3}, {Z:F3})";

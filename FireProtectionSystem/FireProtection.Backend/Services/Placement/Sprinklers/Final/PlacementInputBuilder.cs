@@ -34,6 +34,9 @@ namespace FireProtection.Backend.Services.Placement.Sprinklers.Final
         public string SelectedSprinklerTypeName { get; set; }
         public double? OverrideMaxSpacingFt { get; set; }
         public double? OverrideBoundaryClearanceFt { get; set; }
+
+        /// <summary>Per-room sprinkler orientation override ("pendent", "upright", "sidewall"). null = use default.</summary>
+        public string SelectedSprinklerOrientation { get; set; }
     }
 
     /// <summary>
@@ -178,18 +181,23 @@ namespace FireProtection.Backend.Services.Placement.Sprinklers.Final
                     // Step 2 (sidewall) — derive the per-row orientation string the
                     // calculation engine reads on the room input. Order of
                     // precedence:
-                    //   1. The resolved behavior, when it is mount-specific
+                    //   1. Per-room UI override (sel.SelectedSprinklerOrientation) — user explicit choice.
+                    //   2. The resolved behavior, when it is mount-specific
                     //      (WallSidewall -> "sidewall", CeilingOverhead ->
                     //      "pendent"). This keeps legacy snapshots that already
                     //      have a resolver wired working.
-                    //   2. The catalog's Mount string (e.g. "Sidewall",
+                    //   3. The catalog's Mount string (e.g. "Sidewall",
                     //      "Pendent", "Upright"), lower-cased. This is the
                     //      production path when the resolver carries the
                     //      family-level bucket but the catalog has the row.
-                    //   3. null (no orientation set) — preserves pre-Step-2
+                    //   4. null (no orientation set) — preserves pre-Step-2
                     //      behavior byte-for-byte.
                     string orientation = null;
-                    if (rowContext.PlacementBehavior == DevicePlacementBehavior.WallSidewall)
+                    if (!string.IsNullOrWhiteSpace(sel.SelectedSprinklerOrientation))
+                    {
+                        orientation = sel.SelectedSprinklerOrientation.Trim();
+                    }
+                    else if (rowContext.PlacementBehavior == DevicePlacementBehavior.WallSidewall)
                     {
                         orientation = "sidewall";
                     }

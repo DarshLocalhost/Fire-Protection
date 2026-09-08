@@ -30,6 +30,11 @@ namespace FireProtection.UI.ViewModels.Sprinklers.BruteForce
         private double? _boundaryClearanceFtOverride;
         private double? _defaultMaxSpacingFt;
         private double? _defaultBoundaryClearanceFt;
+        private string _selectedOrientation;
+        private string _defaultOrientation;
+
+        private static readonly IReadOnlyList<string> OrientationOptionsList =
+            new List<string> { "(auto)", "pendent", "upright", "sidewall" };
 
         public RoomItemViewModel(
             RoomUiData room,
@@ -492,6 +497,24 @@ namespace FireProtection.UI.ViewModels.Sprinklers.BruteForce
             get { return _boundaryClearanceFtOverride.HasValue ? _boundaryClearanceFtOverride.Value.ToString("F2") : "—"; }
         }
 
+        public IReadOnlyList<string> OrientationOptions => OrientationOptionsList;
+
+        public string SelectedOrientation
+        {
+            get { return _selectedOrientation ?? "(auto)"; }
+            set
+            {
+                if (SetProperty(ref _selectedOrientation, value == "(auto)" ? null : value))
+                {
+                    OnPropertyChanged(nameof(IsOrientationOverridden));
+                }
+            }
+        }
+
+        public bool IsOrientationOverridden =>
+            !string.IsNullOrEmpty(_selectedOrientation) &&
+            !string.Equals(_selectedOrientation, _defaultOrientation ?? string.Empty, StringComparison.OrdinalIgnoreCase);
+
         // ----- Inline cell validation (item 8) -------------------------------------------------------
         // The editable cells bind to these strings rather than to the nullable doubles. A non-numeric or
         // non-positive entry is refused AT THE CELL: the typed text stays visible, an error is published for
@@ -627,7 +650,7 @@ namespace FireProtection.UI.ViewModels.Sprinklers.BruteForce
             OnPropertyChanged(nameof(BoundaryClearanceInput));
         }
 
-        public void SetCatalogDefaults(string family, string type, double? maxSpacingFt, double? boundaryClearanceFt)
+        public void SetCatalogDefaults(string family, string type, double? maxSpacingFt, double? boundaryClearanceFt, string orientation = null)
         {
             // Decision 019 semantics, row scope: the top-level (universal) selection is the
             // default. A row that is still sitting on the previous default follows the new one;
@@ -637,16 +660,19 @@ namespace FireProtection.UI.ViewModels.Sprinklers.BruteForce
             bool typeWasOverridden = IsTypeOverridden;
             bool spacingWasOverridden = IsSpacingOverridden;
             bool wallSpaceWasOverridden = IsWallSpaceOverridden;
+            bool orientationWasOverridden = IsOrientationOverridden;
 
             _defaultFamily = family;
             _defaultType = type;
             _defaultMaxSpacingFt = maxSpacingFt;
             _defaultBoundaryClearanceFt = boundaryClearanceFt;
+            _defaultOrientation = orientation;
 
             if (_selectedFamily == null || !familyWasOverridden) _selectedFamily = family;
             if (_selectedType == null || !typeWasOverridden) _selectedType = type;
             if (!_maxSpacingFtOverride.HasValue || !spacingWasOverridden) _maxSpacingFtOverride = maxSpacingFt;
             if (!_boundaryClearanceFtOverride.HasValue || !wallSpaceWasOverridden) _boundaryClearanceFtOverride = boundaryClearanceFt;
+            if ((_selectedOrientation == null || orientationWasOverridden)) _selectedOrientation = orientation;
 
             // The row's Type list follows the row's Family, which may have just been re-seeded.
             if (_typesResolver != null)
@@ -684,6 +710,8 @@ namespace FireProtection.UI.ViewModels.Sprinklers.BruteForce
             OnPropertyChanged(nameof(MaxSpacingFtOverrideDisplay));
             OnPropertyChanged(nameof(BoundaryClearanceFtOverrideDisplay));
             OnPropertyChanged(nameof(SelectedFamilyTypeDisplay));
+            OnPropertyChanged(nameof(SelectedOrientation));
+            OnPropertyChanged(nameof(IsOrientationOverridden));
             SyncEditableText();
         }
 
@@ -717,12 +745,15 @@ namespace FireProtection.UI.ViewModels.Sprinklers.BruteForce
         {
             _maxSpacingFtOverride = _defaultMaxSpacingFt;
             _boundaryClearanceFtOverride = _defaultBoundaryClearanceFt;
+            _selectedOrientation = _defaultOrientation;
             OnPropertyChanged(nameof(MaxSpacingFtOverride));
             OnPropertyChanged(nameof(BoundaryClearanceFtOverride));
             OnPropertyChanged(nameof(IsSpacingOverridden));
             OnPropertyChanged(nameof(IsWallSpaceOverridden));
             OnPropertyChanged(nameof(MaxSpacingFtOverrideDisplay));
             OnPropertyChanged(nameof(BoundaryClearanceFtOverrideDisplay));
+            OnPropertyChanged(nameof(SelectedOrientation));
+            OnPropertyChanged(nameof(IsOrientationOverridden));
             SyncEditableText();
         }
 

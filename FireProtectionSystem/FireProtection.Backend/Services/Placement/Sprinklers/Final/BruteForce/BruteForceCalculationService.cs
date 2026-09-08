@@ -596,7 +596,8 @@ namespace FireProtection.Backend.Services.Placement.Sprinklers.Final.BruteForce
                     Z = candidate.Z,
                     RoomId = room.RoomId,
                     LevelId = room.LevelId,
-                    LevelName = room.LevelName
+                    LevelName = room.LevelName,
+                    WallEdgeIndex = candidate.WallEdgeIndex
                 });
             }
 
@@ -905,7 +906,8 @@ namespace FireProtection.Backend.Services.Placement.Sprinklers.Final.BruteForce
                         Y = cy,
                         Z = placementZ,
                         IsValid = true,
-                        Score = 1.0
+                        Score = 1.0,
+                        WallEdgeIndex = i
                     });
                 }
             }

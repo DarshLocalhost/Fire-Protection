@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Globalization;
 using System.Linq;
 using Autodesk.Revit.DB;
+using FireProtection.Backend.Models.Placement.Sprinklers.Final;
 using FireProtection.Backend.Services.Placement.Sprinklers.Final.Strategies;
 using FireProtection.UI.Models;
 using FireProtection.UI.Models.Sprinklers.BruteForce;
@@ -40,11 +41,14 @@ namespace FireProtection.Backend.Services.Placement.Sprinklers.Final
 
             // Ordered strategy set. Selection is by the family's PROVEN FamilyPlacementType via CanHandle;
             // there is no silent substitution and no default-to-level for unknown types (hard rules 5, 6, 7).
+            // WallSidewall is registered last — it is dispatched by DevicePlacementBehavior, not by
+            // FamilyPlacementType (wall-mounted families often have WorkPlaneBased or FaceBased type).
             _strategies = new IFamilyPlacementStrategy[]
             {
                 new Strategies.FaceBasedPlacementStrategy(),
                 new Strategies.WorkPlaneBasedPlacementStrategy(),
-                new Strategies.LevelBasedPlacementStrategy()
+                new Strategies.LevelBasedPlacementStrategy(),
+                new Strategies.WallSidewallPlacementStrategy()
             };
         }
 
@@ -410,10 +414,17 @@ namespace FireProtection.Backend.Services.Placement.Sprinklers.Final
                 //                     rather than trusting the fallback that already failed in production.
                 //   OneLevelBased  -> requires only a resolvable level (legitimately placed without a ceiling).
                 //
+                // WallSidewall behavior overrides: a wall-mounted family does NOT need a ceiling host
+                // regardless of FamilyPlacementType — it needs a wall face.
+                //
                 // A numeric "Ceiling Height" (CeilingHeightFt) is NEVER treated as proof of a usable host (§4).
-                bool requiresCeilingHost =
+                bool isSidewallBehavior = string.Equals(
+                    room?.SelectedSprinklerPlacementBehavior,
+                    "WallSidewall",
+                    StringComparison.OrdinalIgnoreCase);
+                bool requiresCeilingHost = !isSidewallBehavior && (
                     string.Equals(placementType, "FaceBased", StringComparison.OrdinalIgnoreCase) ||
-                    string.Equals(placementType, "WorkPlaneBased", StringComparison.OrdinalIgnoreCase);
+                    string.Equals(placementType, "WorkPlaneBased", StringComparison.OrdinalIgnoreCase));
 
                 bool anyLevelResolved = false;
                 bool anyHostOk = false;
@@ -670,13 +681,24 @@ namespace FireProtection.Backend.Services.Placement.Sprinklers.Final
 
             // §13: select the strategy for the PROVEN placement type. No match => refuse to place; an
             // unknown/unsupported type is NEVER defaulted onto a Level (hard rules 5, 6, 7).
+            //
+            // Sidewall override: when the point carries a WallEdgeIndex, it was generated as a
+            // wall-mounted candidate — use WallSidewallPlacementStrategy regardless of the
+            // family's FamilyPlacementType (wall families often report WorkPlaneBased or FaceBased).
             IFamilyPlacementStrategy strategy = null;
-            for (int i = 0; i < _strategies.Count; i++)
+            if (point.WallEdgeIndex.HasValue)
             {
-                if (_strategies[i].CanHandle(familyPlacementType))
+                strategy = _strategies.FirstOrDefault(s => s is Strategies.WallSidewallPlacementStrategy);
+            }
+            if (strategy == null)
+            {
+                for (int i = 0; i < _strategies.Count; i++)
                 {
-                    strategy = _strategies[i];
-                    break;
+                    if (_strategies[i].CanHandle(familyPlacementType))
+                    {
+                        strategy = _strategies[i];
+                        break;
+                    }
                 }
             }
 
@@ -713,7 +735,9 @@ namespace FireProtection.Backend.Services.Placement.Sprinklers.Final
                     Level = level,
                     RequestedPoint = xyz,
                     FamilyPlacementType = familyPlacementType,
-                    CeilingHostResolver = _ceilingHostResolver
+                    CeilingHostResolver = _ceilingHostResolver,
+                    WallEdgeIndex = point.WallEdgeIndex,
+                    RoomPolygon = room?.Polygon
                 };
 
                 PlacementOutcome outcome = strategy.Place(context);

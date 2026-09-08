@@ -1070,6 +1070,7 @@ namespace FireProtection.UI.ViewModels.Sprinklers.BruteForce
                         SelectedSprinklerTypeName = roomVm.SelectedType,
                         OverrideMaxSpacingFt = roomVm.MaxSpacingFtOverride,
                         OverrideBoundaryClearanceFt = roomVm.BoundaryClearanceFtOverride,
+                        SelectedSprinklerOrientation = roomVm.SelectedOrientation,
                         FullRoomJson = fullRoomJson
                     });
                 }
@@ -1378,6 +1379,7 @@ namespace FireProtection.UI.ViewModels.Sprinklers.BruteForce
                         SelectedSprinklerTypeName = roomVm.SelectedType,
                         OverrideMaxSpacingFt = roomVm.MaxSpacingFtOverride,
                         OverrideBoundaryClearanceFt = roomVm.BoundaryClearanceFtOverride,
+                        SelectedSprinklerOrientation = roomVm.SelectedOrientation,
                         FullRoomJson = BuildFullRoomJson(roomData)
                     });
                 }

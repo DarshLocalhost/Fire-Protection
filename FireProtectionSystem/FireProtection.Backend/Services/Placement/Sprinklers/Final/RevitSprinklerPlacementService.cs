@@ -418,10 +418,7 @@ namespace FireProtection.Backend.Services.Placement.Sprinklers.Final
                 // regardless of FamilyPlacementType — it needs a wall face.
                 //
                 // A numeric "Ceiling Height" (CeilingHeightFt) is NEVER treated as proof of a usable host (§4).
-                bool isSidewallBehavior = string.Equals(
-                    room?.SelectedSprinklerPlacementBehavior,
-                    "WallSidewall",
-                    StringComparison.OrdinalIgnoreCase);
+                bool isSidewallBehavior = candidates != null && candidates.Any(c => c.WallEdgeIndex.HasValue);
                 bool requiresCeilingHost = !isSidewallBehavior && (
                     string.Equals(placementType, "FaceBased", StringComparison.OrdinalIgnoreCase) ||
                     string.Equals(placementType, "WorkPlaneBased", StringComparison.OrdinalIgnoreCase));

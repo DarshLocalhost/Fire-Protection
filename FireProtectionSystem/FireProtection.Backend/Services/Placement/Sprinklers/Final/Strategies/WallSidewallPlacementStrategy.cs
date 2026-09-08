@@ -142,8 +142,7 @@ namespace FireProtection.Backend.Services.Placement.Sprinklers.Final.Strategies
         {
             Options options = new Options
             {
-                ComputeReferences = true,
-                ReferenceLevel = wall.Document.GetElement(wall.LevelId) as Level
+                ComputeReferences = true
             };
 
             GeometryElement geomElem = wall.get_Geometry(options);
@@ -167,7 +166,7 @@ namespace FireProtection.Backend.Services.Placement.Sprinklers.Final.Strategies
                     if (Math.Abs(normal.Z) > 0.5) continue;
 
                     // The interior face is the one whose normal points toward the interior point.
-                    XYZ faceCenter = planarFace.Evaluate(UV.HalfUV);
+                    XYZ faceCenter = planarFace.Evaluate(new UV(0.5, 0.5));
                     XYZ toInterior = (interiorPoint - faceCenter).Normalize();
                     double dot = normal.DotProduct(toInterior);
 

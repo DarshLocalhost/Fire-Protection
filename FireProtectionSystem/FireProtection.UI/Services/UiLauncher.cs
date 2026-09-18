@@ -74,11 +74,13 @@ namespace FireProtection.UI.Services
             ISprinklerFamilySource sprinklerFamilySource,
             ISprinklerPlacementService sprinklerPlacementService,
             CatalogViewModel catalog,
-            IntPtr revitMainWindowHandle)
+            IntPtr revitMainWindowHandle,
+            DevicePlacementSeams deviceSeams = null)
         {
             if (TryActivateExisting()) return;
 
-            MainWindow window = new MainWindow(json, placementInputExporter, sprinklerFamilySource, sprinklerPlacementService, catalog);
+            MainWindow window = new MainWindow(
+                json, placementInputExporter, sprinklerFamilySource, sprinklerPlacementService, catalog, deviceSeams);
 
             if (revitMainWindowHandle != IntPtr.Zero)
             {

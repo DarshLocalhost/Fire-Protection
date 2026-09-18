@@ -1,14 +1,17 @@
 using System;
 using System.Collections.Generic;
 using FireProtection.UI.Models;
+using FireProtection.UI.Services;
 using FireProtection.UI.ViewModels.Common;
 
 namespace FireProtection.UI.ViewModels.Devices
 {
     /// <summary>
-    /// Generic room row for device placement. Shares the selection model of <c>RoomItemViewModel</c> but
-    /// deliberately omits sprinkler-specific concepts (hazard class) and the sprinkler tab's eligibility
-    /// column: every room on a device tab is selectable, and the device backend validates at placement time.
+    /// Generic room row for device placement. Shares the selection model of <c>RoomItemViewModel</c> and now
+    /// its eligibility column too, so the smoke / notification grids show the same ELIGIBLE / BLOCKED /
+    /// UNDETERMINED treatment the sprinkler grid does. Still omits sprinkler-specific concepts (hazard class).
+    /// Deliberate difference: a device row DEFAULTS to eligible so the no-backend / designer path stays fully
+    /// selectable; only the backend preflight (via <see cref="SetEligibility"/>) can move a row off ELIGIBLE.
     /// </summary>
     public class DeviceRoomItemViewModel : ObservableObject
     {
@@ -16,6 +19,22 @@ namespace FireProtection.UI.ViewModels.Devices
         private readonly Dictionary<string, string> _levelDefaults = new Dictionary<string, string>(StringComparer.OrdinalIgnoreCase);
 
         private bool _isSelected;
+
+        // Eligibility (preflight) state - mirrors RoomItemViewModel on the sprinkler side so both grids can
+        // show the same treatment. Deliberate difference: a device row DEFAULTS to eligible (see the
+        // constructor) so the no-backend / designer path stays fully selectable; the backend preflight only
+        // ever RESTRICTS a room once it has actually run.
+        private bool _isEligible;
+        private string _eligibilityState;
+        private string _eligibilityReason;
+        private string _eligibilityStatusCode;
+        private string _familyPlacementType;
+        private string _hostingStrategy;
+        private string _ceilingSource;
+        private string _linkInstanceName;
+        private string _hostCeilingElementId;
+        private string _hostLevelId;
+        private string _hostLevelName;
 
         public DeviceRoomItemViewModel(
             RoomUiData room,
@@ -26,6 +45,15 @@ namespace FireProtection.UI.ViewModels.Devices
 
             ParentLevel =
                 parentLevel ?? throw new ArgumentNullException(nameof(parentLevel));
+
+            // Deliberate difference from the sprinkler row: a device room starts ELIGIBLE, not
+            // "not-yet-evaluated". The device tabs support a no-backend / designer path (IsBackendPending when
+            // the executor is null); with no backend the preflight never runs, and every room must stay
+            // selectable exactly as it did before this column existed. Once the real preflight runs it calls
+            // SetEligibility, which is the only thing that can move a row to BLOCKED / UNDETERMINED.
+            _isEligible = true;
+            _eligibilityState = EligibilityStates.Eligible;
+            _eligibilityReason = null;
         }
 
         public event EventHandler SelectionChanged;
@@ -57,6 +85,106 @@ namespace FireProtection.UI.ViewModels.Devices
                     SelectionChanged?.Invoke(this, EventArgs.Empty);
                 }
             }
+        }
+
+        // ----- Eligibility (preflight) -------------------------------------------------------------------
+        // Copied from RoomItemViewModel (sprinkler) so DevicePlacementView can reuse the same row treatment.
+
+        /// <summary>True when the room can be placed by the production pipeline for the currently selected
+        /// device family/type. Driven by the Backend preflight (<see cref="PlacementEligibilityResult"/>) via
+        /// <see cref="SetEligibility"/>; defaults to true so the no-backend path stays fully selectable.</summary>
+        public bool IsEligible => _isEligible;
+
+        /// <summary>Deterministic inability to place (explicit reason + status code).</summary>
+        public bool IsBlocked =>
+            string.Equals(_eligibilityState, EligibilityStates.Blocked, StringComparison.OrdinalIgnoreCase);
+
+        /// <summary>Eligibility could not be determined (config/infra error). NOT the same as BLOCKED -
+        /// a normal missing ceiling/host is BLOCKED, not UNDETERMINED.</summary>
+        public bool IsUndetermined =>
+            string.Equals(_eligibilityState, EligibilityStates.Undetermined, StringComparison.OrdinalIgnoreCase);
+
+        /// <summary>Raw three-state classification (ELIGIBLE / BLOCKED / UNDETERMINED).</summary>
+        public string EligibilityState => _eligibilityState;
+
+        /// <summary>Human-readable reason the room is blocked (empty when eligible). Shown in the tooltip.</summary>
+        public string EligibilityReason => _eligibilityReason;
+
+        /// <summary>Short, status-code-derived reason for the narrow room row; the full reason stays in the tooltip.</summary>
+        public string EligibilityShortReason =>
+            EligibilityShortText.For(_eligibilityStatusCode, _eligibilityReason);
+
+        /// <summary>Proven Revit FamilyPlacementType of the selected family (FaceBased / WorkPlaneBased / OneLevelBased).</summary>
+        public string FamilyPlacementType => _familyPlacementType;
+
+        /// <summary>Hosting strategy the placement would use (FaceBasedHost / WorkPlaneCeilingFace / LevelBased).</summary>
+        public string HostingStrategy => _hostingStrategy;
+
+        /// <summary>Where a ceiling host was found: "host" / "link:&lt;name&gt;" / "none".</summary>
+        public string CeilingSource => _ceilingSource;
+
+        /// <summary>Linked model name supplying the ceiling host, when applicable.</summary>
+        public string LinkInstanceName => _linkInstanceName;
+
+        /// <summary>Discovered ceiling host ElementId (string), when applicable.</summary>
+        public string HostCeilingElementId => _hostCeilingElementId;
+
+        /// <summary>Resolved host Level id (string), when available.</summary>
+        public string HostLevelId => _hostLevelId;
+
+        /// <summary>Resolved host Level name, when available.</summary>
+        public string HostLevelName => _hostLevelName;
+
+        /// <summary>
+        /// Applies the authoritative preflight result to this room. Called by the base ViewModel after the
+        /// device eligibility service evaluates the room for the currently selected family/type. A null result
+        /// resets the row to ELIGIBLE (the no-backend / not-evaluated default), never to a false BLOCKED.
+        /// </summary>
+        public void SetEligibility(PlacementEligibilityResult result)
+        {
+            if (result == null)
+            {
+                // No result => treat as not-evaluated: stay selectable (matches the pre-preflight behaviour).
+                _isEligible = true;
+                _eligibilityState = EligibilityStates.Eligible;
+                _eligibilityReason = null;
+                _eligibilityStatusCode = null;
+                _familyPlacementType = null;
+                _hostingStrategy = null;
+                _ceilingSource = null;
+                _linkInstanceName = null;
+                _hostCeilingElementId = null;
+                _hostLevelId = null;
+                _hostLevelName = null;
+            }
+            else
+            {
+                _isEligible = result.IsEligible;
+                _eligibilityState = result.EligibilityState;
+                _eligibilityReason = result.Reason;
+                _eligibilityStatusCode = result.StatusCode;
+                _familyPlacementType = result.FamilyPlacementType;
+                _hostingStrategy = result.HostingStrategy;
+                _ceilingSource = result.CeilingSource;
+                _linkInstanceName = result.LinkInstanceName;
+                _hostCeilingElementId = result.HostCeilingElementId;
+                _hostLevelId = result.HostLevelId;
+                _hostLevelName = result.HostLevelName;
+            }
+
+            OnPropertyChanged(nameof(IsEligible));
+            OnPropertyChanged(nameof(IsBlocked));
+            OnPropertyChanged(nameof(IsUndetermined));
+            OnPropertyChanged(nameof(EligibilityState));
+            OnPropertyChanged(nameof(EligibilityReason));
+            OnPropertyChanged(nameof(EligibilityShortReason));
+            OnPropertyChanged(nameof(FamilyPlacementType));
+            OnPropertyChanged(nameof(HostingStrategy));
+            OnPropertyChanged(nameof(CeilingSource));
+            OnPropertyChanged(nameof(LinkInstanceName));
+            OnPropertyChanged(nameof(HostCeilingElementId));
+            OnPropertyChanged(nameof(HostLevelId));
+            OnPropertyChanged(nameof(HostLevelName));
         }
 
         // Per-row overrides (Decision 019). If a key is not overridden, the level default applies.

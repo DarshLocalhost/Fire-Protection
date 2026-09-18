@@ -1,0 +1,2053 @@
+===== PAGE 104 =====
+
+INITIATING DEVICES 72-101
+Shaded text = Revisions. Δ = Text deletions and figure/table revisions. • = Section deletions. N = New material. 2019 Edition
+Chapter 17 Initiating Devices
+17.1 Application.
+Δ 17.1.1* The performance, selection, use, and location of auto‐
+matic or manual initiating devices shall comply with the mini‐
+mum requirements of this chapter.
+17.1.2* This chapter establishes the minimum installation
+criteria for initiating devices required by other governing laws,
+codes, standards, or sections of this document. This chapter
+does not, by itself, require the installation of initiating devices.
+17.1.3 The requirements of Chapters 7, 10, 12, 21, 23, and 24
+shall also apply unless they are in conflict with this chapter.
+17.1.4 The requirements of Chapter 14 shall apply.
+17.1.5 The requirements of single- and multiple-station alarms
+and household fire alarm systems shall be determined in
+accordance with Chapter 29.
+17.1.6 The material in this chapter shall be applied by persons
+knowledgeable in the application of fire detection and fire
+alarm systems and services.
+17.1.7 The interconnection of initiating devices with control
+equipment configurations and power supplies, or with output
+systems responding to external actuation, shall be as detailed
+elsewhere in this Code or in other governing laws, codes, or
+standards.
+17.2 Purpose. Automatic and manual initiating devices shall
+contribute to life safety, fire protection, and property conserva‐
+tion by providing a reliable means to signal other equipment
+arranged to monitor the initiating devices and to initiate a
+response to those signals.
+17.3* Performance-Based Design.
+17.3.1 Performance-based designs submitted to the authority
+having jurisdiction for review and approval shall include docu‐
+mentation, in an approved format, of each performance objec‐
+tive and applicable scenario, together with any calculations,
+modeling, or other technical substantiation used in establish‐
+ing the proposed design’s fire and life safety performance.
+17.3.2 The authority having jurisdiction shall determine
+whether such identified performance objectives are appropri‐
+ate and have been met.
+17.3.3 The authority having jurisdiction shall approve modifi‐
+cations to or variations from the approved design or design
+basis in advance.
+17.4 General Requirements.
+17.4.1 The requirements of 17.4.2 through 17.4.7 shall apply
+to all initiating devices.
+17.4.2 Mechanical Protection.
+N 17.4.2.1 Initiating devices subject to mechanical damage shall
+be protected.
+N 17.4.2.2 If guards or covers are employed, they shall be listed
+for use with the initiating device.
+N 17.4.2.3* The protection shall not prevent the initiating
+device from achieving the objectives of the system by adversely
+affecting the use, operation, or performance of the initiating
+device.
+• 17.4.3 Initiating devices shall be installed in a manner that
+provides accessibility for periodic inspection, testing, and main‐
+tenance.
+17.4.4 Initiating devices shall be installed in all areas, compart‐
+ments, or locations where required by other governing laws,
+codes, or standards.
+17.4.5* Duplicate terminals, leads, or connectors that provide
+for the connection of installation wiring shall be provided on
+each initiating device for the express purpose of connecting
+into the fire alarm system to monitor the integrity of the signal‐
+ing and power wiring unless the initiating devices are connec‐
+ted to a system that provides the required monitoring.
+Δ 17.4.6 Where detectors are installed in concealed locations
+more than 10 ft (3.0 m) above the finished floor or in arrange‐
+ments where the detector’s alarm or supervisory indicator is
+not visible to responding personnel, the detectors shall be
+provided with remote alarm or supervisory indication in a loca‐
+tion acceptable to the authority having jurisdiction.
+17.4.6.1* If a remote alarm indicator is provided, the location
+of the detector and the area protected by the detector shall be
+prominently indicated at the remote alarm indicator by a
+permanently attached placard or by other approved means.
+17.4.6.2 Remote alarm or supervisory indicators shall be
+installed in an accessible location and shall be clearly labeled to
+indicate both their function and any device or equipment asso‐
+ciated with each detector.
+17.4.6.3 Detectors installed in concealed locations where the
+specific detector alarm or supervisory signal is indicated at the
+control unit (and on the drawings with its specific location and
+functions) shall not be required to be provided with remote
+alarm indicators as specified in 17.4.6.
+17.4.7* If the intent is to initiate action when smoke/fire
+threatens a specific object or space, the detector shall be
+permitted to be installed in close proximity to that object or
+space.
+17.5 Requirements for Smoke and Heat Detectors.
+17.5.1 Recessed Mounting. Unless tested and listed for
+recessed mounting, detectors shall not be recessed into the
+mounting surface.
+17.5.2* Partitions. Where partitions extend to within
+15 percent of the ceiling height, the spaces separated by the
+partitions shall be considered as separate rooms.
+17.5.3* Detector Coverage.
+17.5.3.1* Total (Complete) Coverage. Where required by
+other governing laws, codes, or standards, and unless otherwise
+modified by 17.5.3.1.1 through 17.5.3.1.5, total coverage of a
+building or a portion thereof, shall include all rooms, halls,
+storage areas, basements, attics, lofts, spaces above suspended
+ceilings, and other subdivisions and accessible spaces.
+17.5.3.1.1 Where inaccessible areas are constructed of or
+contain combustible material, unless otherwise specified in
+17.5.3.1.2, they shall be made accessible and shall be protected
+by a detector(s).
+17.5.3.1.2 Detectors shall not be required in combustible
+blind spaces if any of the following conditions exist:
+FOR INDIVIDUAL USE ONLY
+Copyright 2019 National Fire Protection Association (NFPA®). Licensed by agreement to Carl Weaver FOR INDIVIDUAL USE ONLY and downloaded on 11/05/2019. No reproduction or transmission in any form permitted without
+written permission of NFPA®. For inquiries or access for multiple users, or to report unauthorized use, contact licensing@nfpa.org.
+{C56A4DC7-64F7-4C88-B368-41DE5BD47BC8}
+
+===== PAGE 105 =====
+
+NATIONAL FIRE ALARM AND SIGNALING CODE	72-102
+2019 Edition Shaded text = Revisions. Δ = Text deletions and figure/table revisions. • = Section deletions. N = New material.
+(1) Where the ceiling is attached directly to the underside of
+the supporting beams of a combustible roof or floor
+deck.
+(2) Where the concealed space is entirely filled with a
+noncombustible insulation. (In solid joist construction,
+the insulation shall be required to fill only the space from
+the ceiling to the bottom edge of the joist of the roof or
+floor deck.)
+(3) Where there are small concealed spaces over rooms,
+provided that any space in question does not exceed
+50 ft2 (4.6 m2) in area.
+(4) In spaces formed by sets of facing studs or solid joists in
+walls, floors, or ceilings, where the distance between the
+facing studs or solid joists is less than 6 in. (150 mm).
+17.5.3.1.3 Detectors shall not be required below open grid
+ceilings if all of the following conditions exist:
+(1) Openings of the grid are 1∕4 in. (6.4 mm) or larger in the
+least dimension.
+(2) Thickness of the material does not exceed the least
+dimension.
+(3) Openings constitute at least 70 percent of the area of the
+ceiling material.
+17.5.3.1.4* Where concealed accessible spaces above suspen‐
+ded ceilings are used as a return air plenum meeting the
+requirements of NFPA 90A detection shall be provided in one
+of the following means:
+(1) Smoke detection shall be provided in accordance with
+17.7.4.2, or
+(2) Smoke detection shall be provided at each connection
+from the return air plenum to the central air-handling
+system.
+17.5.3.1.5 Detectors shall not be required underneath open
+loading docks or platforms and their covers and for accessible
+underfloor spaces if all of the following conditions exist:
+(1) Space is not accessible for storage purposes or entrance
+of unauthorized persons and is protected against the
+accumulation of windborne debris.
+(2) Space contains no equipment such as steam pipes, elec‐
+tric wiring, shafting, or conveyors.
+(3) Floor over the space is tight.
+(4) No flammable liquids are processed, handled, or stored
+on the floor above.
+17.5.3.2* Partial or Selective Coverage. Where other govern‐
+ing laws, codes, or standards require the protection of selected
+areas only, the specified areas shall be protected in accordance
+with this Code.
+17.5.3.3* Nonrequired Coverage.
+17.5.3.3.1 Detection installed for reasons of achieving specific
+fire safety objectives, but not required by any laws, codes, or
+standards, shall meet all of the requirements of this Code, with
+the exception of the prescriptive spacing criteria of Chapter 17.
+17.5.3.3.2 Where nonrequired detectors are installed for
+achieving specific fire safety objectives, additional detectors not
+necessary to achieve the objectives shall not be required.
+17.6 Heat-Sensing Fire Detectors.
+17.6.1 General.
+17.6.1.1* The heat detection design documentation shall state
+the required performance objective of the system.
+17.6.1.2 Designs not in accordance with 17.6.1.3 shall be
+deemed prescriptive designs and shall be designed in accord‐
+ance with the prescriptive requirements of this chapter.
+17.6.1.3* Performance-based designs shall be executed in
+accordance with Section 17.3.
+N 17.6.1.4 Heat sensing fire detectors shall be listed in accord‐
+ance with applicable standards such as ANSI/UL 521, Standard
+for Heat Detectors for Fire Protective Signaling Systems.
+17.6.1.5* Spot-type heat detectors shall include in their instal‐
+lation instructions, technical data, and listing documentation
+the operating temperature and response time index (RTI) as
+determined by the organization listing the device.
+17.6.2 Temperature.
+Δ 17.6.2.1 Classification. Heat-sensing fire detectors of the
+fixed-temperature or rate-compensated, spot type shall be clas‐
+sified as to the temperature of operation in accordance with
+Table 17.6.2.1.
+17.6.2.2 Marking.
+17.6.2.2.1 Color Coding.
+17.6.2.2.1.1 Heat-sensing fire detectors of the fixed-
+temperature or rate-compensated, spot type shall be marked
+with a color code in accordance with Table 17.6.2.1.
+17.6.2.2.1.2 If the overall color of a heat-sensing fire detector
+is the same as the color code marking required for that detec‐
+tor, one of the following arrangements, applied in a contrasting
+color and visible after installation, shall be employed:
+(1) Ring on the surface of the detector
+(2) Temperature rating in numerals at least 3∕8 in. (9.5 mm)
+high
+17.6.2.2.2 Operating Temperature.
+17.6.2.2.2.1 Heat-sensing fire detectors shall be marked with
+their listed operating temperature.
+Δ Table 17.6.2.1 Temperature Classification and Color Code for
+Heat-Sensing Fire Detectors
+Temperature
+Classification
+Temperature Rating
+Range
+Maximum
+Ceiling
+Temperature Color
+Code	°F °C °F °C
+Low 100–134 38–56 80 28 Uncolored
+Ordinary 135–174 57–79 115 47 Uncolored
+Intermediate 175–249 80–121 155 69 White
+High 250–324 122–162 230 111 Blue
+Extra high 325–399 163–204 305 152 Red
+Very extra high 400–499 205–259 380 194 Green
+Ultra high 500–575 260–302 480 249 Orange
+FOR INDIVIDUAL USE ONLY
+Copyright 2019 National Fire Protection Association (NFPA®). Licensed by agreement to Carl Weaver FOR INDIVIDUAL USE ONLY and downloaded on 11/05/2019. No reproduction or transmission in any form permitted without
+written permission of NFPA®. For inquiries or access for multiple users, or to report unauthorized use, contact licensing@nfpa.org.
+{C56A4DC7-64F7-4C88-B368-41DE5BD47BC8}
+
+===== PAGE 106 =====
+
+INITIATING DEVICES 72-103
+Shaded text = Revisions. Δ = Text deletions and figure/table revisions. • = Section deletions. N = New material. 2019 Edition
+17.6.2.2.2.2 Heat-sensing fire detectors where the alarm
+threshold is field adjustable shall be marked with the tempera‐
+ture range.
+17.6.2.2.2.3 Spot-type heat detectors shall also be marked with
+their RTI.
+17.6.2.3* Ambient Ceiling Temperature.
+N 17.6.2.3.1 Detectors having fixed-temperature or rate-
+compensated elements shall be selected in accordance with
+Table 17.6.2.1 for the maximum expected ambient ceiling
+temperature.
+N 17.6.2.3.2 The temperature rating of the detector shall be at
+least 20°F (11°C) above the maximum expected temperature at
+the ceiling.
+17.6.3 Location and Spacing.
+17.6.3.1 Smooth Ceiling.
+17.6.3.1.1* Spacing. One of the following requirements shall
+apply:
+(1) The distance between detectors shall not exceed their
+listed spacing, and there shall be detectors within a
+distance of one-half the listed spacing, measured at right
+angles from all walls or partitions extending upward to
+within the top 15 percent of the ceiling height.
+(2) All points on the ceiling shall have a detector within a
+distance equal to or less than 0.7 times the listed spacing
+(0.7S).
+17.6.3.1.2 Irregular Areas. For irregularly shaped areas, the
+spacing between detectors shall be permitted to be greater
+than the listed spacing, provided that the maximum spacing
+from a detector to the farthest point of a sidewall or corner
+within its zone of protection is not greater than 0.7 times the
+listed spacing.
+17.6.3.1.3 Location.
+17.6.3.1.3.1* Unless otherwise modified by 17.6.3.2.2,
+17.6.3.3.2, or 17.6.3.7, spot-type heat-sensing fire detectors shall
+be located on the ceiling not less than 4 in. (100 mm) from the
+sidewall or on the sidewalls between 4 in. and 12 in. (100 mm
+and 300 mm) from the ceiling.
+17.6.3.1.3.2 Unless otherwise modified by 17.6.3.2.2,
+17.6.3.3.2, or 17.6.3.7, line-type heat detectors shall be located
+on the ceiling or on the sidewalls not more than 20 in.
+(510 mm) from the ceiling.
+17.6.3.2* Solid Joist Construction.
+17.6.3.2.1 Spacing. The design spacing of heat detectors,
+where measured at right angles to the solid joists, shall not
+exceed 50 percent of the listed spacing.
+17.6.3.2.2 Location. Detectors shall be mounted at the
+bottom of the joists.
+17.6.3.3* Beam Construction.
+17.6.3.3.1 Spacing.
+17.6.3.3.1.1 A ceiling shall be treated as a smooth ceiling if the
+beams project no more than 4 in. (100 mm) below the ceiling.
+17.6.3.3.1.2 Where the beams project more than 4 in.
+(100 mm) below the ceiling, the spacing of spot-type heat
+detectors at right angles to the direction of beam travel shall be
+not more than two-thirds of the listed spacing.
+17.6.3.3.1.3 Where the beams project more than 18 in.
+(460 mm) below the ceiling and are more than 8 ft (2.4 m) on
+center, each bay formed by the beams shall be treated as a sepa‐
+rate area.
+17.6.3.3.2 Location. Where beams are less than 12 in.
+(300 mm) in depth and less than 8 ft (2.4 m) on center, detec‐
+tors shall be permitted to be installed on the bottom of beams.
+17.6.3.4* Sloping Ceilings (Peaked and Shed).
+17.6.3.4.1 Spacing.
+17.6.3.4.1.1 Ceiling Slope Less Than 30 Degrees. For a ceiling
+slope of less than 30 degrees, all detectors shall be spaced using
+the height at the peak.
+17.6.3.4.1.2 Ceiling Slopes of 30 Degrees or Greater. All
+detectors, other than those located in the peak, shall be spaced
+using the average slope height or the height of the peak.
+17.6.3.4.1.3 Spacing shall be measured along a horizontal
+projection of the ceiling in accordance with the type of ceiling
+construction.
+17.6.3.4.2 Location.
+17.6.3.4.2.1 A row of detectors shall first be located at or
+within 36 in. (910 mm) of the peak of the ceiling.
+17.6.3.4.2.2 Additional detectors shall be located as deter‐
+mined in 17.6.3.4.1.
+17.6.3.5 High Ceilings.
+17.6.3.5.1* Unless otherwise modified by 17.6.3.5.2, on ceil‐
+ings 10 ft to 30 ft (3.0 m to 9.1 m) high, heat detector spacing
+shall be reduced in accordance with Table 17.6.3.5.1 prior to
+any additional reductions for beams, joists, or slope, where
+applicable.
+N 17.6.3.5.2 For line-type electrical conductivity detectors (see
+3.3.70.11) and pneumatic rate-of-rise tubing heat detectors (see
+3.3.70.15), which rely on the integration effect, the derating
+required by Table 17.6.3.5.1 shall not apply, and the manufac‐
+turer’s published instructions shall be followed for appropriate
+alarm point and spacing.
+Δ Table 17.6.3.5.1 Heat Detector Spacing Reduction Based on
+Ceiling Height
+Ceiling Height
+Greater than (>)
+Up to
+and Including Multiply
+Listed
+Spacing by	ft m ft m
+0 0 10 3.0 1.00
+10 3.0 12 3.7 0.91
+12 3.7 14 4.3 0.84
+14 4.3 16 4.9 0.77
+16 4.9 18 5.5 0.71
+18 5.5 20 6.1 0.64
+20 6.1 22 6.7 0.58
+22 6.7 24 7.3 0.52
+24 7.3 26 7.9 0.46
+26 7.9 28 8.5 0.40
+28 8.5 30 9.1 0.34
+FOR INDIVIDUAL USE ONLY
+Copyright 2019 National Fire Protection Association (NFPA®). Licensed by agreement to Carl Weaver FOR INDIVIDUAL USE ONLY and downloaded on 11/05/2019. No reproduction or transmission in any form permitted without
+written permission of NFPA®. For inquiries or access for multiple users, or to report unauthorized use, contact licensing@nfpa.org.
+{C56A4DC7-64F7-4C88-B368-41DE5BD47BC8}
+
+===== PAGE 107 =====
+
+NATIONAL FIRE ALARM AND SIGNALING CODE	72-104
+2019 Edition Shaded text = Revisions. Δ = Text deletions and figure/table revisions. • = Section deletions. N = New material.
+17.6.3.5.3* Spacing Minimum. The minimum spacing of heat
+detectors shall not be required to be less than 0.4 times the
+height of the ceiling.
+17.6.3.6* Integral Heat Sensors on Combination and Multi-
+Sensor Detectors. A heat-sensing detector integrally mounted
+on a smoke detector shall be listed for not less than 50 ft
+(15.2 m) spacing.
+17.6.3.7 Other Applications. Where a detector is used in an
+application other than open area protection, the manufactur‐
+er’s published instructions shall be followed.
+17.6.3.8 Alternative Design Methods. Annex B shall be
+permitted to be used as one alternative design method for
+determining detector spacing.
+17.7 Smoke-Sensing Fire Detectors.
+17.7.1 General.
+17.7.1.1* The smoke detection design documentation shall
+state the required performance objective of the system.
+17.7.1.2* Designs not in accordance with 17.7.1.3 shall be
+deemed prescriptive designs and shall be designed in accord‐
+ance with the prescriptive requirements of this chapter.
+17.7.1.3* Performance-based designs shall be executed in
+accordance with Section 17.3.
+17.7.1.4 The prescriptive requirements in this section shall be
+applied only where detectors are installed in ordinary indoor
+locations.
+17.7.1.5 Where smoke detectors are being installed to control
+the spread of smoke, they shall be installed in accordance with
+the requirements of 17.7.5.
+17.7.1.6 Smoke detectors shall be installed in all areas where
+required by other governing laws, codes, or standards or by
+other parts of this Code.
+17.7.1.7 The selection and placement of smoke detectors shall
+take into account both the performance characteristics of the
+detector and the areas into which the detectors are to be instal‐
+led to prevent nuisance and unintentional alarms or improper
+operation after installation.
+17.7.1.8* Unless specifically designed and listed for the expec‐
+ted conditions, smoke detectors shall not be installed if any of
+the following ambient conditions exist:
+(1) Temperature below 32°F (0°C)
+(2) Temperature above 100°F (38°C)
+(3) Relative humidity above 93 percent
+(4) Air velocity greater than 300 ft/min (1.5 m/sec)
+N 17.7.1.9* Smoke detectors installed in ducts and other loca‐
+tions with air velocities greater than 300 ft/min (1.5 m/sec)
+shall be listed for the velocity conditions anticipated and instal‐
+led in accordance with the manufacturer’s published instruc‐
+tions.
+17.7.1.10* The location of smoke detectors shall be based on
+an evaluation of potential ambient sources of smoke, moisture,
+dust, or fumes, and electrical or mechanical influences, to
+minimize nuisance alarms.
+17.7.1.11* The effect of stratification below the ceiling shall
+be taken into account. The guidelines in Annex B shall be
+permitted to be used.
+17.7.1.12* Protection During Construction.
+17.7.1.12.1 Where detectors are installed for signal initiation
+during construction, they shall be cleaned and verified to be
+operating in accordance with the listed sensitivity, or they shall
+be replaced prior to the final acceptance test of the system.
+17.7.1.12.2 Where detectors are installed but not operational
+during construction, they shall be protected from construction
+debris, dust, dirt, and damage in accordance with the manufac‐
+turer’s recommendations and verified to be operating in
+accordance with the listed sensitivity, or they shall be replaced
+prior to the final acceptance test of the system.
+17.7.1.12.3 Where detection is not required during construc‐
+tion, detectors shall not be installed until after all other
+construction trades have completed cleanup.
+17.7.2* Sensitivity.
+17.7.2.1* Smoke detectors shall be marked with their nominal
+production sensitivity and tolerance in percent per foot
+(percent per meter) obscuration, as required by the listing.
+17.7.2.2 Spot-type smoke detectors that have provision for
+field adjustment of sensitivity via a mechanical means shall have
+an adjustment range of not less than 0.6 percent per foot
+(1.95 percent per meter) obscuration.
+17.7.2.3 If the means of adjustment of sensitivity is on the
+detector, a method shall be provided to restore the detector to
+its factory calibration.
+17.7.2.4 Detectors that have provision for program-controlled
+adjustment of sensitivity shall be permitted to be marked with
+their programmable sensitivity range only.
+17.7.3 Location and Spacing.
+17.7.3.1* General.
+17.7.3.1.1 The location and spacing of smoke detectors shall
+be based upon the anticipated smoke flows due to the plume
+and ceiling jet produced by the anticipated fire, as well as any
+pre-existing ambient airflows that could exist in the protected
+compartment.
+17.7.3.1.2 The design shall account for the contribution of the
+following factors in predicting detector response to the antici‐
+pated fires to which the system is intended to respond:
+(1) Ceiling shape and surface
+(2) Ceiling height
+(3) Configuration of contents in the protected area
+(4) Combustion characteristics and probable equivalence
+ratio of the anticipated fires involving the fuel loads
+within the protected area
+(5) Compartment ventilation
+(6) Ambient temperature, pressure, altitude, humidity, and
+atmosphere
+17.7.3.1.3 If the intent is to protect against a specific hazard,
+the detector(s) shall be permitted to be installed closer to the
+hazard in a position where the detector can intercept the
+smoke.
+17.7.3.2* Spot-Type Smoke Detectors.
+17.7.3.2.1* Spot-type smoke detectors shall be located on the
+ceiling or, if on a sidewall, between the ceiling and 12 in.
+(300 mm) down from the ceiling to the top of the detector.
+FOR INDIVIDUAL USE ONLY
+Copyright 2019 National Fire Protection Association (NFPA®). Licensed by agreement to Carl Weaver FOR INDIVIDUAL USE ONLY and downloaded on 11/05/2019. No reproduction or transmission in any form permitted without
+written permission of NFPA®. For inquiries or access for multiple users, or to report unauthorized use, contact licensing@nfpa.org.
+{C56A4DC7-64F7-4C88-B368-41DE5BD47BC8}
+
+===== PAGE 108 =====
+
+INITIATING DEVICES 72-105
+Shaded text = Revisions. Δ = Text deletions and figure/table revisions. • = Section deletions. N = New material. 2019 Edition
+17.7.3.2.2* To minimize dust contamination, smoke detectors,
+where installed under raised floors, shall be mounted only in
+an orientation for which they have been listed.
+17.7.3.2.3 On smooth ceilings, spacing for spot-type smoke
+detectors shall be in accordance with 17.7.3.2.3.1 through
+17.7.3.2.3.4.
+17.7.3.2.3.1* In the absence of specific performance-based
+design criteria, one of the following requirements shall apply:
+(1) The distance between smoke detectors shall not exceed a
+nominal spacing of 30 ft (9.1 m) and there shall be detec‐
+tors within a distance of one-half the nominal spacing,
+measured at right angles from all walls or partitions
+extending upward to within the top 15 percent of the ceil‐
+ing height.
+(2)* All points on the ceiling shall have a detector within a
+distance equal to or less than 0.7 times the nominal 30 ft
+(9.1 m) spacing (0.7S).
+17.7.3.2.3.2 In all cases, the manufacturer’s published instruc‐
+tions shall be followed.
+17.7.3.2.3.3 Other spacing shall be permitted to be used
+depending on ceiling height, different conditions, or response
+requirements.
+17.7.3.2.3.4 For the detection of flaming fires, the guidelines
+in Annex B shall be permitted to be used.
+17.7.3.2.4* For solid joist and beam construction, spacing for
+spot-type smoke detectors shall be in accordance with
+17.7.3.2.4.1 through 17.7.3.2.4.6.
+17.7.3.2.4.1 Solid joists shall be considered equivalent to
+beams for smoke detector spacing guidelines.
+17.7.3.2.4.2 For level ceilings, the following shall apply:
+(1) For ceilings with beam depths of less than 10 percent of
+the ceiling height (0.1 H), the following shall apply:
+(a) Smooth ceiling spacing shall be permitted.
+(b) Spot-type smoke detectors shall be permitted to be
+located on ceilings or on the bottom of beams.
+(2) For ceilings with beam depths equal to or greater than
+10 percent of the ceiling height (0.1 H), the following
+shall apply:
+(a) Where beam spacing is equal to or greater than
+40 percent of the ceiling height (0.4 H), spot-type
+detectors shall be located on the ceiling in each
+beam pocket.
+(b) Where beam spacing is less than 40 percent of the
+ceiling height (0.4 H), the following shall be permit‐
+ted for spot detectors:
+i. Smooth ceiling spacing in the direction paral‐
+lel to the beams and at one-half smooth ceil‐
+ing spacing in the direction perpendicular to
+the beams
+ii. Location of detectors either on the ceiling or
+on the bottom of the beams
+(3)* For beam pockets formed by intersecting beams, includ‐
+ing waffle or pan-type ceilings, the following shall apply:
+(a) For beam depths less than 10 percent of the ceiling
+height (0.1 H), spacing shall be in accordance with
+17.7.3.2.4.2(1).
+(b) For beam depths greater than or equal to
+10 percent of the ceiling height (0.1 H), spacing
+shall be in accordance with 17.7.3.2.4.2(2).
+(4)* For corridors 15 ft (4.6 m) in width or less having ceiling
+beams or solid joists perpendicular to the corridor
+length, the following shall apply:
+(a) Smooth ceiling spacing shall be permitted.
+(b) Location of spot-type smoke detectors shall be
+permitted on ceilings, sidewalls, or the bottom of
+beams or solid joists.
+(5) For rooms of 900 ft2 (84 m2) or less, the following shall
+apply:
+(a) Use of smooth ceiling spacing shall be permitted.
+(b) Location of spot-type smoke detectors shall be
+permitted on ceilings or on the bottom of beams.
+17.7.3.2.4.3* For sloping ceilings with beams running parallel
+up slope, the following shall apply:
+(1) Spot-type detector(s) shall be located on the ceiling
+within beam pocket(s).
+(2) The ceiling height shall be taken as the average height
+over slope.
+(3) Spacing shall be measured along a horizontal projection
+of the ceiling.
+(4) Smooth ceiling spacing shall be permitted within beam
+pocket(s) parallel to the beams.
+(5) For beam depths less than or equal to 10 percent of the
+ceiling height (0.1 H), spot-type detectors shall be located
+with smooth ceiling spacing perpendicular to the beams.
+(6) For beam depths greater than 10 percent of the ceiling
+height (0.1 H), the following shall apply for spacing
+perpendicular to the beams:
+(a) For beam spacing greater than or equal to
+40 percent of the ceiling height (0.4 H), spot-type
+detectors shall be located in each beam pocket.
+(b) For beam spacing less than 40 percent of the ceiling
+height (0.4 H), spot-type detectors shall not be
+required in every beam pocket but shall be spaced
+not greater than 50 percent of smooth ceiling spac‐
+ing.
+17.7.3.2.4.4* For sloping ceilings with beams running perpen‐
+dicular across slope, the following shall apply:
+(1) Spot-type detector(s) shall be located at the bottom of the
+beams.
+(2) The ceiling height shall be taken as the average height
+over slope.
+(3) Spacing shall be measured along a horizontal projection
+of the ceiling.
+(4) Smooth ceiling spacing shall be permitted within beam
+pocket(s).
+(5) For beam depths less than or equal to 10 percent of the
+ceiling height (0.1 H), spot-type detectors shall be located
+with smooth ceiling spacing.
+(6) For beam depths greater than 10 percent of the ceiling
+height (0.1 H), spot-type detectors shall not be required
+to be located closer than (0.4 H) and shall not exceed
+50 percent of smooth ceiling spacing.
+17.7.3.2.4.5* For sloped ceilings with beam pockets formed by
+intersecting beams, the following shall apply:
+(1) Spot-type detector(s) shall be located at the bottom of the
+beams.
+FOR INDIVIDUAL USE ONLY
+Copyright 2019 National Fire Protection Association (NFPA®). Licensed by agreement to Carl Weaver FOR INDIVIDUAL USE ONLY and downloaded on 11/05/2019. No reproduction or transmission in any form permitted without
+written permission of NFPA®. For inquiries or access for multiple users, or to report unauthorized use, contact licensing@nfpa.org.
+{C56A4DC7-64F7-4C88-B368-41DE5BD47BC8}
+
+===== PAGE 109 =====
+
+NATIONAL FIRE ALARM AND SIGNALING CODE	72-106
+2019 Edition Shaded text = Revisions. Δ = Text deletions and figure/table revisions. • = Section deletions. N = New material.
+(2) The ceiling height shall be taken as the average height
+over slope.
+(3) Spacing shall be measured along a horizontal projection
+of the ceiling.
+(4) For beam depths less than or equal to 10 percent of the
+ceiling height (0.1 H), spot-type detectors shall be spaced
+with not more than three beams between detectors and
+shall not exceed smooth ceiling spacing.
+(5) For beam depths greater than 10 percent of the ceiling
+height (0.1 H), spot-type detectors shall be spaced with
+not more than two beams between detectors, but shall
+not be required to be spaced closer than (0.4 H), and
+shall not exceed 50 percent of smooth ceiling spacing.
+17.7.3.2.4.6 For sloped ceilings with solid joists, the detectors
+shall be located on the bottom of the joist.
+17.7.3.3* Peaked.
+N 17.7.3.3.1 Detectors shall first be spaced and located within
+36 in. (910 mm) of the peak, measured horizontally.
+N 17.7.3.3.2 The number and spacing of additional detectors, if
+any, shall be based on the horizontal projection of the ceiling.
+17.7.3.4* Shed.
+N 17.7.3.4.1 Detectors shall first be spaced and located within
+36 in. (910 mm) of the high side of the ceiling, measured hori‐
+zontally.
+N 17.7.3.4.2 The number and spacing of additional detectors, if
+any, shall be based on the horizontal projection of the ceiling.
+17.7.3.5 Raised Floors and Suspended Ceilings. Spaces
+beneath raised floors and above suspended ceilings shall be
+treated as separate rooms for smoke detector spacing purposes.
+Detectors installed beneath raised floors or above suspended
+ceilings, or both, including raised floors and suspended ceil‐
+ings used for environmental air, shall not be used in lieu of
+providing detection within the room.
+17.7.3.5.1 For raised floors, the following shall apply:
+(1) Detectors installed beneath raised floors shall be spaced
+in accordance with 17.7.3.1, 17.7.3.1.3, and 17.7.3.2.2.
+(2) Where the area beneath the raised floor is also used for
+environmental air, detector spacing shall also conform to
+17.7.4.1 and 17.7.4.2.
+17.7.3.5.2 For suspended ceilings, the following shall apply:
+(1) Detector spacing above suspended ceilings shall conform
+to the requirements of 17.7.3 for the ceiling configura‐
+tion.
+(2) Where detectors are installed in ceilings used for environ‐
+mental air, detector spacing shall also conform to
+17.7.4.1, 17.7.4.2, and 17.7.4.4.
+17.7.3.6 Air Sampling–Type Smoke Detector.
+N 17.7.3.6.1 General.
+N 17.7.3.6.1.1* In the absence of specific performance-based
+design criteria, each sampling port of an air sampling–type
+smoke detector shall be treated as a spot-type smoke detector
+for the purpose of location and spacing in accordance with
+17.7.3.
+N 17.7.3.6.1.2 Air sampling–type smoke detectors shall produce
+trouble signals if the airflow is outside the manufacturer’s
+specified range.
+N 17.7.3.6.1.3 If provided, atmospheric contaminant filtration
+shall be listed for use with the detector and installed and main‐
+tained in accordance with the air sampling–type smoke detec‐
+tor manufacturer’s published instructions.
+N 17.7.3.6.2 Pipe Network.
+N 17.7.3.6.2.1 Maximum air sample transport time from the
+farthest sampling port to the detector shall not exceed
+120 seconds.
+N 17.7.3.6.2.2 Sampling pipe networks shall be designed on the
+basis of, and shall be supported by, computer-based fluid
+dynamics design calculations to ensure required performance.
+N 17.7.3.6.2.3 The sampling pipe network design calculations
+shall include pressure, volumetric flow, and alarm sensitivity at
+each sampling port.
+N 17.7.3.6.2.4 Software applications for the design of pipe
+networks shall be listed for use with the manufacturer’s equip‐
+ment.
+N 17.7.3.6.2.5 Sampling system piping shall be conspicuously
+identified as “SMOKE DETECTOR SAMPLING TUBE — DO
+NOT DISTURB,” as follows:
+(1) At changes in direction or branches of piping
+(2) At each side of penetrations of walls, floors, or other
+barriers
+(3) At intervals on piping that provide visibility within the
+space, but no greater than 20 ft (6.1 m)
+N 17.7.3.6.2.6* Sampling ports shall be identified as such.
+N 17.7.3.6.2.7* If provided, test ports at the end (most remote
+location) of a pipe run installed in the pipe network solely for
+the purpose of validating consistency in performance (also
+referred to as benchmark test points) shall be included in the
+design calculations and allowed, but not required, to comply
+with the requirements of 17.7.3.6.2.
+N 17.7.3.6.2.8 If the piping and fittings are painted, the painting
+shall be performed in accordance with the air sampling–type
+smoke detector manufacturer’s published instructions.
+N 17.7.3.6.2.9* Pipe network materials, sizing, and installation
+shall be in accordance with the manufacturer’s published
+requirements and suitable for use in the environment in which
+they are installed.
+N 17.7.3.6.2.10 Where used, capillary tubing shall be sized and
+affixed in accordance with the manufacturer’s published
+instructions and computer-based design calculations.
+N 17.7.3.6.3 Installation and Spacing.
+17.7.3.6.3.1* Air sampling pipe network fittings shall be instal‐
+led air-tight and permanently affixed.
+•
+N 17.7.3.6.3.2 Sampled air shall be exhausted to a lessor or
+equal pressure zone. The pressure differential between the
+sampled air and detector exhaust shall not exceed the manu‐
+facturer’s published instructions.
+N 17.7.3.6.3.3* Supports for sampling pipe shall be in accord‐
+ance with the air sampling–type smoke detector manufacturer’s
+published instructions.
+FOR INDIVIDUAL USE ONLY
+Copyright 2019 National Fire Protection Association (NFPA®). Licensed by agreement to Carl Weaver FOR INDIVIDUAL USE ONLY and downloaded on 11/05/2019. No reproduction or transmission in any form permitted without
+written permission of NFPA®. For inquiries or access for multiple users, or to report unauthorized use, contact licensing@nfpa.org.
+{C56A4DC7-64F7-4C88-B368-41DE5BD47BC8}
+
+===== PAGE 110 =====
+
+INITIATING DEVICES 72-107
+Shaded text = Revisions. Δ = Text deletions and figure/table revisions. • = Section deletions. N = New material. 2019 Edition
+N 17.7.3.6.4 Special Applications.
+N 17.7.3.6.4.1 Air Duct Applications.
+N (A) The air sampling system shall be listed for air duct applica‐
+tions and shall be installed in accordance with the manufactur‐
+er’s published instructions.
+N (B) The inlet and exhaust sections of pipe that are installed
+inside the air duct shall be air-tight and shall exhaust the
+sampled air in accordance with the manufacturer’s published
+instructions.
+N 17.7.3.6.4.2* Electrical Cabinet Applications. For protection
+of cabinets containing electrical equipment, the air sampling
+ports shall be located in the main airflow at the exhaust vents,
+downstream of the airflow distribution path, or in accordance
+with the manufacturer’s published instructions.
+• 17.7.3.7* Projected Beam–Type Smoke Detectors.
+17.7.3.7.1 Projected beam–type smoke detectors shall be loca‐
+ted in accordance with the manufacturer’s published instruc‐
+tions.
+17.7.3.7.2 The effects of stratification shall be evaluated when
+locating the detectors.
+17.7.3.7.3 The beam length shall not exceed the maximum
+permitted by the equipment listing.
+17.7.3.7.4 If mirrors are used with projected beams, the
+mirrors shall be installed in accordance with the manufactur‐
+er’s published instructions.
+17.7.3.7.5 A projected beam–type smoke detector shall be
+considered equivalent to a row of spot-type smoke detectors for
+level and sloping ceiling applications.
+17.7.3.7.6 Projected beam–type detectors and mirrors shall be
+mounted on stable surfaces to prevent false or erratic opera‐
+tion due to movement.
+17.7.3.7.7 The beam shall be designed so that small angular
+movements of the light source or receiver do not prevent oper‐
+ation due to smoke and do not cause nuisance or unintentional
+alarms.
+17.7.3.7.8* The light path of projected beam–type detectors
+shall be kept clear of opaque obstacles at all times.
+17.7.4 Heating, Ventilating, and Air-Conditioning (HVAC).
+17.7.4.1* In spaces served by air-handling systems, detectors
+shall not be located where airflow prevents operation of the
+detectors.
+Δ 17.7.4.2 In under-floor spaces and above-ceiling spaces that
+are used as HVAC plenums, detectors shall be listed for the
+anticipated environment as required by 17.7.1.8.
+N 17.7.4.3 Detector spacings and locations shall be selected on
+the basis of anticipated airflow patterns and fire type.
+Δ 17.7.4.4* Detectors placed in environmental air ducts or
+plenums shall not be used as a substitute for open area detec‐
+tors.
+N 17.7.4.4.1 Where detectors are used for the control of smoke
+spread, the requirements of 17.7.5 shall apply.
+N 17.7.4.4.2 Where open area protection is required, 17.7.3
+shall apply.
+17.7.4.5 Detectors placed in environmental air ducts or
+plenums shall be permitted to be either supervisory or alarm
+initiating devices.
+17.7.5* Smoke Detectors for Control of Smoke Spread.
+17.7.5.1* Classifications. Smoke detectors installed and used
+to prevent smoke spread by initiating control of fans, dampers,
+doors, and other equipment shall be classified in the following
+manner:
+(1) Area detectors that are installed in the related smoke
+compartments
+(2) Detectors that are installed in the air duct systems
+(3) Video image smoke detection that is installed in related
+smoke compartments
+17.7.5.2* Limitations.
+17.7.5.2.1 Detectors that are installed in the air duct system in
+accordance with 17.7.5.1(2) shall not be used as a substitute for
+open area protection.
+17.7.5.2.2 Where open area protection is required, 17.7.3
+shall apply.
+17.7.5.3* Purposes.
+17.7.5.3.1 To prevent the recirculation of dangerous quanti‐
+ties of smoke, a detector approved for air duct use shall be
+installed on the supply side of air-handling systems as required
+by NFPA 90A and 17.7.5.4.2.1.
+17.7.5.3.2 If smoke detectors are used to initiate selectively the
+operation of equipment to control smoke spread, the require‐
+ments of 17.7.5.4.2.2 shall apply.
+17.7.5.3.3 If detectors are used to initiate the operation of
+smoke doors, the requirements of 17.7.5.6 shall apply.
+17.7.5.3.4 If duct detectors are used to initiate the operation
+of smoke dampers within ducts, the requirements of 17.7.5.5
+shall apply.
+17.7.5.4 Application.
+17.7.5.4.1 Area Smoke Detectors Within Smoke Compart‐
+ments. Area smoke detectors within smoke compartments
+shall be permitted to be used to control the spread of smoke by
+initiating operation of doors, dampers, and other equipment.
+17.7.5.4.2* Smoke Detection for Air Duct System.
+17.7.5.4.2.1 Supply Air System.
+N (A) Where the detection of smoke in the supply air system is
+required by other NFPA standards, a detector(s) listed for the
+air velocity present shall be installed in the supply air duct
+downstream of both the fan and the filters.
+N (B) Where the air duct system passes through other smoke
+compartments not served by the duct, additional smoke detec‐
+tors shall not be required to be installed.
+17.7.5.4.2.2* Return Air System. Unless otherwise modified
+by 17.7.5.4.2.2(A) or 17.7.5.4.2.2(B), if the detection of smoke
+in the return air system is required by other NFPA standards, a
+detector(s) listed for the air velocity present shall be located
+where the air leaves each smoke compartment, or in the duct
+system before the air enters the return air system common to
+more than one smoke compartment.
+FOR INDIVIDUAL USE ONLY
+Copyright 2019 National Fire Protection Association (NFPA®). Licensed by agreement to Carl Weaver FOR INDIVIDUAL USE ONLY and downloaded on 11/05/2019. No reproduction or transmission in any form permitted without
+written permission of NFPA®. For inquiries or access for multiple users, or to report unauthorized use, contact licensing@nfpa.org.
+{C56A4DC7-64F7-4C88-B368-41DE5BD47BC8}
+
+===== PAGE 111 =====
+
+NATIONAL FIRE ALARM AND SIGNALING CODE	72-108
+2019 Edition Shaded text = Revisions. Δ = Text deletions and figure/table revisions. • = Section deletions. N = New material.
+(A) Additional smoke detectors shall not be required to be
+installed in ducts where the air duct system passes through
+other smoke compartments not served by the duct.
+(B) Where total coverage smoke detection is installed in
+accordance with 17.5.3.1 in all areas of the smoke compart‐
+ment served by the return air system, installation of additional
+detector(s) listed for the air velocity present where the air
+leaves each smoke compartment, or in the duct system before
+the air enters in the return air system shall not be required,
+provided that their function is accomplished by the design of
+the total coverage smoke detection system.
+17.7.5.5 Location and Installation of Detectors in Air Duct
+Systems.
+17.7.5.5.1 Detectors shall be listed for the purpose for which
+they are being used.
+Δ 17.7.5.5.2* Air duct detectors shall be installed in such a way
+as to obtain a representative sample of the airstream.
+N 17.7.5.5.3 This installation shall be permitted to be achieved
+by any of the following methods:
+(1) Rigid mounting within the duct
+(2) Rigid mounting to the wall of the duct with the sensing
+element protruding into the duct
+(3) Installation outside the duct with rigidly mounted
+sampling tubes protruding into the duct
+(4) Installation through the duct with projected light beam
+17.7.5.5.4 Detectors shall be mounted in accordance with the
+manufacturer’s published instructions and shall be accessible
+for cleaning by providing access doors or panels in accordance
+with NFPA 90A.
+17.7.5.5.5 The location of all detectors in air duct systems
+shall be permanently and clearly identified and recorded.
+17.7.5.5.6 Detectors mounted outside of a duct that employs
+sampling tubes for transporting smoke from inside the duct to
+the detector shall be designed and installed to allow verifica‐
+tion of airflow from the duct to the detector.
+17.7.5.5.7 Detectors shall be listed for operation over the
+complete range of air velocities, temperature, and humidity
+expected at the detector when the air-handling system is oper‐
+ating.
+17.7.5.5.8 All penetrations of a return air duct in the vicinity
+of detectors installed on or in an air duct shall be sealed to
+prevent entrance of outside air and possible dilution or redi‐
+rection of smoke within the duct.
+17.7.5.6 Smoke Detectors for Door Release Service.
+17.7.5.6.1 Smoke detectors that are part of an open area
+protection system covering the room, corridor, or enclosed
+space on each side of the smoke door and that are located and
+spaced as required by 17.7.3 shall be permitted to accomplish
+smoke door release service.
+17.7.5.6.2 Smoke detectors that are used exclusively for smoke
+door release service shall be located and spaced as required by
+17.7.5.6.
+17.7.5.6.3 Where smoke door release is accomplished directly
+from the smoke detector(s), the detector(s) shall be listed for
+releasing service.
+17.7.5.6.4 Smoke detectors shall be of the photoelectric, ioni‐
+zation, or other approved type.
+17.7.5.6.5 The number of detectors required shall be deter‐
+mined in accordance with 17.7.5.6.5.1 through 17.7.5.6.5.4.
+17.7.5.6.5.1 If doors are to be closed in response to smoke
+flowing in either direction, the requirements of 17.7.5.6.5.1(A)
+through 17.7.5.6.5.1(D) shall apply.
+(A) If the depth of wall section above the door is 24 in.
+(610 mm) or less, one ceiling-mounted smoke detector shall be
+required on one side of the doorway only, or two wall-mounted
+detectors shall be required, one on each side of the doorway.
+Figure 17.7.5.6.5.1(A), part A or B, shall apply.
+(B) If the depth of wall section above the door is greater than
+24 in. (610 mm) on one side only, one ceiling-mounted smoke
+detector shall be required on the higher side of the doorway
+only, or one wall-mounted detector shall be required on both
+sides of the doorway. Figure 17.7.5.6.5.1(A), part D, shall apply.
+(C)* If the depth of wall section above the door is greater
+than 24 in. (610 mm) on both sides, two ceiling-mounted or
+Depth of wall
+section above
+door
+Door frame
+mounted
+d
+Ceiling or wall mounted
+Smoke detector
+ceiling or wall mounted
+Smoke detector
+listed for frame
+mounting or as
+part of closer
+assembly
+0-24 in.
+(0-610 mm)
+on both
+sides of
+doorway
+A B
+d =
+24 in.
+(610 mm) d
+Detector or
+detector closer
+mounted on
+either side One ceiling-mounted detector on either side or
+one wall-mounted detector on each side
+max. 5 ft (1.52 m)
+d min. but
+not less than
+12 in. (300 mm)
+C D
+Over
+24 in.
+(610 mm)
+on one
+side only
+d1 £ 24 in.
+(£ 610 mm)
+d1 £ 24 in.
+(£ 610 mm)
+d2 > 24 in.
+(> 610 mm)
+d2 > 24 in.
+(> 610 mm)
+5 ft (1.52 m)
+max.
+min. = d2
+E F
+Over
+24 in.
+(610 mm)
+on both
+sides
+Detector or
+detector closer
+mounted on
+higher side
+d > 24 in.
+(> 610 mm)
+Detector or
+detector closer
+mounted on
+either side
+d
+Two detectors required
+G	Over
+60 in.
+(1.52 m) Might require additional detectors
+5 ft (1.52 m)
+max.
+min. = d
+5 ft (1.52 m)
+max.
+min. = d
+or
+or	or
+£ 12.0 in. (£ 300 mm)
+£ 12.0 in. (£ 300 mm)
+£ 12.0 in.
+(£ 300 mm)
+or
+One ceiling-mounted detector on higher side
+or one wall-mounted detector on each side
+Δ FIGURE 17.7.5.6.5.1(A) Detector Location Requirements
+for Wall Sections.
+FOR INDIVIDUAL USE ONLY
+Copyright 2019 National Fire Protection Association (NFPA®). Licensed by agreement to Carl Weaver FOR INDIVIDUAL USE ONLY and downloaded on 11/05/2019. No reproduction or transmission in any form permitted without
+written permission of NFPA®. For inquiries or access for multiple users, or to report unauthorized use, contact licensing@nfpa.org.
+{C56A4DC7-64F7-4C88-B368-41DE5BD47BC8}
+
+===== PAGE 112 =====
+
+INITIATING DEVICES 72-109
+Shaded text = Revisions. Δ = Text deletions and figure/table revisions. • = Section deletions. N = New material. 2019 Edition
+wall-mounted detectors shall be required, one on each side of
+the doorway. Figure 17.7.5.6.5.1(A), part F, shall apply.
+(D) If a detector is specifically listed for door frame mounting,
+or if a listed combination or integral detector–door closer
+assembly is used, only one detector shall be required if installed
+in the manner recommended by the manufacturer's published
+instructions. Figure 17.7.5.6.5.1(A), parts A, C, and E, shall
+apply.
+17.7.5.6.5.2 If door release is intended to prevent smoke
+transmission from one space to another in one direction only,
+detectors located in the space to which smoke is to be
+confined, regardless of the depth of wall section above the
+door, shall be in accordance with 17.7.5.6.6. Alternatively, a
+smoke detector conforming with 17.7.5.6.5.1(D) shall be
+permitted to be used.
+17.7.5.6.5.3 If there are multiple doorways, additional ceiling-
+mounted detectors shall be required as specified in
+17.7.5.6.5.3(A) through 17.7.5.6.5.3(C).
+(A) If the separation between doorways exceeds 24 in.
+(610 mm), each doorway shall be treated separately. Figure
+17.7.5.6.5.3(A), part E, shall apply.
+(B) Each group of three or more doorway openings shall be
+treated separately. Figure 17.7.5.6.5.3(B) shall apply.
+(C) Each group of doorway openings that exceeds 20 ft
+(6.1 m) in width, measured at its overall extremes, shall be trea‐
+ted separately. Figure 17.7.5.6.5.3(C) shall apply.
+17.7.5.6.5.4 If there are multiple doorways and listed door
+frame–mounted detectors, or if listed combination or integral
+detector–door closer assemblies are used, there shall be one
+detector for each single or double doorway.
+17.7.5.6.6 The locations of detectors shall be determined in
+accordance with 17.7.5.6.6.1 and 17.7.5.6.6.2.
+CL CL
+CL
+CL
+CL
+CL
+A
+B
+C
+D
+E a
+a
+a = More than
+24 in. (610 mm)
+a = 24 in.
+(610 mm)
+or less
+Double door
+Door offset from
+centerline of hall
+Single door On centerline of
+doorway
+On centerline of
+doorway
+On centerline of
+doorway
+On centerline of
+separation
+On centerline of each
+doorway
+Detector(s)
+location
+FIGURE 17.7.5.6.5.3(A) Detector Location Requirements
+for Single and Double Doors.
+17.7.5.6.6.1 If ceiling-mounted smoke detectors are to be
+installed on a smooth ceiling for a single or double doorway,
+they shall be located as follows [Figure 17.7.5.6.5.3(A) shall
+apply]:
+(1) On the centerline of the doorway
+(2) No more than 5 ft (1.5 m), measured along the ceiling
+and perpendicular to the doorway [Figure 17.7.5.6.5.1(A)
+shall apply.]
+(3) No closer than shown in Figure 17.7.5.6.5.1(A), parts B,
+D, and F
+17.7.5.6.6.2 If ceiling-mounted detectors are to be installed in
+conditions other than those outlined in 17.7.5.6.6.1, an engi‐
+neering evaluation shall be made.
+17.7.6 Special Considerations.
+17.7.6.1 Spot-Type Detectors.
+17.7.6.1.1 Combination and multi-sensor smoke detectors that
+have a fixed-temperature element as part of the unit shall be
+selected in accordance with Table 17.6.2.1 for the maximum
+ceiling temperature expected in service.
+17.7.6.1.2* Holes in the back of a detector shall be covered by
+a gasket, sealant, or equivalent means, and the detector shall be
+mounted so that airflow from inside or around the housing
+does not prevent the entry of smoke during a fire or test condi‐
+tion.
+17.7.6.2* High-Rack Storage. The location and spacing of
+smoke detectors for high-rack storage shall address the
+commodity, quantity, and configuration of the rack storage.
+17.7.6.3 High Air Movement Areas.
+17.7.6.3.1* General. The purpose and scope of 17.7.6.3 shall
+be to provide location and spacing guidance for smoke detec‐
+A
+CL
+a
+W
+B
+CL CL
+a
+Treat as
+two or
+more
+groups
+a = 24 in.
+(610 mm)
+or less;
+more than
+3 openings
+a = 24 in.
+(610 mm)
+or less;
+3 openings;
+W = 20 ft
+(6.1 m)
+or less
+On
+center-
+line of
+center
+opening
+Detector(s)
+location
+FIGURE 17.7.5.6.5.3(B) Detector(s) Location ±24 in.
+(610 mm) Requirements for Group Doorways.
+a
+CL CL a = 24 in.
+(610 mm)
+or less;
+W = more
+than 20 ft
+(6.1 m)
+Detector(s)
+location
+W
+Treat as
+two or
+more
+groups
+FIGURE 17.7.5.6.5.3(C) Detector(s) Location ±24 in.
+(610 mm) Requirements for Group Doorways over 20 ft
+(6.1 m) in Width.
+FOR INDIVIDUAL USE ONLY
+Copyright 2019 National Fire Protection Association (NFPA®). Licensed by agreement to Carl Weaver FOR INDIVIDUAL USE ONLY and downloaded on 11/05/2019. No reproduction or transmission in any form permitted without
+written permission of NFPA®. For inquiries or access for multiple users, or to report unauthorized use, contact licensing@nfpa.org.
+{C56A4DC7-64F7-4C88-B368-41DE5BD47BC8}
+
+===== PAGE 113 =====
+
+NATIONAL FIRE ALARM AND SIGNALING CODE	72-110
+2019 Edition Shaded text = Revisions. Δ = Text deletions and figure/table revisions. • = Section deletions. N = New material.
+tors intended for early warning of fire in high air movement
+areas.
+17.7.6.3.2 Location. Smoke detectors shall not be located
+directly in the airstream of supply registers.
+17.7.6.3.3* Spacing.
+17.7.6.3.3.1 Smoke detector spacing shall be reduced where
+the airflow in a defined space exceeds 8 minutes per air change
+(total space volume) (equal to 7.5 air changes per hour).
+17.7.6.3.3.2 Where spacing must be adjusted for airflow, spot-
+type smoke detector spacing shall be adjusted in accordance
+with Table 17.7.6.3.3.2 or Figure 17.7.6.3.3.2 before making any
+other spacing adjustments required by this Code.
+17.7.6.3.3.3 Air sampling or projected beam smoke detectors
+shall be installed in accordance with the manufacturer’s
+published instructions.
+17.7.6.3.4 HVAC Mechanical Rooms. Where HVAC mechani‐
+cal rooms are used as an air plenum for return air, the spacings
+Δ Table 17.7.6.3.3.2 Smoke Detector Spacing Based on Air
+Movement (Not to Be Used for Under-Floor or Above-Ceiling
+Spaces)
+Minutes per
+Air Change
+Air Changes
+per Hour
+Spacing per Detector
+ft2 m2
+1 60 125 12
+2 30 250 23
+3 20 375 35
+4 15 500 46
+5 12 625 58
+6 10 750 70
+7 8.6 875 81
+8 7.5 900 84
+9 6.7 900 84
+10 6 900 84
+900 (83.6)
+300 (27.9)
+60 50 40 30 20 10 0
+Air changes per hour
+100 (9.3)
+200 (18.6)
+400 (37.2)
+500 (46.5)
+600 (55.7)
+700 (65.0)
+800 (74.3)
+ft	2 (m
+2) per detector
+FIGURE 17.7.6.3.3.2 High Air Movement Areas (Not to Be
+Used for Under-Floor or Above-Ceiling Spaces).
+of smoke detectors shall not be required to be reduced based
+on the number of air changes.
+17.7.7 Video Image Smoke Detection.
+17.7.7.1 Video image smoke detection systems and all of the
+components thereof, including hardware and software, shall be
+listed for the purpose of smoke detection.
+17.7.7.2 Video image smoke detection systems shall comply
+with all of the applicable requirements of Chapters 1, 10, 14,
+17, and 23 of this Code.
+17.7.7.2.1 Systems shall be designed in accordance with the
+performance-based design requirements of Section 17.3.
+17.7.7.2.2 The location and spacing of video image smoke
+detectors shall comply with the requirements of 17.11.5.
+17.7.7.3* Video signals generated by cameras that are compo‐
+nents of video image smoke detection systems shall be permit‐
+ted to be transmitted to other systems for other uses only
+through output connections provided specifically for that
+purpose by the video system manufacturer.
+Δ 17.7.7.4* All component controls and software shall be
+protected from unauthorized changes.
+N 17.7.7.5 All changes to the software or component settings
+shall be tested in accordance with Chapter 14.
+17.8 Radiant Energy–Sensing Fire Detectors.
+17.8.1* General.
+17.8.1.1 The radiant energy detection design documentation
+shall state the required performance objective of the system.
+Δ 17.8.1.2 The purpose and scope of Section 17.8 shall be to
+provide requirements for the selection, location, and spacing
+of fire detectors that sense the radiant energy produced by
+burning substances.
+N 17.8.1.3 These detectors shall be categorized as flame detec‐
+tors and spark/ember detectors.
+17.8.2* Fire Characteristics and Detector Selection.
+17.8.2.1* The type and quantity of radiant energy–sensing fire
+detectors shall be determined on the basis of the performance
+characteristics of the detector and an analysis of the hazard,
+including the burning characteristics of the fuel, the fire
+growth rate, the environment, the ambient conditions, and the
+capabilities of the extinguishing media and equipment.
+17.8.2.2* The selection of the radiant energy–sensing detec‐
+tors shall be based on the following:
+(1) Matching of the spectral response of the detector to the
+spectral emissions of the fire or fires to be detected
+(2) Minimizing the possibility of spurious nuisance alarms
+from non-fire sources inherent to the hazard area
+17.8.3 Spacing Considerations.
+17.8.3.1 General Rules.
+17.8.3.1.1* Radiant energy–sensing fire detectors shall be
+employed consistent with the listing or approval and the
+inverse square law, which defines the fire size versus distance
+curve for the detector.
+FOR INDIVIDUAL USE ONLY
+Copyright 2019 National Fire Protection Association (NFPA®). Licensed by agreement to Carl Weaver FOR INDIVIDUAL USE ONLY and downloaded on 11/05/2019. No reproduction or transmission in any form permitted without
+written permission of NFPA®. For inquiries or access for multiple users, or to report unauthorized use, contact licensing@nfpa.org.
+{C56A4DC7-64F7-4C88-B368-41DE5BD47BC8}
+
+===== PAGE 114 =====
+
+INITIATING DEVICES 72-111
+Shaded text = Revisions. Δ = Text deletions and figure/table revisions. • = Section deletions. N = New material. 2019 Edition
+17.8.3.1.2 Detector quantity shall be based on the detectors
+being positioned so that no point requiring detection in the
+hazard area is obstructed or outside the field of view of at least
+one detector.
+17.8.3.2 Spacing Considerations for Flame Detectors.
+17.8.3.2.1* The location and spacing of detectors shall be the
+result of an engineering evaluation that includes the following:
+(1) Size of the fire that is to be detected
+(2) Fuel involved
+(3) Sensitivity of the detector
+(4) Field of view of the detector
+(5) Distance between the fire and the detector
+(6) Radiant energy absorption of the atmosphere
+(7) Presence of extraneous sources of radiant emissions
+(8) Purpose of the detection system
+(9) Response time required
+17.8.3.2.2 The system design shall specify the size of the flam‐
+ing fire of given fuel that is to be detected.
+17.8.3.2.3* In applications where the fire to be detected could
+occur in an area not on the optical axis of the detector, the
+distance shall be reduced or detectors shall be added to
+compensate for the angular displacement of the fire in accord‐
+ance with the manufacturer’s published instructions.
+17.8.3.2.4* In applications in which the fire to be detected is
+of a fuel that differs from the test fuel used in the process of
+listing or approval, the distance between the detector and the
+fire shall be adjusted consistent with the fuel specificity of the
+detector as established by the manufacturer.
+17.8.3.2.5 Because flame detectors are line-of-sight devices,
+their ability to respond to the required area of fire in the zone
+that is to be protected shall not be compromised by the pres‐
+ence of intervening structural members or other opaque
+objects or materials.
+17.8.3.2.6* Provisions shall be made to sustain detector
+window clarity in applications where airborne particulates and
+aerosols coat the detector window between maintenance inter‐
+vals and affect sensitivity.
+17.8.3.3 Spacing Considerations for Spark/Ember Detectors.
+17.8.3.3.1* The location and spacing of detectors shall be the
+result of an engineering evaluation that includes the following:
+(1) Size of the spark or ember that is to be detected
+(2) Fuel involved
+(3) Sensitivity of the detector
+(4) Field of view of the detector
+(5) Distance between the fire and the detector
+(6) Radiant energy absorption of the atmosphere
+(7) Presence of extraneous sources of radiant emissions
+(8) Purpose of the detection systems
+(9) Response time required
+17.8.3.3.2* The system design shall specify the size of the
+spark or ember of the given fuel that the detection system is to
+detect.
+17.8.3.3.3 Spark detectors shall be positioned so that all points
+within the cross section of the conveyance duct, conveyor, or
+chute where the detectors are located are within the field of
+view (as defined in 3.3.106) of at least one detector.
+17.8.3.3.4* The location and spacing of the detectors shall be
+adjusted using the inverse square law, modified for the atmos‐
+pheric absorption and the absorption of nonburning fuel
+suspended in the air in accordance with the manufacturer’s
+published instructions.
+17.8.3.3.5* In applications where the sparks to be detected
+could occur in an area not on the optical axis of the detector,
+the distance shall be reduced or detectors shall be added to
+compensate for the angular displacement of the fire in accord‐
+ance with the manufacturer’s published instructions.
+17.8.3.3.6* Provisions shall be made to sustain the detector
+window clarity in applications where airborne particulates and
+aerosols coat the detector window and affect sensitivity.
+17.8.4 Other Considerations.
+17.8.4.1 Radiant energy–sensing detectors shall be protected
+either by design or installation to ensure that optical perform‐
+ance is not compromised.
+17.8.4.2 If necessary, radiant energy–sensing detectors shall be
+shielded or otherwise arranged to prevent action from unwan‐
+ted radiant energy.
+17.8.4.3 Where used in outdoor applications, radiant energy–
+sensing detectors shall be shielded or otherwise arranged in a
+fashion to prevent diminishing sensitivity by conditions such as
+rain or snow and yet allow a clear field of vision of the hazard
+area.
+17.8.4.4 A radiant energy–sensing fire detector shall not be
+installed in a location where the ambient conditions are known
+to exceed the extremes for which the detector has been listed.
+17.8.5 Video Image Flame Detection.
+17.8.5.1 Video image flame detection systems and all of the
+components thereof, including hardware and software, shall be
+listed for the purpose of flame detection.
+17.8.5.2 Video image flame detection systems shall comply
+with all of the applicable requirements of Chapters 1, 10, 14,
+17, and 23 of this Code.
+17.8.5.3* Video signals generated by cameras that are compo‐
+nents of video image flame detection systems shall be permit‐
+ted to be transmitted to other systems for other uses only
+through output connections provided specifically for that
+purpose by the video system manufacturer.
+Δ 17.8.5.4* All component controls and software shall be
+protected from unauthorized changes.
+N 17.8.5.5 All changes to the software or component settings
+shall be tested in accordance with Chapter 14.
+17.9 Combination, Multi-Criteria, and Multi-Sensor Detectors.
+Δ 17.9.1 General. The requirements for the selection, location,
+and spacing of combination, multi-criteria, and multi-sensor
+detectors shall comply with Section 17.9.
+17.9.2 Combination Detectors.
+17.9.2.1 A combination detector shall be listed for each
+sensor.
+17.9.2.2 The device listings shall determine the locations and
+spacing criteria in accordance with Chapter 17.
+FOR INDIVIDUAL USE ONLY
+Copyright 2019 National Fire Protection Association (NFPA®). Licensed by agreement to Carl Weaver FOR INDIVIDUAL USE ONLY and downloaded on 11/05/2019. No reproduction or transmission in any form permitted without
+written permission of NFPA®. For inquiries or access for multiple users, or to report unauthorized use, contact licensing@nfpa.org.
+{C56A4DC7-64F7-4C88-B368-41DE5BD47BC8}
+
+===== PAGE 115 =====
+
+NATIONAL FIRE ALARM AND SIGNALING CODE	72-112
+2019 Edition Shaded text = Revisions. Δ = Text deletions and figure/table revisions. • = Section deletions. N = New material.
+17.9.3 Multi-Criteria Detectors.
+17.9.3.1 A multi-criteria detector shall be listed for the
+primary function of the device.
+17.9.3.2 Because of the device-specific, software-driven solu‐
+tion of multi-criteria detectors to reduce unwanted alarms and
+improve detector response to a nonspecific fire source, loca‐
+tion and spacing criteria included with the detector installation
+instructions shall be followed.
+17.9.4 Multi-Sensor Detectors.
+17.9.4.1 A multi-sensor detector shall be listed for each sensor.
+17.9.4.2 Because of the device-specific, software-driven solu‐
+tion of multi-sensor detectors to reduce unwanted alarms and
+improve detector response to a nonspecific fire source, loca‐
+tion and spacing criteria included with the detector installation
+instructions shall be followed.
+17.10 Gas Detection.
+17.10.1 General. The purpose and scope of Section 17.10
+shall be to provide requirements for the selection, installation,
+and operation of gas detectors other than carbon monoxide
+detectors.
+Δ 17.10.2 Gas Characteristics and Detector Selection.
+17.10.2.1 Gas detection equipment shall be listed in accord‐
+ance with applicable standards such as ANSI/UL 1484, Stand‐
+ard for Residential Gas Detectors, or ANSI/UL 2075, Standard for
+Gas and Vapor Detectors and Sensors, for the specific gas or vapor
+it is intended to detect.
+17.10.2.2 Any gas detection systems installed on a fire alarm
+system shall comply with all the applicable requirements of
+Chapters 1, 10, 14, 17, and 23 of this Code.
+17.10.2.3 The requirements of this Code shall not apply to gas
+detection systems used solely for process control.
+17.10.2.4* The selection and placement of the gas detectors
+shall be based on an engineering evaluation.
+17.11 Other Fire Detectors.
+Δ 17.11.1 Detectors that operate on principles different from
+those covered by Sections 17.6 through 17.8 shall be classified
+as other fire detectors.
+17.11.1.1 Such detectors shall be installed in all areas where
+they are required either by other NFPA codes and standards or
+by the authority having jurisdiction.
+Δ 17.11.2* Other fire detectors shall operate where subjected to
+the abnormal concentration of combustion effects that occur
+during a fire.
+17.11.3 Detection layout shall be based upon the size and
+intensity of fire to provide the necessary quantity of required
+products and related thermal lift, circulation, or diffusion for
+operation.
+17.11.4 Room sizes and contours, airflow patterns, obstruc‐
+tions, and other characteristics of the protected hazard shall be
+taken into account.
+17.11.5 Location and spacing of detectors shall comply with
+17.11.5.1 through 17.11.5.3.
+17.11.5.1 The location and spacing of detectors shall be based
+on the principle of operation and an engineering survey of the
+conditions anticipated in service.
+17.11.5.1.1 The manufacturer’s published instructions shall
+be consulted for recommended detector uses and locations.
+17.11.5.2 Detectors shall not be spaced beyond their listed or
+approved maximums.
+17.11.5.2.1 Closer spacing shall be used where the structural
+or other characteristics of the protected hazard warrant.
+17.11.5.3 The location and sensitivity of the detectors shall be
+based on a documented engineering evaluation that includes
+the manufacturer's installation instructions and the following:
+(1) Structural features, size, and shape of the rooms and bays
+(2) Occupancy and uses of the area
+(3) Ceiling height
+(4) Ceiling shape, surface, and obstructions
+(5) Ventilation
+(6) Ambient environment
+(7) Burning characteristics of the combustible materials
+present
+(8) Configuration of the contents in the area to be protected
+N 17.12 Carbon Monoxide Detectors.
+N 17.12.1 Where required by other governing laws, codes, or
+standards, carbon monoxide detectors shall be installed in
+accordance with the following:
+(1)* On the ceiling in the same room as permanently installed
+fuel-burning appliances, and
+(2)* Centrally located on every habitable level and in every
+HVAC zone of the building, and
+(3) Outside of each separate dwelling unit, guest room, and
+guest suite sleeping area within 21 ft (6.4 m) of any door
+to a sleeping room, with the distance measured along a
+path of travel, and
+(4) Other locations where required by applicable laws, codes,
+or standards, or
+(5) A performance-based design in accordance with
+Section 17.3
+N 17.12.2 Carbon monoxide detectors shall meet the following
+requirements:
+(1) Carbon monoxide detectors shall be listed in accordance
+with applicable standards, such as ANSI/UL 2075, Gas
+and Vapor Detectors and Sensors.
+(2) Carbon monoxide detectors shall be set to respond to the
+sensitivity limits specified in ANSI/UL 2034, Standard for
+Single and Multiple Station Carbon Monoxide Alarms.
+N 17.12.3 All carbon monoxide detectors shall be located and
+mounted so that accidental operation will not be caused by
+jarring or vibration.
+N 17.12.4 The location of carbon monoxide detectors shall be
+based on an evaluation of potential ambient sources and flows
+of carbon monoxide, moisture, temperature, dust, or fumes
+and of electrical or mechanical influences to minimize
+nuisance alarms.
+N 17.12.5 The selection and placement of carbon monoxide
+detectors shall take into account both the performance charac‐
+teristics of the detector and the areas into which the detectors
+FOR INDIVIDUAL USE ONLY
+Copyright 2019 National Fire Protection Association (NFPA®). Licensed by agreement to Carl Weaver FOR INDIVIDUAL USE ONLY and downloaded on 11/05/2019. No reproduction or transmission in any form permitted without
+written permission of NFPA®. For inquiries or access for multiple users, or to report unauthorized use, contact licensing@nfpa.org.
+{C56A4DC7-64F7-4C88-B368-41DE5BD47BC8}
+
+===== PAGE 116 =====
+
+INITIATING DEVICES 72-113
+Shaded text = Revisions. Δ = Text deletions and figure/table revisions. • = Section deletions. N = New material. 2019 Edition
+are to be installed to prevent nuisance and unintentional
+alarms or improper operation after installation.
+N 17.12.6 Unless specifically designed and listed for the expec‐
+ted conditions, carbon monoxide detectors shall not be instal‐
+led where any of the following ambient conditions exist:
+(1) Temperature below 32°F (0°C)
+(2) Temperature above 100°F (38°C)
+(3) Relative humidity outside the range of 10 percent to
+95 percent
+N 17.12.7 Unless tested and listed for recessed mounting,
+carbon monoxide detectors shall not be recessed into the
+mounting surface.
+N 17.12.8 Protection During Construction.
+N 17.12.8.1 Where detectors are installed for signal initiation
+during construction, they shall be replaced prior to the final
+commissioning of the system.
+N 17.12.8.2 Where detection is not required during construc‐
+tion, detectors shall not be installed until after all other
+construction trades have completed cleanup.
+N 17.12.9 Carbon Monoxide Detectors for Control of Carbon
+Monoxide Spread.
+N 17.12.9.1 System designers shall consider the spread of carbon
+monoxide through an occupancy through the HVAC system.
+N 17.12.9.2 Interaction with smoke control systems, if such is
+provided, shall be coordinated.
+17.13 Sprinkler Waterflow Alarm-Initiating Devices.
+17.13.1* The provisions of Section 17.13 shall apply to devices
+that initiate an alarm indicating a flow of water in a sprinkler
+system.
+17.13.2* Activation of the initiating device shall occur within
+90 seconds of waterflow at the alarm-initiating device when flow
+occurs that is equal to or greater than that from a single sprin‐
+kler of the smallest orifice size installed in the system.
+17.13.3 Movement of water due to waste, surges, or variable
+pressure shall not initiate an alarm signal.
+17.14* Detection of Operation of Other Automatic Extinguish‐
+ing Systems. The operation of fire extinguishing systems or
+suppression systems shall initiate an alarm signal by alarm-
+initiating devices installed in accordance with their individual
+listings.
+17.15 Manually Actuated Alarm-Initiating Devices.
+17.15.1 Manually actuated alarm-initiating devices shall be
+listed in accordance with applicable standards such as ANSI/
+UL 38, Standard for Manual Signaling Boxes for Fire Alarm Systems.
+N 17.15.2 Manually actuated alarm-initiating devices for initiat‐
+ing signals other than for fire alarm shall be permitted if the
+devices are differentiated from manual fire alarm boxes by a
+color other than red and labeling.
+17.15.3 Combination manual fire alarm boxes and guard’s
+signaling stations shall be permitted.
+17.15.4 Manually actuated alarm-initiating devices shall be
+securely mounted.
+17.15.5 Manually actuated alarm-initiating devices shall be
+mounted on a background of contrasting color.
+17.15.6 The operable part of a manually actuated alarm-
+initiating device shall be not less than 42 in. (1.07 m) and not
+more than 48 in. (1.22 m) from the finished floor.
+17.15.7 Manually actuated alarm-initiating devices shall be
+permitted to be single action or double action.
+17.15.8* Listed protective covers shall be permitted to be
+installed over single- or double-action manually actuated alarm-
+initiating devices.
+17.15.9 Manual fire alarm boxes shall comply with 17.15.9.1
+through 17.15.9.6.
+17.15.9.1 Manual fire alarm boxes shall be used only for fire
+alarm initiating purposes.
+17.15.9.2 Manual fire alarm boxes shall be installed so that
+they are conspicuous, unobstructed, and accessible.
+17.15.9.3* Unless installed in an environment that precludes
+the use of red paint or red plastic, manual fire alarm boxes
+shall be red in color.
+17.15.9.4 Manual fire alarm boxes shall be located within 5 ft
+(1.5 m) of each exit doorway on each floor.
+17.15.9.5* Additional manual fire alarm boxes shall be provi‐
+ded so that the travel distance to the nearest manual fire alarm
+box will not exceed 200 ft (61 m), measured horizontally on
+the same floor.
+17.15.9.6 Manual fire alarm boxes shall be mounted on both
+sides of grouped openings over 40 ft (12.2 m) in width, and
+within 5 ft (1.5 m) of each side of the grouped opening.
+17.16 Fire Extinguisher Electronic Monitoring Device. A fire
+extinguisher electronic monitoring device shall indicate those
+conditions for a specific fire extinguisher required by NFPA 10
+to a fire alarm control unit or other control unit.
+17.17 Supervisory Signal–Initiating Devices.
+17.17.1 Control Valve Supervisory Signal–Initiating Device.
+17.17.1.1 Two separate and distinct signals shall be initiated:
+one indicating movement of the valve from its normal position
+(off-normal), and the other indicating restoration of the valve
+to its normal position.
+17.17.1.2 The off-normal signal shall be initiated during the
+first two revolutions of the handwheel or during one-fifth of
+the travel distance of the valve control apparatus from its
+normal position.
+17.17.1.3 The off-normal signal shall not be restored at any
+valve position except normal.
+17.17.1.4 An initiating device for supervising the position of a
+control valve shall not interfere with the operation of the valve,
+obstruct the view of its indicator, or prevent access for valve
+maintenance.
+17.17.2 Pressure Supervisory Signal–Initiating Device.
+17.17.2.1 Two separate and distinct signals shall be initiated:
+one indicating that the required pressure has increased or
+decreased (off-normal), and the other indicating restoration of
+the pressure to its normal value.
+FOR INDIVIDUAL USE ONLY
+Copyright 2019 National Fire Protection Association (NFPA®). Licensed by agreement to Carl Weaver FOR INDIVIDUAL USE ONLY and downloaded on 11/05/2019. No reproduction or transmission in any form permitted without
+written permission of NFPA®. For inquiries or access for multiple users, or to report unauthorized use, contact licensing@nfpa.org.
+{C56A4DC7-64F7-4C88-B368-41DE5BD47BC8}
+
+===== PAGE 117 =====
+
+NATIONAL FIRE ALARM AND SIGNALING CODE	72-114
+2019 Edition Shaded text = Revisions. Δ = Text deletions and figure/table revisions. • = Section deletions. N = New material.
+17.17.2.2 The requirements in 17.17.2.2.1 through 17.17.2.2.4
+shall apply to pressure supervisory signal–initiating devices.
+17.17.2.2.1 Pressure Tank.
+(A) A pressure tank supervisory signal–initiating device for a
+pressurized limited water supply, such as a pressure tank, shall
+indicate both high- and low-pressure conditions.
+(B) The off-normal signal shall be initiated when the required
+pressure increases or decreases by 10 psi (70 kPa).
+17.17.2.2.2* Dry Pipe Sprinkler System.
+(A) A pressure supervisory signal–initiating device for a dry-
+pipe sprinkler system shall indicate both high- and low-pressure
+conditions.
+(B) For dry pipe valves, the off-normal signal shall be initiated
+when the pressure increases or decreases by 10 psi (70 kPa).
+N (C) For low air pressure dry pipe valves, the high- and low-
+pressure values shall be set in accordance with the manufactur‐
+er's installation instructions.
+17.17.2.2.3 Steam Pressure.
+(A) A steam pressure supervisory signal–initiating device shall
+indicate a low pressure condition.
+(B) The off-normal signal shall be initiated prior to the pres‐
+sure falling below 110 percent of the minimum operating pres‐
+sure of the steam-operated equipment supplied.
+17.17.2.2.4 Other Sources. An initiating device for supervis‐
+ing the pressure of sources other than those specified in
+17.17.2.2.1 through 17.17.2.2.3 shall be provided as required by
+the authority having jurisdiction.
+17.17.3 Water Level Supervisory Signal–Initiating Device.
+17.17.3.1 Two separate and distinct signals shall be initiated:
+one indicating that the required water level has been lowered
+or raised (off-normal), and the other indicating restoration.
+17.17.3.2 A pressure tank signal-initiating device shall indicate
+both high and low water level conditions.
+17.17.3.2.1 The off-normal signal shall be initiated when the
+water level falls 3 in. (76 mm) or rises 3 in. (76 mm).
+17.17.3.3 A supervisory signal–initiating device for other than
+pressure tanks shall initiate a low water level signal when the
+water level falls 12 in. (300 mm).
+17.17.4 Water Temperature Supervisory Signal–Initiating
+Device.
+17.17.4.1 A temperature supervisory device for a water storage
+container exposed to freezing conditions shall initiate two sepa‐
+rate and distinctive signals, as specified in 17.17.4.2.
+17.17.4.2 One signal shall indicate a decrease in water temper‐
+ature to 40°F (4.4°C), and the other shall indicate its restora‐
+tion to above 40°F (4.4°C).
+17.17.5 Room Temperature Supervisory Signal–Initiating
+Device. A room temperature supervisory device shall indicate
+a decrease in room temperature to 40°F (4.4°C) and its restora‐
+tion to above 40°F (4.4°C).
+Chapter 18 Notification Appliances
+18.1* Application.
+18.1.1 The requirements of this chapter shall apply where
+required by the authority having jurisdiction governing laws,
+codes, or standards; or other parts of this Code.
+18.1.2 The requirements of this chapter shall address the
+reception of a notification signal and not the signal’s informa‐
+tion content.
+18.1.3 The performance, location, and mounting of notifica‐
+tion appliances used to initiate or direct evacuation or reloca‐
+tion of the occupants, or for providing information to
+occupants or staff, shall comply with this chapter.
+18.1.4 The performance, location, and mounting of annun‐
+ciators, displays, and printers used to display or record informa‐
+tion for use by occupants, staff, responding emergency
+personnel, or supervising station personnel shall comply with
+this chapter.
+18.1.5* The requirements of this chapter shall apply to the
+areas, spaces, or system functions where required by the
+authority having jurisdiction governing laws, codes, or stand‐
+ards; or other parts of this Code requiring compliance with this
+chapter.
+• 18.1.6 Notification appliances shall be permitted to be used
+within buildings or outdoors and to target the general build‐
+ing, area, or space, or only specific parts of a building, area, or
+space designated in specific zones and sub-zones.
+N 18.1.7 The requirements of Chapters 10, 14, 23, and 24 shall
+apply to the interconnection of notification appliances, the
+control configurations, the power supplies, and the use of the
+information provided by notification appliances.
+18.2 Purpose. Notification appliances shall provide stimuli
+for initiating emergency action and provide information to
+users, emergency response personnel, and occupants.
+18.3 General.
+18.3.1 Listing. All notification appliances installed in
+conformity with Chapter 18 shall be listed for the purpose for
+which they are used.
+18.3.2 Nameplates.
+18.3.2.1 Notification appliances shall include on their name‐
+plates reference to electrical requirements and rated audible or
+visual performance, or both, as defined by the listing authority.
+18.3.2.2 Audible appliances shall include on their nameplates
+reference to their parameters or reference to installation docu‐
+ments (supplied with the appliance) that include the parame‐
+ters in accordance with 18.4.4 or 18.4.5.
+18.3.2.3 Visual notification appliances shall include on their
+nameplates reference to their parameters or reference to instal‐
+lation documents (supplied with the appliance) that include
+the parameters in accordance with 18.5.3.1 or Section 18.6.
+18.3.3 Physical Construction.
+18.3.3.1 Appliances intended for use in special environments,
+such as outdoors versus indoors, high or low temperatures,
+high humidity, dusty conditions, and hazardous locations, or
+FOR INDIVIDUAL USE ONLY
+Copyright 2019 National Fire Protection Association (NFPA®). Licensed by agreement to Carl Weaver FOR INDIVIDUAL USE ONLY and downloaded on 11/05/2019. No reproduction or transmission in any form permitted without
+written permission of NFPA®. For inquiries or access for multiple users, or to report unauthorized use, contact licensing@nfpa.org.
+{C56A4DC7-64F7-4C88-B368-41DE5BD47BC8}
+
+===== PAGE 118 =====
+
+NOTIFICATION APPLIANCES 72-115
+Shaded text = Revisions. Δ = Text deletions and figure/table revisions. • = Section deletions. N = New material. 2019 Edition
+where subject to tampering, shall be listed for the intended
+application.
+Δ 18.3.3.2* Notification appliances used for signaling other
+than fire shall not have the word FIRE, or any fire symbol, in
+any form (i.e., stamped, imprinted, etc.) on the appliance visi‐
+ble to the public.
+N 18.3.3.3 Notification appliances with multiple visible element‐
+sused for signaling other than fire shall be permitted to have
+fire markings only on those visible elements used for fire signal‐
+ing.
+18.3.4* Mechanical Protection.
+18.3.4.1 Appliances subject to mechanical damage shall be
+suitably protected.
+18.3.4.2 If guards, covers, or lenses are employed, they shall
+be listed for use with the appliance.
+18.3.4.3 The effect of guards, covers, or lenses on the applian‐
+ce’s field performance shall be in accordance with the listing
+requirements.
+18.3.5 Mounting.
+18.3.5.1 Appliances shall be supported independently of their
+attachments to the circuit conductors.
+18.3.5.2 Appliances shall be mounted in accordance with the
+manufacturer’s published instructions.
+18.3.6* Connections. Terminals, leads, or addressable
+communication, that provide for monitoring the integrity of
+the notification appliance connections shall be provided.
+18.4 Audible Characteristics.
+18.4.1 General Requirements.
+18.4.1.1* An average ambient sound level greater than
+105 dBA shall require the use of a visual notification appli‐
+ance(s) in accordance with Section 18.5 where the application
+is public mode or Section 18.6 where the application is private
+mode.
+18.4.1.2* The total sound pressure level produced by combin‐
+ing the ambient sound pressure level with all audible notifica‐
+tion appliances operating shall not exceed 110 dBA at the
+minimum hearing distance.
+Δ 18.4.1.3* Sound from normal or permanent sources, having a
+duration of at least 60 seconds, shall be included when measur‐
+ing maximum ambient sound level.
+N 18.4.1.4 Sound from temporary or abnormal sources lasting
+less than 60 seconds shall not be required to be included when
+measuring maximum ambient sound level.
+Δ 18.4.1.5 Audible alert and evacuation signal tones, including
+those that precede or follow voice messages, shall meet the
+requirements of 18.4.4 (Public Mode Audible Requirements),
+18.4.5 (Private Mode Audible Requirements), 18.4.6 (Sleeping
+Area Requirements), or 18.4.7 (Narrow Band Tone Signaling
+for Exceeding Masked Thresholds), as applicable.
+18.4.1.5.1* The designer of the audible notification system
+shall identify the rooms and spaces that will have audible notifi‐
+cation and those where audible notification will not be provi‐
+ded.
+Δ 18.4.1.5.2* Unless otherwise required by other sections of this
+Code, the coverage area for audible occupant notification shall
+be as required by other governing laws, codes, or standards.
+N 18.4.1.5.3 Where other governing laws, codes, or standards
+require audible occupant notification for all or part of an area
+or space, coverage shall only be required in occupiable areas as
+defined in 3.3.187
+Δ 18.4.1.5.4 The sound pressure levels that must be produced by
+the audible appliances in the coverage areas to meet the
+requirements of this Code shall be documented by the system
+designer during the planning and design of the notification
+system.
+N 18.4.1.5.5 The greater of the expected average ambient sound
+pressure level or expected maximum sound pressure level
+having a duration of at least 60 seconds shall be documented
+for the coverage area by the system designer to ensure compli‐
+ance with 18.4.4, 18.4.5, 18.4.6, or 18.4.7.
+18.4.1.5.6 The design sound pressure levels to be produced by
+the notification appliances for the various coverage areas shall
+be documented for use during acceptance testing of the
+system.
+18.4.1.5.7 Where required by the authority having jurisdic‐
+tion, documentation of the design sound pressure levels for the
+various coverage areas shall be submitted for review and appro‐
+val.
+18.4.1.6* Voice messages shall not be required to meet the
+audibility requirements of 18.4.4 (Public Mode Audible
+Requirements), 18.4.5 (Private Mode Audible Requirements),
+18.4.6 (Sleeping Area Requirements), or 18.4.7 (Narrow Band
+Tone Signaling for Exceeding Masked Thresholds), but shall
+meet the intelligibility requirements of 18.4.11 where voice
+intelligibility is required.
+18.4.1.7 Audible notification appliances used for exit marking
+shall not be required to meet the audibility requirements of
+18.4.4 (Public Mode Audible Requirements), 18.4.5 (Private
+Mode Audible Requirements), 18.4.6 (Sleeping Area Require‐
+ments), or 18.4.7 (Narrow Band Tone Signaling for Exceeding
+Masked Thresholds), except as required by 18.4.8 (Exit Mark‐
+ing Audible Notification Appliance Requirements).
+18.4.2 Distinctive Evacuation Signal.
+18.4.2.1* To meet the requirements of Section 10.10, the
+alarm audible signal pattern used to notify building occupants
+of the need to evacuate (leave the building) or relocate (from
+one area to another) shall be the standard alarm evacuation
+signal consisting of a three-pulse temporal pattern. The pattern
+shall be in accordance with Figure 18.4.2.1 and shall consist of
+the following in this order:
+(1) “On” phase lasting 0.5 second ±10 percent
+(2) “Off” phase lasting 0.5 second ±10 percent for three
+successive “on” periods
+(3) “Off” phase lasting 1.5 seconds ±10 percent
+Exception: Where approved by the authority having jurisdiction, contin‐
+ued use of the existing consistent evacuation signaling scheme shall be
+permitted.
+18.4.2.2 A single-stroke bell or chime sounded at "on" inter‐
+vals lasting 1 second ±10 percent, with a 2-second ±10 percent
+"off" interval after each third "on" stroke, shall be permitted.
+FOR INDIVIDUAL USE ONLY
+Copyright 2019 National Fire Protection Association (NFPA®). Licensed by agreement to Carl Weaver FOR INDIVIDUAL USE ONLY and downloaded on 11/05/2019. No reproduction or transmission in any form permitted without
+written permission of NFPA®. For inquiries or access for multiple users, or to report unauthorized use, contact licensing@nfpa.org.
+{C56A4DC7-64F7-4C88-B368-41DE5BD47BC8}
+
+===== PAGE 119 =====
+
+NATIONAL FIRE ALARM AND SIGNALING CODE	72-116
+2019 Edition Shaded text = Revisions. Δ = Text deletions and figure/table revisions. • = Section deletions. N = New material.
+18.4.2.3 The signal shall be repeated for a period appropriate
+for the purposes of evacuation of the building, but for not less
+than 180 seconds.
+18.4.2.3.1 The minimum repetition time shall be permitted to
+be manually interrupted.
+18.4.2.3.2 The minimum repetition time shall be permitted to
+be automatically interrupted for the transmission of mass noti‐
+fication messages in accordance with Chapter 24.
+18.4.2.4* The standard evacuation signal shall be synchron‐
+ized within a notification zone.
+N 18.4.3 Distinctive Carbon Monoxide Audible Alarm Signal.
+N 18.4.3.1 Where a carbon monoxide detector or alarm is
+required by other codes or standards or by the authority having
+jurisdiction and where an audible signal is required, a distinc‐
+tive signal pattern shall be required that is different from a fire
+evacuation signal.
+N 18.4.3.2 Where an audible signal is required, the carbon
+monoxide signal shall be a four-pulse temporal pattern and
+comply with the following:
+(1) Signals shall be a pattern consisting of four cycles of
+100 milliseconds ± 10 percent “on” and 100 milliseconds
+± 10 percent “off,” followed by 5 seconds ± 10 percent
+“off,” as demonstrated in Figure 18.4.3.2.
+On
+Off
+(a) (b) (a) (a)	(b) (a)	(c)
+Time (sec)	Cycle
+Key:
+Phase (a) signal is on for 0.5 sec ±10%
+Phase (b) signal is off for 0.5 sec ±10%
+Phase (c) signal is off for 1.5 sec ±10% [(c) = (a) + 2(b)]
+Total cycle lasts for 4 sec ±10%
+FIGURE 18.4.2.1 Temporal Pattern Parameters.
+(2) After the initial 4 minutes of the carbon monoxide signal,
+the 5-second “off” time shall be permitted to be changed
+to 60 seconds ± 10 percent.
+(3) The alarm signal shall be repeated in compliance with
+18.4.3.2(1) and 18.4.3.2(2) until the alarm resets or the
+alarm signal is manually silenced.
+N 18.4.3.3 The signal shall be synchronized within a notification
+zone of a protected premises.
+N 18.4.3.4 The audible signal of carbon monoxide alarms and
+systems installed to meet the requirements of Chapter 29 shall
+not be required to be synchronized.
+18.4.4* Public Mode Audible Requirements.
+18.4.4.1* To ensure that audible public mode signals are
+clearly heard, unless otherwise permitted by 18.4.4.2 through
+18.4.4.5, they shall have a sound level at least 15 dB above the
+average ambient sound level or 5 dB above the maximum
+sound level having a duration of at least 60 seconds, whichever
+is greater, measured 5 ft (1.5 m) above the floor in the area
+required to be served by the system using the A-weighted scale
+(dBA).
+18.4.4.2 Where approved by the authority having jurisdiction
+or other governing codes or standards, the requirements for
+audible signaling shall be permitted to be reduced or elimina‐
+ted when visual signaling is provided in accordance with
+Section 18.5.
+Δ 18.4.4.3 Audible notification appliances installed in elevator
+cars shall be permitted to use the audibility criteria for private
+mode appliances detailed in 18.4.5.1.
+Δ 18.4.4.4 If approved by the authority having jurisdiction, audi‐
+ble notification appliances installed in restrooms shall be
+permitted to use the audibility criteria for private mode appli‐
+ances detailed in 18.4.5.1.
+18.4.4.5 A signaling system arranged to stop or reduce ambi‐
+ent noise shall comply with 18.4.4.5.1 through 18.4.4.5.3.
+18.4.4.5.1 A signaling system arranged to stop or reduce ambi‐
+ent noise shall produce a sound level at least 15 dB above the
+On
+Off
+a	a b b	b a a a
+Phase a: signal is on for 100 ms ± 10 ms.
+Phase b: signal is off for 100 ms ± 10 ms.
+Phase c: signal is off for 5 sec ± 0.5 sec for initial 4 minutes.
+After the initial 4 minutes Phase c: signal is permitted to be changed to 60 s ± 6 s off.
+Although the diagram shows a square waveform, the wave can have other shapes that produce a similar effect.
+c a	a b b	b a a c
+One cycle One cycle
+N FIGURE 18.4.3.2 Temporal Pattern Parameters — Carbon Monoxide Signal.
+FOR INDIVIDUAL USE ONLY
+Copyright 2019 National Fire Protection Association (NFPA®). Licensed by agreement to Carl Weaver FOR INDIVIDUAL USE ONLY and downloaded on 11/05/2019. No reproduction or transmission in any form permitted without
+written permission of NFPA®. For inquiries or access for multiple users, or to report unauthorized use, contact licensing@nfpa.org.
+{C56A4DC7-64F7-4C88-B368-41DE5BD47BC8}
+
+===== PAGE 120 =====
+
+NOTIFICATION APPLIANCES 72-117
+Shaded text = Revisions. Δ = Text deletions and figure/table revisions. • = Section deletions. N = New material. 2019 Edition
+reduced average ambient sound level or 5 dB above the maxi‐
+mum sound level having a duration of at least 60 seconds after
+reduction of the ambient noise level, whichever is greater,
+measured 5 ft (1.5 m) above the floor in the area required to
+be served by the system using the A-weighted scale (dBA).
+18.4.4.5.2 Visual notification appliances shall be installed in
+the affected areas in accordance with Sections 18.5 or 18.6.
+18.4.4.5.3 Relays, circuits, or interfaces necessary to stop or
+reduce ambient noise shall meet the requirements of Chapters
+10, 12, 21, and 23.
+18.4.5 Private Mode Audible Requirements.
+18.4.5.1* To ensure that audible private mode signals are
+clearly heard, they shall have a sound level at least 10 dB above
+the average ambient sound level or 5 dB above the maximum
+sound level having a duration of at least 60 seconds, whichever
+is greater, measured 5 ft (1.5 m) above the floor in the area
+required to be served by the system using the A-weighted scale
+(dBA).
+18.4.5.2* Where approved by the authority having jurisdiction
+or other governing codes or standards, the requirements for
+audible signaling shall be permitted to be reduced or elimina‐
+ted when visual signaling is provided in accordance with
+Section 18.5.
+18.4.5.3 A system arranged to stop or reduce ambient noise
+shall comply with 18.4.5.3.1 through 18.4.5.3.3.
+18.4.5.3.1 A system arranged to stop or reduce ambient noise
+shall be permitted to produce a sound level at least 10 dB
+above the reduced average ambient sound level or 5 dB above
+the maximum sound level having a duration of at least
+60 seconds after reduction of the ambient noise level, which‐
+ever is greater, measured 5 ft (1.5 m) above the floor, using the
+A-weighted scale (dBA).
+18.4.5.3.2 Visual notification appliances shall be installed in
+the affected areas in accordance with Sections 18.5 or 18.6.
+18.4.5.3.3 Relays, circuits, or interfaces necessary to stop or
+reduce ambient noise shall meet the requirements of Chapters
+10, 12, 21, and 23.
+18.4.6 Sleeping Area Requirements.
+18.4.6.1* Where audible appliances are installed to provide
+signals for sleeping areas, they shall have a sound level of at
+least 15 dB above the average ambient sound level or 5 dB
+above the maximum sound level having a duration of at least
+60 seconds or a sound level of at least 75 dBA, whichever is
+greater, measured at the pillow level in the area required to be
+served by the system using the A-weighted scale (dBA).
+18.4.6.2 If any barrier, such as a door, curtain, or retractable
+partition, is located between the notification appliance and the
+pillow, the sound pressure level shall be measured with the
+barrier placed between the appliance and the pillow.
+Δ 18.4.6.3* Audible appliances provided for the sleeping areas
+to awaken occupants shall produce a low frequency alarm
+signal that complies with the following:
+(1) The waveform shall have a fundamental frequency of
+520 Hz ± 10 percent.
+(2)* The notification equipment shall be listed for producing
+the low frequency waveform.
+18.4.7* Narrow Band Tone Signaling for Exceeding Masked
+Thresholds.
+18.4.7.1 Masked Threshold Allowance. Audible tone signaling
+shall be permitted to comply with the masked threshold
+requirements in this subsection in lieu of the A-weighted signal‐
+ing requirements in 18.4.4 and 18.4.5.
+18.4.7.2* Calculation Method. The effective masked thresh‐
+old shall be calculated in accordance with ISO 7731, Danger
+signals for public and work places — Auditory danger signals.
+18.4.7.3 Noise Data. Noise data for calculating the effective
+masked threshold shall be the peak value of noise lasting
+60 seconds or more for each octave or one-third octave band.
+18.4.7.4 Documentation. Analysis and design documentation
+shall be submitted to the authority having jurisdiction and shall
+contain the following information:
+(1) Frequency data for the ambient noise, including the date,
+time, and location where measurements were taken for
+existing environments, or projected data for environ‐
+ments not yet constructed
+(2) Frequency data of the audible notification appliance
+(3) Calculations of the effective masked threshold for each
+set of noise data
+(4) A statement of the sound pressure level that would be
+required by 18.4.4 or 18.4.5 if masked threshold signaling
+had not been done
+18.4.7.5 Sound Pressure Level. For masked threshold signal‐
+ing, the audible signal tone shall meet the requirements of
+either 18.4.7.5.1 or 18.4.7.5.2 but not for the reproduction of
+prerecorded, synthesized, or live messages.
+18.4.7.5.1 The sound pressure level of the audible tone signal
+shall exceed the masked threshold in one or more octave
+bands by at least 10 dB in the octave band under consideration.
+18.4.7.5.2 The sound pressure level of the audible tone signal
+shall exceed the masked threshold in one or more one-third
+octave bands by at least 13 dB in the one-third octave band
+under consideration.
+18.4.8 Exit Marking Audible Notification Appliance Require‐
+ments.
+18.4.8.1* Exit marking audible notification appliances shall
+meet or exceed the frequency and sound level settings and
+guidelines specified in the manufacturer's documented instruc‐
+tions.
+Δ 18.4.8.2* In addition to 18.4.8.1, as a minimum, to ensure that
+exit marking audible notification appliance signals are clearly
+heard and produce the desired directional effects for 50 ft
+(15.24 m) within an unobstructed egress path, they shall meet
+the audibility requirements of 18.4.7 in at least one one-third
+octave band or one octave band within the effective frequency
+ranges of the interaural time difference (ITD), interaural level
+or intensity difference (ILD or IID), and anatomical transfer
+function or head-related transfer function (ATF or HRTF)
+localization cues.
+N 18.4.8.3 The exit marking audible notification appliance
+signal shall penetrate both the ambient noise and the fire
+alarm signal.
+18.4.8.4 Where required by the authority having jurisdiction
+governing laws, codes, or standards; or other parts of this Code,
+FOR INDIVIDUAL USE ONLY
+Copyright 2019 National Fire Protection Association (NFPA®). Licensed by agreement to Carl Weaver FOR INDIVIDUAL USE ONLY and downloaded on 11/05/2019. No reproduction or transmission in any form permitted without
+written permission of NFPA®. For inquiries or access for multiple users, or to report unauthorized use, contact licensing@nfpa.org.
+{C56A4DC7-64F7-4C88-B368-41DE5BD47BC8}
+

@@ -9,6 +9,7 @@
     <!-- ================= CONVERTERS ================= -->
     <BooleanToVisibilityConverter x:Key="BoolToVis"/>
     <conv:InverseBoolConverter x:Key="InverseBoolConverter"/>
+    <conv:InverseBoolToVisibilityConverter x:Key="InverseBoolToVis"/>
 
     <!-- ================= TYPOGRAPHY ================= -->
     <!-- Technical drawing voice: mono for data, Segoe UI for chrome -->

@@ -5,16 +5,30 @@
              xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
              xmlns:vmDevices="clr-namespace:FireProtection.UI.ViewModels.Devices"
              xmlns:ctrl="clr-namespace:FireProtection.UI.Controls"
+             xmlns:local="clr-namespace:FireProtection.UI.Converters"
              mc:Ignorable="d"
              d:DesignHeight="820" d:DesignWidth="1280"
              Background="Transparent"
              FontFamily="Segoe UI">
+    <UserControl.InputBindings>
+        <KeyBinding Key="Enter"
+                    Modifiers="Ctrl"
+                    Command="{Binding PlaceDevicesCommand}"/>
+        <KeyBinding Key="Escape"
+                    Command="{Binding CancelPlacementCommand}"/>
+        <KeyBinding Key="R"
+                    Modifiers="Ctrl"
+                    Command="{Binding ResetCommand}"/>
+        <KeyBinding Key="F5"
+                    Command="{Binding ResetCommand}"/>
+    </UserControl.InputBindings>
     <UserControl.Resources>
         <ResourceDictionary>
             <ResourceDictionary.MergedDictionaries>
                 <ResourceDictionary Source="/FireProtection.UI;component/Themes/Colors.xaml"/>
                 <ResourceDictionary Source="/FireProtection.UI;component/Themes/Styles.xaml"/>
             </ResourceDictionary.MergedDictionaries>
+            <local:RunLogLevelToBrushConverter x:Key="RunLogLevelToBrushConverter"/>
         </ResourceDictionary>
     </UserControl.Resources>
 
@@ -25,6 +39,7 @@
             <RowDefinition Height="Auto"/>
             <RowDefinition Height="16"/>
             <RowDefinition Height="*"/>
+            <RowDefinition Height="Auto"/>
             <RowDefinition Height="Auto"/>
         </Grid.RowDefinitions>
 
@@ -220,6 +235,7 @@
                                             ToolTip="Level settings (declarative metadata only)"
                                             Click="LevelSettingsButton_Click"
                                             Tag="{Binding}"
+                                            Visibility="{Binding DataContext.HasLevelSettings, RelativeSource={RelativeSource AncestorType=UserControl}, Converter={StaticResource BoolToVis}}"
                                             VerticalAlignment="Center"/>
 
                                     <TextBlock Grid.Column="3"
@@ -490,8 +506,63 @@
             </Border>
         </Grid>
 
+        <!-- ================= RUN LOG ================= -->
+        <Border Grid.Row="3"
+                Background="{StaticResource SurfaceBrush}"
+                BorderBrush="{StaticResource BorderBrush}"
+                BorderThickness="1"
+                CornerRadius="6"
+                Margin="0,12,0,0"
+                Visibility="{Binding IsRunLogVisible, Converter={StaticResource BoolToVis}}">
+            <Grid Margin="12">
+                <Grid.RowDefinitions>
+                    <RowDefinition Height="Auto"/>
+                    <RowDefinition Height="*"/>
+                </Grid.RowDefinitions>
+
+                <Grid Grid.Row="0">
+                    <Grid.ColumnDefinitions>
+                        <ColumnDefinition Width="*"/>
+                        <ColumnDefinition Width="Auto"/>
+                    </Grid.ColumnDefinitions>
+
+                    <TextBlock Grid.Column="0"
+                               Text="Run Log"
+                               FontSize="13"
+                               FontWeight="SemiBold"
+                               Foreground="{StaticResource TextPrimaryBrush}"
+                               VerticalAlignment="Center"/>
+
+                    <Button Grid.Column="1"
+                            Style="{StaticResource OutlineButtonStyle}"
+                            Content="Clear"
+                            Padding="8,4"
+                            Command="{Binding ClearRunLogCommand}"
+                            ToolTip="Clear run log"/>
+                </Grid>
+
+                <ListBox Grid.Row="1"
+                         ItemsSource="{Binding RunLogEntries}"
+                         Margin="0,8,0,0"
+                         Background="Transparent"
+                         BorderThickness="0"
+                         FontFamily="Consolas"
+                         FontSize="11"
+                         ScrollViewer.VerticalScrollBarVisibility="Auto"
+                         MaxHeight="120">
+                    <ListBox.ItemTemplate>
+                        <DataTemplate>
+                            <TextBlock Text="{Binding FormattedEntry}"
+                                       Foreground="{Binding Level, Converter={StaticResource RunLogLevelToBrushConverter}}"
+                                       TextTrimming="CharacterEllipsis"/>
+                        </DataTemplate>
+                    </ListBox.ItemTemplate>
+                </ListBox>
+            </Grid>
+        </Border>
+
         <!-- ================= BOTTOM ACTIONS ================= -->
-        <Grid Grid.Row="3" Margin="0,16,0,0">
+        <Grid Grid.Row="4" Margin="0,16,0,0">
             <Grid.ColumnDefinitions>
                 <ColumnDefinition Width="*"/>
                 <ColumnDefinition Width="Auto"/>
@@ -504,11 +575,11 @@
                 <StackPanel>
                     <TextBlock FontSize="12"
                                Foreground="{StaticResource AccentBrush}"
-                               Text="Device placement backend is not yet implemented (UI-first slice)."/>
+                               Text="{Binding CatalogStatusMessage}"/>
                     <TextBlock FontSize="12"
                                Foreground="{StaticResource AccentBrush}"
                                Margin="0,2,0,0"
-                               Text="Room/level selection is shared and ready; the Place action is disabled until the NFPA-72 logic lands."/>
+                               Text="{Binding PlacementStatusMessage}"/>
                 </StackPanel>
             </ctrl:InfoBanner>
 

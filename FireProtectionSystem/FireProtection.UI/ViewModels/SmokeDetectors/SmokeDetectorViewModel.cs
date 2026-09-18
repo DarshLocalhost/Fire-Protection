@@ -14,7 +14,9 @@ namespace FireProtection.UI.ViewModels.SmokeDetectors
     ///
     /// Every option list here comes from the loaded Excel catalog (Decision 017) — nothing is hardcoded.
     /// With no workbook loaded the combos are empty and the rooms report UNDETERMINED / CATALOG_NOT_LOADED.
-    /// The actual placement backend is deferred (UI-first slice), so placement stays disabled via the base seam.
+    /// Detector type / mount / ceiling slope are DERIVED from the catalog row of the selected family/type
+    /// and shown read-only (they are facts about the device, not user choices); placement consumes the
+    /// derived values per room, following that row's own family/type.
     /// </summary>
     public class SmokeDetectorViewModel : DevicePlacementViewModelBase
     {
@@ -33,7 +35,16 @@ namespace FireProtection.UI.ViewModels.SmokeDetectors
         }
 
         public SmokeDetectorViewModel(FireProtectionUiData data, CatalogViewModel catalogViewModel)
-            : base(data, null, null, catalogViewModel)
+            : this(data, null, null, catalogViewModel)
+        {
+        }
+
+        public SmokeDetectorViewModel(
+            FireProtectionUiData data,
+            IDeviceFamilySource deviceFamilySource,
+            IDevicePlacementExecutor deviceExecutor,
+            CatalogViewModel catalogViewModel)
+            : base(data, deviceFamilySource, deviceExecutor, catalogViewModel)
         {
             // The base ctor already loaded families/types; seed the detector attributes from the
             // same workbook and push them down the universal -> level -> row chain.
@@ -42,9 +53,15 @@ namespace FireProtection.UI.ViewModels.SmokeDetectors
             // The base ctor applied its default selection before the attributes above existed; re-apply
             // now that they are seeded, matching the sprinkler tab's "arrive ready to place" behaviour.
             ApplyDefaultSelection();
+
+            // Last statement: clear the base ctor's construction-time suppression and run the single
+            // initial eligibility preflight now that all defaults/attributes are seeded (no-op with no backend).
+            InitializeEligibility();
         }
 
         public override string DeviceDisplayName => "SMOKE DETECTOR CONFIGURATION";
+
+        protected override FireProtection.UI.Services.DeviceKind TabDeviceKind => FireProtection.UI.Services.DeviceKind.SmokeDetector;
 
         // ---------------------------------------------------------------------------------------
         // Catalog-driven option lists (workbook only — no hardcoded fallback).
@@ -58,6 +75,75 @@ namespace FireProtection.UI.ViewModels.SmokeDetectors
 
         public IReadOnlyList<string> CeilingSlopeOptions =>
             Catalog != null ? Catalog.AvailableCeilingSlopes : Empty;
+
+        // ---------------------------------------------------------------------------------------
+        // Family/type-derived attributes. The catalog carries DetectorType, Mount and CeilingSlope
+        // per (family, type) row, so with a catalog family/type selected these are READ-ONLY facts
+        // about the device, not user choices: the picker is replaced by a text display, and
+        // placement uses the derived value ahead of any level default (per-room, following that
+        // row's own family/type). A field only keeps its dropdown when it is not derivable.
+        // ---------------------------------------------------------------------------------------
+
+        public string DerivedDetectorType => DeriveAttribute("DetectorType", UniversalFamilyName, UniversalTypeName);
+        public string DerivedMount => DeriveAttribute("Mount", UniversalFamilyName, UniversalTypeName);
+        public string DerivedCeilingSlope => DeriveAttribute("CeilingSlope", UniversalFamilyName, UniversalTypeName);
+
+        public bool ShowDetectorTypePicker => string.IsNullOrWhiteSpace(DerivedDetectorType);
+        public bool ShowMountPicker => string.IsNullOrWhiteSpace(DerivedMount);
+        public bool ShowCeilingSlopePicker => string.IsNullOrWhiteSpace(DerivedCeilingSlope);
+
+        private string UniversalFamilyName => SelectedDeviceFamily != null ? SelectedDeviceFamily.FamilyName : null;
+        private string UniversalTypeName => SelectedDeviceType != null ? SelectedDeviceType.TypeName : null;
+
+        protected override void OnUniversalFamilyTypeChanged()
+        {
+            RaiseDerivedAttributeNotifications();
+        }
+
+        protected override string DeriveAttribute(string key, string familyName, string typeName)
+        {
+            SmokeDetectorCatalogEntry entry = FindCatalogEntry(Catalog, familyName, typeName);
+            if (entry == null) return null;
+
+            switch (key)
+            {
+                case "DetectorType": return entry.DetectorType;
+                case "Mount": return entry.Mount;
+                case "CeilingSlope": return entry.CeilingSlope;
+                default: return null;
+            }
+        }
+
+        private static SmokeDetectorCatalogEntry FindCatalogEntry(ICatalog catalog, string familyName, string typeName)
+        {
+            if (catalog == null || string.IsNullOrWhiteSpace(familyName) || string.IsNullOrWhiteSpace(typeName))
+                return null;
+
+            IReadOnlyList<SmokeDetectorCatalogEntry> entries;
+            try
+            {
+                entries = catalog.GetSmokeDetectorEntriesForFamily(familyName);
+            }
+            catch { return null; }
+
+            if (entries == null) return null;
+            foreach (SmokeDetectorCatalogEntry entry in entries)
+            {
+                if (entry != null && string.Equals(entry.TypeName, typeName, StringComparison.OrdinalIgnoreCase))
+                    return entry;
+            }
+            return null;
+        }
+
+        private void RaiseDerivedAttributeNotifications()
+        {
+            OnPropertyChanged(nameof(DerivedDetectorType));
+            OnPropertyChanged(nameof(DerivedMount));
+            OnPropertyChanged(nameof(DerivedCeilingSlope));
+            OnPropertyChanged(nameof(ShowDetectorTypePicker));
+            OnPropertyChanged(nameof(ShowMountPicker));
+            OnPropertyChanged(nameof(ShowCeilingSlopePicker));
+        }
 
         public string DetectorType
         {
@@ -147,6 +233,7 @@ namespace FireProtection.UI.ViewModels.SmokeDetectors
             OnPropertyChanged(nameof(DetectorTypeOptions));
             OnPropertyChanged(nameof(CeilingMountOptions));
             OnPropertyChanged(nameof(CeilingSlopeOptions));
+            RaiseDerivedAttributeNotifications();
         }
 
         /// <summary>
@@ -178,26 +265,9 @@ namespace FireProtection.UI.ViewModels.SmokeDetectors
 
         private static readonly IReadOnlyList<string> Empty = new List<string>();
 
-        // ---------------------------------------------------------------------------------------
-        // Per-level settings popover (Decision 019).
-        // ---------------------------------------------------------------------------------------
-
-        public override void OpenLevelSettings(DeviceLevelItemViewModel level)
-        {
-            if (level == null) return;
-            // Dialogs.Owner is the tool window, the only window WPF will accept as an owner here.
-            LevelSettingsResult result = LevelSettingsPopover.Show(
-                Dialogs.Owner,
-                level.Name,
-                "Detector type, mount, and ceiling slope apply to all rooms on this level. " +
-                "Rooms can override these per-row. Values come from the loaded catalog.",
-                "DetectorType", "Detector Type", level.DetectorType, DetectorTypeOptions,
-                "Mount", "Mount", level.Mount, CeilingMountOptions,
-                "CeilingSlope", "Ceiling Slope", level.CeilingSlope, CeilingSlopeOptions);
-            if (result == null) return;
-            if (result.Field1Key == "DetectorType" && result.Field1Value != null) level.DetectorType = result.Field1Value;
-            if (result.Field2Key == "Mount" && result.Field2Value != null) level.Mount = result.Field2Value;
-            if (result.Field3Key == "CeilingSlope" && result.Field3Value != null) level.CeilingSlope = result.Field3Value;
-        }
+        // Per-level attribute settings (Decision 019 popover) are retired for this tab: DetectorType,
+        // Mount and CeilingSlope are now derived from the catalog row of the selected (or per-row)
+        // family/type, so there is nothing meaningful left to set per level. The base's no-op
+        // OpenLevelSettings + HasLevelSettings=false hide the level "..." button.
     }
 }

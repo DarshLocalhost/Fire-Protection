@@ -173,6 +173,7 @@ namespace FireProtection.Backend.Services.Model
                         hostBBox,
                         floorZ,
                         roomTopZ,
+                        levelId,
                         ceilingItems);
 
                     // Determine primary ceiling height and type
@@ -421,6 +422,7 @@ namespace FireProtection.Backend.Services.Model
             BoundingBox3DData hostBBox,
             double roomBottomZ,
             double roomTopZ,
+            string roomLevelId,
             List<CeilingExtractor.ExtractedCeilingItem> ceilingItems)
         {
             List<CeilingData> matches = new List<CeilingData>();
@@ -454,14 +456,34 @@ namespace FireProtection.Backend.Services.Model
                 if (!xyOverlap) continue;
 
                 // Z overlap: the ceiling's vertical extent must intersect the room's vertical band.
-                // Generous tolerance handles sloped/stepped ceilings and small height inaccuracies.
-                if (cBox.Min.Z <= roomTopZ + 5.0 && cBox.Max.Z >= roomBottomZ - 0.5)
+                // Tightened from +5.0 ft to +0.5 ft upward slop: a ceiling that is many feet
+                // above the room's nominal top is the floor of the level above (or unrelated),
+                // not a candidate for this room. The room DTO and the BruteForce
+                // SelectPrimaryCeiling re-sort again, so this is a coarse pre-filter.
+                if (cBox.Min.Z <= roomTopZ + 0.5 && cBox.Max.Z >= roomBottomZ - 0.5)
                 {
                     CeilingData clone = CloneCeilingData(cItem.Dto);
                     clone.IsRoomDirectCeiling = true;
                     matches.Add(clone);
                 }
             }
+
+            if (matches.Count == 0) return matches;
+
+            // Sort: level-matched ceilings first (this room's own ceiling, not the slab of
+            // the level above / below), then by BottomElevationFt descending so the room's
+            // own (highest) ceiling is the FIRST element of the list — that becomes the
+            // primary ceiling the DTO exposes to the calculation engine.
+            bool hasRoomLevel = !string.IsNullOrEmpty(roomLevelId);
+            matches.Sort((a, b) =>
+            {
+                int aLevel = (hasRoomLevel && a != null && string.Equals(a.LevelId, roomLevelId, System.StringComparison.OrdinalIgnoreCase)) ? 0 : 1;
+                int bLevel = (hasRoomLevel && b != null && string.Equals(b.LevelId, roomLevelId, System.StringComparison.OrdinalIgnoreCase)) ? 0 : 1;
+                if (aLevel != bLevel) return aLevel.CompareTo(bLevel);
+                double aBottom = a.BottomElevationFt ?? double.NegativeInfinity;
+                double bBottom = b.BottomElevationFt ?? double.NegativeInfinity;
+                return bBottom.CompareTo(aBottom); // descending
+            });
 
             return matches;
         }

@@ -134,24 +134,16 @@ namespace FireProtection.Tests
             // The Smoke Detectors tab reads its Detector Type / Mount / Ceiling Slope dropdowns from the
             // distinct values in this sheet, so the sample rows have to span the ranges the UI must offer:
             // every DetectorType the validator knows, both Ceiling and Wall mounts, and all three slopes.
-            // FamilyName / TypeName are PLACEHOLDERS - unlike the Sprinklers sheet these were not taken
-            // from a Revit Project Browser listing, so they must be replaced with the real
-            // Family.Name / FamilySymbol.Name strings from the host model before placement can resolve them.
             int r = 3;
-            AddSmoke(sheet, ref r, "Smoke Detector - Photo", "Photo 135F Fixed", "Photoelectric", "Ceiling", "Flat", "Standard office photoelectric");
-            AddSmoke(sheet, ref r, "Smoke Detector - Photo", "Photo 135F Fixed (Sloped)", "Photoelectric", "Ceiling", "Sloped", "Sloped-ceiling rated");
-            AddSmoke(sheet, ref r, "Smoke Detector - Photo", "Photo 135F Fixed (Stepped)", "Photoelectric", "Ceiling", "Stepped", "Stepped-ceiling rated");
-            AddSmoke(sheet, ref r, "Smoke Detector - Photo", "Photo 135F Wall Mount", "Photoelectric", "Wall", "Flat", "Wall-mount variant");
-            AddSmoke(sheet, ref r, "Smoke Detector - Ion", "Ion 150F Fixed", "Ionization", "Ceiling", "Flat", null);
-            AddSmoke(sheet, ref r, "Smoke Detector - Ion", "Ion 150F Fixed (Sloped)", "Ionization", "Ceiling", "Sloped", null);
-            AddSmoke(sheet, ref r, "Smoke Detector - Heat", "Heat 194F Fixed", "Heat", "Ceiling", "Flat", "Fixed-temperature heat detector");
-            AddSmoke(sheet, ref r, "Smoke Detector - Heat", "Heat 194F Rate-of-Rise", "Heat", "Ceiling", "Flat", "Rate-of-rise heat detector");
-            AddSmoke(sheet, ref r, "Smoke Detector - Heat", "Heat 194F Wall Mount", "Heat", "Wall", "Flat", null);
-            AddSmoke(sheet, ref r, "Smoke Detector - CO", "CO Fixed", "CO", "Ceiling", "Flat", "Carbon-monoxide only");
-            AddSmoke(sheet, ref r, "Smoke Detector - Multi-Criteria", "Photo + Heat + CO", "MultiCriteria", "Ceiling", "Flat", "Combination photo/heat/CO");
-            AddSmoke(sheet, ref r, "Smoke Detector - Multi-Criteria", "Photo + Heat + CO (Sloped)", "MultiCriteria", "Ceiling", "Sloped", null);
-            AddSmoke(sheet, ref r, "Smoke Detector - Multi-Criteria", "Photo + Heat Wall Mount", "MultiCriteria", "Wall", "Flat", null);
-            AddSmoke(sheet, ref r, "Smoke Detector - Aspirating", "Aspirating Sampling Point", "Aspirating", "Ceiling", "Flat", "Air-sampling pipe network point");
+            AddSmoke(sheet, ref r, "Smoke Detector - Beam Receiver", "Standard", "Photoelectric", "Ceiling", "Flat", "Beam receiver");
+            AddSmoke(sheet, ref r, "Smoke Detector - Beam Transmitter", "Standard", "Photoelectric", "Ceiling", "Flat", "Beam transmitter");
+            AddSmoke(sheet, ref r, "Duct-smoke-detector", "Duct-smoke-detector", "Photoelectric", "Ceiling", "Flat", "Duct smoke detector");
+            AddSmoke(sheet, ref r, "Smoke-detector", "Smoke-detector", "Photoelectric", "Ceiling", "Flat", "Generic smoke detector");
+            AddSmoke(sheet, ref r, "Smoke Detector", "Air Sampling", "Aspirating", "Ceiling", "Flat", "Air sampling");
+            AddSmoke(sheet, ref r, "Smoke Detector", "Ionization", "Ionization", "Ceiling", "Flat", null);
+            AddSmoke(sheet, ref r, "Smoke Detector", "Photoelectric", "Photoelectric", "Ceiling", "Flat", null);
+            AddSmoke(sheet, ref r, "Smoke Detector", "Plain", "Photoelectric", "Ceiling", "Flat", null);
+            AddSmoke(sheet, ref r, "Smoke Detector", "Smoke Detector", "Photoelectric", "Ceiling", "Flat", null);
 
             sheet.Columns().AdjustToContents();
         }
@@ -187,30 +179,12 @@ namespace FireProtection.Tests
             // ApplianceType the validator knows plus the standard UL-listed candela steps. A 0 in either
             // numeric column means "no such rating" (a strobe has no dBA, a horn has no candela) and is
             // filtered out of the dropdowns.
-            // FamilyName / TypeName are PLACEHOLDERS - see the note on the SmokeDetectors sheet.
             int r = 3;
-            AddNa(sheet, ref r, "Notification Appliance - Wall Horn", "Wall Horn 87dBA", "Horn", 0, 87, "Audible only, no strobe");
-            AddNa(sheet, ref r, "Notification Appliance - Wall Horn", "Wall Horn 92dBA", "Horn", 0, 92, null);
-            AddNa(sheet, ref r, "Notification Appliance - Wall Horn-Strobe", "Wall HS 15cd 87dBA", "HornStrobe", 15, 87, "Wall-mount, low candela");
-            AddNa(sheet, ref r, "Notification Appliance - Wall Horn-Strobe", "Wall HS 30cd 87dBA", "HornStrobe", 30, 87, null);
-            AddNa(sheet, ref r, "Notification Appliance - Wall Horn-Strobe", "Wall HS 75cd 89dBA", "HornStrobe", 75, 89, null);
-            AddNa(sheet, ref r, "Notification Appliance - Wall Horn-Strobe", "Wall HS 110cd 89dBA", "HornStrobe", 110, 89, null);
-            AddNa(sheet, ref r, "Notification Appliance - Wall Horn-Strobe", "Wall HS 135cd 92dBA", "HornStrobe", 135, 92, null);
-            AddNa(sheet, ref r, "Notification Appliance - Wall Horn-Strobe", "Wall HS 185cd 95dBA", "HornStrobe", 185, 95, "High candela, large space");
-            AddNa(sheet, ref r, "Notification Appliance - Ceiling Strobe", "Ceiling Strobe 15cd", "Strobe", 15, 0, "Strobe-only, no audible");
-            AddNa(sheet, ref r, "Notification Appliance - Ceiling Strobe", "Ceiling Strobe 30cd", "Strobe", 30, 0, null);
-            AddNa(sheet, ref r, "Notification Appliance - Ceiling Strobe", "Ceiling Strobe 75cd", "Strobe", 75, 0, null);
-            AddNa(sheet, ref r, "Notification Appliance - Ceiling Strobe", "Ceiling Strobe 95cd", "Strobe", 95, 0, null);
-            AddNa(sheet, ref r, "Notification Appliance - Ceiling Strobe", "Ceiling Strobe 177cd", "Strobe", 177, 0, "Ceiling-mount high candela");
-            AddNa(sheet, ref r, "Notification Appliance - Wall Speaker", "Wall Speaker 83dBA", "Speaker", 0, 83, "Voice evacuation, no strobe");
-            AddNa(sheet, ref r, "Notification Appliance - Wall Speaker", "Wall Speaker 87dBA", "Speaker", 0, 87, null);
-            AddNa(sheet, ref r, "Notification Appliance - Speaker-Strobe", "Speaker-Strobe 15cd 83dBA", "SpeakerStrobe", 15, 83, null);
-            AddNa(sheet, ref r, "Notification Appliance - Speaker-Strobe", "Speaker-Strobe 30cd 92dBA", "SpeakerStrobe", 30, 92, null);
-            AddNa(sheet, ref r, "Notification Appliance - Speaker-Strobe", "Speaker-Strobe 75cd 92dBA", "SpeakerStrobe", 75, 92, null);
-            AddNa(sheet, ref r, "Notification Appliance - Speaker-Strobe", "Speaker-Strobe 110cd 95dBA", "SpeakerStrobe", 110, 95, null);
-            AddNa(sheet, ref r, "Notification Appliance - Chime", "Chime 75dBA", "Chime", 0, 75, "Low-noise audible");
-            AddNa(sheet, ref r, "Notification Appliance - Chime-Strobe", "Chime-Strobe 15cd 75dBA", "ChimeStrobe", 15, 75, null);
-            AddNa(sheet, ref r, "Notification Appliance - Chime-Strobe", "Chime-Strobe 75cd 79dBA", "ChimeStrobe", 75, 79, null);
+            AddNa(sheet, ref r, "Fire Alarm Horn - Wall Mounted", "Standard", "Horn", 0, 87, "Wall mounted horn");
+            AddNa(sheet, ref r, "Fire Alarm Horn Strobe - Ceiling Mounted", "Standard", "HornStrobe", 15, 87, "Ceiling mounted horn strobe");
+            AddNa(sheet, ref r, "Fire Alarm Horn Strobe - Wall Mounted", "Standard", "HornStrobe", 15, 87, "Wall mounted horn strobe");
+            AddNa(sheet, ref r, "Fire Alarm Strobe Speaker - Ceiling Mounted", "Standard", "SpeakerStrobe", 15, 83, "Ceiling mounted speaker strobe");
+            AddNa(sheet, ref r, "Fire Alarm Strobe Speaker - Wall Mounted", "Standard", "SpeakerStrobe", 15, 83, "Wall mounted speaker strobe");
 
             sheet.Columns().AdjustToContents();
         }

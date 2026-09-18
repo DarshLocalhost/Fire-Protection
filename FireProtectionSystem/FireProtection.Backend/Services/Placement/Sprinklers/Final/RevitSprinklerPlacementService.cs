@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Globalization;
 using System.Linq;
 using Autodesk.Revit.DB;
+using FireProtection.Backend.Models.Placement.Sprinklers.Final;
 using FireProtection.Backend.Services.Placement.Sprinklers.Final.Strategies;
 using FireProtection.UI.Models;
 using FireProtection.UI.Models.Sprinklers.BruteForce;
@@ -40,11 +41,14 @@ namespace FireProtection.Backend.Services.Placement.Sprinklers.Final
 
             // Ordered strategy set. Selection is by the family's PROVEN FamilyPlacementType via CanHandle;
             // there is no silent substitution and no default-to-level for unknown types (hard rules 5, 6, 7).
+            // WallSidewall is registered last — it is dispatched by DevicePlacementBehavior, not by
+            // FamilyPlacementType (wall-mounted families often have WorkPlaneBased or FaceBased type).
             _strategies = new IFamilyPlacementStrategy[]
             {
                 new Strategies.FaceBasedPlacementStrategy(),
                 new Strategies.WorkPlaneBasedPlacementStrategy(),
-                new Strategies.LevelBasedPlacementStrategy()
+                new Strategies.LevelBasedPlacementStrategy(),
+                new Strategies.WallSidewallPlacementStrategy()
             };
         }
 
@@ -410,10 +414,14 @@ namespace FireProtection.Backend.Services.Placement.Sprinklers.Final
                 //                     rather than trusting the fallback that already failed in production.
                 //   OneLevelBased  -> requires only a resolvable level (legitimately placed without a ceiling).
                 //
+                // WallSidewall behavior overrides: a wall-mounted family does NOT need a ceiling host
+                // regardless of FamilyPlacementType — it needs a wall face.
+                //
                 // A numeric "Ceiling Height" (CeilingHeightFt) is NEVER treated as proof of a usable host (§4).
-                bool requiresCeilingHost =
+                bool isSidewallBehavior = candidates != null && candidates.Any(c => c.WallEdgeIndex.HasValue);
+                bool requiresCeilingHost = !isSidewallBehavior && (
                     string.Equals(placementType, "FaceBased", StringComparison.OrdinalIgnoreCase) ||
-                    string.Equals(placementType, "WorkPlaneBased", StringComparison.OrdinalIgnoreCase);
+                    string.Equals(placementType, "WorkPlaneBased", StringComparison.OrdinalIgnoreCase));
 
                 bool anyLevelResolved = false;
                 bool anyHostOk = false;
@@ -670,13 +678,24 @@ namespace FireProtection.Backend.Services.Placement.Sprinklers.Final
 
             // §13: select the strategy for the PROVEN placement type. No match => refuse to place; an
             // unknown/unsupported type is NEVER defaulted onto a Level (hard rules 5, 6, 7).
+            //
+            // Sidewall override: when the point carries a WallEdgeIndex, it was generated as a
+            // wall-mounted candidate — use WallSidewallPlacementStrategy regardless of the
+            // family's FamilyPlacementType (wall families often report WorkPlaneBased or FaceBased).
             IFamilyPlacementStrategy strategy = null;
-            for (int i = 0; i < _strategies.Count; i++)
+            if (point.WallEdgeIndex.HasValue)
             {
-                if (_strategies[i].CanHandle(familyPlacementType))
+                strategy = _strategies.FirstOrDefault(s => s is Strategies.WallSidewallPlacementStrategy);
+            }
+            if (strategy == null)
+            {
+                for (int i = 0; i < _strategies.Count; i++)
                 {
-                    strategy = _strategies[i];
-                    break;
+                    if (_strategies[i].CanHandle(familyPlacementType))
+                    {
+                        strategy = _strategies[i];
+                        break;
+                    }
                 }
             }
 
@@ -713,7 +732,9 @@ namespace FireProtection.Backend.Services.Placement.Sprinklers.Final
                     Level = level,
                     RequestedPoint = xyz,
                     FamilyPlacementType = familyPlacementType,
-                    CeilingHostResolver = _ceilingHostResolver
+                    CeilingHostResolver = _ceilingHostResolver,
+                    WallEdgeIndex = point.WallEdgeIndex,
+                    RoomPolygon = room?.Polygon
                 };
 
                 PlacementOutcome outcome = strategy.Place(context);
@@ -1218,26 +1239,82 @@ namespace FireProtection.Backend.Services.Placement.Sprinklers.Final
         {
             try
             {
-                ElementId levelId = instance?.LevelId;
+                if (instance == null || doc == null) return null;
+                ElementId levelId = GetActualLevelId(instance);
                 if (levelId == null || levelId == ElementId.InvalidElementId) return null;
-                return SafeName(doc?.GetElement(levelId));
+                return SafeName(doc.GetElement(levelId));
             }
             catch { return null; }
+        }
+        private static ElementId GetActualLevelId(FamilyInstance instance)
+        {
+            if (instance == null) return ElementId.InvalidElementId;
+
+            // 1. Try standard LevelId property
+            ElementId levelId = instance.LevelId;
+            if (levelId != null && levelId != ElementId.InvalidElementId)
+            {
+                return levelId;
+            }
+
+            // 2. Try "Reference Level" (Common for face-hosted and work-plane-hosted families)
+            Parameter refLevelParam = instance.get_Parameter(BuiltInParameter.INSTANCE_REFERENCE_LEVEL_PARAM);
+            if (refLevelParam != null && refLevelParam.StorageType == StorageType.ElementId)
+            {
+                ElementId id = refLevelParam.AsElementId();
+                if (id != null && id != ElementId.InvalidElementId) return id;
+            }
+
+            // 3. Try "Schedule Level"
+            Parameter scheduleLevelParam = instance.get_Parameter(BuiltInParameter.INSTANCE_SCHEDULE_ONLY_LEVEL_PARAM);
+            if (scheduleLevelParam != null && scheduleLevelParam.StorageType == StorageType.ElementId)
+            {
+                ElementId id = scheduleLevelParam.AsElementId();
+                if (id != null && id != ElementId.InvalidElementId) return id;
+            }
+
+            // 4. Try generic "Level" parameter
+            Parameter levelParam = instance.get_Parameter(BuiltInParameter.LEVEL_PARAM);
+            if (levelParam != null && levelParam.StorageType == StorageType.ElementId)
+            {
+                ElementId id = levelParam.AsElementId();
+                if (id != null && id != ElementId.InvalidElementId) return id;
+            }
+
+            // 5. Fallback: Check host element's level (e.g. if hosted on a ceiling or roof)
+            if (instance.Host != null)
+            {
+                ElementId hostLevelId = instance.Host.LevelId;
+                if (hostLevelId != null && hostLevelId != ElementId.InvalidElementId) return hostLevelId;
+
+                Parameter hostLevelParam = instance.Host.get_Parameter(BuiltInParameter.LEVEL_PARAM);
+                if (hostLevelParam != null && hostLevelParam.StorageType == StorageType.ElementId)
+                {
+                    ElementId id = hostLevelParam.AsElementId();
+                    if (id != null && id != ElementId.InvalidElementId) return id;
+                }
+            }
+
+            return ElementId.InvalidElementId;
         }
 
         private static string ReadActualScheduleLevelName(Document doc, FamilyInstance instance)
         {
             try
             {
-                if (instance == null) return null;
-                // The "Schedule Level" association drives which plan view shows the instance; for a
-                // face/work-plane-hosted family this is often the only level association present.
-                Parameter scheduleLevel = instance.get_Parameter(BuiltInParameter.INSTANCE_SCHEDULE_ONLY_LEVEL_PARAM);
-                if (scheduleLevel == null || scheduleLevel.StorageType != StorageType.ElementId) return null;
+                if (instance == null || doc == null) return null;
 
-                ElementId scheduleLevelId = scheduleLevel.AsElementId();
-                if (scheduleLevelId == null || scheduleLevelId == ElementId.InvalidElementId) return null;
-                return SafeName(doc?.GetElement(scheduleLevelId));
+                // Specifically look for the Schedule Level parameter
+                Parameter scheduleLevel = instance.get_Parameter(BuiltInParameter.INSTANCE_SCHEDULE_ONLY_LEVEL_PARAM);
+                if (scheduleLevel != null && scheduleLevel.StorageType == StorageType.ElementId)
+                {
+                    ElementId scheduleLevelId = scheduleLevel.AsElementId();
+                    if (scheduleLevelId != null && scheduleLevelId != ElementId.InvalidElementId)
+                    {
+                        return SafeName(doc.GetElement(scheduleLevelId));
+                    }
+                }
+                return null;
             }
             catch { return null; }
         }
@@ -1247,6 +1324,7 @@ namespace FireProtection.Backend.Services.Placement.Sprinklers.Final
             try { return element?.Name; }
             catch { return null; }
         }
+
     }
 
     /// <summary>

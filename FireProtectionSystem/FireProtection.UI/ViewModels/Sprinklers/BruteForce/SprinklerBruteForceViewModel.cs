@@ -42,6 +42,7 @@ namespace FireProtection.UI.ViewModels.Sprinklers.BruteForce
         // Set while a family/type cascade or a catalog reload is moving several selections at once, so the
         // (expensive, Revit-transactional) per-room eligibility probe runs once at the end instead of per move.
         private bool _suppressEligibilityRefresh;
+        private bool _isEligibilityRefreshing;
         private string _placementStatusMessage;
 
         private SprinklerFamilyOption _selectedSprinklerFamily;
@@ -734,6 +735,7 @@ namespace FireProtection.UI.ViewModels.Sprinklers.BruteForce
         private bool CanExecutePlaceSprinklers()
         {
             if (IsPlacementRunning) return false;
+            if (_isEligibilityRefreshing) return false;
             if (SelectedVisibleEligibleRoomCount == 0) return false;
             if (SelectedSprinklerFamily == null) return false;
             if (SelectedSprinklerType == null) return false;
@@ -957,13 +959,36 @@ namespace FireProtection.UI.ViewModels.Sprinklers.BruteForce
                         sb.AppendLine();
                         sb.AppendLine($"Placement result JSON:\n{placementPath}");
                     }
+
+                    // Engineering-grade run report - the same window the smoke / notification tabs show
+                    // (count cards, per-room outcomes, click-through issue list, JSON/CSV export).
+                    try
+                    {
+                        PlacementRunReport runReport = placement.ToPlacementRunReport(
+                            calc, familyName, typeName);
+                        var reportView = new PlacementResultReportView
+                        {
+                            DataContext = new PlacementResultReportViewModel(runReport, "SPRINKLER")
+                        };
+                        new PlacementResultReportWindow(reportView) { Owner = Dialogs.Owner }.ShowDialog();
+                    }
+                    catch (Exception reportEx)
+                    {
+                        // The report window is presentation over an already-committed run; never let it
+                        // mask the placement result - fall back to the plain text summary.
+                        FireProtectionLog.Warn("Sprinkler report window failed: " + reportEx.Message);
+                    }
                 }
 
-                Dialogs.Show(
-                    sb.ToString(),
-                    didPlace ? "Place Sprinklers — Result" : "Place Sprinklers — BruteForce Result",
-                    MessageBoxButton.OK,
-                    calc.Success ? MessageBoxImage.Information : MessageBoxImage.Warning);
+                if (!didPlace)
+                {
+                    // Calculation-only (no placement service): keep the lightweight text dialog.
+                    Dialogs.Show(
+                        sb.ToString(),
+                        "Place Sprinklers — BruteForce Result",
+                        MessageBoxButton.OK,
+                        calc.Success ? MessageBoxImage.Information : MessageBoxImage.Warning);
+                }
             }
             catch (Exception ex)
             {
@@ -1068,6 +1093,7 @@ namespace FireProtection.UI.ViewModels.Sprinklers.BruteForce
                         SelectedSprinklerTypeName = roomVm.SelectedType,
                         OverrideMaxSpacingFt = roomVm.MaxSpacingFtOverride,
                         OverrideBoundaryClearanceFt = roomVm.BoundaryClearanceFtOverride,
+                        SelectedSprinklerOrientation = roomVm.SelectedOrientation,
                         FullRoomJson = fullRoomJson
                     });
                 }
@@ -1222,9 +1248,17 @@ namespace FireProtection.UI.ViewModels.Sprinklers.BruteForce
             if (_sprinklerPlacementService == null) return;
             if (_suppressEligibilityRefresh) return;
 
+            _isEligibilityRefreshing = true;
+            CommandManager.InvalidateRequerySuggested();
+
             RevitApi.Run(
                 RefreshEligibilityCore,
-                ex => System.Diagnostics.Debug.WriteLine("[ROOM-ELIGIBILITY] refresh failed: " + ex.Message));
+                ex =>
+                {
+                    _isEligibilityRefreshing = false;
+                    CommandManager.InvalidateRequerySuggested();
+                    System.Diagnostics.Debug.WriteLine("[ROOM-ELIGIBILITY] refresh failed: " + ex.Message);
+                });
         }
 
         /// <summary>Body of <see cref="RefreshEligibility"/>; always runs in a valid Revit API context.</summary>
@@ -1289,6 +1323,12 @@ namespace FireProtection.UI.ViewModels.Sprinklers.BruteForce
                         calcByRoom.TryGetValue(roomVm.Room.RoomId, out RoomCalculationResult rc))
                     {
                         candidates = rc.Points;
+
+                        // Feed the columns the REAL values the calculation used (hazard rule + overrides +
+                        // clamping), so the S->S / Wall cells show what is actually active, not "—".
+                        // Only the row DEFAULT is updated: a user override still wins in the cell.
+                        if (rc.AppliedMaxSpacingFt.HasValue) roomVm.DefaultMaxSpacingFt = rc.AppliedMaxSpacingFt;
+                        if (rc.AppliedBoundaryClearanceFt.HasValue) roomVm.DefaultBoundaryClearanceFt = rc.AppliedBoundaryClearanceFt;
                     }
                     candidateCount = candidates?.Count ?? 0;
                     result = _sprinklerPlacementService.EvaluateRoomEligibility(
@@ -1315,6 +1355,9 @@ namespace FireProtection.UI.ViewModels.Sprinklers.BruteForce
 
             OnPropertyChanged(nameof(AreAllSelectableRoomsSelected));
             OnPropertyChanged(nameof(RoomSelectionToggleLabel));
+
+            _isEligibilityRefreshing = false;
+            CommandManager.InvalidateRequerySuggested();
         }
 
         /// <summary>
@@ -1365,6 +1408,7 @@ namespace FireProtection.UI.ViewModels.Sprinklers.BruteForce
                         SelectedSprinklerTypeName = roomVm.SelectedType,
                         OverrideMaxSpacingFt = roomVm.MaxSpacingFtOverride,
                         OverrideBoundaryClearanceFt = roomVm.BoundaryClearanceFtOverride,
+                        SelectedSprinklerOrientation = roomVm.SelectedOrientation,
                         FullRoomJson = BuildFullRoomJson(roomData)
                     });
                 }
@@ -1540,6 +1584,7 @@ namespace FireProtection.UI.ViewModels.Sprinklers.BruteForce
                 room.AvailableTypes = types;
                 room.SelectedType = types.Count > 0 ? types[0] : null;
             }
+            RefreshEligibility();
         }
 
         private void ApplyTypeToSelected(string type)
@@ -1552,22 +1597,28 @@ namespace FireProtection.UI.ViewModels.Sprinklers.BruteForce
                 if (types != null && types.Contains(type, StringComparer.OrdinalIgnoreCase))
                     room.SelectedType = type;
             }
+            RefreshEligibility();
         }
 
-        /// <summary>Applies the bulk spacing box to every target room. The box is validated the same way as the
-        /// per-row cells, so an unparseable value is refused here rather than silently clearing the override.</summary>
+        /// <summary>Applies the bulk spacing box to every target room. The box is validated with the same
+        /// bounds as the per-row cells, so an unparseable or out-of-range value is refused here rather than
+        /// silently propagating.</summary>
         private void ApplySpacingToSelected()
         {
-            if (!TryReadBulkValue(BulkSpacingInput, out double? feet, "Sprinkler-to-sprinkler spacing")) return;
+            if (!TryReadBulkValue(BulkSpacingInput, 1.0, 40.0, out double? feet, "Sprinkler-to-sprinkler spacing")) return;
             foreach (RoomItemViewModel room in BulkTargets.ToList())
                 room.MaxSpacingFtOverride = feet;
+            // The overrides feed the calculation and the eligibility cache key; re-run so the columns
+            // and room states show the new applied spacing.
+            RefreshEligibility();
         }
 
         private void ApplyClearanceToSelected()
         {
-            if (!TryReadBulkValue(BulkClearanceInput, out double? feet, "Wall clearance")) return;
+            if (!TryReadBulkValue(BulkClearanceInput, 0.0, 10.0, out double? feet, "Wall clearance")) return;
             foreach (RoomItemViewModel room in BulkTargets.ToList())
                 room.BoundaryClearanceFtOverride = feet;
+            RefreshEligibility();
         }
 
         /// <summary>Clears every per-row override on the target rooms - Family/Type back to the universal
@@ -1579,11 +1630,12 @@ namespace FireProtection.UI.ViewModels.Sprinklers.BruteForce
                 room.ResetFamilyAndTypeToDefault();
                 room.ResetSpacingOverridesToDefault();
             }
+            RefreshEligibility();
         }
 
-        /// <summary>Blank clears the override; anything else must parse as a positive length in the current display
-        /// unit. Returns false (with a dialog) when the text is unusable.</summary>
-        private static bool TryReadBulkValue(string text, out double? feet, string fieldName)
+        /// <summary>Blank clears the override; anything else must parse as a length within the sane bounds in
+        /// the current display unit. Returns false (with a dialog) when the text is unusable.</summary>
+        private static bool TryReadBulkValue(string text, double minFt, double maxFt, out double? feet, string fieldName)
         {
             feet = null;
             if (string.IsNullOrWhiteSpace(text)) return true;   // blank = clear the override
@@ -1593,6 +1645,13 @@ namespace FireProtection.UI.ViewModels.Sprinklers.BruteForce
             if (!UnitDisplay.TryParseToFeet(text, out parsed, out error))
             {
                 Dialogs.Show(fieldName + ": " + error, "Bulk edit", MessageBoxButton.OK, MessageBoxImage.Warning);
+                return false;
+            }
+            if (parsed < minFt || parsed > maxFt)
+            {
+                Dialogs.Show(fieldName + " must be between " + UnitDisplay.FromFeet(minFt).ToString("F1") + " and "
+                    + UnitDisplay.FromFeet(maxFt).ToString("F1") + " " + UnitDisplay.Suffix + ".",
+                    "Bulk edit", MessageBoxButton.OK, MessageBoxImage.Warning);
                 return false;
             }
 
@@ -1605,6 +1664,7 @@ namespace FireProtection.UI.ViewModels.Sprinklers.BruteForce
             if (room == null) return;
             room.ResetFamilyAndTypeToDefault();
             room.ResetSpacingOverridesToDefault();
+            room.ResetHazardClassToDefault();
         }
     }
 }

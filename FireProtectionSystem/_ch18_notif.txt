@@ -1,0 +1,3095 @@
+===== PAGE 119 =====
+
+NATIONAL FIRE ALARM AND SIGNALING CODE	72-116
+2019 Edition Shaded text = Revisions. Δ = Text deletions and figure/table revisions. • = Section deletions. N = New material.
+18.4.2.3 The signal shall be repeated for a period appropriate
+for the purposes of evacuation of the building, but for not less
+than 180 seconds.
+18.4.2.3.1 The minimum repetition time shall be permitted to
+be manually interrupted.
+18.4.2.3.2 The minimum repetition time shall be permitted to
+be automatically interrupted for the transmission of mass noti‐
+fication messages in accordance with Chapter 24.
+18.4.2.4* The standard evacuation signal shall be synchron‐
+ized within a notification zone.
+N 18.4.3 Distinctive Carbon Monoxide Audible Alarm Signal.
+N 18.4.3.1 Where a carbon monoxide detector or alarm is
+required by other codes or standards or by the authority having
+jurisdiction and where an audible signal is required, a distinc‐
+tive signal pattern shall be required that is different from a fire
+evacuation signal.
+N 18.4.3.2 Where an audible signal is required, the carbon
+monoxide signal shall be a four-pulse temporal pattern and
+comply with the following:
+(1) Signals shall be a pattern consisting of four cycles of
+100 milliseconds ± 10 percent “on” and 100 milliseconds
+± 10 percent “off,” followed by 5 seconds ± 10 percent
+“off,” as demonstrated in Figure 18.4.3.2.
+On
+Off
+(a) (b) (a) (a)	(b) (a)	(c)
+Time (sec)	Cycle
+Key:
+Phase (a) signal is on for 0.5 sec ±10%
+Phase (b) signal is off for 0.5 sec ±10%
+Phase (c) signal is off for 1.5 sec ±10% [(c) = (a) + 2(b)]
+Total cycle lasts for 4 sec ±10%
+FIGURE 18.4.2.1 Temporal Pattern Parameters.
+(2) After the initial 4 minutes of the carbon monoxide signal,
+the 5-second “off” time shall be permitted to be changed
+to 60 seconds ± 10 percent.
+(3) The alarm signal shall be repeated in compliance with
+18.4.3.2(1) and 18.4.3.2(2) until the alarm resets or the
+alarm signal is manually silenced.
+N 18.4.3.3 The signal shall be synchronized within a notification
+zone of a protected premises.
+N 18.4.3.4 The audible signal of carbon monoxide alarms and
+systems installed to meet the requirements of Chapter 29 shall
+not be required to be synchronized.
+18.4.4* Public Mode Audible Requirements.
+18.4.4.1* To ensure that audible public mode signals are
+clearly heard, unless otherwise permitted by 18.4.4.2 through
+18.4.4.5, they shall have a sound level at least 15 dB above the
+average ambient sound level or 5 dB above the maximum
+sound level having a duration of at least 60 seconds, whichever
+is greater, measured 5 ft (1.5 m) above the floor in the area
+required to be served by the system using the A-weighted scale
+(dBA).
+18.4.4.2 Where approved by the authority having jurisdiction
+or other governing codes or standards, the requirements for
+audible signaling shall be permitted to be reduced or elimina‐
+ted when visual signaling is provided in accordance with
+Section 18.5.
+Δ 18.4.4.3 Audible notification appliances installed in elevator
+cars shall be permitted to use the audibility criteria for private
+mode appliances detailed in 18.4.5.1.
+Δ 18.4.4.4 If approved by the authority having jurisdiction, audi‐
+ble notification appliances installed in restrooms shall be
+permitted to use the audibility criteria for private mode appli‐
+ances detailed in 18.4.5.1.
+18.4.4.5 A signaling system arranged to stop or reduce ambi‐
+ent noise shall comply with 18.4.4.5.1 through 18.4.4.5.3.
+18.4.4.5.1 A signaling system arranged to stop or reduce ambi‐
+ent noise shall produce a sound level at least 15 dB above the
+On
+Off
+a	a b b	b a a a
+Phase a: signal is on for 100 ms ± 10 ms.
+Phase b: signal is off for 100 ms ± 10 ms.
+Phase c: signal is off for 5 sec ± 0.5 sec for initial 4 minutes.
+After the initial 4 minutes Phase c: signal is permitted to be changed to 60 s ± 6 s off.
+Although the diagram shows a square waveform, the wave can have other shapes that produce a similar effect.
+c a	a b b	b a a c
+One cycle One cycle
+N FIGURE 18.4.3.2 Temporal Pattern Parameters — Carbon Monoxide Signal.
+FOR INDIVIDUAL USE ONLY
+Copyright 2019 National Fire Protection Association (NFPA®). Licensed by agreement to Carl Weaver FOR INDIVIDUAL USE ONLY and downloaded on 11/05/2019. No reproduction or transmission in any form permitted without
+written permission of NFPA®. For inquiries or access for multiple users, or to report unauthorized use, contact licensing@nfpa.org.
+{C56A4DC7-64F7-4C88-B368-41DE5BD47BC8}
+
+===== PAGE 120 =====
+
+NOTIFICATION APPLIANCES 72-117
+Shaded text = Revisions. Δ = Text deletions and figure/table revisions. • = Section deletions. N = New material. 2019 Edition
+reduced average ambient sound level or 5 dB above the maxi‐
+mum sound level having a duration of at least 60 seconds after
+reduction of the ambient noise level, whichever is greater,
+measured 5 ft (1.5 m) above the floor in the area required to
+be served by the system using the A-weighted scale (dBA).
+18.4.4.5.2 Visual notification appliances shall be installed in
+the affected areas in accordance with Sections 18.5 or 18.6.
+18.4.4.5.3 Relays, circuits, or interfaces necessary to stop or
+reduce ambient noise shall meet the requirements of Chapters
+10, 12, 21, and 23.
+18.4.5 Private Mode Audible Requirements.
+18.4.5.1* To ensure that audible private mode signals are
+clearly heard, they shall have a sound level at least 10 dB above
+the average ambient sound level or 5 dB above the maximum
+sound level having a duration of at least 60 seconds, whichever
+is greater, measured 5 ft (1.5 m) above the floor in the area
+required to be served by the system using the A-weighted scale
+(dBA).
+18.4.5.2* Where approved by the authority having jurisdiction
+or other governing codes or standards, the requirements for
+audible signaling shall be permitted to be reduced or elimina‐
+ted when visual signaling is provided in accordance with
+Section 18.5.
+18.4.5.3 A system arranged to stop or reduce ambient noise
+shall comply with 18.4.5.3.1 through 18.4.5.3.3.
+18.4.5.3.1 A system arranged to stop or reduce ambient noise
+shall be permitted to produce a sound level at least 10 dB
+above the reduced average ambient sound level or 5 dB above
+the maximum sound level having a duration of at least
+60 seconds after reduction of the ambient noise level, which‐
+ever is greater, measured 5 ft (1.5 m) above the floor, using the
+A-weighted scale (dBA).
+18.4.5.3.2 Visual notification appliances shall be installed in
+the affected areas in accordance with Sections 18.5 or 18.6.
+18.4.5.3.3 Relays, circuits, or interfaces necessary to stop or
+reduce ambient noise shall meet the requirements of Chapters
+10, 12, 21, and 23.
+18.4.6 Sleeping Area Requirements.
+18.4.6.1* Where audible appliances are installed to provide
+signals for sleeping areas, they shall have a sound level of at
+least 15 dB above the average ambient sound level or 5 dB
+above the maximum sound level having a duration of at least
+60 seconds or a sound level of at least 75 dBA, whichever is
+greater, measured at the pillow level in the area required to be
+served by the system using the A-weighted scale (dBA).
+18.4.6.2 If any barrier, such as a door, curtain, or retractable
+partition, is located between the notification appliance and the
+pillow, the sound pressure level shall be measured with the
+barrier placed between the appliance and the pillow.
+Δ 18.4.6.3* Audible appliances provided for the sleeping areas
+to awaken occupants shall produce a low frequency alarm
+signal that complies with the following:
+(1) The waveform shall have a fundamental frequency of
+520 Hz ± 10 percent.
+(2)* The notification equipment shall be listed for producing
+the low frequency waveform.
+18.4.7* Narrow Band Tone Signaling for Exceeding Masked
+Thresholds.
+18.4.7.1 Masked Threshold Allowance. Audible tone signaling
+shall be permitted to comply with the masked threshold
+requirements in this subsection in lieu of the A-weighted signal‐
+ing requirements in 18.4.4 and 18.4.5.
+18.4.7.2* Calculation Method. The effective masked thresh‐
+old shall be calculated in accordance with ISO 7731, Danger
+signals for public and work places — Auditory danger signals.
+18.4.7.3 Noise Data. Noise data for calculating the effective
+masked threshold shall be the peak value of noise lasting
+60 seconds or more for each octave or one-third octave band.
+18.4.7.4 Documentation. Analysis and design documentation
+shall be submitted to the authority having jurisdiction and shall
+contain the following information:
+(1) Frequency data for the ambient noise, including the date,
+time, and location where measurements were taken for
+existing environments, or projected data for environ‐
+ments not yet constructed
+(2) Frequency data of the audible notification appliance
+(3) Calculations of the effective masked threshold for each
+set of noise data
+(4) A statement of the sound pressure level that would be
+required by 18.4.4 or 18.4.5 if masked threshold signaling
+had not been done
+18.4.7.5 Sound Pressure Level. For masked threshold signal‐
+ing, the audible signal tone shall meet the requirements of
+either 18.4.7.5.1 or 18.4.7.5.2 but not for the reproduction of
+prerecorded, synthesized, or live messages.
+18.4.7.5.1 The sound pressure level of the audible tone signal
+shall exceed the masked threshold in one or more octave
+bands by at least 10 dB in the octave band under consideration.
+18.4.7.5.2 The sound pressure level of the audible tone signal
+shall exceed the masked threshold in one or more one-third
+octave bands by at least 13 dB in the one-third octave band
+under consideration.
+18.4.8 Exit Marking Audible Notification Appliance Require‐
+ments.
+18.4.8.1* Exit marking audible notification appliances shall
+meet or exceed the frequency and sound level settings and
+guidelines specified in the manufacturer's documented instruc‐
+tions.
+Δ 18.4.8.2* In addition to 18.4.8.1, as a minimum, to ensure that
+exit marking audible notification appliance signals are clearly
+heard and produce the desired directional effects for 50 ft
+(15.24 m) within an unobstructed egress path, they shall meet
+the audibility requirements of 18.4.7 in at least one one-third
+octave band or one octave band within the effective frequency
+ranges of the interaural time difference (ITD), interaural level
+or intensity difference (ILD or IID), and anatomical transfer
+function or head-related transfer function (ATF or HRTF)
+localization cues.
+N 18.4.8.3 The exit marking audible notification appliance
+signal shall penetrate both the ambient noise and the fire
+alarm signal.
+18.4.8.4 Where required by the authority having jurisdiction
+governing laws, codes, or standards; or other parts of this Code,
+FOR INDIVIDUAL USE ONLY
+Copyright 2019 National Fire Protection Association (NFPA®). Licensed by agreement to Carl Weaver FOR INDIVIDUAL USE ONLY and downloaded on 11/05/2019. No reproduction or transmission in any form permitted without
+written permission of NFPA®. For inquiries or access for multiple users, or to report unauthorized use, contact licensing@nfpa.org.
+{C56A4DC7-64F7-4C88-B368-41DE5BD47BC8}
+
+===== PAGE 121 =====
+
+NATIONAL FIRE ALARM AND SIGNALING CODE	72-118
+2019 Edition Shaded text = Revisions. Δ = Text deletions and figure/table revisions. • = Section deletions. N = New material.
+exit marking audible notification appliances shall be installed
+in accordance with the manufacturer's published instructions.
+18.4.8.5* Where required by the authority having jurisdiction
+governing laws, codes, or standards; or other parts of this Code,
+exit marking audible notification shall be located at the
+entrance to all building exits and areas of refuge as defined by
+the applicable building or fire code.
+18.4.8.6 Where exit marking audible notification appliances
+are utilized to mark areas of refuge, they shall provide an audi‐
+ble signal distinct from that used for other exits that do not
+have areas of refuge.
+18.4.9 Location of Audible Notification Appliances for Build‐
+ing or Structure.
+18.4.9.1 If ceiling heights allow, and unless otherwise permit‐
+ted by 18.4.9.2 through 18.4.9.5, wall-mounted appliances shall
+have their tops above the finished floors at heights of not less
+than 90 in. (2.29 m) and below the finished ceilings at distan‐
+ces of not less than 6 in. (150 mm).
+18.4.9.2 Ceiling-mounted or recessed appliances shall be
+permitted.
+18.4.9.3 If combination audible/visual notification appliances
+are installed, the location of the installed appliance shall be
+determined by the requirements of 18.5.5.
+18.4.9.4 Appliances that are an integral part of a smoke detec‐
+tor, carbon monoxide detector, smoke alarm, carbon monox‐
+ide alarm, or other initiating device shall be located in
+accordance with the requirements for that device.
+18.4.9.5 Mounting heights other than required by 18.4.9.1
+and 18.4.9.2 shall be permitted, provided that the sound pres‐
+sure level requirements of 18.4.4 for public mode or 18.4.5 for
+private mode, or 18.4.6 for sleeping areas, based on the appli‐
+cation, are met.
+18.4.10 Location of Audible Notification Appliances for Wide-
+Area Signaling. Audible notification appliances for wide-area
+signaling shall be installed in accordance with the require‐
+ments of the authority having jurisdiction, approved design
+documents, and the manufacturer’s installation instruction to
+achieve the required performance.
+18.4.11* Voice Intelligibility. Within the acoustically distin‐
+guishable spaces (ADS) where voice intelligibility is required,
+voice communications systems shall reproduce prerecorded,
+synthesized, or live (e.g., microphone, telephone handset, and
+radio) messages with voice intelligibility.
+18.4.11.1* ADSs shall be determined by the system designer
+during the planning and design of all emergency communica‐
+tions systems.
+18.4.11.2 Each ADS shall be identified as requiring or not
+requiring voice intelligibility.
+18.4.11.3* Unless specifically required by other governing
+laws, codes, or standards, or by other parts of this Code, intelli‐
+gibility shall not be required in all ADSs.
+18.4.11.4* Where required by the authority having jurisdic‐
+tion governing laws, codes, or standards; or other parts of this
+Code, ADS assignments shall be submitted for review and
+approval.
+Δ 18.4.11.5 Quantitative measurements shall not be required.
+•
+N 18.4.11.6 Quantitative measurements shall be permitted. (See
+D.2.4.)
+18.5* Visual Characteristics — Public Mode.
+18.5.1* Visual Signaling.
+18.5.1.1 Public mode visual signaling shall meet the require‐
+ments of Section 18.5 using visual notification appliances.
+Δ 18.5.1.2* The coverage area for visual notification shall be as
+required by other governing laws, codes, or standards.
+N 18.5.1.3 Where other governing laws, codes, or standards
+require visual notification for all or part of an area or space,
+coverage shall only be required in occupiable areas as defined
+in 3.3.187.
+18.5.2 Area of Coverage.
+18.5.2.1 The designer of the visual notification system shall
+document the rooms and spaces that will have visual notifica‐
+tion and those where visual notification will not be provided.
+18.5.2.2* Unless otherwise specified or required by other
+sections of this Code, the required coverage area for visual noti‐
+fication shall be as required by other governing laws, codes, or
+standards.
+18.5.2.3 Where required by the authority having jurisdiction,
+documentation of the effective intensity (cd) of the visual noti‐
+fication appliances for the area of coverage shall be submitted
+for review and approval.
+18.5.3 Light, Color, and Pulse Characteristics.
+18.5.3.1 The flash rate shall not exceed two flashes per second
+(2 Hz) nor be less than one flash every second (1 Hz) through‐
+out the listed voltage range of the appliance.
+18.5.3.2 The maximum light pulse duration shall be 20 milli‐
+seconds, except as permitted in 18.5.3.3.
+N 18.5.3.3* Light pulse durations greater than 20 milliseconds,
+but not greater than 100 milliseconds, shall be permitted where
+the alerting capability of the visual notification appliance is
+demonstrated to be equal to or greater than visual notification
+appliances with a 20-millisecond pulse duration.
+18.5.3.4 The pulse duration shall be defined as the time inter‐
+val between initial and final points of 10 percent of maximum
+signal.
+18.5.3.5* Visual notification appliances used for fire alarm
+signaling only or to signal the intent for complete evacuation
+shall be clear or nominal white and shall not exceed 1000 cd
+(effective intensity).
+18.5.3.6 Visual notification appliances used to signal occu‐
+pants to seek information or instructions shall be clear, nomi‐
+nal white, or other color as required by the emergency plan
+and the authority having jurisdiction for the area or building.
+18.5.3.7* The visual synchronization requirements of this
+chapter shall not apply where the visual notification appliances
+located inside the building are viewed from outside of the
+building.
+N 18.5.3.8 Visual notification appliances used for carbon
+monoxide signaling shall be as required by the emergency plan
+and the authority having jurisdiction for the area or building
+and shall not exceed 1000 cd (effective intensity).
+FOR INDIVIDUAL USE ONLY
+Copyright 2019 National Fire Protection Association (NFPA®). Licensed by agreement to Carl Weaver FOR INDIVIDUAL USE ONLY and downloaded on 11/05/2019. No reproduction or transmission in any form permitted without
+written permission of NFPA®. For inquiries or access for multiple users, or to report unauthorized use, contact licensing@nfpa.org.
+{C56A4DC7-64F7-4C88-B368-41DE5BD47BC8}
+
+===== PAGE 122 =====
+
+NOTIFICATION APPLIANCES 72-119
+Shaded text = Revisions. Δ = Text deletions and figure/table revisions. • = Section deletions. N = New material. 2019 Edition
+18.5.4* Appliance Photometrics. The light output shall
+comply with the polar dispersion requirements for public
+mode signaling as described in ANSI/UL 1971, Standard for
+Signaling Devices for the Hearing Impaired, ANSI/UL 1638, Stand‐
+ard for Visible Signaling Devices for Fire Alarm and Signaling Systems,
+Including Accessories, or equivalent.
+18.5.5 Appliance Location.
+18.5.5.1* Wall-mounted appliances shall be mounted such
+that the entire lens is not less than 80 in. (2.03 m) and not
+greater than 96 in. (2.44 m) above the finished floor or at the
+mounting height specified using the performance-based alter‐
+native of 18.5.5.7.
+Δ 18.5.5.2 Where low ceiling heights do not permit wall mount‐
+ing at a minimum of 80 in. (2.03 m), wall mounted visual noti‐
+fication appliances shall be mounted within 6 in. (150 mm) of
+the ceiling.
+N 18.5.5.3 Where low ceiling heights do not permit wall mount‐
+ing at a minimum of 80 in. (2.03 m), the room size covered by
+a visual notification appliance of a given value shall be reduced
+by twice the difference between the minimum mounting height
+of 80 in. (2.03 m) and the actual lower mounting height.
+18.5.5.4* Visual notification appliances listed for mounting
+parallel to the floor shall be permitted to be located on the
+ceiling or suspended below the ceiling.
+18.5.5.5* Spacing in Rooms.
+Δ 18.5.5.5.1* Spacing shall be in accordance with either Table
+18.5.5.5.1(a) and Figure 18.5.5.5.1 or Table 18.5.5.5.1(b).
+18.5.5.5.2 Visual notification appliances shall be installed in
+accordance with Table 18.5.5.5.1(a) or Table 18.5.5.5.1(b)
+using one of the following:
+(1) A single visual notification appliance.
+(2)* Two groups of visual notification appliances, where visual
+notification appliances of each group are synchronized,
+in the same room or adjacent space within the field of
+view. This shall include synchronization of visual applian‐
+ces operated by separate systems.
+(3) More than two visual notification appliances or groups of
+synchronized appliances in the same room or adjacent
+space within the field of view that flash in synchroniza‐
+tion.
+18.5.5.5.3 Room spacing in accordance with Table
+18.5.5.5.1(a) and Figure 18.5.5.5.1 for wall-mounted appliances
+shall be based on locating the visual notification appliance at
+the halfway distance of the wall.
+Δ 18.5.5.5.4 In square rooms with appliances not centered or in
+nonsquare rooms, the effective intensity (cd) from one wall-
+mounted visual notification appliance shall be determined by
+maximum room size dimensions obtained either by measuring
+the distance to the farthest wall or by doubling the distance to
+the farthest adjacent wall, whichever is greater, as required by
+Table 18.5.5.5.1(a) and Figure 18.5.5.5.1.
+18.5.5.5.5 If a room configuration is not square, the square
+room size that allows the entire room to be encompassed or
+allows the room to be subdivided into multiple squares shall be
+used.
+18.5.5.5.6* If ceiling heights exceed 30 ft (9.1 m), ceiling-
+mounted visual notification appliances shall be suspended at or
+below 30 ft (9.1 m) or at the mounting height determined
+using the performance-based alternative of 18.5.5.7, or wall-
+mounted visual notification appliances shall be installed in
+accordance with Table 18.5.5.5.1(a).
+Δ Table 18.5.5.5.1(a) Room Spacing for Wall-Mounted Visual Notification Appliances
+Maximum
+Room Size
+Minimum Required Light Output
+[Effective Intensity (cd)]
+One Visual Notification
+Appliance per Room
+Four Visual Notification
+Appliances per Room
+(One per Wall)	ft m
+20 × 20 6.10 × 6.10 15 NA
+28 × 28 8.53 × 8.53 30 NA
+30 × 30 9.14 × 9.14 34 NA
+40 × 40 12.2 × 12.2 60 15
+45 × 45 13.7 × 13.7 75 19
+50 × 50 15.2 × 15.2 94 30
+54 × 54 16.5 × 16.5 110 30
+55 × 55 16.8 × 16.8 115 30
+60 × 60 18.3 × 18.3 135 30
+63 × 63 19.2 × 19.2 150 37
+68 × 68 20.7 × 20.7 177 43
+70 × 70 21.3 × 21.3 184 60
+80 × 80 24.4 × 24.4 240 60
+90 × 90 27.4 × 27.4 304 95
+100 × 100 30.5 × 30.5 375 95
+110 × 110 33.5 × 33.5 455 135
+120 × 120 36.6 × 36.6 540 135
+130 × 130 39.6 × 39.6 635 185
+NA: Not allowable.
+FOR INDIVIDUAL USE ONLY
+Copyright 2019 National Fire Protection Association (NFPA®). Licensed by agreement to Carl Weaver FOR INDIVIDUAL USE ONLY and downloaded on 11/05/2019. No reproduction or transmission in any form permitted without
+written permission of NFPA®. For inquiries or access for multiple users, or to report unauthorized use, contact licensing@nfpa.org.
+{C56A4DC7-64F7-4C88-B368-41DE5BD47BC8}
+
+===== PAGE 123 =====
+
+NATIONAL FIRE ALARM AND SIGNALING CODE	72-120
+2019 Edition Shaded text = Revisions. Δ = Text deletions and figure/table revisions. • = Section deletions. N = New material.
+Δ 18.5.5.5.7 Table 18.5.5.5.1(b) shall be used if the ceiling-
+mounted visual notification appliance is at the center of the
+room.
+N 18.5.5.5.8 If the ceiling-mounted visual notification appliance
+is not located at the center of the room, the effective intensity
+(cd) shall be determined by doubling the distance from the
+appliance to the farthest wall to obtain the maximum room
+size.
+18.5.5.6* Spacing in Corridors.
+18.5.5.6.1 The installation of visual notification appliances in
+corridors 20 ft (6.1 m) or less in width shall be in accordance
+with the requirements of either 18.5.5.5 or 18.5.5.6.
+18.5.5.6.2 Paragraph 18.5.5.6 shall apply to corridors not
+exceeding 20 ft (6.1 m) in width.
+18.5.5.6.3 In a corridor application, visual notification appli‐
+ances shall be rated not less than 15 cd.
+18.5.5.6.4 Corridors greater than 20 ft (6.1 m) wide shall
+comply with the spacing requirements for rooms in accordance
+with 18.5.5.5.
+18.5.5.6.5* Visual notification appliances shall be located not
+more than 15 ft (4.6.m) from the end of the corridor with a
+separation not greater than 100 ft (30.5 m) between applian‐
+ces.
+18.5.5.6.6 If there is an interruption of the concentrated view‐
+ing path, such as a fire door, an elevation change, or any other
+obstruction, the area shall be treated as a separate corridor.
+18.5.5.6.7 In corridors where more than two visual notifica‐
+tion appliances are in any field of view, they shall flash in
+synchronization.
+18.5.5.6.8 Wall-mounted visual notification appliances in
+corridors shall be permitted to be mounted on either the end
+wall or the side wall of the corridor in accordance with spacing
+requirements of 18.5.5.6.5.
+20 ft
+(6.1 m)
+30 ft
+(9.1 m)
+40 ft
+(12.2 m)
+50 ft
+(15.2 m)
+20 ft
+(6.1 m)
+30 ft
+(9.1 m)
+50 ft
+(15.2 m)
+40 ft
+(12.2 m)
+Visual
+notification
+appliance
+Δ FIGURE 18.5.5.5.1 Room Spacing for Wall-Mounted Visual
+Notification Appliances.
+Δ Table 18.5.5.5.1(b) Room Spacing for Ceiling-Mounted Visual Notification Appliances
+Maximum
+Room Size Maximum Lens Height*
+Minimum Required
+Light Output
+(Effective Intensity);
+One Visual Notification Appliance
+(cd)	ft m ft m
+20 × 20 6.1 × 6.1 10 3.0 15
+30 × 30 9.1 × 9.1 10 3.0 30
+40 × 40 12.2 × 12.2 10 3.0 60
+44 × 44 13.4 × 13.4 10 3.0 75
+20 × 20 6.1 × 6.1 20 6.1 30
+30 × 30 9.1 × 9.1 20 6.1 45
+44 × 44 13.4 × 13.4 20 6.1 75
+46 × 46 14.0 × 14.0 20 6.1 80
+20 × 20 6.1 × 6.1 30 9.1 55
+30 × 30 9.1 × 9.1 30 9.1 75
+50 × 50 15.2 × 15.2 30 9.1 95
+53 × 53 16.2 × 16.2 30 9.1 110
+55 × 55 16.8 × 16.8 30 9.1 115
+59 × 59 18.0 × 18.0 30 9.1 135
+63 × 63 19.2 × 19.2 30 9.1 150
+68 × 68 20.7 × 20.7 30 9.1 177
+70 × 70 21.3 × 21.3 30 9.1 185
+*This does not preclude mounting lens at lower heights.
+FOR INDIVIDUAL USE ONLY
+Copyright 2019 National Fire Protection Association (NFPA®). Licensed by agreement to Carl Weaver FOR INDIVIDUAL USE ONLY and downloaded on 11/05/2019. No reproduction or transmission in any form permitted without
+written permission of NFPA®. For inquiries or access for multiple users, or to report unauthorized use, contact licensing@nfpa.org.
+{C56A4DC7-64F7-4C88-B368-41DE5BD47BC8}
+
+===== PAGE 124 =====
+
+NOTIFICATION APPLIANCES 72-121
+Shaded text = Revisions. Δ = Text deletions and figure/table revisions. • = Section deletions. N = New material. 2019 Edition
+18.5.5.7* Performance-Based Alternative.
+18.5.5.7.1 Any design that provides a minimum of
+0.0375 lumens/ft2 (0.4036 lumens/m2) of illumination at any
+point within the covered area at all angles specified by the
+polar dispersion planes for wall- or ceiling-mounted public
+mode visual notification appliances in ANSI/UL 1971, Standard
+for Signaling Devices for the Hearing Impaired, ANSI/UL 1638, Visi‐
+ble Signaling Devices for Fire Alarm and Signaling Systems, Including
+Accessories, or equivalent, as calculated for the maximum
+distance from the nearest visual notification appliance, shall be
+permitted in lieu of the requirements of 18.5.5, excluding
+18.5.5.8.
+18.5.5.7.2 Documentation provided to the authority having
+jurisdiction shall include the following:
+(1) Inverse Square Law calculations using each of the vertical
+and horizontal polar distribution angles in ANSI/
+UL 1971, Standard for Signaling Devices for the Hearing
+Impaired, or equivalent.
+(2) The calculations shall account for the effects of polar
+distribution using one of the following:
+(a) The percentages from the applicable table(s) in
+ANSI/UL 1971, Standard for Signaling Devices for the
+Hearing Impaired, or equivalent
+(b) The actual results of laboratory tests of the specific
+appliance to be used as recorded by the listing
+organization
+18.5.5.8 Sleeping Areas.
+18.5.5.8.1 Combination smoke detectors and visual notifica‐
+tion appliances or combination smoke alarms and visual notifi‐
+cation appliances shall be installed in accordance with the
+applicable requirements of Chapters 17, 18, 23, and 29.
+N 18.5.5.8.2 Combination carbon monoxide detectors or alarms
+with visual notification appliances shall be located in accord‐
+ance with the applicable requirements for the visual notifica‐
+tion appliance and the applicable requirements for the carbon
+monoxide detector or alarm of Chapters 17, 18, 23, and 29.
+18.5.5.8.3* Table 18.5.5.8.3 shall apply to the minimum
+required intensity of visual notification appliances in sleeping
+areas after establishing the mounting height.
+18.5.5.8.4 For rooms with a linear dimension greater than
+16 ft (4.9 m), the visual notification appliance shall be located
+within 16 ft (4.9 m) of the pillow.
+18.5.6 Location of Visual Notification Appliances for Wide-
+Area Signaling. Visual notification appliances for wide-area
+signaling shall be installed in accordance with the require‐
+ments of the authority having jurisdiction, approved design
+documents, and the manufacturer’s published instructions to
+achieve the required performance.
+Δ Table 18.5.5.8.3 Effective Intensity Requirements for Sleeping
+Area Visual Notification Appliances
+Distance from Ceiling
+to Top of Lens Minimum Intensity
+(cd)	in. mm
+≥24 ≥610 110
+<24 <610 177
+18.6* Visual Characteristics — Private Mode. Visual notifica‐
+tion appliances used in the private mode shall be of a sufficient
+quantity and intensity and located so as to meet the intent of
+the user and the authority having jurisdiction.
+18.7 Supplementary Visual Signaling Method. A supplemen‐
+tary visual notification appliance shall be intended to augment
+an audible or visual signal.
+18.7.1 A supplementary visual notification appliance shall
+comply with its marked rated performance.
+18.7.2 Supplementary visual notification appliances shall be
+permitted to be located less than 80 in. (2.03 m) above the
+floor.
+18.8 Textual Audible Appliances.
+18.8.1 Loudspeaker Appliances.
+18.8.1.1 Loudspeaker appliances shall comply with
+Section 18.4.
+18.8.1.2* The sound pressure level, in dBA, of the tone
+produced by a signaling loudspeaker shall comply with all the
+requirements in 18.4.4 (public), 18.4.5 (private), or 18.4.6
+(sleeping) for the intended mode or shall comply with the
+requirements of 18.4.7 (narrow band tone signaling).
+18.8.2 Telephone Appliances. Telephone appliances shall be
+in accordance with Section 24.8.
+18.9* Textual and Graphical Visual Appliances.
+18.9.1 Application.
+18.9.1.1 Textual and graphical visual appliances shall be
+permitted to be used to signal information about fire or other
+emergency conditions or to direct intended responses to those
+conditions.
+18.9.1.2 This section does not apply to means of egress signs,
+room identification signs, and other signage that could be
+required by other governing laws, codes, or standards.
+18.9.1.3 Textual visual appliance messages shall be permitted
+to be static, flashing, or scrolling.
+18.9.2 Location.
+18.9.2.1 Private Mode. Unless otherwise permitted or
+required by other governing laws, codes, or standards, or by
+other parts of this Code or by the authority having jurisdiction,
+all textual and graphical visual notification appliances in the
+private mode shall be located in rooms that are accessible only
+to those persons directly concerned with the implementation
+and direction of emergency response in the areas protected by
+the system.
+18.9.2.2 Public Mode. Textual and graphical visual notifica‐
+tion appliances used in the public mode shall be located to
+ensure visibility to the occupants of the protected area or to the
+intended recipients.
+18.9.2.3 Mounting. Desktop and surface-mounted textual and
+graphical visual notification appliances shall be permitted.
+18.9.3 Performance. The information produced by textual
+and graphical visual appliances shall be clear and legible at the
+intended viewing distance.
+FOR INDIVIDUAL USE ONLY
+Copyright 2019 National Fire Protection Association (NFPA®). Licensed by agreement to Carl Weaver FOR INDIVIDUAL USE ONLY and downloaded on 11/05/2019. No reproduction or transmission in any form permitted without
+written permission of NFPA®. For inquiries or access for multiple users, or to report unauthorized use, contact licensing@nfpa.org.
+{C56A4DC7-64F7-4C88-B368-41DE5BD47BC8}
+
+===== PAGE 125 =====
+
+NATIONAL FIRE ALARM AND SIGNALING CODE	72-122
+2019 Edition Shaded text = Revisions. Δ = Text deletions and figure/table revisions. • = Section deletions. N = New material.
+18.9.4* Character and Symbol Requirements and Viewing
+Distance.
+18.9.4.1 This section applies to visual characters and graphic
+elements and does not address raised characters or braille that
+could be required by other governing laws, codes, or standards.
+18.9.4.2* Characters and symbols shall contrast with their
+background using either positive contrast (light on a dark back‐
+ground) or negative contrast (dark on a light background).
+18.9.4.3 Characters and symbols and their background shall
+have a nonglare finish.
+18.9.4.4* Characters shall be permitted to be uppercase or
+lowercase, or a combination of both.
+18.9.4.5 Characters shall be conventional in form and not
+italic, oblique, script, highly decorative, or of other unusual
+form and shall use sans serif fonts.
+18.9.4.6 Characters shall be selected from fonts where the
+width of the uppercase letter “O” is 55 percent minimum and
+110 percent maximum of the height of the uppercase letter “I”.
+18.9.4.7* Character and symbol height for appliances other
+than desktop monitors or displays shall meet all of the follow‐
+ing criteria:
+(1) Minimum character height shall comply with Table
+18.9.4.7.
+(2) Viewing distance shall be measured as the horizontal
+distance between the character and an obstruction
+preventing further approach towards the appliance.
+(3) Character height shall be based on the uppercase letter
+“I”.
+18.9.4.8* All characters and symbols displayed by textual and
+graphical visual notification appliances shall be a minimum of
+40 in. (1.02 m) above the ground or finished floor.
+18.9.4.9 Stroke thickness of the uppercase letter “I” shall be
+minimum 10 percent and maximum 30 percent of the height
+of the character.
+18.9.4.10 Character spacing shall be measured between the
+two closest points of adjacent characters, excluding word
+spaces. Spacing between individual characters shall be mini‐
+mum 10 percent and maximum 35 percent of character height.
+18.9.4.11 Spacing between the baselines of separate lines of
+characters within a message shall be 135 percent minimum and
+170 percent maximum of the character height.
+18.10 Tactile Appliances.
+18.10.1 Application. Tactile appliances shall be permitted if
+used in addition to audible and/or visual notification applian‐
+ces.
+N Table 18.9.4.7 Visual Character and Graphic Symbol Height Based on Height and Distance
+Minimum Character or Symbol Height for Installed Elevation
+Horizontal Viewing
+Distance
+At 40 in. to 70 in. (1.0 m to 1.8 m)
+Above the Floor
+At Greater Than 70 in. to 120 in.
+(1.8 m to 3.1 m) Above the Floor
+At Greater Than 120 in. (3.0 m) Above the
+Floor
+ft m in. mm in. mm in. mm
+1 0.3 5∕8 16 2 51 3 76
+2 0.6 5∕8 16 2 51 3 76
+3 0.9 5∕8 16 2 51 3 76
+4 1.2 5∕8 16 2 51 3 76
+5 1.5 5∕8 16 2 51 3 76
+6 1.8 5∕8 16 2 51 3 76
+7 2.1 3∕4 19 2 51 3 76
+8 2.4 7∕8 22 2 51 3 76
+9 2.7 1 25 2 51 3 76
+10 3 1 1∕8 29 2 51 3 76
+11 3.4 1 1∕4 32 2 51 3 76
+12 3.7 1 3∕8 35 2 51 3 76
+13 4 1 1∕2 38 2 51 3 76
+14 4.3 1 5∕8 41 2 51 3 76
+15 4.6 1 3∕4 44 2 51 3 76
+16 4.9 1 7∕8 48 2 1∕8 54 3 76
+17 5.2 2 51 2 1∕4 57 3 76
+18 5.5 2 1∕8 54 2 3∕8 60 3 76
+19 5.8 2 1∕4 57 2 1∕2 64 3 76
+20 6.1 2 3∕8 60 2 5∕8 67 3 76
+21 6.4 2 1∕2 64 2 3∕4 70 3 76
+22 6.7 2 5∕8 67 2 7∕8 73 3 1∕8 79
+23 7 2 3∕4 70 3 76 3 1∕4 83
+24 7.3 2 7∕8 73 3 1∕8 79 3 3∕8 86
+25 7.6 3 76 3 1∕4 83 3 1∕2 89
+>25 >7.6 3 + h* 76 + h* 3 1∕4 + h* 83 + h* 3 1∕2 + h* 89 + h*
+*For each foot of horizontal viewing distance greater than 25 ft (7.6 m), add 1∕8 in. (3 mm) to the character or symbol height.
+FOR INDIVIDUAL USE ONLY
+Copyright 2019 National Fire Protection Association (NFPA®). Licensed by agreement to Carl Weaver FOR INDIVIDUAL USE ONLY and downloaded on 11/05/2019. No reproduction or transmission in any form permitted without
+written permission of NFPA®. For inquiries or access for multiple users, or to report unauthorized use, contact licensing@nfpa.org.
+{C56A4DC7-64F7-4C88-B368-41DE5BD47BC8}
+
+===== PAGE 126 =====
+
+EMERGENCY CONTROL FUNCTION INTERFACES 72-123
+Shaded text = Revisions. Δ = Text deletions and figure/table revisions. • = Section deletions. N = New material. 2019 Edition
+18.10.2* Performance. Tactile appliances shall meet the
+performance requirements of ANSI/UL 1971, Standard for
+Signaling Devices for the Hearing Impaired, or equivalent.
+18.11* Standard Emergency Service Interface. Where
+required by the enforcing authority; governing laws, codes, or
+standards; or other parts of this Code, annunciators, informa‐
+tion display systems, and controls for portions of a system provi‐
+ded for use by emergency service personnel shall be designed,
+arranged, and located in accordance with the requirements of
+the organizations intended to use the equipment.
+Chapter 19 Reserved
+Chapter 20 Reserved
+Chapter 21 Emergency Control Function Interfaces
+21.1* Application. The provisions of Chapter 21 shall cover
+the minimum requirements and methods for emergency
+control function interfaces to fire alarm systems and emer‐
+gency communications systems in accordance with this chapter.
+21.1.1 The requirements of Chapters 7, 10, 14, 17, 18, 23, 24,
+and 26 shall apply, unless otherwise noted in this chapter.
+• 21.1.2 The requirements of this chapter shall not apply to
+Chapter 29 unless otherwise stated.
+21.2 General.
+21.2.1* Emergency control functions shall be permitted to be
+performed automatically.
+21.2.2 The performance of automatic emergency control
+functions shall not interfere with power for lighting or for
+operating elevators.
+21.2.3 The performance of automatic emergency control
+functions shall not preclude the combination of fire alarm serv‐
+ices with other services requiring monitoring of operations.
+21.2.4* Emergency control function interface devices shall be
+located within 3 ft (0.9 m) of the component controlling the
+emergency control function where the control circuit is not
+configured as a Class D circuit.
+21.2.5 The emergency control function interface device shall
+function within the voltage and current limitations of the fire
+alarm control unit.
+21.2.6 The installation wiring between the fire alarm control
+unit and the emergency control function interface device shall
+be Class A, Class B, Class D, Class N, or Class X in accordance
+with Chapter 12.
+21.2.7 Emergency control functions shall not interfere with
+other operations of the fire alarm system.
+21.2.8 The method(s) of interconnection between the fire
+alarm system and emergency control function interface device
+shall be monitored for integrity in accordance with
+Section 12.6.
+21.2.9 The method(s) of interconnection between the emer‐
+gency control function interface device and the component
+controlling the emergency control function shall comply with
+the applicable provisions of NFPA 70.
+21.2.10 The method(s) of interconnection between the emer‐
+gency control function interface device and the component
+controlling the emergency control function shall be achieved
+by one of the following recognized means:
+(1) Electrical contacts listed for the connected load
+(2) Data communications over a signaling line circuit(s)
+dedicated to the fire alarm or shared with other premises
+operating systems
+(3) Other listed methods
+21.2.11 If a fire alarm system is a component of a life safety
+network and it communicates data to other systems providing
+life safety functions, or it receives data from such systems, the
+following shall apply:
+(1) The path used for communicating data shall be moni‐
+tored for integrity. This shall include monitoring the
+physical communications media and the ability to main‐
+tain intelligible communications.
+(2) Data received from the network shall not affect the opera‐
+tion of the fire alarm system in any way other than to
+display the status of life safety network components.
+(3) Where non-fire alarm systems are interconnected to the
+fire alarm system using a network or other digital commu‐
+nications technique, a signal (e.g., heartbeat, poll, ping,
+query) shall be generated between the fire alarm system
+and the non-fire alarm system. Failure of the fire alarm
+system to receive confirmation of the transmission shall
+cause a trouble signal to indicate within 200 seconds.
+21.3* Elevator Phase I Emergency Recall Operation.
+21.3.1 All fire alarm initiating devices used to initiate elevator
+Phase I Emergency Recall Operation shall be connected to the
+required building fire alarm system.
+21.3.2* In facilities without a required building fire alarm
+system, fire alarm initiating devices used to initiate elevator
+Phase I Emergency Recall Operation shall be connected to
+either a nonrequired building fire alarm system or a dedicated
+function fire alarm control unit that shall be designated as
+“elevator recall control and supervisory control unit,” perma‐
+nently identified on the dedicated function fire alarm control
+unit and on the record drawings.
+21.3.3 Phase I Emergency Recall Operation Initiation.
+N 21.3.3.1 Unless otherwise permitted by 21.3.3.2 or required by
+the authority having jurisdiction, only the elevator lobby, eleva‐
+tor hoistway, elevator machine room, elevator machinery space,
+elevator control room, and elevator control space smoke detec‐
+tors or other automatic fire detection as permitted by 21.3.10
+shall be used to initiate Elevator Phase I Emergency Recall
+Operation.
+N 21.3.3.2 A waterflow switch shall be permitted to initiate Eleva‐
+tor Phase I Emergency Recall Operation upon activation of a
+sprinkler installed at the bottom of the elevator hoistway (the
+elevator pit), provided the waterflow switch and pit sprinkler
+are installed on a separately valved sprinkler line dedicated
+solely for protecting the elevator pit, and the waterflow switch
+is provided without time-delay capability.
+21.3.4 Each fire alarm initiating device used to initiate eleva‐
+tor Phase I Emergency Recall Operation shall be capable of
+FOR INDIVIDUAL USE ONLY
+Copyright 2019 National Fire Protection Association (NFPA®). Licensed by agreement to Carl Weaver FOR INDIVIDUAL USE ONLY and downloaded on 11/05/2019. No reproduction or transmission in any form permitted without
+written permission of NFPA®. For inquiries or access for multiple users, or to report unauthorized use, contact licensing@nfpa.org.
+{C56A4DC7-64F7-4C88-B368-41DE5BD47BC8}
+
+===== PAGE 127 =====
+
+NATIONAL FIRE ALARM AND SIGNALING CODE	72-124
+2019 Edition Shaded text = Revisions. Δ = Text deletions and figure/table revisions. • = Section deletions. N = New material.
+initiating the elevator recall function when all other devices on
+the same initiating device circuit have been manually or auto‐
+matically placed in the alarm condition.
+21.3.5* Elevator Lobby Detector Location.
+N 21.3.5.1 A lobby smoke detector shall be located on the ceil‐
+ing within 21 ft (6.4 m) of the centerline of each elevator door
+within the elevator bank under control of the detector.
+N 21.3.5.2 For lobby ceiling configurations exceeding 15 ft
+(4.6 m) in height or that are other than flat and smooth, detec‐
+tor locations shall be determined in accordance with Chap‐
+ter 17.
+Δ 21.3.6 Smoke detectors or other automatic fire detection as
+permitted in 21.3.10 shall not be installed in unsprinklered
+elevator hoistways unless they are required by ASME
+A17.1/CSA B44, Safety Code for Elevators and Escalators, for actua‐
+tion of the elevator hoistway smoke relief equipment and/or to
+initiate Elevator Phase I Emergency Recall Operation as speci‐
+fied in 21.3.14.1(2) and 21.3.14.2(2) for either of the following:
+(1) Hoistway machinery spaces containing a motor controller
+or driving machine
+(2) Control spaces located in the hoistway
+N 21.3.7* Fire Alarm Initiating Device(s) Inside Elevator Hoist‐
+ways. Fire alarm initiating device(s) required to be installed
+inside an elevator hoistway by other sections of this Code or by
+other governing laws, codes, or standards shall be required to
+be accessible for service, testing, and maintenance from
+outside the elevator hoistway.
+21.3.8* When sprinklers are required in elevator hoistways by
+other codes and standards, fire alarm initiating devices shall be
+installed to initiate Elevator Phase I Emergency Recall Opera‐
+tion in accordance with ASME A17.1/CSA B44, Safety Code for
+Elevators and Escalators, and the following shall apply:
+(1) Where sprinklers are located at the top of the hoistway,
+the fire detection device(s) shall be located at the top of
+the hoistway.
+(2) Where sprinklers are located at the bottom of the hoist‐
+way (the pit), fire detection device(s) shall be installed in
+the pit in accordance with Chapter 17.
+(3) Outputs from the fire alarm system to the elevator system
+shall comply with 21.3.14.
+(4) The fire alarm initiating device(s) shall be installed in
+accordance with Chapter 17.
+21.3.9* Smoke detectors shall not be installed in elevator
+hoistways to initiate Elevator Phase I Emergency Recall Opera‐
+tion unless listed for the environmental conditions.
+21.3.10* If ambient conditions prohibit installation of auto‐
+matic smoke detection used to initiate elevator Phase I Emer‐
+gency Recall Operation, other automatic fire detection
+initiating devices shall be permitted.
+21.3.11 When actuated, any fire alarm initiating device that is
+used to initiate elevator Phase I Emergency Recall Operation
+shall be annunciated at the building fire alarm control unit or
+at the fire alarm control unit described in 21.3.2.
+21.3.12 Actuation of the elevator hoistway, elevator machine
+room, elevator machinery space, elevator control space, or
+elevator control room smoke detectors or other automatic fire
+detection as permitted by 21.3.10 shall cause separate and
+distinct visible annunciation at the building fire alarm control
+unit or at the fire alarm control unit described in 21.3.2.
+21.3.13 Where approved by the authority having jurisdiction,
+the detectors used to initiate Elevator Phase I Emergency
+Recall Operation shall be permitted to initiate a supervisory
+signal in lieu of an alarm signal.
+Δ 21.3.14 The following three separate outputs from the build‐
+ing fire alarm control unit or the fire alarm control unit descri‐
+bed in 21.3.2 to the elevator system shall be provided to
+implement Elevator Phase I Emergency Recall Operation in
+accordance with Section 2.27 of ASME A17.1/CSA B44, Safety
+Code for Elevators and Escalators, as required in 21.3.14.1 and
+21.3.14.2:
+(1) Designated level associated output
+(2) Alternate level associated output
+(3) Elevator machine room, elevator machinery space, eleva‐
+tor control space, or elevator control room associated
+output
+Δ 21.3.14.1* Elevator Phase I Emergency Recall Operation to
+Designated Level. For each elevator or group of elevators
+operating in a group automatic operation, an output shall be
+provided from the fire alarm system to the elevator system in
+response to the following:
+(1) Activation of smoke detector(s) or other automatic fire
+detection as permitted by 21.3.10 located at any associ‐
+ated elevator(s) lobby other than the lobby at the desig‐
+nated level
+(2) Activation of smoke detector(s) or other automatic fire
+detection as permitted by 21.3.10 located at any associ‐
+ated elevator(s) machine room, elevator machinery space
+containing a motor controller or driving machine, eleva‐
+tor control space, or elevator control room, except where
+such rooms or spaces are located at the designated level
+(3) Activation of smoke detector(s) or other automatic fire
+detection as permitted by 21.3.10 located at any associ‐
+ated elevator(s) hoistway when sprinklers are located in
+those hoistways, unless otherwise specified in 21.3.14.2(3)
+Δ 21.3.14.2* Elevator Phase I Emergency Recall Operation to
+Alternate Level. For each elevator or group of elevators oper‐
+ating in a group automatic operation, an output shall be provi‐
+ded from the fire alarm system to the elevator system in
+response to the following:
+(1) Activation of smoke detector(s), or other automatic fire
+detection as permitted by 21.3.10, located at the designa‐
+ted level lobby served by the elevator(s)
+(2) Activation of smoke detector(s), or other automatic fire
+detection as permitted by 21.3.10, located in the elevator
+machine room, elevator machinery space containing a
+motor controller or driving machine, elevator control
+space, or elevator control room serving the elevator(s) if
+such rooms or spaces are located at the designated level
+(3)* Activation of the fire alarm initiating device(s) identified
+in 21.3.14.1(3) if they are installed at or below the lowest
+level of recall in the elevator hoistway and the alternate
+level is located above the designated level
+• 21.4 Elevator Power Shutdown.
+Δ 21.4.1* When heat detector(s) are used to actuate the discon‐
+necting means described in 2.8 of ASME A17.1/CSA B44, Safety
+Code for Elevators and Escalators, to disconnect the main line
+power supply to the affected elevator and any other power
+FOR INDIVIDUAL USE ONLY
+Copyright 2019 National Fire Protection Association (NFPA®). Licensed by agreement to Carl Weaver FOR INDIVIDUAL USE ONLY and downloaded on 11/05/2019. No reproduction or transmission in any form permitted without
+written permission of NFPA®. For inquiries or access for multiple users, or to report unauthorized use, contact licensing@nfpa.org.
+{C56A4DC7-64F7-4C88-B368-41DE5BD47BC8}
+
+===== PAGE 128 =====
+
+EMERGENCY CONTROL FUNCTION INTERFACES 72-125
+Shaded text = Revisions. Δ = Text deletions and figure/table revisions. • = Section deletions. N = New material. 2019 Edition
+supplies used to move the elevator, upon or prior to the activa‐
+tion of sprinkler(s), the detector(s) shall have both a lower
+temperature rating and a lower response time index (RTI) as
+compared to the sprinkler(s).
+21.4.2* The heat detector(s) specified in 21.4.1 shall be
+placed within 24 in. (610 mm) of each sprinkler and be instal‐
+led in accordance with the requirements of Chapter 17.
+21.4.2.1 Engineering methods, such as those specified in
+Annex B, shall be permitted to be used to select and place heat
+detectors to ensure response prior to any sprinkler operation
+under a variety of fire growth rate scenarios.
+Δ 21.4.3* If pressure or waterflow switches are used to actuate
+the disconnecting means specified in 21.4.1, the use of devices
+with time-delay capability shall not be permitted.
+Δ 21.4.4* Control circuit(s) of the disconnecting means speci‐
+fied in 21.4.1 shall be monitored for the presence of operating
+voltage.
+N 21.4.5 Loss of voltage to the control circuit(s) in 21.4.4shall
+cause a supervisory signal to be indicated at the building fire
+alarm control unit or at the control unit specified in or in
+21.3.2.
+Δ 21.4.6 The devices specified in 21.4.2 and 21.4.3 shall be
+monitored for integrity by the fire alarm control unit specified
+in 21.3.1 or 21.3.2.
+21.5* Fire Service Access Elevators. Where one or more
+elevators are specifically designated and marked as fire service
+access elevators, temperature and presence of smoke in eleva‐
+tor lobbies, machine rooms, control rooms, machinery spaces,
+or control spaces shall be continuously monitored and
+displayed on a building fire alarm system annunciator(s), or
+other annunciator(s) as approved by the authority having juris‐
+diction.
+• 21.6* Occupant Evacuation Elevators (OEE).
+Δ 21.6.1 Elevator Status. Where elevators are to be used for
+occupant self-evacuation during fires and non‐fire emergen‐
+cies, they shall comply with Sections 21.5 and 21.6.
+Δ 21.6.2 Occupant Evacuation Operation (OEO). Outputs from
+the fire alarm system to the elevator system shall be provided to
+implement elevator occupant evacuation operation in accord‐
+ance with Section 2.27 of ASME A17.1/CSA B44, Safety Code for
+Elevators and Escalators, as required in 21.6.2.1 through 21.6.2.5.
+N 21.6.2.1 Applicability. OEO shall only be initiated upon an
+automatic or manual signal from the fire alarm system to the
+elevator system.
+N 21.6.2.1.1* OEO shall apply separately to each individual
+elevator and to elevators having group automatic operation or
+designated as an elevator group or group of elevators.
+N 21.6.2.1.2* OEO shall function per 21.6.2.1.1 only prior to
+Elevator Phase I Emergency Recall Operation.
+21.6.2.2 Partial Building Evacuation. Where an elevator or
+group of elevators is designated for use by occupants for self‐
+evacuation, the provisions of 21.6.2.3 through 21.6.2.6 shall
+apply for partial building evacuation.
+21.6.2.3 Initiation. OEO shall be initiated by either manual
+means from the Fire Command Center (FCC) or Emergency
+Command Center in accordance with 21.6.2.4 or by actuation
+of an automatic fire alarm initiating device in accordance with
+21.6.2.3.1.
+N 21.6.2.3.1* An active automatic fire alarm initiating device
+that does not initiate Elevator Phase I Emergency Recall Opera‐
+tion shall cause the fire alarm system to provide a signal to the
+elevator system indicating the floor of an active alarm, except
+as prohibited by 21.6.2.3.6.
+N 21.6.2.3.2* The floors to be evacuated shall be a contiguous
+block of floors designated as “the elevator evacuation zone”
+consisting of at least the floor with an active alarm, two floors
+above the floor with the active alarm, and two floors below the
+floor with the active alarm.
+N 21.6.2.3.3* When the floor designated as the elevator
+discharge level falls within the elevator evacuation zone, it is
+not to be evacuated by the elevator(s), and the fire alarm
+system shall initiate a voice message to instruct the occupants
+on that level to exit the building.
+N 21.6.2.3.4 If activation of an automatic fire alarm initiating
+device that does not initiate Elevator Phase I Emergency Recall
+Operation occurs on an additional floor(s), including the
+elevator discharge level at any time while OEO is in effect, the
+elevator evacuation zone shall be expanded to include all floors
+with an active alarm, all floors between the highest and lowest
+floor with an active alarm, plus two floors above the highest
+floor with an active alarm and two floors below the lowest floor
+with an active alarm.
+N 21.6.2.3.5 If the first active alarm is on the elevator discharge
+level, automatic initiation of OEO shall not be permitted for all
+elevators having that same elevator discharge level.
+N 21.6.2.3.6* When the first active alarm is on an elevator
+discharge level, the fire alarm system shall not send a signal to
+the elevator system for that alarm or any other active alarm that
+does not initiate Elevator Phase I Emergency Recall Operation
+for that group of elevators.
+• 21.6.2.4* Manual Floor Selection.
+N 21.6.2.4.1 A means shall be furnished at the FCC to provide
+for the manual selection of each floor in the building.
+N 21.6.2.4.2 The manual floor selection shall be actuated only
+by authorized or emergency personnel.
+N 21.6.2.4.3 When OEO is not yet in effect and a manual floor
+selection is made to initiate OEO, a signal shall be sent to the
+elevator system simulating an active alarm for that floor.
+N 21.6.2.4.4 When OEO is in effect and a manual floor selection
+is made, the elevator evacuation zone shall be expanded as
+described in 21.6.2.3.4.
+N 21.6.2.4.5 Each manual selection means shall have the capa‐
+bility to cancel a manually actuated output signal.
+•
+N 21.6.2.5* Fire Alarm Output Signals to Elevator System.
+N 21.6.2.5.1 Output from the fire alarm system to the elevator
+system shall identify each floor with an actuated automatic fire
+alarm initiating device.
+FOR INDIVIDUAL USE ONLY
+Copyright 2019 National Fire Protection Association (NFPA®). Licensed by agreement to Carl Weaver FOR INDIVIDUAL USE ONLY and downloaded on 11/05/2019. No reproduction or transmission in any form permitted without
+written permission of NFPA®. For inquiries or access for multiple users, or to report unauthorized use, contact licensing@nfpa.org.
+{C56A4DC7-64F7-4C88-B368-41DE5BD47BC8}
+
+===== PAGE 129 =====
+
+NATIONAL FIRE ALARM AND SIGNALING CODE	72-126
+2019 Edition Shaded text = Revisions. Δ = Text deletions and figure/table revisions. • = Section deletions. N = New material.
+N 21.6.2.5.2 Output from the fire alarm system to the elevator
+system shall include the following:
+(1) Floor(s) with anyactuated fire alarm initiating device(s)
+(2) Floor(s) selected by manual means from the FCC
+N 21.6.2.5.3 The identified floor(s) shall be displayed on the
+building fire alarm system annunciator at the FCC or on a
+listed non-fire alarm system annunciator or other annunciator
+as approved by the authority having jurisdiction.
+Δ 21.6.2.6* Occupant Notification. The in-building emergency
+voice/alarm communications system shall transmit messages
+coordinated with the elevator system’s variable message signs in
+all elevator lobbies.
+21.6.2.6.1 Automatic voice evacuation messages shall be trans‐
+mitted to the elevator evacuation zone floors to indicate the
+need to evacuate and that elevator service is available.
+21.6.2.6.2 Automatic voice messages shall be transmitted to
+the floors that are not in the elevatorevacuation zone and are
+served by the group, to inform occupants that elevator service
+is not available.
+Δ 21.6.2.6.3* Automatic voice messages shall be transmitted to
+the floors in the elevator evacuation zone when no elevators
+serving that elevator evacuation zone are available.
+21.6.2.6.4* Where required by the building code, the emer‐
+gency voice/alarm communications system’s loudspeaker(s)
+located in each OEE lobby shall be connected to a separate
+notification zone for manual paging only.
+N 21.6.2.6.4.1 Individual paging zones per each OEE lobby on
+each flooror a grouped paging zone for all OEE lobbies on a
+floor shall be permitted if approved.
+N 21.6.2.6.4.2 A vertical paging zone for each elevator group
+shall be permitted if approved.
+N 21.6.2.6.5 Visual notification appliances (strobes) shall
+comply with 24.5.17.3(1), 24.5.17.3(2), and 24.5.17.3(3).
+21.6.2.7 Total Evacuation. A means to initiate total building
+evacuation labeled “ELEVATOR TOTAL BUILDING EVACUA‐
+TION” shall be provided at the FCC.
+21.6.2.7.1 When the total building evacuation means is actu‐
+ated, the fire alarm system shall provide a signal to the elevator
+system indicating that all floors in the building are to be evacu‐
+ated.
+•
+Δ 21.6.2.7.2 When the total building evacuation means is actu‐
+ated, the in-building fire emergency voice/alarm communica‐
+tions system shall transmit an evacuation message throughout
+the building.
+N 21.6.2.8* Suspension of OEO for an Individual Elevator or
+Group of Elevators. When OEO has been suspended, the in-
+building fire emergency voice/alarm communications system
+shall transmit messages coordinated with the elevator system’s
+variable message signs in compliance with 21.6.2.6.
+N 21.6.2.9* Partial Termination of OEO.
+N 21.6.2.9.1 OEO shall be terminated for a specific group of
+elevator(s) when the signal(s) provided in 21.3.14.1 and
+21.3.14.2 associated with this group of elevator(s) has initiated
+Elevator Phase I Emergency Recall Operation for this group of
+elevator(s).
+N 21.6.2.9.2 When OEO has been partially terminated, the in-
+building fire emergency voice/alarm communications system
+shall transmit messages coordinated with the elevator system’s
+variable message signs in compliance with 21.6.2.6.
+N 21.6.2.10* Total Termination of OEO. OEO shall be termina‐
+ted for all elevators in the building upon reset of the fire alarm
+system.
+21.7 Heating, Ventilating and Air-Conditioning (HVAC)
+Systems.
+21.7.1 The provisions of Section 21.7 shall apply to the basic
+method by which a fire alarm system interfaces with the heat‐
+ing, ventilating, and air-conditioning (HVAC) systems.
+21.7.2* If connected to the fire alarm system serving the
+protected premises, all detection devices used to cause the
+operation of HVAC systems, smoke dampers, fire dampers, fan
+control, smoke doors, or fire doors shall be monitored for
+integrity in accordance with Section 12.6.
+21.7.3 Connections between fire alarm systems and the HVAC
+system for the purpose of monitoring and control shall operate
+and be monitored in accordance with applicable NFPA stand‐
+ards.
+21.7.4 Smoke detectors mounted in the air ducts of HVAC
+systems shall initiate a supervisory signal.
+21.7.4.1 Smoke detectors mounted in the air ducts of HVAC
+systems in a fire alarm system without a constantly attended
+location or supervising station shall be permitted to initiate an
+alarm signal.
+21.7.4.2 Smoke detectors mounted in the air ducts of HVAC
+systems shall be permitted to initiate an alarm signal where
+required by other governing laws, codes, or standards.
+21.7.5 If the fire alarm control unit actuates the HVAC system
+for the purpose of smoke control, the automatic alarm-
+initiating zones shall be coordinated with the smoke control
+zones they actuate.
+21.7.6 If carbon monoxide detection or a dedicated carbon
+monoxide system initiates a ventilation response, a smoke
+control response of the fire alarm system shall take precedence
+over the response of the carbon monoxide detectors during a
+fire alarm condition.
+21.7.7 Where interconnected as a combination system, a fire
+fighter’s smoke control station (FSCS) shall be provided to
+perform manual control over the automatic operation of the
+system’s smoke control strategy.
+21.7.8 Where interconnected as a combination system, the
+smoke control system programming shall be designed such that
+normal HVAC operation or changes do not prevent the inten‐
+ded performance of the smoke control strategy.
+N 21.8 High Volume Low Speed (HVLS) Fans. Where required
+by NFPA 13, all HVLS fans shall be interlocked to shut down
+upon actuation of a sprinkler waterflow switch that indicates
+waterflow in the area served by the fans.
+21.9 Door and Shutter Release.
+21.9.1 The provisions of Section 21.9 shall apply to the meth‐
+ods of connection of door and shutter hold-open release devi‐
+ces and to integral door and shutter hold-open release, closer,
+and smoke detection devices.
+FOR INDIVIDUAL USE ONLY
+Copyright 2019 National Fire Protection Association (NFPA®). Licensed by agreement to Carl Weaver FOR INDIVIDUAL USE ONLY and downloaded on 11/05/2019. No reproduction or transmission in any form permitted without
+written permission of NFPA®. For inquiries or access for multiple users, or to report unauthorized use, contact licensing@nfpa.org.
+{C56A4DC7-64F7-4C88-B368-41DE5BD47BC8}
+
+===== PAGE 130 =====
+
+PROTECTED PREMISES ALARM AND SIGNALING SYSTEMS 72-127
+Shaded text = Revisions. Δ = Text deletions and figure/table revisions. • = Section deletions. N = New material. 2019 Edition
+21.9.2 Other than smoke detectors used only for door and
+shutter release and not for open area protection, all detection
+devices used for door and shutter hold-open release service
+shall be monitored for integrity in accordance with
+Section 12.6.
+21.9.3 Unless installed as Class D circuits in accordance with
+12.3.4, all door and shutter hold-open release and integral
+door and shutter release and closure devices used for release
+service shall be monitored for integrity in accordance with
+Section 12.6.
+21.9.4 Magnetic door and shutter holders that allow doors to
+close upon loss of operating power shall not be required to
+have a secondary power source.
+21.10 Electrically Locked Doors.
+21.10.1* Electrically locked doors in a required means of
+egress shall unlock in the direction of egress where required by
+other laws, codes, and governing standards.
+21.10.2 For all means of egress doors connected in accord‐
+ance with 21.10.1 where secondary power supplies of fire alarm
+control units are used, they shall comply with 10.6.7.
+21.10.3* Secondary power supplies of fire alarm control units
+shall not be utilized to maintain means of egress doors in the
+locked condition unless the fire alarm control unit is arranged
+with circuitry and sufficient secondary power to ensure that the
+means of egress doors will unlock within 10 minutes of loss of
+primary power.
+21.10.4 Locks powered by independent power supplies dedi‐
+cated to lock power and access control functions, and that
+unlock upon loss of power, shall not be required to comply
+with 21.10.2.
+21.10.5 If means of egress doors are unlocked by the fire
+alarm system, the unlocking function shall occur prior to, or
+concurrent with, activation of any public-mode notification
+appliances in the area(s) served by the normally locked means
+of egress doors.
+21.10.6 All doors that are required to be unlocked by the fire
+alarm system in accordance with 21.10.1 shall remain unlocked
+until the fire alarm condition is manually reset.
+21.11* Exit Marking Audible Notification Systems.
+21.11.1 Where required by other governing laws, codes, stand‐
+ards, or the authority having jurisdiction, exit marking audible
+notification appliances shall be actuated by the building fire
+alarm system.
+21.11.2 Exit marking systems shall meet the requirements of
+Chapter 18.
+Chapter 22 Reserved
+Chapter 23 Protected Premises Alarm and Signaling Systems
+23.1 Application.
+Δ 23.1.1* The application, installation, and performance of
+alarm and signaling systems within protected premises shall
+comply with the requirements of this chapter.
+23.1.2 The requirements of Chapters 7, 10, 12, 14, 17, 18, 21,
+24, and 26 shall apply unless otherwise noted in this chapter.
+• 23.1.3 The requirements of this chapter shall not apply to
+Chapter 29 unless otherwise noted.
+• 23.2 General.
+23.2.1* Purpose. The systems covered in Chapter 23 shall be
+for the protection of life or property, or both, by indicating the
+existence of heat, fire, smoke, carbon monoxide, or other
+emergencies impacting the protected premises.
+23.2.2 Software and Firmware Control.
+23.2.2.1 A record of installed software and firmware version
+numbers shall be prepared and maintained in accordance with
+Sections 7.5 and 7.7.
+23.2.2.1.1* Software and firmware within the alarm and
+signaling system that interfaces to other required software or
+firmware shall be functionally compatible.
+23.2.2.1.2* The compatible software or firmware versions shall
+be documented at the initial acceptance test and at any reac‐
+ceptance tests.
+23.2.2.2* All software and firmware shall be protected from
+unauthorized changes.
+23.2.2.3 All changes shall be tested in accordance with 14.4.2.
+N 23.2.3 Separate Systems. The requirements of this chapter
+shall not preclude the use of separate fire, carbon monoxide,
+or other life safety systems provided the systems do not gener‐
+ate simultaneous conflicting notification to the building occu‐
+pants or conflicting actuation of safety functions.
+23.3 System Features. The features required for a protected
+premises fire alarm system shall be documented as a part of the
+system design and shall be determined in accordance with
+23.3.1 through 23.3.3.
+23.3.1* Required Systems. Features for required systems shall
+be based on the requirements of other applicable codes or stat‐
+utes that have been adopted by the enforcing jurisdiction.
+23.3.2* Nonrequired (Voluntary) Systems and Components.
+The features for a nonrequired system shall be established by
+the system designer on the basis of the goals and objectives
+intended by the system owner.
+23.3.2.1 Nonrequired protected premises systems and compo‐
+nents shall meet the requirements of this Code.
+23.3.2.2 Nonrequired systems and components shall be identi‐
+fied on the record drawings required in 7.2.1(15).
+23.3.3 Required Features.
+Δ 23.3.3.1* Building Alarm and Signaling Systems. Protected
+premises systems that serve the alarm and signaling needs of a
+building or buildings shall include one or more of the follow‐
+ing systems or functions:
+(1) Manual fire alarm signal initiation
+(2) Automatic fire alarm and supervisory signal initiation
+(3) Monitoring of abnormal conditions in fire suppression
+systems
+(4) Actuation of fire suppression systems
+(5) Actuation of emergency control functions
+(6) Actuation of fire alarm notification appliances
+FOR INDIVIDUAL USE ONLY
+Copyright 2019 National Fire Protection Association (NFPA®). Licensed by agreement to Carl Weaver FOR INDIVIDUAL USE ONLY and downloaded on 11/05/2019. No reproduction or transmission in any form permitted without
+written permission of NFPA®. For inquiries or access for multiple users, or to report unauthorized use, contact licensing@nfpa.org.
+{C56A4DC7-64F7-4C88-B368-41DE5BD47BC8}
+
+===== PAGE 131 =====
+
+NATIONAL FIRE ALARM AND SIGNALING CODE	72-128
+2019 Edition Shaded text = Revisions. Δ = Text deletions and figure/table revisions. • = Section deletions. N = New material.
+(7) In-building fire emergency voice/alarm communications
+(8) Automatic carbon monoxide alarm and supervisory
+signal initiation
+(9) Actuation of carbon monoxide notification appliances
+(10) Guard’s tour supervisory service
+(11) Process monitoring supervisory systems
+(12) Actuation of off-premises signals
+(13) Combination systems
+23.3.3.2* Dedicated Function Fire Alarm Systems.
+23.3.3.2.1 In facilities without a building fire alarm system, a
+dedicated function fire alarm system shall be permitted and
+shall not be required to include other functions or features of a
+building fire alarm system.
+23.3.3.2.2 Where a dedicated function fire alarm system exists
+and a building fire alarm system is subsequently installed, the
+systems shall be interconnected and comply with 23.8.2.
+23.4 System Performance and Integrity.
+23.4.1 Purpose. Section 23.4 provides information that shall
+be used in the design and installation of protected premises
+fire alarm systems for the protection of life and property.
+23.4.2 Circuit Designations. Initiating device circuits, notifica‐
+tion appliance circuits, and signaling line circuits shall be desig‐
+nated by class, depending on the circuit’s capability to continue
+to operate during specified fault conditions as indicated in
+Sections 23.5 through 23.7.
+23.4.2.1 Specified fault conditions shall result in the annunci‐
+ation of a trouble signal at the protected premises within
+200 seconds as required in Section 12.6.
+23.4.2.2* Where the power to a device is supplied over a sepa‐
+rate circuit from the signaling line circuit or initiating device
+circuit, the operation of the power circuit shall meet the
+performance requirements of the initiating device circuit or
+signaling line circuit, unless different performance require‐
+ments are established in accordance with the evaluation in
+23.4.3 and approved by the authority having jurisdiction.
+23.4.3 Pathway Classification.
+23.4.3.1 The class of pathways shall be determined from an
+evaluation based on the path performance as required by
+governing laws, codes, standards, and a site-specific engineer‐
+ing analysis.
+23.4.3.2 When determining the integrity and reliability of the
+interconnecting signaling paths (circuits) installed within the
+protected premises, the following influences shall be consid‐
+ered:
+(1) Transmission media used
+(2) Length of the circuit conductors
+(3) Total building area covered by, and the quantity of initiat‐
+ing devices and notification appliances connected to, a
+single circuit
+(4) Effect of a fault in the fire alarm system that would hinder
+the performance objectives of the system that protects the
+occupants, mission, and property of the protected prem‐
+ises
+(5) Nature of hazards present within the protected premises
+(6) Functional requirements of the system necessary to
+provide the level of protection required for the system
+(7) Size and nature of the population of the protected prem‐
+ises
+23.4.3.3 Results of the evaluation required by 23.4.3.1 shall be
+included with the documentation required by 7.3.9.
+23.5 Performance of Initiating Device Circuits (IDCs). The
+assignment of class designations to initiating device circuits
+shall be based on their performance capabilities under abnor‐
+mal (fault) conditions in accordance with the requirements for
+Class A or Class B pathways specified in Chapter 12.
+23.6 Performance of Signaling Line Circuits (SLCs). The
+assignment of class designations to signaling line circuits shall
+be based on their performance capabilities under abnormal
+(fault) conditions in accordance with the requirements for
+Class A, Class B, Class N, or Class X pathways specified in Chap‐
+ter 12.
+23.6.1* SLC Zones. A single fault on a pathway connected to
+the addressable devices shall not cause the loss of the devices in
+more than one zone.
+23.6.1.1 For the purpose of this section, each floor of the
+building shall be considered a separate zone.
+23.6.1.2 For the purpose of this section, if a floor of the build‐
+ing is subdivided into multiple zones by fire or smoke barriers
+and the fire plan for the protected premises allows relocation
+of occupants from the zone of origin to another zone on the
+same floor, each zone on the floor shall be considered a sepa‐
+rate zone.
+23.6.1.3* The requirements in 23.6.1 shall not apply to the
+following:
+(1) Circuits between enclosures containing transponders and
+control units regardless of the number of initiating devi‐
+ces, notification appliances, or control relays that might
+be connected to those control units
+(2) Circuits connecting short-circuit fault isolation modules
+to enclosures containing transponders and control units
+where the conductors are installed in metallic raceway or
+equivalently protected against mechanical injury and
+where the circuit does not exceed 3 ft (0.9 m) in length
+(3)* Alterations or modifications made to an existing SLC not
+required to comply with 23.6.1 when originally installed
+23.6.1.4 The loss of more than one zone shall be permitted on
+a documented performance-based design approach.
+23.6.1.5* Performance-based designs submitted to the author‐
+ity having jurisdiction for review and approval shall include
+documentation, in an approved format, of each performance
+objective and applicable scenario, together with technical
+substantiation used in establishing the proposed zone perform‐
+ance.
+23.6.2* Class N Devices. Unless permitted in 23.6.2.1 or
+23.6.2.2, no area or zone shall be served solely by a single
+device where Class N pathways are deployed, such that a single
+device failure resulting from a multiple ground-fault pathway
+failure would render an area or zone incapable of initiating
+input signals or receiving output signals.
+23.6.2.1 Where a risk analysis shows that only one device is
+required and where acceptable to the authority having jurisdic‐
+tion, the requirements of 23.6.2 shall not apply.
+N 23.6.2.2 Multiple devices shall not be required in areas served
+by pathways not susceptible to ground faults, such as fiber or
+wireless pathways.
+FOR INDIVIDUAL USE ONLY
+Copyright 2019 National Fire Protection Association (NFPA®). Licensed by agreement to Carl Weaver FOR INDIVIDUAL USE ONLY and downloaded on 11/05/2019. No reproduction or transmission in any form permitted without
+written permission of NFPA®. For inquiries or access for multiple users, or to report unauthorized use, contact licensing@nfpa.org.
+{C56A4DC7-64F7-4C88-B368-41DE5BD47BC8}
+
+===== PAGE 132 =====
+
+PROTECTED PREMISES ALARM AND SIGNALING SYSTEMS 72-129
+Shaded text = Revisions. Δ = Text deletions and figure/table revisions. • = Section deletions. N = New material. 2019 Edition
+N 23.6.2.3* Where a device as referenced by 23.6.2is serviced by
+only a single pathway, it shall terminate that pathway with no
+ability to connect additional endpoint devices to the pathway.
+Δ 23.6.2.4* A single fault on a Class N pathway shall not cause
+the loss of more than one addressable device.
+Δ 23.6.3 Class N Shared Pathways. Class N pathways shall be
+required to use shared pathway Level 3 as specified in 12.5.4
+except as permitted by 23.6.3.2.
+Δ 23.6.3.1 Accessibility. Class N pathways shall not be accessible
+to the general public or building occupants for any purpose
+other than specified in the network design analysis, mainte‐
+nance, and deployment plans.
+23.6.3.2 Level 1 and Level 2. Shared pathways Levels 1 and 2
+shall be permitted subject to approval of the authority having
+jurisdiction, based on documentation of the deployment,
+change control, maintenance plans, management organization,
+network design analysis, and a risk analysis as identified in
+23.6.3.3 through 23.6.3.8.
+23.6.3.3* Deployment Plan.
+23.6.3.3.1 All equipment connected to shared pathways shall
+be documented in the deployment plan.
+23.6.3.3.1.1 The documentation shall include manufacturer,
+model, listings, and intended purpose and reason for inclusion
+on the shared network.
+23.6.3.3.1.2* The deployment plan shall identify how and
+where each piece of equipment is connected.
+23.6.3.3.2* All connection ports, used or spare, where any
+unauthorized or unintended equipment could be added to the
+shared network, shall be identified as for use only by equip‐
+ment consistent with the deployment plan.
+N 23.6.3.3.3 Equipment Location.
+N 23.6.3.3.3.1 The requirements of 23.6.3.3.3.2 through
+23.6.3.3.3.4 shall apply to all equipment rooms, equipment
+closets, telecommunication rooms, telecommunication enclo‐
+sures, or the like, for which both Class N life safety network
+infrastructure and non–life safety network equipment resides.
+N 23.6.3.3.3.2* Equipment rooms or enclosures shall be permit‐
+ted to contain both Class N life safety networking cable, equip‐
+ment, and associated infrastructure provided the deployment
+satisfies 23.6.3.3.3.3 through 23.6.3.3.3.4.
+N 23.6.3.3.3.3 Class N life safety network cabling, equipment,
+and infrastructure shall be clearly segregated and identified as
+“Life Safety Network.”
+N 23.6.3.3.3.4 Equipment rooms or enclosures shall be accessi‐
+ble to only authorized personnel via a locked access or via an
+enclosure requiring the use of tools to open, as acceptable by
+the authority having jurisdiction.
+23.6.3.4 Change Control Plan. Configuration upgrades and
+updates shall be governed by a change control plan that deter‐
+mines the policy and procedure of the change and ensures that
+all documentation is correspondingly updated.
+23.6.3.5 Management Organization.
+Δ 23.6.3.5.1* An organization shall be established and main‐
+tained to manage the life safety network and shall perform the
+following:
+(1) Contain members appropriately certified by each manu‐
+facturer of the equipment and devices deployed on
+shared pathways to maintain such a network
+(2) Service and maintain all shared Class N pathways
+(3) Maintain the deployment and shared pathways plan for
+the lifetime of the shared pathways
+23.6.3.5.2* Other service personnel, even when certified to
+service a specific system (i.e., fire alarm or MNS), shall be
+authorized and managed by this organization to ensure any
+outages of any system are planned, managed, and documented
+and appropriate steps are taken during outages to provide
+alternate protection of life and property.
+23.6.3.6 Network Design Analysis.
+23.6.3.6.1* The analysis shall be performed to determine and
+document communications capability as follows:
+(1) Calculation of minimum required bandwidth such that all
+life safety systems can be guaranteed to operate simulta‐
+neously and within required time limits
+(2) Total bandwidth provided by the network
+(3) Future bandwidth requirements
+(4) Method of providing and maintaining the prioritization
+of life safety traffic over non–life safety traffic
+23.6.3.6.2* The analysis shall determine and document the
+power distribution capability as follows:
+(1) The methods provided to maintain power to all shared
+pathway equipment
+(2) A calculation of power requirements of all connected
+equipment
+(3) Secondary power capacities provided to maintain all life
+safety equipment with minimum operational capacity in
+accordance with 10.6.7.2.1.2
+(4) Methods to disengage any non–life safety equipment in
+the event of emergency operation if required to support
+the minimum operational capacity requirements
+23.6.3.7 Maintenance Plan.
+23.6.3.7.1* The maintenance plan shall identify policy and
+procedures to monitor, maintain, test, and control change of
+the shared pathways.
+23.6.3.7.2* Written procedures shall be presented in mainte‐
+nance plans to govern the following:
+(1) Physical access to all parts of the Class N network equip‐
+ment (i.e., switches, ports, server, controllers, devices, or
+components)
+(2) Electronic access to all parts of the Class N network (i.e.,
+passwords, addresses)
+(3)* Service outage impairment process with notices of impair‐
+ment and contingency plans for affected systems
+(4) Upgrade procedures
+(5) Change control procedures, with consideration given to
+require an updated risk analysis if necessary
+(6) Prioritization and/or segregation configuration informa‐
+tion for life safety traffic
+FOR INDIVIDUAL USE ONLY
+Copyright 2019 National Fire Protection Association (NFPA®). Licensed by agreement to Carl Weaver FOR INDIVIDUAL USE ONLY and downloaded on 11/05/2019. No reproduction or transmission in any form permitted without
+written permission of NFPA®. For inquiries or access for multiple users, or to report unauthorized use, contact licensing@nfpa.org.
+{C56A4DC7-64F7-4C88-B368-41DE5BD47BC8}
+
+===== PAGE 133 =====
+
+NATIONAL FIRE ALARM AND SIGNALING CODE	72-130
+2019 Edition Shaded text = Revisions. Δ = Text deletions and figure/table revisions. • = Section deletions. N = New material.
+(7) Maintenance and testing plans to ensure the minimum
+operational capacity with respect to secondary power is
+maintained
+(8) Other service, maintenance, or reconfiguration plans for
+any connected equipment
+23.6.3.8* Network Risk Analysis for Class N.
+N 23.6.3.8.1 Each application of a Class N deployment shall be
+specific to the nature and anticipated risks of each facility for
+which it is designed.
+N 23.6.3.8.2 The risk analysis shall address both fire and non-fire
+emergencies when determining risk tolerances for the surviva‐
+bility of the network and the systems and devices it serves.
+N 23.6.3.8.3 The detail and complexity of the risk analysis shall
+be commensurate with the complexity of the facility for which
+the network is to be installed.
+N 23.6.3.8.4 The risk analysis shall be permitted to be limited in
+scope to address the requirements of an existing emergency
+response plan.
+N 23.6.3.8.5 The risk analysis shall consider characteristics of the
+buildings, areas, spaces, campuses or regions, equipment, and
+operations that are not inherent in the design specifications.
+N 23.6.3.8.6 Those elements that are not inherent in the design
+specifications, but that affect occupant behavior or the rate of
+hazard development, shall be explicitly identified and included
+in the risk analysis.
+N 23.6.3.8.7 The risk analysis shall consider the following types
+of potential events, which are not all-inclusive but reflect the
+general categories that shall be considered in the risk analysis:
+(1) Natural hazards — geological events
+(2) Natural hazards — meteorological events
+(3) Human caused — accidental events
+(4) Human caused — intentional events
+(5) Technological — caused events
+N 23.6.3.8.8 All other identified risks as required by the author‐
+ity having jurisdiction shall be discussed and addressed in the
+analysis and maintenance plans.
+23.7 Performance of Notification Appliance Circuits (NACs).
+The assignment of class designations to notification appliance
+circuits shall be based on their performance capabilities under
+abnormal (fault) conditions in accordance with the require‐
+ments for Class A, Class B, or Class X pathways specified in
+Chapter 12.
+23.8 System Requirements.
+23.8.1 General.
+23.8.1.1* Presignal Feature.
+23.8.1.1.1 Systems that have a presignal feature complying
+with 23.8.1.1 shall be permitted if approved by the authority
+having jurisdiction.
+23.8.1.1.2 A presignal feature shall meet the following condi‐
+tions:
+(1) The initial fire alarm signals sound only in department
+offices, control rooms, fire brigade stations, or other
+constantly attended central locations.
+(2) Where there is a connection to a remote location, the
+transmission of the fire alarm signal to the supervising
+station actuates upon the initial alarm signal.
+(3) Subsequent system operation is by either of the following
+means:
+(a) Human action that actuates the general fire alarm
+(b) A feature that allows the control equipment to delay
+the general alarm by more than 1 minute after the
+start of the alarm processing
+23.8.1.2 Positive Alarm Sequence.
+23.8.1.2.1 Systems that have positive alarm features complying
+with 23.8.1.2 shall be permitted if approved by the authority
+having jurisdiction.
+23.8.1.2.1.1 The positive alarm sequence operation shall
+comply with the following:
+(1) To initiate the positive alarm sequence operation, the
+signal from an automatic fire detection device selected
+for positive alarm sequence operation shall be acknowl‐
+edged at the fire alarm control unit by trained personnel
+within 15 seconds of annunciation.
+(2) If the signal is not acknowledged within 15 seconds, noti‐
+fication signals in accordance with the building evacua‐
+tion or relocation plan and remote signals shall be
+automatically and immediately actuated.
+(3) If the positive alarm sequence operation is initiated in
+accordance with 23.8.1.2.1.1(1), trained personnel shall
+have an alarm investigation phase of up to 180 seconds to
+evaluate the fire condition and reset the system.
+(4) If the system is not reset during the alarm investigation
+phase, notification signals in accordance with the build‐
+ing evacuation or relocation plan and remote signals shall
+be automatically and immediately actuated.
+(5) If a second automatic fire detector selected for positive
+alarm sequence is actuated during the alarm investigation
+phase, notification signals in accordance with the build‐
+ing evacuation or relocation plan and remote signals shall
+be automatically and immediately actuated.
+(6)* If any other fire alarm initiating device is actuated, notifi‐
+cation signals in accordance with the building evacuation
+or relocation plan and remote signals shall be automati‐
+cally and immediately actuated.
+23.8.1.2.1.2* The system shall provide means for bypassing
+the positive alarm sequence.
+23.8.2* Alarm Control Units.
+23.8.2.1 Alarm and signaling systems shall be permitted to
+combine all detection, notification, and auxiliary functions in a
+single system or be a combination of component subsystems.
+23.8.2.2 Except as permitted in 23.8.2.3, the alarm and signal‐
+ingsystem components shall be permitted to share control
+equipment or shall be able to operate as stand-alone subsys‐
+tems, but shall be arranged to function as a single system in
+accordance with 23.8.2.4 through 23.8.2.10.
+23.8.2.3 Where the building is not served by a building fire
+alarm system, independent dedicated function fire alarm
+systems and/or releasing fire alarm systems shall not be
+required to be interconnected to function as a single system.
+FOR INDIVIDUAL USE ONLY
+Copyright 2019 National Fire Protection Association (NFPA®). Licensed by agreement to Carl Weaver FOR INDIVIDUAL USE ONLY and downloaded on 11/05/2019. No reproduction or transmission in any form permitted without
+written permission of NFPA®. For inquiries or access for multiple users, or to report unauthorized use, contact licensing@nfpa.org.
+{C56A4DC7-64F7-4C88-B368-41DE5BD47BC8}
+
+===== PAGE 134 =====
+
+PROTECTED PREMISES ALARM AND SIGNALING SYSTEMS 72-131
+Shaded text = Revisions. Δ = Text deletions and figure/table revisions. • = Section deletions. N = New material. 2019 Edition
+23.8.2.4 All component subsystems shall be capable of simulta‐
+neous, full-load operation without degradation of the required
+overall system performance.
+23.8.2.5 The method of interconnection of fire alarm control
+units shall meet the monitoring requirements of Section 12.6
+and NFPA 70, Article 760, and shall be achieved by the follow‐
+ing recognized means:
+(1) Electrical contacts listed for the connected load
+(2) Data communications over a signaling line circuit(s)
+dedicated to the fire alarm or shared with other premises
+operating systems
+(3) Other listed methods
+23.8.2.6 Where the signaling line circuit is shared by other
+premises operating systems, operation shall be in accordance
+with 23.8.4.
+23.8.2.6.1 All signal control and transport equipment (such as
+routers and servers) located in a critical fire alarm or emer‐
+gency control function interface device signaling path shall be
+listed for fire alarm service, unless the following conditions are
+met:
+(1) The equipment meets the performance requirements of
+10.3.5.
+(2) The equipment is provided with primary and secondary
+power and monitored for integrity as required in
+Section 10.6, 10.6.9, Section 10.19, and Section 12.6.
+(3) All programming and configuration ensure a fire alarm
+system actuation time as required in 10.11.1.
+(4) System bandwidth is monitored to confirm that all
+communications between equipment that is critical to the
+operation of the fire alarm system or emergency control
+function interface devices take place within 10 seconds;
+failure shall be indicated within 200 seconds.
+(5) Failure of any equipment that is critical to the operation
+of the fire alarm system or emergency control function
+interface devices is indicated at the master fire alarm
+control unit within 200 seconds.
+23.8.2.6.2 A listed barrier gateway, integral with or attached to
+each control unit or group of control units, as appropriate,
+shall be provided to prevent the other systems from interfering
+with or controlling the fire alarm system.
+23.8.2.6.3 Where Class N is utilized for shared equipment, the
+requirements in 23.6.3 shall also apply.
+Δ 23.8.2.7 Each interconnected alarm control unit shall be sepa‐
+rately monitored for alarm, supervisory, and trouble conditions
+with supervised pathways that are in accordance with the manu‐
+facturers’ published instructions.
+Δ 23.8.2.7.1 Alarm conditions on interconnected alarm control
+units shall annunciate as alarm signals and initiate the evacua‐
+tion signals.
+Δ 23.8.2.7.2 Supervisory conditions on interconnected alarm
+control units shall annunciate as supervisory signals.
+Δ 23.8.2.7.3 Trouble conditions on interconnected alarm
+control units shall annunciate as trouble signals.
+23.8.2.7.4* Where supervised pathways between interconnec‐
+ted fire alarm control units is not achievable, a supervised
+annunciator shall be installed adjacent to control unit(s) to
+annunciate the status of the each control unit.
+23.8.2.8 Interconnected fire alarm control unit alarm signals
+shall be permitted to be monitored by zone or by combined
+common signals.
+Δ 23.8.2.9 Protected premises alarm control units shall be capa‐
+ble of being reset or silenced only from the protected premises,
+unless otherwise permitted by 23.8.2.10.
+23.8.2.9.1 Where multiple control units of the same manufac‐
+turer are interconnected in a network arrangement and serve
+the same protected premises, the control units shall be
+arranged to be reset or silenced from one location.
+23.8.2.9.2 Where multiple control units of the different manu‐
+facturers are interconnected in accordance with 23.8.2.5
+through 23.8.2.8 and serve the same protected premises, the
+control units shall be permitted to be reset or silenced individ‐
+ually at each control unit.
+23.8.2.9.3 Resetting procedures shall be documented and
+permanently posted beside each control unit and annunciator.
+23.8.2.10 Remote resetting and silencing of a fire alarm
+control unit from other than the protected premises shall be
+permitted with the approval of the authority having jurisdic‐
+tion.
+23.8.3 Protected Premises Alarm and Signaling Systems Inter‐
+connected with Dwelling Unit Fire and Carbon Monoxide
+Warning Equipment.
+Δ 23.8.3.1 A protected premises system shall be permitted to be
+interconnected to the household warning equipment for the
+purpose of actuating the notification appliances connected to
+the household warning equipment.
+23.8.3.2 The actuation of dwelling unit warning equipment
+shall only be permitted to be displayed at the protected prem‐
+ises control unit and annunciators as supervisory signals.
+Δ 23.8.3.3 If interconnected, an alarm condition at the protec‐
+ted premises system shall cause the alarm notification appli‐
+ance(s) within the family living unit of the dwelling unit
+warning equipment to become energizedand remain energized
+until the protected premises system is silenced or reset.
+Δ 23.8.3.4 The interconnection circuit or path from the protec‐
+ted premises system to the dwelling unit warning equipment
+shall be monitored for integrity by the protected premises
+system in accordance with Section 12.6.
+Δ 23.8.3.5 An alarm condition occurring at the dwelling unit
+fire warning equipment or the operation of any test switches
+provided as part of the dwelling unit warning equipment shall
+not cause an alarm condition at the protected premises system.
+23.8.4 Combination Systems.
+23.8.4.1* Fire alarm systems shall be permitted to share
+components, equipment, circuitry, and installation wiring with
+non–fire alarm systems.
+N 23.8.4.2 Building System Information Unit (BSIU).
+N 23.8.4.2.1* A building system information unit (BSIU) shall
+be listed to product safety standard ANSI/UL 60950, Informa‐
+tion Technology Equipment — Part 1: General Requirements, or
+ANSI/UL 62368-1 Audio/Video, Information and Communication
+Technology Equipment — Part 1: Safety Requirements, or equivalent.
+FOR INDIVIDUAL USE ONLY
+Copyright 2019 National Fire Protection Association (NFPA®). Licensed by agreement to Carl Weaver FOR INDIVIDUAL USE ONLY and downloaded on 11/05/2019. No reproduction or transmission in any form permitted without
+written permission of NFPA®. For inquiries or access for multiple users, or to report unauthorized use, contact licensing@nfpa.org.
+{C56A4DC7-64F7-4C88-B368-41DE5BD47BC8}
+
+===== PAGE 135 =====
+
+NATIONAL FIRE ALARM AND SIGNALING CODE	72-132
+2019 Edition Shaded text = Revisions. Δ = Text deletions and figure/table revisions. • = Section deletions. N = New material.
+N 23.8.4.2.2 Where a BSIU provides control of the fire alarm
+system, the requirements in 23.8.4.2.2.1 through 23.8.4.2.2.4
+shall also apply.
+N 23.8.4.2.2.1 A fire alarm control unit (FACU) controlling the
+fire alarm system shall be located within the same room as the
+BSIU.
+N 23.8.4.2.2.2* The BSIU shall not be permitted to perform fire
+alarm system control features that cannot be accomplished by
+the FACU within the room.
+N 23.8.4.2.2.3 The communication path from the FACU and the
+BSIU shall meet the requirements of 23.8.4.4.1 through
+23.8.4.4.3.
+N 23.8.4.2.2.4 The application software for the BSIU shall be
+listed to ANSI/UL 864, Control Units and Accessories for Fire Alarm
+Systems.
+23.8.4.3 Operation of a non–fire system function(s) originat‐
+ing within a connected non-fire system shall not interfere with
+the required operation of the fire alarm system, unless other‐
+wise permitted by this Code.
+23.8.4.4* For non–fire alarm equipment listed to the perform‐
+ance requirements specified in 10.3.5, the requirements of
+23.8.4.4.1 through 23.8.4.4.3 shall apply.
+23.8.4.4.1 The equipment shall be permitted to be attached to
+a fire alarm circuit, either among the fire alarm devices or as a
+branch or extension of the fire alarm pathways, when the
+following requirements are met:
+(1) All the equipment and pathways shall meet the monitor‐
+ing for integrity requirements of 10.6.9, Section 10.19,
+and Section 12.6.
+(2) All the equipment and pathways shall be maintained by a
+single service organization.
+(3) All the equipment and pathways shall be installed in
+accordance with the requirements of this Code.
+(4) All the equipment shall be listed as compatible with the
+fire alarm equipment or the equipment shall have an
+interface listed as compatible with the fire alarm equip‐
+ment.
+23.8.4.4.2 If the equipment is attached to the fire alarm
+system via separate pathways, then short circuits or open
+circuits in this equipment, or between this equipment and the
+fire alarm system pathways, shall not impede or impair the
+monitoring for integrity of the fire alarm system or prevent
+alarm, supervisory, or fire safety control signal transmissions.
+23.8.4.4.3 Grounds in this equipment, or between this equip‐
+ment and the fire alarm system pathways, shall be reported,
+annunciated, and corrected in the same manner as grounds in
+the rest of the fire alarm system.
+23.8.4.5 For non-fire equipment not listed to the performance
+requirements specified in 10.3.5, the requirements of 23.8.4.5.1
+through 23.8.4.5.3 shall apply
+23.8.4.5.1 Short circuits or open circuits in the equipment, or
+between the equipment and the fire alarm system pathways,
+shall not impede or impair the monitoring for integrity of the
+fire alarm system or prevent alarm, supervisory, or fire safety
+control signal transmissions.
+23.8.4.5.2 Grounds in this equipment, or between this equip‐
+ment and the fire alarm system pathways, shall be reported,
+annunciated, and corrected in the same manner as grounds in
+the rest of the fire alarm system.
+23.8.4.5.3 Removal, replacement, failure, maintenance proce‐
+dures, or ground on this hardware, software, or circuits shall
+not impair the required operation of the fire alarm system.
+23.8.4.6 Loudspeakers used as alarm notification appliances
+on fire alarm systems shall also be permitted to be used for
+emergency communications systems when installed in accord‐
+ance with Chapter 24.
+23.8.4.7* In combination systems, fire alarm signals shall be
+distinctive, clearly recognizable, and shall be indicated as
+follows in descending order of priority, except where otherwise
+required by other governing laws, codes or standards, or by
+other parts of this Code:
+(1) Signals associated with life safety
+(2) Signals associated with property protection
+(3) Trouble signals associated with life and/or property
+protection
+(4) All other signals
+23.8.4.8 If the authority having jurisdiction determines that
+the information being displayed or annunciated on a combina‐
+tion system is excessive and is causing confusion and delayed
+response to a fire emergency, the authority having jurisdiction
+shall be permitted to require that the display or annunciation
+of information for the fire alarm system be separate from, and
+have priority in accordance with, 23.8.4.7, over information for
+the non–fire alarm systems.
+23.8.4.9* Carbon Monoxide Detector Signals. Unless other‐
+wise permitted by 23.8.4.9.1, signals from carbon monoxide
+detectors and carbon monoxide detection systems transmitted
+to a fire alarm system shall be indicated as a carbon monoxide
+alarm signal.
+N 23.8.4.9.1 When in accordance with the emergency response
+plan, evacuation plan, fire safety plan, or similar documenta‐
+tion, signals from carbon monoxide detectors and carbon
+monoxide detection systems transmitted to a fire alarm system
+shall be permitted to be supervisory signals.
+23.8.4.9.2* Fire alarm system processing for and occupant
+response to carbon monoxide alarm signals shall be in accord‐
+ance with the emergency response plan, evacuation plan, fire
+safety plan, or similar documentation.
+N 23.8.4.9.3 Where carbon monoxide warning equipment is
+connected to a protected premises fire alarm system, receipt of
+signals shall initiate the signal required by Section 18.4.
+N 23.8.4.9.4 Operation of carbon monoxide alarms or detectors
+shall not cause fire alarm or combination control units to
+actuate either protected premises or supervising station fire
+alarm signals.
+• 23.8.4.10* Signals from a fire extinguisher electronic monitor‐
+ing device or fire extinguisher monitoring system transmitted
+to a fire alarm system shall be permitted to be supervisory
+signals.
+FOR INDIVIDUAL USE ONLY
+Copyright 2019 National Fire Protection Association (NFPA®). Licensed by agreement to Carl Weaver FOR INDIVIDUAL USE ONLY and downloaded on 11/05/2019. No reproduction or transmission in any form permitted without
+written permission of NFPA®. For inquiries or access for multiple users, or to report unauthorized use, contact licensing@nfpa.org.
+{C56A4DC7-64F7-4C88-B368-41DE5BD47BC8}
+
+===== PAGE 136 =====
+
+PROTECTED PREMISES ALARM AND SIGNALING SYSTEMS 72-133
+Shaded text = Revisions. Δ = Text deletions and figure/table revisions. • = Section deletions. N = New material. 2019 Edition
+23.8.5 Fire Alarm System Inputs.
+23.8.5.1 General.
+23.8.5.1.1 All initiating devices shall be installed in accord‐
+ance with Chapter 17 and tested in accordance with Chap‐
+ter 14.
+23.8.5.1.2* Where connected to a supervising station, fire
+alarm systems employing automatic fire detectors or waterflow
+detection devices shall include a manual fire alarm box to
+initiate a signal to the supervising station.
+N 23.8.5.1.3 Fire alarm systems dedicated to elevator recall
+control and supervisory service as permitted in Section 21.3
+shall not be required to meet 23.8.5.1.2.
+23.8.5.2 Fire Alarm Signal Initiation — Manual. Manual fire
+alarm signal initiation shall comply with the requirements of
+Section 17.15.
+23.8.5.2.1 If signals from manual fire alarm boxes and other
+fire alarm initiating devices within a building are transmitted
+over the same signaling line circuit, there shall be no interfer‐
+ence with manual fire alarm box signals when both types of
+initiating devices are operated at the same time.
+23.8.5.2.2 Provision of the shunt noninterfering method of
+operation shall be permitted for this performance.
+23.8.5.3 Fire Alarm Signal Initiation — Initiating Devices with
+Separate Power and Signaling Wiring.
+23.8.5.3.1 Automatic fire alarm signal initiating devices that
+have integral trouble signal contacts shall be connected to the
+initiating device circuit so that a trouble condition within a
+device does not impair alarm transmission from any other
+initiating device, unless the trouble condition is caused by elec‐
+trical disconnection of the device or by removing the initiating
+device from its plug-in base.
+23.8.5.3.2* Automatic fire alarm signal initiating devices that
+use a nonintegral device to monitor the integrity of the power
+supply wiring to the individual initiating devices shall have the
+nonintegral device connected to the initiating device circuit so
+that a fault on the power supply wiring does not impair alarm
+transmission from any operational initiating device.
+23.8.5.4 Fire Alarm Signal Initiation — Detection Devices.
+23.8.5.4.1* Systems equipped with alarm verification features
+shall be permitted under the following conditions:
+(1) The alarm verification feature is not initially enabled,
+unless conditions or occupant activities that are expected
+to cause nuisance alarms are anticipated in the area that
+is protected by the smoke detectors. Enabling of the
+alarm verification feature shall be protected by password
+or limited access.
+(2) A smoke detector that is continuously subjected to a
+smoke concentration above alarm threshold does not
+delay the system functions of Sections 10.7 through 10.17,
+or 21.2.1 by more than 1 minute.
+(3) Actuation of an alarm-initiating device other than a
+smoke detector causes the system functions of Sections
+10.7 through 10.17, or 21.2.1 without additional delay.
+(4) The current status of the alarm verification feature is
+shown on the record of completion [see Figure 7.8.2(a),
+item 4.3].
+23.8.5.4.2 If automatic drift compensation of sensitivity for a
+fire detector is provided, the fire alarm control unit shall iden‐
+tify the affected detector when the limit of compensation is
+reached.
+23.8.5.4.3 Systems that require the operation of two automatic
+detectors to initiate the alarm response shall be permitted,
+provided that the following conditions are satisfied:
+(1) The systems are not prohibited by the authority having
+jurisdiction.
+(2) At least two automatic detectors are in each protected
+space.
+(3) The alarm verification feature is not used.
+23.8.5.4.4 For systems that require the operation of two auto‐
+matic detectors to initiate emergency control functions or to
+actuate fire extinguishing or suppression systems, the detectors
+shall be installed at the spacing determined in accordance with
+Chapter 17.
+23.8.5.4.5 For systems that require the operation of two auto‐
+matic detectors to actuate public mode notification, the detec‐
+tors shall be installed at a linear spacing not more than
+0.7 times the linear spacing determined in accordance with
+Chapter 17.
+23.8.5.4.6 Signal Initiation — Duct Smoke Detectors.
+23.8.5.4.6.1 Where duct smoke detectors are required to be
+monitored and a building fire alarm system is installed, a duct
+detector activation signal shall meet the requirements of 21.7.4.
+23.8.5.4.6.2 Where duct smoke detectors are connected to a
+protected premises fire alarm system, the operation of the
+power circuit shall meet the requirements of 23.4.2.2.
+23.8.5.4.6.3* Where duct smoke detectors with separate power
+and signal wiring are installed and connected to a protected
+premises fire alarm system, they shall meet the requirements of
+23.8.5.3.
+23.8.5.4.6.4 Where duct smoke detectors are not resettable
+from the protected premises fire alarm system, a listed alarm/
+supervisory indicator with an integral reset switch shall be
+provided in an accessible location.
+23.8.5.5* Fire Alarm Signal Initiation — Sprinkler Systems.
+23.8.5.5.1 Where required by other governing laws, codes, or
+standards to be electronically monitored, waterflow alarm-
+initiating devices shall be connected to a dedicated function
+fire alarm control unit designated as “sprinkler waterflow and
+supervisory system” and permanently identified on the control
+unit and record drawings.
+N 23.8.5.5.2 Waterflow alarm-initiating devices connected to a
+building alarm system shall not be required to meet the
+requirements of 23.8.5.5.1.
+23.8.5.5.3* The number of waterflow alarm-initiating devices
+permitted to be connected to a single initiating device circuit
+shall not exceed five.
+23.8.5.5.4 If a valve is installed in the connection between a
+sprinkler system and an initiating device, the valve shall be
+supervised in accordance with 17.17.1.
+FOR INDIVIDUAL USE ONLY
+Copyright 2019 National Fire Protection Association (NFPA®). Licensed by agreement to Carl Weaver FOR INDIVIDUAL USE ONLY and downloaded on 11/05/2019. No reproduction or transmission in any form permitted without
+written permission of NFPA®. For inquiries or access for multiple users, or to report unauthorized use, contact licensing@nfpa.org.
+{C56A4DC7-64F7-4C88-B368-41DE5BD47BC8}
+
+===== PAGE 137 =====
+
+NATIONAL FIRE ALARM AND SIGNALING CODE	72-134
+2019 Edition Shaded text = Revisions. Δ = Text deletions and figure/table revisions. • = Section deletions. N = New material.
+23.8.5.6* Supervisory Signal Initiation — Sprinkler Systems.
+23.8.5.6.1 Where required by other governing laws, codes, or
+standards to be electronically monitored, supervisory signal–
+initiating devices shall be connected to a dedicated function
+fire alarm control unit designated as “sprinkler waterflow and
+supervisory system” and permanently identified on the control
+unit and record drawings.
+N 23.8.5.6.2 Supervisory signal–initiating devices connected to a
+building alarm system shall not be required to meet the
+requirements of 23.8.5.6.1.
+23.8.5.6.3* The number of supervisory signal–initiating devi‐
+ces permitted to be connected to a single initiating device
+circuit shall not exceed 20.
+23.8.5.6.4* If a valve is installed in the connection between a
+sprinkler system and an initiating device, the valve shall be
+supervised in accordance with 17.17.1 unless the valve is
+arranged to cause operation of the supervisory signal initiating
+device when it is in its off-normal position.
+23.8.5.7 Alarm Signal Initiation — Fire Suppression Systems
+Other Than Sprinklers.
+23.8.5.7.1 Where required by other governing laws, codes, or
+standards to be monitored and a building fire alarm system is
+installed, the actuation of a fire suppression system shall
+annunciate an alarm or supervisory condition at the building
+fire alarm control unit.
+23.8.5.7.2 The integrity of each fire suppression system actuat‐
+ing device and its circuit shall comply with 12.6.1, 12.6.2, and
+other applicable NFPA standards.
+23.8.5.7.3 If a valve is installed in the connection between a
+suppression system and an initiating device, the valve shall be
+supervised in accordance with 17.17.1.
+23.8.5.8* Supervisory Signal Initiation — Fire Suppression
+Systems Other Than Sprinklers.
+23.8.5.8.1 Where required to be monitored and a building
+fire alarm system is installed, an off-normal condition of a fire
+suppression system shall annunciate a supervisory condition at
+the building fire alarm control unit.
+23.8.5.8.2 Supervisory signals that latch in the off-normal state
+and require manual reset of the system to restore them to
+normal shall be permitted.
+23.8.5.8.3 If a valve is installed in the connection between a
+suppression system and an initiating device, the valve shall be
+supervised in accordance with 17.17.1.
+23.8.5.9 Signal Initiation — Fire Pump.
+23.8.5.9.1 Where fire pumps are required to be monitored
+and a building fire alarm system is installed, a pump running
+signal shall be permitted to be a supervisory or alarm signal.
+23.8.5.9.2 Where fire pumps are required to be monitored
+and a building fire alarm system is installed, signals other than
+pump running shall be supervisory signals.
+23.8.5.10 Fire Alarm and Supervisory Signal Initiation —
+Releasing Fire Alarm Systems.
+23.8.5.10.1 Releasing service fire alarm control units shall be
+connected to the protected premises fire alarm system.
+23.8.5.10.2 Fire alarm and supervisory signals generated at the
+releasing service fire alarm control unit shall be annunciated at
+a protected premises fire alarm unit.
+23.8.5.10.3 Where required by other governing laws, codes, or
+standards, actuation of any suppression system connected to a
+releasing service fire alarm control unit shall be annunciated at
+the protected premises fire alarm control unit, even where the
+system actuation is by manual means or otherwise accom‐
+plished without actuation of the releasing service fire alarm
+control unit.
+23.8.5.10.4 If a valve is installed in the connection between a
+suppression system and an initiating device, the valve shall be
+supervised in accordance with Chapter 17.
+23.8.5.10.5 In facilities that are not required to install a
+protected premises fire alarm system, the alarm and supervi‐
+sory devices shall be connected to the releasing service fire
+alarm control unit, and their actuation shall be annunciated at
+the releasing service control unit.
+23.8.5.11 Trouble Signal Initiation.
+Δ 23.8.5.11.1 Automatic fire suppression system alarm-initiating
+devices and supervisory signal–initiating devices and their
+circuits shall be designed and installed so that they cannot be
+subject to tampering, opening, or removal without initiating a
+signal.
+N 23.8.5.11.2 Covers of junction boxes inside of buildings shall
+not be required to meet the requirements of 23.8.5.11.1.
+N 23.8.5.11.3 The requirements of 23.8.5.11.1shall apply to junc‐
+tion boxes and device covers installed outside of buildings to
+facilitate access to the initiating device circuit unless tamper-
+resistant screws or other approved mechanical means are used
+for preventing access.
+23.8.5.11.4 The integrity of each fire suppression system
+actuating device and its circuit shall be supervised in accord‐
+ance with 12.6.1 and 12.6.2 and with other applicable NFPA
+standards.
+N 23.8.5.12 Disconnect Switches and Disable Functions. Opera‐
+tion of any disconnect switch or disable function associated
+with the fire alarm system, when in the off-normal condition,
+shall be indicated at the building fire alarm control unit or at a
+dedicated function(s) fire alarm control unit if provided.
+23.8.6 Alarm System Notification Outputs.
+23.8.6.1 Occupant Notification.
+N 23.8.6.1.1 Fire alarm systems provided for evacuation or relo‐
+cation of occupants shall have one or more notification appli‐
+ances listed for the purpose in each notification zone of the
+building and be so located that they have the characteristics
+described in Chapter 18 for public mode or private mode, as
+required.
+N 23.8.6.1.2 Except as permitted in 23.8.6.1.3, occupant notifica‐
+tion of carbon monoxide systems shall be throughout the
+protected premises.
+N 23.8.6.1.3 Where carbon monoxide alarm signals are transmit‐
+ted to a constantly attended on-site location or off-premises
+location in accordance with this chapter, selective public mode
+occupant notification shall be permitted to be limited to the
+FOR INDIVIDUAL USE ONLY
+Copyright 2019 National Fire Protection Association (NFPA®). Licensed by agreement to Carl Weaver FOR INDIVIDUAL USE ONLY and downloaded on 11/05/2019. No reproduction or transmission in any form permitted without
+written permission of NFPA®. For inquiries or access for multiple users, or to report unauthorized use, contact licensing@nfpa.org.
+{C56A4DC7-64F7-4C88-B368-41DE5BD47BC8}
+
+===== PAGE 138 =====
+
+PROTECTED PREMISES ALARM AND SIGNALING SYSTEMS 72-135
+Shaded text = Revisions. Δ = Text deletions and figure/table revisions. • = Section deletions. N = New material. 2019 Edition
+notification zone encompassing the area where the carbon
+monoxide alarm signal was initiated.
+23.8.6.2* Notification Appliances in Exit Stair Enclosures, Exit
+Passageways, and Elevator Cars. Notification appliances shall
+not be required in exit stair enclosures, exit passageways, and
+elevator cars in accordance with 23.8.6.2.1 through 23.8.6.2.4
+unless required by other codes and standards.
+23.8.6.2.1 Visual signals shall not be required in exit stair
+enclosures and exit passageways.
+23.8.6.2.2 Visual signals shall not be required in elevator cars.
+23.8.6.2.3 The emergency evacuation signal specified in 18.4.2
+shall not be required to automatically operate in exit stair
+enclosures and exit passageways.
+23.8.6.2.4 The emergency evacuation signal specified in 18.4.2
+shall not be required to automatically operate in elevator cars.
+23.8.6.3 Notification Zones.
+23.8.6.3.1 Notification zones shall be consistent with the emer‐
+gency response or evacuation plan for the protected premises.
+23.8.6.3.2 The boundaries of fire alarm notification zones
+shall be coincident with building outer walls, building fire or
+smoke compartment boundaries, floor separations, or other
+fire safety subdivisions.
+N 23.8.6.3.3* The boundaries of carbon monoxide alarm notifi‐
+cation zones shall be coincident with the area where the alarm
+initiation originated and other notification zones in accord‐
+ance with the building’s emergency response plan.
+23.8.6.4 Circuits for Addressable Notification Appliances.
+23.8.6.4.1 Circuit configuration for addressable notification
+appliances shall comply with the applicable performance
+requirements for notification zones.
+23.8.6.4.2 Where there are addressable notification appliances
+on a signaling line circuit that serves different notification
+zones, a single open, short-circuit, or ground on that signaling
+line circuit shall not affect operation of more than one notifica‐
+tion zone.
+23.8.6.4.3 Riser conductors installed in accordance with
+24.4.8.6.3 that are monitored for integrity shall not be required
+to operate in accordance with 23.8.6.4.2.
+23.9 In-Building Emergency Voice/Alarm Communications.
+23.9.1 In-building fire emergency voice/alarm communica‐
+tions shall meet the requirements of Chapter 24.
+N 23.9.2 Where a voice/alarm communications system is instal‐
+led for the purpose of occupant notification related to carbon
+monoxide detection, it shall meet the requirements of
+Section 24.4 excluding the requirements of 24.4.8.6.
+23.9.3 All live voice communications systems shall meet the
+requirements of Chapter 24.
+23.9.4 Two-Way Communication Service. Two-way communi‐
+cation service shall meet the requirements of Chapter 24.
+23.10 Fire Alarm Systems Using Tone.
+23.10.1 The requirements of Section 23.10 shall apply to tone
+and visual notification appliance circuits.
+Δ 23.10.2* Fire alarm systems used for partial evacuation and
+relocation shall be designed and installed such that attack by
+fire within a notification zone shall not impair control and
+operation of the notification appliances outside that notifica‐
+tion zone.
+N 23.10.3 Performance features provided to ensure survivability
+shall be described and technical justification provided in the
+documentation submitted to the authority having jurisdiction
+with the evaluation required in 23.4.3.1.
+23.10.4 Loudspeakers that transmit tone signals shall be
+permitted to be used as fire alarm notification appliances.
+23.11 Suppression System Actuation.
+23.11.1 Releasing service fire alarm control units used for
+automatic or manual activation of a fire suppression system
+shall be listed for releasing service.
+23.11.2 Releasing devices for suppression systems shall be
+listed for use with releasing service control units.
+23.11.3 Each releasing device (e.g., solenoid, relay) shall be
+monitored for integrity (supervised) in accordance with appli‐
+cable NFPA standards.
+23.11.4 The installation wiring shall be monitored for integ‐
+rity in accordance with the requirements of Section 12.6.
+23.11.5 Releasing service fire alarm systems used for fire
+suppression–releasing service shall be provided with a discon‐
+nect switch to allow the system to be tested without actuating
+the fire suppression systems.
+23.11.5.1 Operation of a disconnect switch or a disable func‐
+tion shall cause a supervisory signal at the releasing service fire
+alarm control unit.
+23.11.5.2 The disconnect shall be a physical switch and not be
+accomplished by using software.
+23.11.5.3 Software disconnects, even if actuated by dedicated
+buttons or key switches, shall not be permitted as a method to
+secure a suppression system from inadvertent discharge.
+23.11.6 Sequence of operation shall be consistent with the
+applicable suppression system standards.
+23.11.7* Each space protected by an automatic fire suppres‐
+sion system actuated by the fire alarm system shall contain one
+or more automatic fire detectors installed in accordance with
+Chapter 17.
+23.11.8 Suppression systems or groups of systems shall be
+controlled by a single releasing service fire alarm control unit
+that monitors the associated initiating device(s), actuates the
+associated releasing device(s), and controls the associated
+agent release notification appliances.
+23.11.9 If the configuration of multiple control units is listed
+for releasing device service, and if a trouble condition or
+manual disconnect on either control unit causes a trouble or
+supervisory signal, the initiating device on one control unit
+shall be permitted to actuate releasing devices on another
+control unit in lieu of 23.11.8.
+23.11.10 If the releasing service fire alarm control unit is loca‐
+ted in a protected premises having a separate fire alarm system,
+it shall be monitored for alarm, supervisory, and trouble
+FOR INDIVIDUAL USE ONLY
+Copyright 2019 National Fire Protection Association (NFPA®). Licensed by agreement to Carl Weaver FOR INDIVIDUAL USE ONLY and downloaded on 11/05/2019. No reproduction or transmission in any form permitted without
+written permission of NFPA®. For inquiries or access for multiple users, or to report unauthorized use, contact licensing@nfpa.org.
+{C56A4DC7-64F7-4C88-B368-41DE5BD47BC8}
+
+===== PAGE 139 =====
+
+NATIONAL FIRE ALARM AND SIGNALING CODE	72-136
+2019 Edition Shaded text = Revisions. Δ = Text deletions and figure/table revisions. • = Section deletions. N = New material.
+signals, but shall not be dependent on or affected by the opera‐
+tion or failure of the protected premises fire alarm system.
+23.11.11 Releasing fire alarm systems performing suppression
+system releasing functions shall be installed in such a manner
+that they are effectively protected from damage caused by acti‐
+vation of the suppression system(s) they control.
+23.12 Off-Premises Signals.
+23.12.1 Systems requiring transmission of signals to continu‐
+ously attended locations providing supervising station service
+(e.g., central station, proprietary supervising station, remote
+supervising station) shall also comply with the applicable
+requirements of Chapter 26.
+23.12.2 Relays or modules providing transmission of trouble
+signals to a supervising station shall be arranged to provide fail-
+safe operation.
+23.12.3 Means provided to transmit trouble signals to super‐
+vising stations shall be arranged so as to transmit a trouble
+signal to the supervising station for any trouble condition
+received at the protected premises control unit, including loss
+of primary or secondary power.
+23.12.4* It shall be permitted to provide supplementary trans‐
+mission of real-time data from the fire system to off-premises
+equipment.
+23.12.4.1 Transmission of real-time data off-premises shall not
+affect the operation or response of the fire alarm control unit.
+23.12.4.2 Any data transmitted shall be consistent with the
+data generated by the system.
+23.13 Guard’s Tour Supervisory Service.
+23.13.1 Guard’s tour reporting stations shall be listed for the
+application.
+23.13.2 The number of guard’s tour reporting stations, their
+locations, and the route to be followed by the guard for operat‐
+ing the stations shall be approved for the particular installation
+in accordance with NFPA 601.
+23.13.3 A permanent record indicating every time each signal-
+transmitting station is operated shall be made at a protected
+premises fire alarm control unit.
+23.13.4 Where intermediate stations that do not transmit a
+signal are employed in conjunction with signal-transmitting
+stations, distinctive signals shall be transmitted at the beginning
+and end of each tour of a guard.
+23.13.5 A signal-transmitting station shall be provided at inter‐
+vals not exceeding 10 intermediate stations.
+23.13.6 Intermediate stations that do not transmit a signal
+shall be capable of operation only in a fixed sequence.
+23.14 Suppressed (Exception Reporting) Signal System.
+23.14.1 The suppressed signal system shall comply with the
+provisions of 23.13.2.
+23.14.2 The system shall transmit a start signal to the signal-
+receiving location.
+23.14.3 The start signal shall be initiated by the guard at the
+start of continuous tour rounds.
+23.14.4 The system shall automatically transmit a delinquency
+signal within 15 minutes after the predetermined actuation
+time if the guard fails to actuate a tour station as scheduled.
+23.14.5 A finish signal shall be transmitted within a predeter‐
+mined interval after the guard’s completion of each tour of the
+premises.
+23.14.6 For periods of over 24 hours during which tours are
+continuously conducted, a start signal shall be transmitted at
+least every 24 hours.
+23.14.7 The start, delinquency, and finish signals shall be
+recorded at the signal-receiving location.
+23.15 Protected Premises Emergency Control Functions.
+23.15.1 Emergency Elevator Operations. Emergency elevator
+operations shall meet the requirements of Sections 21.3, 21.4,
+21.5, and 21.6.
+23.15.2 HVAC Systems. HVAC systems shall meet the require‐
+ments of Section 21.7.
+23.15.3 Door Release Service. Door release service shall meet
+the requirements of Section 21.9.
+23.15.4 Electrically Locked Doors. Door-unlocking devices
+shall meet the requirements of Section 21.10.
+23.15.5 Exit Marking Audible Notification Systems. Exit
+marking audible notification systems shall meet the require‐
+ments of Section 21.11.
+N 23.15.6 Carbon Monoxide. Where provided, carbon monox‐
+ide control functions shall comply with the requirements of
+21.7.6.
+23.16* Special Requirements for Low-Power Radio (Wireless)
+Systems.
+23.16.1* Listing Requirements. Compliance with
+Section 23.16 shall require the use of low-power radio equip‐
+ment specifically listed for the purpose.
+Δ 23.16.2* Power Supplies. A primary battery(s) (dry cell) that
+meet the requirements of 23.16.2.1 or 23.16.2.2 shall be
+permitted to be used as the sole power source for devices incor‐
+porating a low-power radio transmitter/transceiver.
+N 23.16.2.1 The following conditions shall be met when one or
+more primary batteries are utilized and a catastrophic (open or
+short) single battery failure affects the alarm operation of the
+device:
+(1) Each transmitter/transceiver shall serve only one device
+and shall be individually identified at the system control
+unit.
+(2) The battery(s) shall be capable of operating the low-
+power radio transmitter/transceiver and its associated
+device for not less than 1 year before the battery deple‐
+tion threshold is reached.
+(3) A low battery signal shall be transmitted before the device
+is no longer capable of providing 7 days of trouble signal
+operation followed by the signaling of a single non-
+trouble response.
+(4) The low battery signal shall be distinctive from alarm,
+supervisory, tamper, and trouble signals, shall visibly iden‐
+tify the affected low-power radio transmitter/transceiver,
+and, when silenced, shall automatically re-sound at least
+once every 4 hours.
+FOR INDIVIDUAL USE ONLY
+Copyright 2019 National Fire Protection Association (NFPA®). Licensed by agreement to Carl Weaver FOR INDIVIDUAL USE ONLY and downloaded on 11/05/2019. No reproduction or transmission in any form permitted without
+written permission of NFPA®. For inquiries or access for multiple users, or to report unauthorized use, contact licensing@nfpa.org.
+{C56A4DC7-64F7-4C88-B368-41DE5BD47BC8}
+
+===== PAGE 140 =====
+
+PROTECTED PREMISES ALARM AND SIGNALING SYSTEMS 72-137
+Shaded text = Revisions. Δ = Text deletions and figure/table revisions. • = Section deletions. N = New material. 2019 Edition
+(5) Catastrophic (open or short) battery failure shall cause a
+trouble signal identifying the affected low-power radio
+transmitter/transceiver at the system control unit. When
+silenced, the trouble signal shall automatically re-sound at
+least once every 4 hours.
+(6) Any mode of failure of a primary battery in a low-power
+radio transmitter/transceiver shall not affect any other
+low-power radio transmitter/transceiver.
+N 23.16.2.2 The following conditions shall be met when multi‐
+ple batteries are utilized and a catastrophic (open or short)
+single battery failure does not affect the alarm operation of the
+device:
+(1) Two or more batteries shall be provided.
+(2) The combined batteries shall be capable of operating the
+low-power radio transmitter/transceiver and its associated
+device for not less than 1 year before the battery deple‐
+tion threshold in 23.16.2.2(3) is reached.
+(3) A low battery signal shall be transmitted before the device
+is no longer capable of providing 7 days of trouble signal
+operation followed by the signaling of a single non-
+trouble response.
+(4) Each individual battery, primary and secondary, shall be
+separately monitored for the battery depletion threshold,
+and a low battery signal shall be transmitted when an
+individual battery has reached the battery depletion
+threshold.
+(5) Following the failure of a single battery, the remaining
+battery(s) shall be capable of operating the low-power
+radio transmitter/transceiver and its associated device for
+not less than 7 days when the battery depletion threshold
+in 23.16.2.2(3) is reached.
+(6) The low battery signal shall be distinctive from alarm,
+supervisory, tamper, and trouble signals, shall visibly iden‐
+tify the affected low-power radio transmitter/transceiver,
+and, when silenced, shall automatically re-sound at least
+once every 4 hours.
+(7) Catastrophic (open or short) failure of any individual
+battery shall cause a trouble signal identifying the affec‐
+ted low-power radio transmitter/transceiver at the system
+control unit. When silenced, the trouble signal shall auto‐
+matically re-sound at least once every 4 hours.
+(8) Each transmitter/transceiver shall be permitted to serve
+more than one device and shall be individually identified
+at the system control unit.
+23.16.3 Alarm Signals.
+23.16.3.1* When a wireless initiating device is actuated, its
+low-power radio transmitter/transceiver shall comply with
+23.16.3.1.1 through 23.16.3.1.4.
+N 23.16.3.1.1 It shall automatically transmit an alarm signal and
+be identified at the fire alarm system.
+N 23.16.3.1.2 To ensure the receipt of an alarm signal by the
+control unit, the low-power radio transmitter/transceiver shall
+automatically repeat alarm transmissions at intervals not
+exceeding 60 seconds until the transmitter/transceiver receives
+a signal confirming receipt of the alarm signal by the control
+unit.
+23.16.3.1.3* Signals shall have priority in accordance with
+23.8.4.7.
+23.16.3.1.4 Response time shall be in accordance with 10.11.1.
+23.16.3.1.5* An alarm signal from a low-power radio transmit‐
+ter/transceiver shall latch at the fire alarm control system until
+manually reset and shall identify the particular initiating device
+in alarm.
+N 23.16.3.1.6 Sixty seconds after the conclusion of resetting the
+fire alarm system, a non-restored actuated low-power radio
+transmitter/transceiver shall be identified at the fire alarm
+systems.
+• 23.16.4 Monitoring for Integrity.
+23.16.4.1 The low-power radio transmitter/transceiver shall
+be specifically listed as using a communication method that is
+highly resistant to misinterpretation of simultaneous transmis‐
+sions and to interference (e.g., impulse noise and adjacent
+channel interference).
+23.16.4.2 The occurrence of any single fault that disables
+communication between any low-power radio transmitter/
+transceiver and the receiver/transceiver system control unit
+shall cause a latching trouble signal within 200 seconds at the
+system control unit that individually identifies the affected
+device.
+23.16.4.3 A single fault on the signaling channel shall not
+cause an alarm signal.
+23.16.4.4 The periodic communication required to comply
+with 23.16.4.2 shall ensure successful alarm transmission capa‐
+bility.
+23.16.4.5 Removal of a low-power radio transmitter/trans‐
+ceiver from its installed location shall cause immediate trans‐
+mission of a distinctive trouble signal that indicates its removal
+and individually identifies the affected device.
+23.16.4.6 Reception of any unwanted (interfering) transmis‐
+sion by a retransmission device or by the receiver system
+control unit for a continuous period of 20 seconds or more
+shall cause an audible and visible trouble indication at the
+system control unit.
+23.16.4.7 The indication required by 23.16.4.6 shall identify
+the specific trouble condition as an interfering signal.
+23.16.5 Output Signals from a Wireless Receiver/Transceiver
+of a Control Unit. Wherea wireless receiver/transceiver of a
+control unit is used to actuate remote devices, such as notifica‐
+tion appliances and relays, by wireless means, the remote devi‐
+ces shall meet the following requirements:
+(1) Power supplies shall comply with Chapter 10 or the
+requirements of 23.16.2.
+(2) All monitoring for integrity requirements of Chapters 10,
+12, 23, and 23.16.4 shall apply.
+(3) Response time shall be in accordance with 10.11.1.
+(4) Each wireless receiver/transceiver of a control unit shall
+automatically repeat actuated response signals associated
+with life safety events at intervals not exceeding
+60 seconds or until confirmation that the output device
+has received the alarm signal.
+(5) The remote devices shall continue to operate (latch-in)
+until manually reset at the system control unit.
+FOR INDIVIDUAL USE ONLY
+Copyright 2019 National Fire Protection Association (NFPA®). Licensed by agreement to Carl Weaver FOR INDIVIDUAL USE ONLY and downloaded on 11/05/2019. No reproduction or transmission in any form permitted without
+written permission of NFPA®. For inquiries or access for multiple users, or to report unauthorized use, contact licensing@nfpa.org.
+{C56A4DC7-64F7-4C88-B368-41DE5BD47BC8}
+
+===== PAGE 141 =====
+
+NATIONAL FIRE ALARM AND SIGNALING CODE	72-138
+2019 Edition Shaded text = Revisions. Δ = Text deletions and figure/table revisions. • = Section deletions. N = New material.
+Chapter 24 Emergency Communications Systems (ECS)
+24.1 Application.
+24.1.1 The application, installation, and performance of
+emergency communications systems and their components
+shall comply with the requirements of this chapter.
+24.1.2* The requirements of this chapter shall apply to emer‐
+gency communications systems within buildings and outdoor
+areas.
+24.1.3 The requirements of Chapters 7, 10, 12, 17, 18, 21, 23,
+26, and 27 shall also apply unless otherwise noted in this chap‐
+ter.
+24.1.4 Inspection, testing, and maintenance shall be
+performed in accordance with testing frequencies and methods
+in Chapter 14.
+24.1.5 The requirements of this chapter shall not apply to
+Chapter 29 unless specifically indicated.
+24.2 Purpose.
+24.2.1 The systems covered under Chapter 24 shall be for the
+protection of life by indicating the existence of an emergency
+situation and communicating information necessary to facili‐
+tate an appropriate response and action.
+24.2.2 This chapter establishes minimum required levels of
+performance, reliability, and quality of installation for emer‐
+gency communications systems but does not establish the only
+methods by which these requirements are to be achieved.
+24.2.3 An emergency communications system is intended to
+communicate information about emergencies including, but
+not limited to, fire, human-caused events (accidental and inten‐
+tional), other dangerous situations, accidents, and natural
+disasters.
+24.3 General.
+24.3.1 Intelligible Voice Messages.
+24.3.1.1* Emergency communications systems shall be capa‐
+ble of the reproduction of prerecorded, synthesized, or live
+(e.g., microphone, telephone handset, and radio) messages
+with voice intelligibility in accordance with Chapter 18.
+24.3.1.2* Where listed loudspeakers do not achieve the intelli‐
+gibility requirements of the Code for a notification zone,
+nonlisted loudspeakers shall be permitted to be installed to
+achieve the intelligibility for that notification zone.
+24.3.2* Microphone Use. All users of systems that have micro‐
+phones for live voice announcements shall be provided with
+posted instructions for using the microphone.
+24.3.3* Required Emergency Communications Systems. An
+emergency communications system shall be installed in occu‐
+pancies where required by the authority having jurisdiction or
+by other applicable governing laws, codes, or standards.
+24.3.4* Nonrequired (Voluntary) Emergency Communications
+Systems.
+24.3.4.1 Nonrequired emergency communications systems
+and components shall meet the requirements of this chapter.
+24.3.4.2 Nonrequired emergency communications systems
+and components shall be identified on the record drawings.
+24.3.5 Ancillary Functions.
+24.3.5.1 Ancillary functions shall not impair the required
+operation of the emergency communications system.
+24.3.5.2* Loudspeakers used for emergency communications
+system functions also providing ancillary functions shall meet
+the conditions of either 24.3.5.2(1) or (2):
+(1) The fire command center or the emergency command
+center as applicable shall be constantly attended by
+trained personnel, and selective paging is permitted by
+the authority having jurisdiction.
+(2) All of the following conditions shall be met:
+(a) The loudspeakers and associated audio equipment
+are installed or located with safeguards to resist
+tampering or misadjustment of those components
+essential for intended emergency notification.
+(b) The monitoring integrity requirements of 10.6.9
+and Sections 10.19 and 12.6 continue to be met
+while the system is used for non-emergency purpo‐
+ses.
+24.3.5.3 Ancillary functions shall be inspected and tested
+annually to verify they will not impair the operation of the fire
+alarm system or the mass notification system.
+24.3.5.4 Where emergency communications systems utilize
+Class N pathways that are also shared Level 1 or Level 2 path‐
+ways as a means to support ancillary functions, devices, or inter‐
+connected systems, the shared pathways shall meet the
+requirements of 23.6.3.
+24.3.5.4.1 In addition to the requirements of 23.6.3, a risk
+analysis shall be performed and approved by the AHJ.
+24.3.6 Messages for One-Way Emergency Communications
+Systems.
+24.3.6.1* Messages shall be developed for each scenario devel‐
+oped in the emergency response plan.
+24.3.6.2*
+N 24.3.6.2.1 Based on the emergency response plan, emergency
+messages shall have content that provides information and
+instructions to people in the building, area, site, or installation.
+N 24.3.6.2.2 The proposed verbiage of prerecorded automatic
+emergency messages shall be identified on the permit plans
+and be approved by the authority having jurisdiction prior to
+their programming into the emergency voice communications
+system.
+N 24.3.6.2.3 As a minimum, the proposed verbiage of prerecor‐
+ded messages shall be in the official spoken language accepta‐
+ble to the authority having jurisdiction.
+N 24.3.6.2.4 Additional prerecorded message(s) shall be permit‐
+ted as approved by the authority having jurisdiction.
+24.3.6.3* A message template shall be developed for each
+message required in 24.3.6.1.
+24.3.6.4 For an evacuation message, a tone in accordance with
+18.4.2 shall be used with a minimum of two cycles preceding
+and following the voice message.
+24.3.6.5 Test messages shall clearly state the phrase “This is a
+test.”
+FOR INDIVIDUAL USE ONLY
+Copyright 2019 National Fire Protection Association (NFPA®). Licensed by agreement to Carl Weaver FOR INDIVIDUAL USE ONLY and downloaded on 11/05/2019. No reproduction or transmission in any form permitted without
+written permission of NFPA®. For inquiries or access for multiple users, or to report unauthorized use, contact licensing@nfpa.org.
+{C56A4DC7-64F7-4C88-B368-41DE5BD47BC8}
+
+===== PAGE 142 =====
+
+EMERGENCY COMMUNICATIONS SYSTEMS (ECS) 72-139
+Shaded text = Revisions. Δ = Text deletions and figure/table revisions. • = Section deletions. N = New material. 2019 Edition
+24.3.7* System Classification. Emergency communications
+systems (ECS) shall be designated as one-way or two-way.
+24.3.7.1* One-way emergency communications systems shall
+consist of one or more of the following:
+(1) In-building fire emergency voice/alarm communications
+systems (EVACS) (see Section 24.4)
+(2) In-building mass notification systems (see Section 24.5)
+(3) Wide-area mass notification systems (see Section 24.6)
+(4) Distributed recipient mass notification systems (DRMNS)
+(see Section 24.7)
+24.3.7.2 Two-way emergency communications systems shall
+consist of one or more of the following:
+(1) Two-way, in-building wired emergency services communi‐
+cations systems (see Section 24.8)
+(2) Two-way radio communications enhancement systems (see
+Section 24.9)
+(3) Area of refuge (area of rescue assistance) emergency
+communications systems (see Section 24.10)
+(4) Stairway communications systems (see Section 24.10)
+(5) Elevator landing communications systems (see
+Section 24.10)
+(6) Occupant evacuation elevator lobby communications
+systems (see Section 24.10)
+24.3.8* Mass Notification Layers. Emergency communica‐
+tions used for mass notification shall be categorized into layers
+and take into consideration type of audience and reach as
+follows:
+(1) Layer 1 relates to means of notification of occupants by
+systems/equipment installed inside a building and
+controlled only by authorized users (in-building ECS)
+(2) Layer 2 relates to means of notification of occupants on
+the exterior of a building and controlled only by author‐
+ized users (wide-area MNS)
+(3) Layer 3 relates to means of notification of personnel
+through individual measures (distributed recipient MNS)
+(4) Layer 4 relates to means of notification of personnel by
+public measures (broadcast radio, television, and so
+forth)
+24.3.9* Design Documentation. Design documents in accord‐
+ance with Section 7.3 shall be prepared prior to installation of
+any new system.
+24.3.9.1 Systems that are altered shall have design documents
+prepared that apply to the portions of the system that are
+altered.
+24.3.9.2 Documents shall be revised as necessary following
+installation to represent as-built conditions and include record
+drawings.
+Δ 24.3.10* Control Unit Listing for Mass Notification Systems.
+Control units installed as part of a mass notification system
+shall be in compliance with this Code and at least one of the
+following applicable standards:
+(1) ANSI/UL 864, Standard for Control Units and Accessories for
+Fire Alarm Systems
+(2) ANSI/UL 2572, Mass Notification Systems
+N 24.3.11 Building System Information Unit. A building system
+information unit that displays information and events from the
+mass notification system shall comply with 23.8.4.4.1 through
+23.8.4.4.3.
+24.3.12* Risk Analysis for Mass Notification Systems.
+24.3.12.1* Each application of a mass notification system shall
+be specific to the nature and anticipated risks of each facility
+for which it is designed.
+N 24.3.12.1.1 When an owner has developed a risk analysis in
+accordance with 24.3.12, such risk analysis shall be permitted to
+be used as a baseline in preparing the risk analysis for new or
+renovated facilities that are similar in nature.
+24.3.12.2 The designer shall consider both fire and non-fire
+emergencies when determining risk tolerances for survivability
+for the mass notification system.
+24.3.12.3 The detail and complexity of the risk analysis shall
+be commensurate with the complexity of the facility for which
+the mass notification system is designed.
+24.3.12.4 The risk analysis shall be permitted to be limited in
+scope to address the communication requirements of an exist‐
+ing emergency response plan.
+24.3.12.5 The risk analysis shall consider the number of
+persons, type of occupancy, and perceived peril to occupants.
+24.3.12.6 The analysis shall be based on the maximum occu‐
+pant load calculation for every occupiable room, building,
+area, space, campus, or region is expected to contain.
+24.3.12.7 Occupancy characteristics shall comply with
+24.3.12.7.1 and 24.3.12.7.2.
+24.3.12.7.1 The risk analysis shall consider characteristics of
+the buildings, areas, spaces, campuses or regions, equipment,
+and operations that are not inherent in the design specifica‐
+tions.
+24.3.12.7.2 Those elements that are not inherent in the
+design specifications, but that affect occupant behavior or the
+rate of hazard development, shall be explicitly identified and
+included in the risk analysis.
+24.3.12.8 The risk analysis shall consider the following types of
+potential events, which are not all-inclusive but reflect the
+general categories that shall be considered in the risk analysis:
+(1) Natural hazards — Geological events
+(2) Natural hazards — Meteorological events
+(3) Natural hazards — Biological events
+(4) Human caused — Accidental events
+(5) Human caused — Intentional events
+(6) Technological — Caused events
+24.3.12.9 The risk analysis shall include a review of the extent
+to which occupants and personnel are notified, based on the
+anticipated event (potential hazard).
+24.3.12.10 The risk analysis shall be used as the basis for devel‐
+opment of the ECS provisions of the facility emergency
+response plan.
+24.3.13* Emergency Response Plan Elements. A well-defined
+emergency response plan shall be developed in accordance
+with NFPA 1600 and NFPA 1620 as part of the design and
+implementation of a mass notification system.
+24.3.14 Pathway Survivability.
+24.3.14.1 Pathway survivability levels shall be as described in
+Section 12.4.
+FOR INDIVIDUAL USE ONLY
+Copyright 2019 National Fire Protection Association (NFPA®). Licensed by agreement to Carl Weaver FOR INDIVIDUAL USE ONLY and downloaded on 11/05/2019. No reproduction or transmission in any form permitted without
+written permission of NFPA®. For inquiries or access for multiple users, or to report unauthorized use, contact licensing@nfpa.org.
+{C56A4DC7-64F7-4C88-B368-41DE5BD47BC8}
+
+===== PAGE 143 =====
+
+NATIONAL FIRE ALARM AND SIGNALING CODE	72-140
+2019 Edition Shaded text = Revisions. Δ = Text deletions and figure/table revisions. • = Section deletions. N = New material.
+24.3.14.2 Other component survivability shall comply with the
+provisions of 24.4.8.6.6.
+24.3.14.3* The pathway survivability requirements in 24.3.14.4
+through 24.3.14.12 shall apply to notification and communica‐
+tions circuits and other circuits necessary to ensure the contin‐
+ued operation of the emergency communications system.
+24.3.14.4 In-building fire emergency voice/alarm communica‐
+tions systems shall comply with 24.3.14.4.1 or 24.3.14.4.2.
+24.3.14.4.1 For systems employing relocation or partial evacu‐
+ation, a Level 2 or Level 3 pathway survivability shall be
+required, unless otherwise permitted in 24.3.14.4.1.1 or
+24.3.14.4.1.2.
+N 24.3.14.4.1.1 Where notification zones are separated by less
+than 2-hour fire-rated construction, a pathway survivability of
+Level 1, 2 or 3 shall be permitted.
+N 24.3.14.4.1.2 Where Class X or Class N system pathways are
+installed and the incoming and outgoing pathways are separa‐
+ted by at least one-third the maximum diagonal of the notifica‐
+tion zone, a pathway survivability of Level 1, 2 or 3 shall be
+permitted.
+24.3.14.4.2 For systems that do not employ relocation or
+partial evacuation, a Level 0, Level 1, Level 2, or Level 3 path‐
+way survivability shall be permitted.
+• 24.3.14.5 Pathway survivability levels for in-building mass noti‐
+fication systems shall be determined by the risk analysis.
+24.3.14.6 Pathway survivability levels for wide-area mass notifi‐
+cation systems shall be determined by the risk analysis.
+24.3.14.7 Two-way in-building wired emergency communica‐
+tions systems that are installed where the building has less than
+2-hour fire-rated construction shall have a pathway survivability
+of Level 1, 2, or Level 3.
+•
+N 24.3.14.8 Two-way in-building wired emergency communica‐
+tion systems that are installed where the building has 2-hour
+fire-rated construction or greater shall have a pathway surviva‐
+bility of Level 2 or 3.
+24.3.14.9* Area of refuge (area of rescue assistance) emer‐
+gency communications systems shall comply with 24.3.14.9.1
+and 24.3.14.9.3.
+Δ 24.3.14.9.1 Area of refuge wired emergency communications
+systems that are installed where the building has less than 2-
+hour fire-rated construction shall have a pathway survivability
+of Level 1, 2, or 3.
+N 24.3.14.9.2 Area of refuge wired emergency communication
+systems that are installed where the building has 2-hour fire-
+rated construction or greater shall have a pathway survivability
+of Level 2 or 3.
+24.3.14.9.3 Circuits intended to transmit off-premises shall
+have a pathway survivability of Level 0, Level 1, Level 2, or
+Level 3.
+24.3.14.10 Elevator emergency communications systems shall
+have a pathway survivability of Level 0, Level 1, Level 2, or
+Level 3.
+24.3.14.11 Central command station emergency communica‐
+tions systems shall have pathway survivability as determined by
+the risk analysis.
+24.3.14.12 All other emergency communications system
+circuits shall have pathway survivability as determined by the
+risk analysis.
+24.4* In-Building Fire Emergency Voice/Alarm Communica‐
+tions Systems (EVACS). Section 24.4 shall be used in the
+design and application of in-building fire emergency voice/
+alarm communications for fire alarm systems.
+24.4.1 Automatic Response. The in-building fire emergency
+voice/alarm communications system shall be used to provide
+an automatic response to the receipt of a signal indicative of a
+fire alarm or other emergency.
+24.4.1.1 When the monitoring location is constantly attended
+by trained operators, and operator acknowledgment of receipt
+of a fire alarm or other emergency signal is received within
+30 seconds, automatic response shall not be required.
+24.4.1.2 If acceptable to the authority having jurisdiction, the
+system shall permit the application of an automatic evacuation
+signal to one or more signaling zones and, at the same time,
+shall permit manual voice paging to the other signaling zones
+selectively or in any combination.
+24.4.2 Voice Evacuation Messages.
+24.4.2.1 Unless otherwise permitted by 24.4.8, evacuation
+messages shall be preceded and followed by a minimum of two
+cycles of the emergency evacuation signal specified in 18.4.2.
+24.4.2.2 Voice messages shall comply with the requirements of
+24.3.1.
+24.4.2.2.1 The following requirements shall be met for layout
+and design:
+(1) The loudspeaker layout of the system shall be designed to
+ensure intelligibility and audibility.
+(2) Intelligibility shall first be determined by ensuring that all
+areas in the building have the required level of audibility.
+24.4.2.2.2* System design shall incorporate designation of
+acoustically distinguishable spaces (ADS) within the occupiable
+areas as required in Chapter 18.
+24.4.2.2.3 Audibility shall be required in all areas in accord‐
+ance with Chapter 18.
+24.4.3 Positive Alarm Sequence. In-building fire emergency
+voice/alarm communications systems shall be permitted to use
+positive alarm sequence complying with 23.8.1.2.
+24.4.4 Tones. The tone preceding any message shall comply
+with 24.4.4.1 through 24.4.4.4.
+24.4.4.1 The tone preceding any message shall be permitted
+to be a part of the voice message or to be transmitted automati‐
+cally from a separate tone generator.
+24.4.4.2* Except as specified in 24.4.4.3, in occupancies where
+sleeping accommodations are provided and the voice message
+is intended to communicate information to those who could be
+asleep, a low frequency tone that complies with 18.4.6 shall be
+used.
+24.4.4.3* In areas where sleeping accommodation are provi‐
+ded, but the voice communication system is used to communi‐
+cate to occupants who are awake, the low frequency tone shall
+not be required.
+FOR INDIVIDUAL USE ONLY
+Copyright 2019 National Fire Protection Association (NFPA®). Licensed by agreement to Carl Weaver FOR INDIVIDUAL USE ONLY and downloaded on 11/05/2019. No reproduction or transmission in any form permitted without
+written permission of NFPA®. For inquiries or access for multiple users, or to report unauthorized use, contact licensing@nfpa.org.
+{C56A4DC7-64F7-4C88-B368-41DE5BD47BC8}
+
+===== PAGE 144 =====
+
+EMERGENCY COMMUNICATIONS SYSTEMS (ECS) 72-141
+Shaded text = Revisions. Δ = Text deletions and figure/table revisions. • = Section deletions. N = New material. 2019 Edition
+24.4.4.4 Audible signal tones for alert or evacuation shall meet
+the audibility requirements of either 18.4.4 (public mode audi‐
+ble requirements), 18.4.5 (private mode audible require‐
+ments), 18.4.6.1 and 18.4.6.2 (sleeping area requirements), or
+18.4.7 (narrow band tone signaling for exceeding masked
+thresholds), as applicable.
+24.4.5 Operating Controls.
+24.4.5.1* Controls for the in-building fire emergency voice/
+alarm communications system shall be at a location approved
+by the authority having jurisdiction.
+24.4.5.2 Controls shall be located or secured to allow access
+only by trained and authorized personnel.
+24.4.5.3 Operating controls shall be clearly identified.
+24.4.5.4 If there are multiple in-building fire emergency
+voice/alarm communications control locations, only one shall
+be in control at any given time.
+24.4.5.5 The location having control of the system shall be
+identified by a visual indication at that location.
+24.4.5.6 Manual controls shall be arranged to provide visual
+indication of the on/off status for their associated signaling
+zone.
+24.4.5.7 If live voice instructions are provided, they shall
+perform as follows:
+(1) They shall override previously initiated signals to the
+selected notification zone.
+(2) They shall have priority over any subsequent automati‐
+cally initiated signals to the selected notification zone.
+(3) If a previously initiated recorded message is interrupted
+by live voice instructions, upon release of the micro‐
+phone, the previously initiated recorded messages to the
+selected notification zones shall not resume playing auto‐
+matically unless required by the emergency response
+plan.
+24.4.6 Loudspeakers.
+24.4.6.1* Loudspeakers and their enclosures shall be installed
+in accordance with Chapter 18.
+24.4.6.2 Loudspeakers used as alarm notification appliances
+on fire alarm systems shall also be permitted to be used for
+mass notification.
+24.4.7 Priority.
+24.4.7.1* Notification appliances required to provide special
+suppression predischarge notification shall not be overridden
+by other systems.
+24.4.7.2 Priority of mass notification messages over fire alarm
+evacuation shall be permitted when evaluated by the stakehold‐
+ers through a risk analysis in accordance with 24.3.12.
+24.4.7.3 When the fire alarm system has been activated, and
+mass notification has been given priority over the fire alarm
+system, a distinctive audible and visual indication shall be provi‐
+ded at the building fire alarm control unit to indicate MNS is
+active.
+24.4.7.4 It shall not be required to transmit this condition to a
+supervising station.
+24.4.7.5 The fire alarm system shall not automatically override
+emergency mass notification messages.
+24.4.8* Relocation and Partial Evacuation. The requirements
+of 24.4.8 shall apply only to systems used for relocation or
+partial evacuation during a fire condition.
+24.4.8.1 New systems employing relocation or partial evacua‐
+tion shall require documentation in accordance with Sections
+7.3, 7.4, and 7.5 in addition to the minimum documentation
+requirements of Sections 7.2 and 24.13.
+24.4.8.2 Systems shall be provided with manual voice transmis‐
+sion capabilities selectively to one or more notification zones or
+on an all-call basis.
+24.4.8.3 Where the system is used to transmit relocation
+instructions or other fire emergency non-evacuation messages,
+a 1-second to 3-second alert tone followed by a message (or
+messages where multi-channel capability is used) shall be provi‐
+ded.
+24.4.8.3.1 The sequence [the alert tone followed by the
+message(s)] shall be repeated at least three times to inform
+and direct occupants in the signaling zone where the alarm
+initiation originated, as well as other signaling zones in accord‐
+ance with the building fire safety plan.
+24.4.8.3.2 Approved alternative fire alarm notification
+schemes shall be permitted as long as the occupants are effec‐
+tively notified and are provided instructions in a timely and safe
+manner in accordance with the emergency response plan.
+N 24.4.8.4 Where the system is used to transmit partial evacua‐
+tion instructions, the alert tone specified in 24.4.2.1 followed
+by a message (or messages where multi-channel capability is
+used) shall be provided.
+24.4.8.5 Where provided, loudspeakers in each enclosed stair‐
+way, each exit passageway, each occupant evacuation elevator
+lobby, and each group of elevator cars within a common hoist‐
+way or bank shall be connected to separate notification zones
+for manual paging only.
+24.4.8.5.1 The evacuation signal specified in 18.4.2 shall not
+operate in elevator cars, exit stair enclosures, and exit passage‐
+ways.
+24.4.8.5.2 Manually activated loudspeakers shall be permitted
+in exit stair enclosures, exit passageways, and elevators in build‐
+ings that have emergency voice/alarm communications systems
+in accordance with Section 24.4.
+24.4.8.6 The requirements of 24.4.8.6 shall apply to both audi‐
+ble (tone and voice) and visual notification appliance circuits.
+24.4.8.6.1* Fire alarm systems used for partial evacuation and
+relocation shall be designed and installed such that attack by
+fire within a signaling zone does not impair control and opera‐
+tion of the notification appliances outside the signaling zone.
+24.4.8.6.2 Performance features provided to ensure opera‐
+tional reliability under adverse conditions shall be described
+and technical justification provided in the documentation
+submitted to the authority having jurisdiction with the analysis
+required in 23.4.3.1.
+FOR INDIVIDUAL USE ONLY
+Copyright 2019 National Fire Protection Association (NFPA®). Licensed by agreement to Carl Weaver FOR INDIVIDUAL USE ONLY and downloaded on 11/05/2019. No reproduction or transmission in any form permitted without
+written permission of NFPA®. For inquiries or access for multiple users, or to report unauthorized use, contact licensing@nfpa.org.
+{C56A4DC7-64F7-4C88-B368-41DE5BD47BC8}
+
+===== PAGE 145 =====
+
+NATIONAL FIRE ALARM AND SIGNALING CODE	72-142
+2019 Edition Shaded text = Revisions. Δ = Text deletions and figure/table revisions. • = Section deletions. N = New material.
+24.4.8.6.3* All circuits necessary for the operation of the noti‐
+fication appliances shall be protected until they enter the noti‐
+fication zone that they serve by the protection provided by the
+pathway survivability level required in 24.3.14.4.1 or by
+performance alternatives approved by the authority having
+jurisdiction.
+24.4.8.6.4 Where the separation of in-building fire emergency
+voice/alarm control equipment locations results in the
+portions of the system controlled by one location being
+dependent upon the control equipment in other locations, the
+circuits between the dependent controls shall be protected
+against attack by fire by the protection provided by the pathway
+survivability level required in 24.3.14.4.1 or by performance
+alternatives approved by the authority having jurisdiction.
+24.4.8.6.5 Protection of circuits between redundant control
+equipment locations that are not mutually dependent shall not
+be required.
+24.4.8.6.6 Where the separation of the in-building fire emer‐
+gency voice/alarm control equipment occurs as in 24.4.8.6.4,
+and where the circuits are run through junction boxes, termi‐
+nal cabinets or control equipment, such as system control
+units, power supplies and amplifiers, and where cable integrity
+is not maintained, these components shall, in addition to the
+pathway survivability required by 24.3.14.4.1, be protected by
+using one of the following methods:
+(1) A 2-hour fire–rated enclosure
+(2) A 2-hour fire–rated room
+(3) Other equivalent means to provide a 2-hour fire resist‐
+ance–rating approved by the authority having jurisdiction
+24.4.8.6.7 Paragraphs 24.4.8 through 24.4.8.6.6 shall not auto‐
+matically apply when relocation or partial evacuation is of a
+non-fire emergency unless identified and required by a risk
+analysis.
+24.4.9 Signal Zoning.
+24.4.9.1* Undivided fire or smoke areas shall not be divided
+into multiple notification zones.
+24.4.9.2 If multiple notification appliance circuits are provi‐
+ded within a single zone, all of the notification appliances
+within the zone shall be arranged to activate or deactivate
+simultaneously, either automatically or by actuation of a
+common manual control.
+24.4.9.3 Where there are different notification appliance
+circuits within a signaling zone that perform separate func‐
+tions, such as presignal and general alarm signals and predis‐
+charge and discharge signals, they shall not be required to
+activate or deactivate simultaneously.
+24.5* In-Building Mass Notification Systems. The require‐
+ments of Section 24.5 shall apply to mass notification systems
+installed in buildings or structures for the purpose of notifying
+and instructing occupants in an emergency.
+24.5.1* General Performance. The performance, selection,
+installation, operation, and use of a mass notification system
+shall comply with the requirements of Section 24.5.
+24.5.1.1 Interconnection of protected premises emergency
+control functions with the mass notification systems shall
+comply with Chapter 21.
+24.5.1.2 An in-building mass notification system shall include
+one or more of the following components:
+(1) Autonomous control unit (ACU)
+(2) Local operating console (LOC)
+(3) Fire alarm control interface
+(4) Notification appliance network
+(5) Initiating devices
+(6)* Interface to other systems and alerting sources
+24.5.1.3 All mass notification system notification appliances
+that receive their power from a signaling line circuit of a mass
+notification system control unit shall be listed for use with the
+control unit.
+24.5.1.4 Mass notification system components shall be instal‐
+led, tested, and maintained in accordance with the manufactur‐
+er's published instructions and this Code.
+24.5.1.5 In-building emergency mass notification operation
+shall be permitted to be initiated by manual or automatic
+means.
+24.5.1.6 Mass notification system activation shall initiate recor‐
+ded messages or live voice and visual notification.
+24.5.1.7 The priority level of recorded messages shall be deter‐
+mined by the emergency response plan.
+24.5.1.8 Only recorded messages determined by the emer‐
+gency response plan to be of higher priority than fire alarm
+activation shall be permitted to override the fire alarm notifica‐
+tion and initiate the mass notification priority indicator.
+24.5.1.9 Activation of any other recorded message shall not
+interfere with the operation of fire alarm notification.
+24.5.1.10 Initiation of live voice announcements from micro‐
+phones on the fire alarm system at an ACU, and at an LOC,
+shall not automatically place the fire alarm system in a mass
+notification priority mode.
+24.5.1.11 Combination of mass notification with fire alarm
+systems shall be permitted and shall meet the requirements of
+23.8.4.
+24.5.2 System Operation.
+24.5.2.1* Authorized personnel shall be permitted to control
+message initiation over the mass notification system.
+24.5.2.2* Where required by the emergency response plan,
+the mass notification system shall provide the capability for
+authorized personnel to remotely activate live and prerecorded
+emergency messages.
+24.5.2.3* Operating controls shall be clearly identified.
+24.5.2.4 If there are multiple control locations, only one shall
+be in control at any given time.
+24.5.2.5* Any ACU shall provide a control status of all inter‐
+connected LOCs.
+24.5.2.6 If there are multiple control locations, a visual indica‐
+tion shall be provided at all other control locations indicating
+that another control location is in use.
+24.5.2.7 Manual controls shall be arranged to provide visual
+indication of the on/off status for their associated notification
+zone.
+FOR INDIVIDUAL USE ONLY
+Copyright 2019 National Fire Protection Association (NFPA®). Licensed by agreement to Carl Weaver FOR INDIVIDUAL USE ONLY and downloaded on 11/05/2019. No reproduction or transmission in any form permitted without
+written permission of NFPA®. For inquiries or access for multiple users, or to report unauthorized use, contact licensing@nfpa.org.
+{C56A4DC7-64F7-4C88-B368-41DE5BD47BC8}
+

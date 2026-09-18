@@ -43,6 +43,16 @@ namespace FireProtection.UI.Services
 
         string GetHazardClassForSprinkler(string familyName, string typeName);
 
+        /// <summary>
+        /// Returns the <c>Mount</c> value (e.g. <c>"Pendent"</c>, <c>"Sidewall"</c>,
+        /// <c>"Upright"</c>) for the given sprinkler (family, type), or <c>null</c>
+        /// when no row matches. Comparison is case-insensitive and trims
+        /// whitespace. Consumed by the device-placement resolver to refine
+        /// <c>DevicePlacementBehavior.WorkPlaneDependent</c> into the mount-specific
+        /// bucket (<c>CeilingOverhead</c> / <c>WallSidewall</c>).
+        /// </summary>
+        string GetSprinklerMount(string familyName, string typeName);
+
         IReadOnlyList<string> GetSmokeDetectorFamilies();
 
         IReadOnlyList<string> GetSmokeDetectorTypesForFamily(string familyName);

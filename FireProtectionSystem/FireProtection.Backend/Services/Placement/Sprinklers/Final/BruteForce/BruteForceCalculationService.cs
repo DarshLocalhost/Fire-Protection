@@ -4,6 +4,7 @@ using System.Linq;
 using FireProtection.Backend.Models.DTOs;
 using FireProtection.Backend.Models.Hazard;
 using FireProtection.Backend.Models.Placement.Sprinklers.Final;
+using FireProtection.Backend.Services.Placement.LocationPoints;
 using FireProtection.UI.Models.Sprinklers.BruteForce;
 
 namespace FireProtection.Backend.Services.Placement.Sprinklers.Final.BruteForce
@@ -121,6 +122,14 @@ namespace FireProtection.Backend.Services.Placement.Sprinklers.Final.BruteForce
             HazardClass hazardClass = ParseHazardClass(room.EffectiveHazardClass, result);
             HazardPlacementRuleSet baseRuleSet = rules.GetRules(hazardClass);
             HazardPlacementRuleSet ruleSet = ApplyPerRoomOverrides(baseRuleSet, room, result);
+            // ApplyPerRoomOverrides clones when an override is present; for the no-override
+            // path it returns the base instance. Clone defensively here so downstream
+            // in-place mutations (ceiling-height factor, obstacle/orientation adjustments
+            // added by later tasks) never leak back to the base rule set.
+            if (ReferenceEquals(ruleSet, baseRuleSet))
+            {
+                ruleSet = baseRuleSet.Clone();
+            }
 
             // Carried onto the result so placement can prove points fall inside this room and can stamp the
             // spacing it actually used onto each created element.
@@ -130,27 +139,50 @@ namespace FireProtection.Backend.Services.Placement.Sprinklers.Final.BruteForce
             result.RulesApproved = rules.HasApprovedRules;
 
             // ---- Ceiling / placement plane (Z) ----
+            // DETERMINISTIC selection: pick the ceiling that is unambiguously the room's ceiling,
+            // not the first one iteration happens to return.
+            //   1. Filter by level match (host-room level id); only when the candidate carries a level.
+            //   2. Among matches, prefer FLAT over SLOPED over STEPPED (FLAT is the "clean" case).
+            //   3. Within the preferred slope class, pick the highest BottomElevationFt that is still
+            //      ABOVE the room's floor — a ceiling below floor Z is a slab of the level below.
             bool ceilingUnsupported = false;
             double placementZ = room.LevelElevationFt;
             string ceilingNote = null;
 
-            CeilingData flatCeiling = (room.Ceilings != null)
-                ? room.Ceilings.FirstOrDefault(c =>
-                    c != null &&
-                    string.Equals(c.SlopeType, "FLAT", StringComparison.OrdinalIgnoreCase) &&
-                    c.BottomElevationFt.HasValue)
-                : null;
+            CeilingData bestCeiling = SelectPrimaryCeiling(room, out string selectionReason, result);
 
-            bool hasSlopedCeiling = (room.Ceilings != null) &&
-                room.Ceilings.Any(c => c != null &&
-                    !string.Equals(c.SlopeType, "FLAT", StringComparison.OrdinalIgnoreCase));
-
-            if (flatCeiling != null)
+            if (bestCeiling != null && bestCeiling.BottomElevationFt.HasValue)
             {
-                placementZ = flatCeiling.BottomElevationFt.Value;
+                // For a SLOPED ceiling, BottomElevationFt is the LOW point of the slope and
+                // TopElevationFt is the HIGH point. A weighted average (geometric mean) places
+                // the placement plane at the centroid height, which is closer to the median
+                // sprinkler position than the low end. FLAT ceilings ignore the average (top
+                // == bottom) so this is a no-op for them.
+                if (string.Equals(bestCeiling.SlopeType, "SLOPED", System.StringComparison.OrdinalIgnoreCase)
+                    && bestCeiling.TopElevationFt.HasValue
+                    && bestCeiling.TopElevationFt.Value > bestCeiling.BottomElevationFt.Value)
+                {
+                    double avg = (bestCeiling.BottomElevationFt.Value + bestCeiling.TopElevationFt.Value) / 2.0;
+                    if (result != null)
+                    {
+                        result.Diagnostics.Add(
+                            $"Sloped ceiling Z averaged: bottom={bestCeiling.BottomElevationFt.Value:F2} ft, " +
+                            $"top={bestCeiling.TopElevationFt.Value:F2} ft, average={avg:F2} ft.");
+                    }
+                    placementZ = avg;
+                }
+                else
+                {
+                    placementZ = bestCeiling.BottomElevationFt.Value;
+                }
+                if (result != null && !string.IsNullOrEmpty(selectionReason))
+                {
+                    result.Diagnostics.Add(selectionReason);
+                }
             }
             else
             {
+                // No usable ceiling — fall back to a provisional Z and flag for review.
                 if (room.CeilingHeightFt.HasValue)
                 {
                     placementZ = room.LevelElevationFt + room.CeilingHeightFt.Value;
@@ -163,27 +195,202 @@ namespace FireProtection.Backend.Services.Placement.Sprinklers.Final.BruteForce
                 }
 
                 ceilingUnsupported = true;
-                if (hasSlopedCeiling)
-                {
-                    ceilingNote = (ceilingNote + " Sloped/unsupported ceiling present.").Trim();
-                }
+            }
+
+            // Step 2 placement-behavior read (Decision 011 hookup): the
+            // per-row SelectedSprinklerPlacementBehavior now drives the engine.
+            // If the resolved behavior is Unsupported the engine explicitly does
+            // NOT support that family class — fail fast with a clear error
+            // rather than producing candidates that the placement service would
+            // reject at commit time. This is the only Step-2 behavior switch
+            // that has algorithmic effect; the full placement-strategy hookup
+            // (FaceBased / WorkPlaneBased / OneLevelBased) is a future change.
+            // Placed BEFORE the ceilingUnsupported block so it fires regardless
+            // of whether the room has a valid ceiling.
+            if (room.SelectedSprinklerPlacementBehavior == DevicePlacementBehavior.Unsupported)
+            {
+                result.Status = CalculationStatus.InvalidInput;
+                result.CalculatedCount = 0;
+                result.RequiredCount = 0;
+                result.Errors.Add(
+                    "The selected sprinkler family has an unsupported placement behavior (" +
+                    room.SelectedSprinklerFamilyName + " / " + room.SelectedSprinklerTypeName +
+                    "). The brute-force engine does not currently support this family class. " +
+                    "Select a different family or extend the engine with a placement strategy.");
+                result.Diagnostics.Add(
+                    "BLOCKED: unsupported placement behavior. " +
+                    "SelectedSprinklerPlacementBehavior=Unsupported for family '" +
+                    (room.SelectedSprinklerFamilyName ?? "<none>") + "'.");
+                return result;
             }
 
             if (ceilingUnsupported)
             {
                 result.Status = CalculationStatus.ReviewRequired;
-                if (flatCeiling == null)
+                bool hasSlopedOrStepped = (room.Ceilings != null) &&
+                    room.Ceilings.Any(c => c != null &&
+                        !string.Equals(c.SlopeType, "FLAT", StringComparison.OrdinalIgnoreCase));
+                if (bestCeiling == null)
                 {
-                    result.Status = hasSlopedCeiling
+                    result.Status = hasSlopedOrStepped
                         ? CalculationStatus.UnsupportedCeiling
                         : CalculationStatus.MissingCeiling;
                 }
                 result.Warnings.Add(ceilingNote ?? "Ceiling data requires review.");
+
+                // For HOSTED sprinkler families (CeilingOverhead / FaceHosted /
+                // WorkPlaneDependent / Unknown / Unsupported) the candidates produced by
+                // a missing-ceiling room are unusable in Revit — there is no host face to
+                // anchor the placement on. The room is therefore BLOCKED rather than
+                // producing provisional points that would be rejected at placement time.
+                // LevelHosted families (plain level-anchored sprinklers) are exempt: they
+                // do not need a ceiling. Only block when the room has NO ceilings at all
+                // (so MissingCeiling already implies "absent"). A room that HAS ceilings
+                // but none were selected (e.g. only sloped) keeps its UnsupportedCeiling
+                // status and proceeds.
+                if (bestCeiling == null
+                    && (room.Ceilings == null || room.Ceilings.Count == 0)
+                    && RequiresCeilingHost(room.SelectedSprinklerPlacementBehavior))
+                {
+                    result.Status = CalculationStatus.MissingCeiling;
+                    result.CalculatedCount = 0;
+                    result.RequiredCount = 0;
+                    result.Errors.Add(
+                        "Room has no ceiling AND the selected sprinkler family requires " +
+                        "a ceiling/host face (placement behavior '" + room.SelectedSprinklerPlacementBehavior +
+                        "'). Calculation is blocked — add a ceiling to the room, or switch to a level-hosted family.");
+                    result.Diagnostics.Add(
+                        "BLOCKED: hosted-family + missing ceiling. The selected sprinkler family requires a " +
+                        "ceiling or work plane that the room does not have. Add a ceiling to the room or " +
+                        "select a level-hosted family.");
+                    return result;
+                }
+            }
+
+            // ---- Ceiling-height adjustment (NFPA 13 §11.1 / §C.11 / Table 21.2.3.1) ----
+            // NFPA 13 Table 21.2.3.1 specifies ceiling-height spacing reduction factors
+            // ONLY for Light Hazard. For OH/EH classes, different rules apply (§21.2.3.2)
+            // and are not modeled here — the class-wide CeilingHeightAdjustmentFactor
+            // captures the hazard-class safety margin instead.
+            //   ceiling height > 10 ft: factor 1.0 (no change)
+            //   ceiling height > 12 ft: factor 0.95
+            //   ceiling height > 15 ft: factor 0.90
+            //   ceiling height > 20 ft: factor 0.85
+            //   ceiling height > 25 ft: factor 0.80
+            // Only MaxSpacingFt is reduced — NFPA 13 does not reduce coverage radius.
+            double ceilingHeightFt = room.CeilingHeightFt.HasValue
+                ? room.CeilingHeightFt.Value
+                : Math.Max(0, placementZ - room.LevelElevationFt);
+            double heightFactor = 1.0;
+            bool isLightHazard = ruleSet.HazardClass == HazardClass.Light;
+            if (isLightHazard)
+            {
+                if (ceilingHeightFt > 25.0) heightFactor = 0.80;
+                else if (ceilingHeightFt > 20.0) heightFactor = 0.85;
+                else if (ceilingHeightFt > 15.0) heightFactor = 0.90;
+                else if (ceilingHeightFt > 12.0) heightFactor = 0.95;
+            }
+
+            double slopeFactor = 1.0;
+            if (bestCeiling != null && !string.Equals(bestCeiling.SlopeType, "FLAT", StringComparison.OrdinalIgnoreCase))
+            {
+                slopeFactor = ruleSet.GetCeilingSlopeAdjustment(bestCeiling.SlopeType);
+                if (slopeFactor <= 0) slopeFactor = 1.0;
+            }
+
+            // Combined factor — reduces MaxSpacingFt for high or sloped ceilings.
+            // CoverageRadiusFt is NOT reduced (NFPA 13 only restricts spacing).
+            // The rule-set field CeilingHeightAdjustmentFactor is a CLASS-WIDE multiplier
+            // (1.0 default, 0.75–0.9 for higher-hazard classes) applied separately from
+            // the height/slope factors.
+            double combinedFactor = heightFactor * slopeFactor * ruleSet.CeilingHeightAdjustmentFactor;
+            if (combinedFactor < 1.0)
+            {
+                double newMax = ruleSet.MaxSpacingFt * combinedFactor;
+                if (newMax < ruleSet.MaxSpacingFt - 1e-9)
+                {
+                    result.Diagnostics.Add(
+                        $"Ceiling-height adjustment applied: factor={combinedFactor:F3} (height={ceilingHeightFt:F2}ft, slope={slopeFactor:F2}, class={ruleSet.CeilingHeightAdjustmentFactor:F2}). " +
+                        $"MaxSpacingFt: {ruleSet.MaxSpacingFt:F2} -> {newMax:F2} ft.");
+                    ruleSet.MaxSpacingFt = newMax;
+                    result.AppliedMaxSpacingFt = newMax;
+                }
+            }
+
+            // ---- Orientation adjustment (NFPA 13 §10.2) ----
+            // Sidewall sprinklers have a half-circle spray pattern, so NFPA 13 limits their
+            // coverage to approximately HALF that of pendent/upright sprinklers. The spacing
+            // is reduced by the orientation factor, and the coverage radius is reduced by
+            // sqrt(2) to model the half-circle pattern (area = pi*r^2/2 ≈ pi*(r/sqrt(2))^2).
+            // null / empty / unknown orientation = no adjustment.
+            bool isSidewallOrientation = string.Equals(room.SelectedSprinklerOrientation, "sidewall", StringComparison.OrdinalIgnoreCase);
+            double orientationFactor = ruleSet.GetOrientationAdjustment(room.SelectedSprinklerOrientation);
+            if (orientationFactor > 0 && orientationFactor < 1.0)
+            {
+                double prevMax = ruleSet.MaxSpacingFt;
+                double newMaxO = prevMax * orientationFactor;
+                result.Diagnostics.Add(
+                    $"Orientation adjustment applied: orientation='{room.SelectedSprinklerOrientation}', factor={orientationFactor:F3}. " +
+                    $"MaxSpacingFt: {prevMax:F2} -> {newMaxO:F2} ft.");
+                ruleSet.MaxSpacingFt = newMaxO;
+                result.AppliedMaxSpacingFt = newMaxO;
+            }
+            if (isSidewallOrientation && ruleSet.CoverageRadiusFt > 0)
+            {
+                double prevCoverage = ruleSet.CoverageRadiusFt;
+                double sidewallCoverage = prevCoverage / Math.Sqrt(2.0);
+                result.Diagnostics.Add(
+                    $"Sidewall coverage halved: CoverageRadiusFt: {prevCoverage:F2} -> {sidewallCoverage:F2} ft (half-circle spray pattern).");
+                ruleSet.CoverageRadiusFt = sidewallCoverage;
             }
 
             // ---- Candidate generation ----
             List<ObstacleBox> obstacleBoxes = BuildObstacleBoxes(room, ruleSet, result);
             List<double[]> existingSprinklerXy = BuildExistingSprinklerXy(room);
+
+            // ---- Sidewall branch (NFPA 13 §11.3) ----
+            // When the per-row sprinkler is wall-anchored, the candidate set is NOT
+            // the 2-D ceiling grid; it is a step along each wall edge, projected
+            // ~BoundaryClearanceFt inboard. This is the industry-standard sidewall
+            // pattern: throw one direction into the room, half-ellipse coverage.
+            // The selection loop below is reused unchanged — it only consumes
+            // (X, Y, Z) tuples; sidewall candidates carry the same shape.
+            bool isSidewall =
+                room.SelectedSprinklerPlacementBehavior == DevicePlacementBehavior.WallSidewall
+                || string.Equals(room.SelectedSprinklerOrientation, "sidewall", StringComparison.OrdinalIgnoreCase);
+
+            var sprinklerLocationProfile = DeviceLocationPointIdentifier.ResolveSprinklerProfile(
+                room.SelectedSprinklerPlacementBehavior.ToString(),
+                room.SelectedSprinklerOrientation,
+                ruleSet.MaxSpacingFt,
+                ruleSet.BoundaryClearanceFt,
+                ruleSet.CoverageRadiusFt,
+                placementZ,
+                room.RoomId);
+            result.Diagnostics.Add(
+                "Location-point strategy=" + sprinklerLocationProfile.StrategyName
+                + ", mount=" + sprinklerLocationProfile.Mount
+                + ", grid=" + sprinklerLocationProfile.GridResolutionFt.ToString("F2")
+                + " ft, min-spacing=" + sprinklerLocationProfile.MinSpacingFt.ToString("F2")
+                + " ft, coverage=" + sprinklerLocationProfile.CoverageRadiusFt.ToString("F2")
+                + " ft, basis=" + sprinklerLocationProfile.SelectionBasis);
+
+            if (isSidewall)
+            {
+                List<CandidatePoint> sidewallCandidates = GenerateSidewallCandidates(
+                    room, geometry, ruleSet, obstacleBoxes, existingSprinklerXy, placementZ, config, result);
+                if (sidewallCandidates.Count == 0)
+                {
+                    result.Status = CalculationStatus.NoValidCandidates;
+                    result.Errors.Add("No valid sidewall candidate locations found along the room boundary.");
+                    result.CalculatedCount = 0;
+                    result.RequiredCount = 0;
+                    return result;
+                }
+                return SelectFromCandidates(
+                    sidewallCandidates, room, geometry, ruleSet, obstacleBoxes,
+                    existingSprinklerXy, config, result, ceilingUnsupported, ceilingNote);
+            }
 
             double gridRes = ComputeGridResolution(geometry, ruleSet, config, out int gridPointEstimate);
 
@@ -231,8 +438,20 @@ namespace FireProtection.Backend.Services.Placement.Sprinklers.Final.BruteForce
                     bool hitObstacle = false;
                     foreach (ObstacleBox box in obstacleBoxes)
                     {
-                        if (GeometryMath.InsideExpandedBox(x, y, box.MinX, box.MinY, box.MaxX, box.MaxY, ruleSet.ObstacleClearanceFt))
+                        // Per-obstacle clearance (NFPA 13 distinguishes beam/column/duct
+                        // clearances per hazard class). The rule set supplies a fallback
+                        // ObstacleClearanceFt when the category is unknown.
+                        if (GeometryMath.InsideExpandedBox(x, y, box.MinX, box.MinY, box.MaxX, box.MaxY, box.ClearanceFt))
                         {
+                            // Z-axis guard: a low beam (MaxZ well below the placement
+                            // plane) does NOT block a sprinkler at the ceiling, even if
+                            // its XY footprint overlaps. Only obstacles whose vertical
+                            // extent actually contains placementZ are real conflicts
+                            // (ducts, soffits, tall columns). SpansZ returns true when
+                            // the obstacle has no Z info — preserving pre-3D behavior
+                            // for legacy input.
+                            if (!box.SpansZ(placementZ, config.ToleranceFt)) continue;
+
                             candidate.IsValid = false;
                             candidate.RejectionReasons.Add("Inside/too close to obstacle: " + box.Category);
                             rejectedObstacle++;
@@ -267,6 +486,27 @@ namespace FireProtection.Backend.Services.Placement.Sprinklers.Final.BruteForce
                 $"Candidates generated={generated}, valid={validCount}, " +
                 $"rejected(outside={rejectedOutside}, boundary={rejectedBoundary}, obstacle={rejectedObstacle}, existing={rejectedExisting}).");
 
+            // Bug C-E guard: the grid coarsening in ComputeGridResolution is capped at
+            // CoverageRadius*4, so a large room can still hit MaxCandidatePoints MID-sweep. A
+            // truncated sweep silently leaves the rest of the room ungenerated - the post-selection
+            // coverage detector may or may not see the hole, but the user must ALWAYS see it.
+            // Count the points the full sweep WOULD have visited (mirrors the loop bounds exactly)
+            // and compare against what was actually generated.
+            {
+                int sweepRows = (int)Math.Floor((geometry.MaxY - geometry.MinY) / gridRes) + 1;
+                int sweepCols = (int)Math.Floor((geometry.MaxX - geometry.MinX) / gridRes) + 1;
+                long fullSweep = (long)sweepRows * sweepCols;
+                if (generated >= config.MaxCandidatePoints && fullSweep > generated)
+                {
+                    result.Warnings.Add(
+                        "Candidate grid was truncated at the " + config.MaxCandidatePoints
+                        + "-point safety cap; part of the room was never sampled. Coverage in the "
+                        + "unswept area is NOT guaranteed - review required (room too large for the "
+                        + "current grid budget, or reduce spacing).");
+                    result.Status = CalculationStatus.ReviewRequired;
+                }
+            }
+
             if (validCandidates.Count == 0)
             {
                 result.Status = CalculationStatus.NoValidCandidates;
@@ -276,7 +516,68 @@ namespace FireProtection.Backend.Services.Placement.Sprinklers.Final.BruteForce
                 return result;
             }
 
-            // ---- Deterministic selection (spacing + coverage) ----
+            // ---- Centered rectangular-grid selection (NFPA 13 §8.6 array method) ----
+            // The ceiling pendent/upright layout is a centered rectangular grid whose
+            // spacing is driven by the (adjusted) MaxSpacingFt. That is the value the UI
+            // exposes as "S->S", so editing it now actually moves heads. The sidewall
+            // branch above keeps the greedy wall-anchored selection.
+            return SelectCenteredGrid(
+                validCandidates, room, geometry, ruleSet, obstacleBoxes,
+                existingSprinklerXy, placementZ, gridRes, config, result,
+                ceilingUnsupported, ceilingNote);
+        }
+
+        // ------------------------------------------------------------------
+        // Selection (shared by ceiling-grid and sidewall branches)
+        // ------------------------------------------------------------------
+
+        /// <summary>
+        /// Greedy coverage-driven selection over a candidate set. Used by the sidewall
+        /// branch (NFPA 13 §11.3), whose wall-anchored candidates have no natural grid to
+        /// center; the ceiling pendent/upright path uses <see cref="SelectCenteredGrid"/>
+        /// instead. The algorithm is mount-agnostic; the caller produces the candidate list.
+        /// </summary>
+        private static RoomCalculationResult SelectFromCandidates(
+            List<CandidatePoint> validCandidates,
+            PlacementRoomInput room,
+            RoomGeometry geometry,
+            HazardPlacementRuleSet ruleSet,
+            List<ObstacleBox> obstacleBoxes,
+            List<double[]> existingSprinklerXy,
+            BruteForceCalculationConfig config,
+            RoomCalculationResult result,
+            bool ceilingUnsupported,
+            string ceilingNote)
+        {
+            // Semantics (this is what NFPA 13 actually says, and what the ruleset's fields mean):
+            //   CoverageRadiusFt   = maximum radius one sprinkler can cover. A point WITHIN this
+            //                        radius of an existing/placed sprinkler is ALREADY COVERED and
+            //                        does NOT need a new sprinkler.
+            //   MaxSpacingFt       = NFPA 13 upper bound on center-to-center distance. The greedy
+            //                        algorithm is allowed to place sprinklers further apart to
+            //                        achieve coverage, but the maximum is verified POST-SELECTION
+            //                        (Task #9 - coverage gap detection); it is NOT a per-candidate
+            //                        gate, because that would make the algorithm stop after the
+            //                        first sprinkler.
+            //   MinSpacingFt       = minimum permitted center-to-center distance. Two sprinklers
+            //                        must not be closer than this (default = CoverageRadius when
+            //                        not separately provided). Prevents bunching.
+            //
+            // The previous code used CoverageRadiusFt as if it were MinSpacingFt (rejecting any
+            // candidate within CoverageRadius of a placed sprinkler), which both:
+            //   (a) let sprinklers spread to MaxSpacing rather than stopping at CoverageRadius, and
+            //   (b) silently violated the spacing rule by inverting its meaning.
+            // The corrected algorithm enforces coverage (skip) + min spacing (no new sprinkler
+            // within MinSpacing of an existing one). Max spacing is verified as a post-selection
+            // warning, not a hard reject.
+
+            double minSpacingFt = ruleSet.MinSpacingFt > 0
+                ? ruleSet.MinSpacingFt
+                : ruleSet.CoverageRadiusFt; // conservative default: at least one coverage radius apart
+            double coverageRadiusFt = ruleSet.CoverageRadiusFt > 0 ? ruleSet.CoverageRadiusFt : 7.5;
+
+            // Sort by (Y, X) for a deterministic, room-traversable ordering. The same input
+            // must always produce the same output.
             validCandidates.Sort((a, b) =>
             {
                 int byY = a.Y.CompareTo(b.Y);
@@ -291,40 +592,42 @@ namespace FireProtection.Backend.Services.Placement.Sprinklers.Final.BruteForce
                 if (iterations >= config.MaxSearchIterations) break;
                 iterations++;
 
-                bool covered = false;
+                // 1. COVERAGE CHECK: skip the candidate if an existing OR already-placed sprinkler
+                //    within CoverageRadiusFt already covers it.
+                bool alreadyCovered = false;
                 foreach (double[] es in existingSprinklerXy)
                 {
-                    if (GeometryMath.Distance(candidate.X, candidate.Y, es[0], es[1]) <= ruleSet.CoverageRadiusFt - config.ToleranceFt)
+                    if (GeometryMath.Distance(candidate.X, candidate.Y, es[0], es[1]) <= coverageRadiusFt - config.ToleranceFt)
                     {
-                        covered = true;
+                        alreadyCovered = true;
                         break;
                     }
                 }
-
-                if (!covered)
+                if (!alreadyCovered)
                 {
                     foreach (CalculatedSprinklerPoint s in selected)
                     {
-                        if (GeometryMath.Distance(candidate.X, candidate.Y, s.X, s.Y) <= ruleSet.CoverageRadiusFt - config.ToleranceFt)
+                        if (GeometryMath.Distance(candidate.X, candidate.Y, s.X, s.Y) <= coverageRadiusFt - config.ToleranceFt)
                         {
-                            covered = true;
+                            alreadyCovered = true;
                             break;
                         }
                     }
                 }
+                if (alreadyCovered) continue;
 
-                if (covered) continue;
-
+                // 2. MIN SPACING CHECK: reject if too close to an already-placed sprinkler
+                //    (prevents bunching that would skew hydraulic calculations).
                 bool tooClose = false;
                 foreach (CalculatedSprinklerPoint s in selected)
                 {
-                    if (GeometryMath.Distance(candidate.X, candidate.Y, s.X, s.Y) < ruleSet.MaxSpacingFt - config.ToleranceFt)
+                    double d = GeometryMath.Distance(candidate.X, candidate.Y, s.X, s.Y);
+                    if (d < minSpacingFt - config.ToleranceFt)
                     {
                         tooClose = true;
                         break;
                     }
                 }
-
                 if (tooClose) continue;
 
                 selected.Add(new CalculatedSprinklerPoint
@@ -334,8 +637,187 @@ namespace FireProtection.Backend.Services.Placement.Sprinklers.Final.BruteForce
                     Z = candidate.Z,
                     RoomId = room.RoomId,
                     LevelId = room.LevelId,
-                    LevelName = room.LevelName
+                    LevelName = room.LevelName,
+                    WallEdgeIndex = candidate.WallEdgeIndex
                 });
+            }
+
+            return FinalizeSelection(
+                selected, room, geometry, ruleSet, obstacleBoxes,
+                existingSprinklerXy, config, result, ceilingUnsupported, ceilingNote);
+        }
+
+        // ------------------------------------------------------------------
+        // Shared post-selection verification (both selection strategies)
+        // ------------------------------------------------------------------
+
+        /// <summary>
+        /// Runs the NFPA 13 post-selection checks over an already-selected head list and
+        /// finalizes the result: max center-to-center spacing (§8.6), wall-distance upper
+        /// bound (§10.2.4 / §11.3), per-sprinkler coverage area (§5.2), coverage-gap
+        /// re-sampling, the provisional-rules flag, and the ceiling-review note. Shared by
+        /// the greedy sidewall path (<see cref="SelectFromCandidates"/>) and the centered
+        /// ceiling grid (<see cref="SelectCenteredGrid"/>) so both obey identical checks.
+        /// </summary>
+        private static RoomCalculationResult FinalizeSelection(
+            List<CalculatedSprinklerPoint> selected,
+            PlacementRoomInput room,
+            RoomGeometry geometry,
+            HazardPlacementRuleSet ruleSet,
+            List<ObstacleBox> obstacleBoxes,
+            List<double[]> existingSprinklerXy,
+            BruteForceCalculationConfig config,
+            RoomCalculationResult result,
+            bool ceilingUnsupported,
+            string ceilingNote)
+        {
+            // 3. POST-SELECTION MAX-SPACING VERIFICATION: NFPA 13 sets an upper bound on
+            //    center-to-center distance. If any pair of placed (or existing+placed) sprinklers
+            //    exceeds MaxSpacingFt, the room is flagged for review — the greedy selection
+            //    could not satisfy the spacing rule with the available candidates. This is a
+            //    warning, not a failure, because reducing spacing to satisfy the rule would
+            //    require more candidates (finer grid) than the cap allows.
+            if (ruleSet.MaxSpacingFt > 0)
+            {
+                double maxSpacing = ruleSet.MaxSpacingFt;
+                for (int i = 0; i < selected.Count; i++)
+                {
+                    for (int j = i + 1; j < selected.Count; j++)
+                    {
+                        double d = GeometryMath.Distance(selected[i].X, selected[i].Y, selected[j].X, selected[j].Y);
+                        if (d > maxSpacing + config.ToleranceFt)
+                        {
+                            result.Warnings.Add(
+                                $"Pair of placed sprinklers ({i + 1},{j + 1}) are {d:F2} ft apart, " +
+                                $"exceeding MaxSpacingFt={maxSpacing:F2} ft. Review required.");
+                            result.Status = CalculationStatus.ReviewRequired;
+                        }
+                    }
+                }
+            }
+
+            // 3b. POST-SELECTION WALL-DISTANCE VERIFICATION (NFPA 13 §10.2.4 / §11.3):
+            //    a sprinkler must be no further than MaxDistanceFromWallsFt from the
+            //    nearest wall. The greedy selector could place a sprinkler in the room
+            //    center (still within max spacing, still covering, but too far from any
+            //    wall). Verify after the fact and flag the room for review. BoundaryClearanceFt
+            //    is the LOWER bound (min distance, enforced at candidate-gen); this is
+            //    the UPPER bound.
+            if (ruleSet.MaxDistanceFromWallsFt > 0 && selected.Count > 0)
+            {
+                double maxWall = ruleSet.MaxDistanceFromWallsFt;
+                for (int i = 0; i < selected.Count; i++)
+                {
+                    double d = geometry.DistanceToOuterBoundary(selected[i].X, selected[i].Y);
+                    if (d > maxWall + config.ToleranceFt)
+                    {
+                        result.Warnings.Add(
+                            $"Placed sprinkler {i + 1} is {d:F2} ft from the nearest wall, " +
+                            $"exceeding MaxDistanceFromWallsFt={maxWall:F2} ft. Review required.");
+                        result.Status = CalculationStatus.ReviewRequired;
+                    }
+                }
+            }
+
+            // 3c. POST-SELECTION COVERAGE AREA VALIDATION (NFPA 13 §5.2):
+            //     Each sprinkler's coverage area must not exceed the hazard-class maximum.
+            //     The greedy selector uses CoverageRadiusFt as a circular approximation;
+            //     this check validates that the actual per-sprinkler polygon area (room area
+            //     / sprinkler count) does not exceed MaxCoverageAreaSqFt. For rectangular
+            //     rooms the actual coverage can differ from the circular approximation.
+            if (ruleSet.MaxCoverageAreaSqFt > 0 && selected.Count > 0 && room.AreaSqFt > 0)
+            {
+                double perSprinklerArea = room.AreaSqFt / selected.Count;
+                if (perSprinklerArea > ruleSet.MaxCoverageAreaSqFt + 1e-6)
+                {
+                    result.Warnings.Add(
+                        $"Per-sprinkler coverage area ({perSprinklerArea:F1} sq ft) exceeds " +
+                        $"MaxCoverageAreaSqFt={ruleSet.MaxCoverageAreaSqFt:F1} sq ft for {ruleSet.HazardClass}. " +
+                        $"Review required (consider adding more sprinklers or reducing spacing).");
+                    result.Status = CalculationStatus.ReviewRequired;
+                }
+            }
+
+            // 4. POST-SELECTION COVERAGE GAP DETECTION: the greedy places a sprinkler at
+            //    every VALID candidate that is uncovered AND not too close to a placed
+            //    sprinkler. MinSpacingFt can leave a gap when a candidate that would cover
+            //    an uncovered region is too close to an already-placed sprinkler and is
+            //    therefore rejected. We re-sample the room interior on a coarse grid (half
+            //    the smaller of coverage radius / max spacing) and count samples that are
+            //    beyond CoverageRadiusFt of any placed sprinkler. A non-zero gap is flagged
+            //    for review.
+            if (ruleSet.CoverageRadiusFt > 0 && selected.Count > 0)
+            {
+                double sampleStep = Math.Min(ruleSet.CoverageRadiusFt, ruleSet.MaxSpacingFt);
+                if (sampleStep <= 0) sampleStep = ruleSet.CoverageRadiusFt;
+                sampleStep = Math.Max(sampleStep / 2.0, 0.5); // floor at 0.5 ft to keep the test deterministic
+
+                int samples = 0;
+                int uncovered = 0;
+                double worstGap = 0.0;
+                double worstX = 0.0;
+                double worstY = 0.0;
+                double coverageThreshold = ruleSet.CoverageRadiusFt - config.ToleranceFt;
+
+                for (double sy = geometry.MinY; sy <= geometry.MaxY + config.ToleranceFt; sy += sampleStep)
+                {
+                    for (double sx = geometry.MinX; sx <= geometry.MaxX + config.ToleranceFt; sx += sampleStep)
+                    {
+                        if (!geometry.IsPointInsideRoom(sx, sy, config.ToleranceFt)) continue;
+                        // Skip sample points inside obstacles at the placement plane (those are
+                        // not "room" to cover). Only skip obstacles whose vertical extent
+                        // actually overlaps the placement Z — a low beam should not exclude
+                        // ceiling-level sample points. Use the Z from the first placed point.
+                        bool insideObstacle = false;
+                        double placementZForGapCheck = selected[0].Z;
+                        foreach (ObstacleBox box in obstacleBoxes)
+                        {
+                            if (!box.SpansZ(placementZForGapCheck, config.ToleranceFt)) continue;
+                            if (GeometryMath.InsideExpandedBox(sx, sy, box.MinX, box.MinY, box.MaxX, box.MaxY, 0.0))
+                            {
+                                insideObstacle = true; break;
+                            }
+                        }
+                        if (insideObstacle) continue;
+                        samples++;
+
+                        double nearest = double.PositiveInfinity;
+                        foreach (CalculatedSprinklerPoint s in selected)
+                        {
+                            double d = GeometryMath.Distance(sx, sy, s.X, s.Y);
+                            if (d < nearest) nearest = d;
+                        }
+                        foreach (double[] es in existingSprinklerXy)
+                        {
+                            double d = GeometryMath.Distance(sx, sy, es[0], es[1]);
+                            if (d < nearest) nearest = d;
+                        }
+                        if (nearest > coverageThreshold)
+                        {
+                            uncovered++;
+                            if (nearest > worstGap)
+                            {
+                                worstGap = nearest;
+                                worstX = sx;
+                                worstY = sy;
+                            }
+                        }
+                    }
+                }
+
+                if (samples > 0 && uncovered > 0)
+                {
+                    double pct = (double)uncovered * 100.0 / samples;
+                    result.Warnings.Add(
+                        $"Coverage gap detected: {uncovered} of {samples} sample points ({pct:F1}%) " +
+                        $"are beyond CoverageRadiusFt={ruleSet.CoverageRadiusFt:F2} ft from any placed " +
+                        $"sprinkler. Worst gap at ({worstX:F2},{worstY:F2}) = {worstGap:F2} ft. " +
+                        $"Review required (consider finer grid or relax MinSpacingFt).");
+                    if (pct > 5.0)
+                    {
+                        result.Status = CalculationStatus.ReviewRequired;
+                    }
+                }
             }
 
             result.Points = selected;
@@ -360,6 +842,366 @@ namespace FireProtection.Backend.Services.Placement.Sprinklers.Final.BruteForce
             }
 
             return result;
+        }
+
+        // ------------------------------------------------------------------
+        // Centered rectangular-grid selection (industry-standard ceiling array)
+        // ------------------------------------------------------------------
+
+        /// <summary>
+        /// Lays sprinklers on a centered rectangular grid whose spacing is driven by the
+        /// already hazard/override/ceiling/orientation-adjusted
+        /// <see cref="HazardPlacementRuleSet.MaxSpacingFt"/>. This is the standard NFPA 13
+        /// array method for regular areas and is what makes the on-screen "S->S" value
+        /// actually move heads. Per bounding-box axis: n = ceil(dim / S), actual step =
+        /// dim / n (&lt;= S), first line offset step/2 from the min edge — so center-to-center
+        /// &lt;= S and wall distance &lt;= S/2, guaranteed and evenly distributed. A grid target
+        /// that is blocked (outside the room, inside boundary clearance, inside an obstacle at
+        /// the placement plane, or too close to an existing head) snaps to the nearest UNUSED
+        /// valid fine-grid candidate within half a grid step (floored at the fine-grid
+        /// resolution so a neighbour is always reachable); if nothing is reachable the cell is
+        /// skipped. Deterministic (row-major, Y then X; ties resolved by the sorted candidate
+        /// order). Post-selection verification is shared with the sidewall path via
+        /// <see cref="FinalizeSelection"/>. An empty result is an honest hard <c>Failed</c>.
+        /// </summary>
+        private static RoomCalculationResult SelectCenteredGrid(
+            List<CandidatePoint> validCandidates,
+            PlacementRoomInput room,
+            RoomGeometry geometry,
+            HazardPlacementRuleSet ruleSet,
+            List<ObstacleBox> obstacleBoxes,
+            List<double[]> existingSprinklerXy,
+            double placementZ,
+            double gridRes,
+            BruteForceCalculationConfig config,
+            RoomCalculationResult result,
+            bool ceilingUnsupported,
+            string ceilingNote)
+        {
+            // Effective center-to-center spacing = adjusted NFPA 13 max spacing. Defensive
+            // fallbacks keep the grid finite if a rule set ever supplies a non-positive value.
+            double spacing = ruleSet.MaxSpacingFt;
+            if (spacing <= 0)
+                spacing = ruleSet.CoverageRadiusFt > 0 ? ruleSet.CoverageRadiusFt : 12.0;
+
+            double minSpacingFt = ruleSet.MinSpacingFt > 0 ? ruleSet.MinSpacingFt : 0.0;
+
+            double width = geometry.MaxX - geometry.MinX;
+            double height = geometry.MaxY - geometry.MinY;
+
+            // n lines per axis; step = dim/n (<= spacing); first line at step/2 (centered array).
+            int nx = width <= spacing + config.ToleranceFt
+                ? 1 : (int)Math.Ceiling(width / spacing - config.ToleranceFt);
+            int ny = height <= spacing + config.ToleranceFt
+                ? 1 : (int)Math.Ceiling(height / spacing - config.ToleranceFt);
+            if (nx < 1) nx = 1;
+            if (ny < 1) ny = 1;
+            double stepX = width / nx;
+            double stepY = height / ny;
+
+            // Snap radius: half the larger grid step, floored at the fine-grid resolution so a
+            // blocked target can always reach a neighbouring valid candidate. Half a step keeps
+            // a snap from crossing into the next cell (preserves spacing <= S in open rooms;
+            // near obstacles the post-check flags any residual spacing violation).
+            double captureRadius = Math.Max(Math.Max(stepX, stepY) / 2.0, gridRes);
+
+            // Deterministic candidate ordering (Y then X) for a stable nearest-candidate snap.
+            validCandidates.Sort((a, b) =>
+            {
+                int byY = a.Y.CompareTo(b.Y);
+                return byY != 0 ? byY : a.X.CompareTo(b.X);
+            });
+            bool[] used = new bool[validCandidates.Count];
+
+            List<CalculatedSprinklerPoint> selected = new List<CalculatedSprinklerPoint>();
+            int placedExact = 0, placedSnapped = 0, cellsSkipped = 0;
+
+            for (int iy = 0; iy < ny; iy++)
+            {
+                double ty = geometry.MinY + stepY * (iy + 0.5);
+                for (int ix = 0; ix < nx; ix++)
+                {
+                    double tx = geometry.MinX + stepX * (ix + 0.5);
+
+                    double rx, ry;
+                    int snapIdx = -1;
+
+                    if (IsPlacementValid(tx, ty, placementZ, geometry, ruleSet, obstacleBoxes, existingSprinklerXy, config))
+                    {
+                        rx = tx;
+                        ry = ty;
+                    }
+                    else
+                    {
+                        // Snap to the nearest UNUSED valid fine-grid candidate within the capture
+                        // radius. Candidates are sorted (Y, X); the strict '<' keeps the first
+                        // (lowest Y, then X) on a tie, so the result is deterministic.
+                        double bestDist = double.PositiveInfinity;
+                        for (int c = 0; c < validCandidates.Count; c++)
+                        {
+                            if (used[c]) continue;
+                            double d = GeometryMath.Distance(tx, ty, validCandidates[c].X, validCandidates[c].Y);
+                            if (d > captureRadius + config.ToleranceFt) continue;
+                            if (d < bestDist - config.ToleranceFt)
+                            {
+                                bestDist = d;
+                                snapIdx = c;
+                            }
+                        }
+                        if (snapIdx < 0)
+                        {
+                            cellsSkipped++;
+                            continue;
+                        }
+                        rx = validCandidates[snapIdx].X;
+                        ry = validCandidates[snapIdx].Y;
+                    }
+
+                    // Min-spacing guard: never place two heads closer than MinSpacingFt.
+                    if (minSpacingFt > 0)
+                    {
+                        bool tooClose = false;
+                        for (int s = 0; s < selected.Count; s++)
+                        {
+                            if (GeometryMath.Distance(rx, ry, selected[s].X, selected[s].Y) < minSpacingFt - config.ToleranceFt)
+                            {
+                                tooClose = true;
+                                break;
+                            }
+                        }
+                        if (tooClose)
+                        {
+                            cellsSkipped++;
+                            continue;
+                        }
+                    }
+
+                    if (snapIdx >= 0)
+                    {
+                        used[snapIdx] = true;
+                        placedSnapped++;
+                    }
+                    else
+                    {
+                        placedExact++;
+                    }
+
+                    selected.Add(new CalculatedSprinklerPoint
+                    {
+                        X = rx,
+                        Y = ry,
+                        Z = placementZ,
+                        RoomId = room.RoomId,
+                        LevelId = room.LevelId,
+                        LevelName = room.LevelName
+                    });
+                }
+            }
+
+            result.Diagnostics.Add(
+                $"Centered grid: S={spacing:F2} ft, nx={nx}, ny={ny}, stepX={stepX:F2} ft, stepY={stepY:F2} ft; " +
+                $"placed={selected.Count} (exact={placedExact}, snapped={placedSnapped}), cells skipped={cellsSkipped}.");
+
+            if (selected.Count == 0)
+            {
+                // Valid room geometry and a non-empty fine-grid candidate set, yet the centered
+                // grid placed nothing (every target blocked and no fallback candidate within
+                // reach). Report an honest hard failure for the room rather than a soft review.
+                result.Status = CalculationStatus.Failed;
+                result.CalculatedCount = 0;
+                result.RequiredCount = 0;
+                result.Errors.Add(
+                    "Centered-grid placement produced no sprinklers: every grid position was blocked " +
+                    "(boundary clearance / obstacle / existing sprinkler) and no valid fallback candidate " +
+                    "was within reach. Review the room geometry, obstacles, and spacing override.");
+                return result;
+            }
+
+            return FinalizeSelection(
+                selected, room, geometry, ruleSet, obstacleBoxes,
+                existingSprinklerXy, config, result, ceilingUnsupported, ceilingNote);
+        }
+
+        /// <summary>
+        /// True when a sprinkler may sit at (x, y) on the placement plane: inside the room,
+        /// at least <see cref="HazardPlacementRuleSet.BoundaryClearanceFt"/> from the outer
+        /// boundary, not inside an obstacle whose vertical extent contains the placement plane,
+        /// and not within <see cref="HazardPlacementRuleSet.ExistingSprinklerSeparationFt"/> of
+        /// an existing head. Mirrors the fine-grid candidate filter exactly so grid targets and
+        /// snapped candidates obey identical rules.
+        /// </summary>
+        private static bool IsPlacementValid(
+            double x, double y, double placementZ,
+            RoomGeometry geometry,
+            HazardPlacementRuleSet ruleSet,
+            List<ObstacleBox> obstacleBoxes,
+            List<double[]> existingSprinklerXy,
+            BruteForceCalculationConfig config)
+        {
+            if (!geometry.IsPointInsideRoom(x, y, config.ToleranceFt)) return false;
+            if (geometry.DistanceToOuterBoundary(x, y) < ruleSet.BoundaryClearanceFt - config.ToleranceFt) return false;
+
+            foreach (ObstacleBox box in obstacleBoxes)
+            {
+                if (GeometryMath.InsideExpandedBox(x, y, box.MinX, box.MinY, box.MaxX, box.MaxY, box.ClearanceFt))
+                {
+                    if (!box.SpansZ(placementZ, config.ToleranceFt)) continue;
+                    return false;
+                }
+            }
+
+            foreach (double[] es in existingSprinklerXy)
+            {
+                if (GeometryMath.Distance(x, y, es[0], es[1]) <= ruleSet.ExistingSprinklerSeparationFt - config.ToleranceFt)
+                    return false;
+            }
+
+            return true;
+        }
+
+        // ------------------------------------------------------------------
+        // Sidewall candidate generation (NFPA 13 §11.3)
+        // ------------------------------------------------------------------
+
+        /// <summary>
+        /// Generates wall-anchored candidate points for a sidewall sprinkler.
+        /// Walks each edge of the room's outer polygon, projects
+        /// <see cref="HazardPlacementRuleSet.BoundaryClearanceFt"/> inboard
+        /// perpendicular to the edge, and steps along the edge at the (already
+        /// orientation-adjusted) <see cref="HazardPlacementRuleSet.MaxSpacingFt"/>.
+        /// Inward normal is disambiguated with the room's
+        /// <see cref="RoomGeometry.IsPointInsideRoom"/> test.
+        ///
+        /// Candidates that fall outside the room (concave corners), too close
+        /// to an obstacle, or too close to an existing sprinkler are rejected.
+        /// The boundary-clearance lower bound is intentionally NOT applied —
+        /// sidewall candidates are SUPPOSED to be near the wall.
+        /// </summary>
+        private static List<CandidatePoint> GenerateSidewallCandidates(
+            PlacementRoomInput room,
+            RoomGeometry geometry,
+            HazardPlacementRuleSet ruleSet,
+            List<ObstacleBox> obstacleBoxes,
+            List<double[]> existingSprinklerXy,
+            double placementZ,
+            BruteForceCalculationConfig config,
+            RoomCalculationResult result)
+        {
+            List<CandidatePoint> candidates = new List<CandidatePoint>();
+
+            List<double[]> polygon = room.BoundaryPolygon;
+            if (polygon == null || polygon.Count < 3)
+            {
+                if (room.Boundary != null && room.Boundary.OuterLoop != null &&
+                    room.Boundary.OuterLoop.Polygon != null && room.Boundary.OuterLoop.Polygon.Count >= 3)
+                {
+                    polygon = room.Boundary.OuterLoop.Polygon;
+                }
+            }
+            if (polygon == null || polygon.Count < 3) return candidates;
+
+            // NFPA 13 §11.3: sidewall deflector distance from wall is 4-6 inches (0.33-0.5 ft).
+            // Use a dedicated standoff rather than BoundaryClearanceFt (which is 1.0-2.0 ft for
+            // general room boundary clearance and places candidates too far from the wall).
+            const double sidewallStandoffFt = 0.5;
+            double standOff = sidewallStandoffFt;
+
+            // NFPA 13 §11.3: sidewall step along the wall is based on the throw distance,
+            // not the pendent MaxSpacingFt. Use the rule-set MaxSpacingFt (already
+            // orientation-adjusted) as the step, with a floor to avoid degenerate spacing.
+            double step = ruleSet.MaxSpacingFt > 0 ? ruleSet.MaxSpacingFt : 6.0;
+
+            int totalGenerated = 0;
+            int rejectedOutside = 0;
+            int rejectedObstacle = 0;
+            int rejectedExisting = 0;
+
+            for (int i = 0; i < polygon.Count; i++)
+            {
+                double[] a = polygon[i];
+                double[] b = polygon[(i + 1) % polygon.Count];
+                if (a == null || b == null || a.Length < 2 || b.Length < 2) continue;
+
+                double ex = b[0] - a[0];
+                double ey = b[1] - a[1];
+                double edgeLen = Math.Sqrt(ex * ex + ey * ey);
+                if (edgeLen < 1e-6) continue;
+
+                double ux = ex / edgeLen;
+                double uy = ey / edgeLen;
+
+                // Two candidate normals (left-hand + right-hand perpendicular).
+                // Disambiguate by IsPointInsideRoom: the inboard side is the one
+                // where midpoint + 0.5 * n is inside the room.
+                double nxLeft = -uy;
+                double nyLeft = ux;
+                double midX = (a[0] + b[0]) * 0.5;
+                double midY = (a[1] + b[1]) * 0.5;
+
+                bool leftIsInboard = geometry.IsPointInsideRoom(
+                    midX + nxLeft * 0.5, midY + nyLeft * 0.5, config.ToleranceFt);
+                double nx = leftIsInboard ? nxLeft : -nxLeft;
+                double ny = leftIsInboard ? nyLeft : -nyLeft;
+
+                int n = Math.Max(1, (int)Math.Ceiling(edgeLen / step));
+
+                for (int k = 0; k <= n; k++)
+                {
+                    double t = (double)k / (double)n;
+                    double baseX = a[0] + ex * t;
+                    double baseY = a[1] + ey * t;
+                    double cx = baseX + nx * standOff;
+                    double cy = baseY + ny * standOff;
+                    totalGenerated++;
+
+                    if (!geometry.IsPointInsideRoom(cx, cy, config.ToleranceFt))
+                    {
+                        rejectedOutside++;
+                        continue;
+                    }
+
+                    bool hitObstacle = false;
+                    foreach (ObstacleBox box in obstacleBoxes)
+                    {
+                        if (GeometryMath.InsideExpandedBox(cx, cy, box.MinX, box.MinY, box.MaxX, box.MaxY, box.ClearanceFt))
+                        {
+                            if (!box.SpansZ(placementZ, config.ToleranceFt)) continue;
+                            rejectedObstacle++;
+                            hitObstacle = true;
+                            break;
+                        }
+                    }
+                    if (hitObstacle) continue;
+
+                    bool hitExisting = false;
+                    foreach (double[] es in existingSprinklerXy)
+                    {
+                        if (GeometryMath.Distance(cx, cy, es[0], es[1]) <= ruleSet.ExistingSprinklerSeparationFt - config.ToleranceFt)
+                        {
+                            rejectedExisting++;
+                            hitExisting = true;
+                            break;
+                        }
+                    }
+                    if (hitExisting) continue;
+
+                    candidates.Add(new CandidatePoint
+                    {
+                        X = cx,
+                        Y = cy,
+                        Z = placementZ,
+                        IsValid = true,
+                        Score = 1.0,
+                        WallEdgeIndex = i
+                    });
+                }
+            }
+
+            result.Diagnostics.Add(
+                $"Sidewall candidates: generated={totalGenerated}, valid={candidates.Count}, " +
+                $"rejected(outside={rejectedOutside}, obstacle={rejectedObstacle}, existing={rejectedExisting}). " +
+                $"StandOff={standOff:F2} ft, step={step:F2} ft.");
+            return candidates;
         }
 
         // ------------------------------------------------------------------
@@ -422,6 +1264,31 @@ namespace FireProtection.Backend.Services.Placement.Sprinklers.Final.BruteForce
             }
         }
 
+        /// <summary>
+        /// True when the selected sprinkler family's placement behavior REQUIRES a real
+        /// ceiling or work-plane host face to anchor each candidate. Level-hosted families
+        /// (e.g. <see cref="DevicePlacementBehavior.LevelHosted"/>) are exempt — they sit
+        /// on a level plane and do not need a ceiling. The default <c>Unknown</c> /
+        /// <c>Unsupported</c> is treated as hosted (conservative) so the room is blocked
+        /// rather than producing unusable points.
+        /// </summary>
+        private static bool RequiresCeilingHost(DevicePlacementBehavior behavior)
+        {
+            switch (behavior)
+            {
+                case DevicePlacementBehavior.CeilingOverhead:
+                case DevicePlacementBehavior.FaceHosted:
+                case DevicePlacementBehavior.WorkPlaneDependent:
+                case DevicePlacementBehavior.Unknown:
+                case DevicePlacementBehavior.Unsupported:
+                    return true;
+                case DevicePlacementBehavior.WallSidewall:
+                case DevicePlacementBehavior.LevelHosted:
+                default:
+                    return false;
+            }
+        }
+
         private static double ComputeGridResolution(
             RoomGeometry geometry, HazardPlacementRuleSet ruleSet, BruteForceCalculationConfig config, out int estimate)
         {
@@ -429,6 +1296,24 @@ namespace FireProtection.Backend.Services.Placement.Sprinklers.Final.BruteForce
             if (res > ruleSet.CoverageRadiusFt)
             {
                 res = ruleSet.CoverageRadiusFt;
+            }
+
+            // Floor the grid step at half the coverage radius so every coverage diameter
+            // is sampled by AT LEAST two candidate points. Without this floor a sparse
+            // grid (e.g. 4 ft step on a 12 ft coverage radius) would let the post-selection
+            // coverage-gap detector flag the room as under-covered. The floor is applied
+            // ONLY when the room is at least 2 * floor wide in BOTH dimensions; otherwise
+            // the floor would skip grid points that the original fine grid sampled (e.g.
+            // a 30 ft x 3 ft room has only 2 y positions that clear the boundary).
+            if (ruleSet.CoverageRadiusFt > 0)
+            {
+                double roomW = geometry.MaxX - geometry.MinX;
+                double roomH = geometry.MaxY - geometry.MinY;
+                double floor = ruleSet.CoverageRadiusFt / 2.0;
+                if (floor > 0 && roomW >= 2.0 * floor && roomH >= 2.0 * floor)
+                {
+                    if (res < floor) res = floor;
+                }
             }
 
             estimate = EstimateGridPoints(geometry, res);
@@ -452,6 +1337,82 @@ namespace FireProtection.Backend.Services.Placement.Sprinklers.Final.BruteForce
             if (nx < 0) nx = 0;
             if (ny < 0) ny = 0;
             return nx * ny;
+        }
+
+        /// <summary>
+        /// Deterministically picks the ceiling that should host this room's sprinklers.
+        /// Decision order (in priority):
+        ///   1. FLAT ceiling matching the room's level with the highest BottomElevationFt above floor Z.
+        ///   2. SLOPED ceiling matching the room's level with the highest BottomElevationFt above floor Z.
+        ///   3. STEPPED ceiling matching the room's level with the highest BottomElevationFt above floor Z.
+        ///   4. Any FLAT ceiling with the highest BottomElevationFt above floor Z (level mismatch fallback).
+        ///   5. Any SLOPED ceiling with the highest BottomElevationFt above floor Z.
+        ///   6. Any ceiling whatsoever (last resort).
+        /// A ceiling below floor Z is NEVER picked — that is a slab of the level below.
+        /// Returns the picked ceiling and a human-readable selection reason (or null when no ceiling qualifies).
+        /// </summary>
+        private static CeilingData SelectPrimaryCeiling(PlacementRoomInput room, out string reason, RoomCalculationResult result)
+        {
+            reason = null;
+            if (room?.Ceilings == null || room.Ceilings.Count == 0) return null;
+
+            double floorZ = room.LevelElevationFt;
+            string roomLevelId = room.LevelId;
+
+            // A candidate must be a real ceiling with a measured bottom elevation, located above the
+            // room's floor (a slab below the floor is structural, not a ceiling).
+            List<CeilingData> candidates = new List<CeilingData>();
+            foreach (CeilingData c in room.Ceilings)
+            {
+                if (c == null) continue;
+                if (!c.BottomElevationFt.HasValue) continue;
+                if (c.BottomElevationFt.Value <= floorZ + 0.05) continue; // tolerate 0.05 ft slop
+                candidates.Add(c);
+            }
+
+            if (candidates.Count == 0) return null;
+
+            // Priority buckets, in descending preference.
+            string[] slopePriority = { "FLAT", "SLOPED", "STEPPED" };
+
+            for (int pass = 0; pass < 2; pass++)
+            {
+                bool requireLevelMatch = (pass == 0);
+
+                foreach (string slope in slopePriority)
+                {
+                    CeilingData best = null;
+                    foreach (CeilingData c in candidates)
+                    {
+                        if (!string.Equals(c.SlopeType, slope, StringComparison.OrdinalIgnoreCase)) continue;
+                        if (requireLevelMatch)
+                        {
+                            if (string.IsNullOrEmpty(c.LevelId)) continue;
+                            if (!string.Equals(c.LevelId, roomLevelId, StringComparison.OrdinalIgnoreCase)) continue;
+                        }
+                        if (best == null || c.BottomElevationFt.Value > best.BottomElevationFt.Value) best = c;
+                    }
+
+                    if (best != null)
+                    {
+                        reason = $"Primary ceiling: slope={best.SlopeType}, BottomElevationFt={best.BottomElevationFt.Value:F2}, levelMatch={requireLevelMatch}.";
+                        return best;
+                    }
+                }
+            }
+
+            // No ceiling matched any of the preferred buckets with a level match; pick the
+            // highest Z ceiling regardless of slope/level (better than no ceiling at all).
+            CeilingData fallback = null;
+            foreach (CeilingData c in candidates)
+            {
+                if (fallback == null || c.BottomElevationFt.Value > fallback.BottomElevationFt.Value) fallback = c;
+            }
+            if (fallback != null)
+            {
+                reason = $"Primary ceiling (fallback, no level match): slope={fallback.SlopeType}, BottomElevationFt={fallback.BottomElevationFt.Value:F2}.";
+            }
+            return fallback;
         }
 
         private static List<ObstacleBox> BuildObstacleBoxes(
@@ -496,13 +1457,26 @@ namespace FireProtection.Backend.Services.Placement.Sprinklers.Final.BruteForce
                     continue;
                 }
 
+                double minZ = double.NaN;
+                double maxZ = double.NaN;
+                if (obstacle.BoundingBox != null
+                    && obstacle.BoundingBox.Min != null
+                    && obstacle.BoundingBox.Max != null)
+                {
+                    minZ = obstacle.BoundingBox.Min.Z;
+                    maxZ = obstacle.BoundingBox.Max.Z;
+                }
+
                 boxes.Add(new ObstacleBox
                 {
                     MinX = minX,
                     MinY = minY,
                     MaxX = maxX,
                     MaxY = maxY,
-                    Category = obstacle.Category ?? "obstacle"
+                    MinZ = minZ,
+                    MaxZ = maxZ,
+                    Category = obstacle.Category ?? "obstacle",
+                    ClearanceFt = ruleSet.GetObstacleClearance(obstacle.Category)
                 });
             }
 
@@ -541,17 +1515,11 @@ namespace FireProtection.Backend.Services.Placement.Sprinklers.Final.BruteForce
                 return baseRuleSet;
             }
 
-            HazardPlacementRuleSet effective = new HazardPlacementRuleSet
-            {
-                HazardClass = baseRuleSet.HazardClass,
-                MaxSpacingFt = baseRuleSet.MaxSpacingFt,
-                CoverageRadiusFt = baseRuleSet.CoverageRadiusFt,
-                ObstacleClearanceFt = baseRuleSet.ObstacleClearanceFt,
-                BoundaryClearanceFt = baseRuleSet.BoundaryClearanceFt,
-                ExistingSprinklerSeparationFt = baseRuleSet.ExistingSprinklerSeparationFt,
-                IsProvisional = baseRuleSet.IsProvisional || true,
-                Notes = baseRuleSet.Notes
-            };
+            // Always clone when ANY override is present so the per-room mutations
+            // (this method + the ceiling-height adjustment below) cannot leak back
+            // into the base rule set returned by the rules provider.
+            HazardPlacementRuleSet effective = baseRuleSet.Clone();
+            effective.IsProvisional = true;
 
             if (room.OverrideMaxSpacingFt.HasValue)
             {
@@ -595,17 +1563,16 @@ namespace FireProtection.Backend.Services.Placement.Sprinklers.Final.BruteForce
 
         private static double ClampToNfpa13MaxSpacing(HazardClass hazardClass, double requestedFt, out string note)
         {
-            // NFPA 13 hard-limit ceilings per the current placeholder rule set (15 ft). The
-            // current authoritative values are not yet encoded; the placeholder is the only
-            // hard ceiling we can enforce. Engineers can request tighter (smaller) values.
+            // NFPA 13 hard-limit ceilings per hazard class. Engineers can request tighter
+            // (smaller) values, but values exceeding the class ceiling are clamped.
             note = null;
-            const double provisionalCeilingFt = 15.0;
-            if (requestedFt > provisionalCeilingFt)
+            double ceilingFt = GetNfpa13MaxSpacingCeiling(hazardClass);
+            if (requestedFt > ceilingFt)
             {
                 note = "Requested MaxSpacingFt " + requestedFt.ToString("F2")
-                    + " ft exceeds the current provisional ceiling (" + provisionalCeilingFt.ToString("F2")
-                    + " ft); clamped to " + provisionalCeilingFt.ToString("F2") + " ft.";
-                return provisionalCeilingFt;
+                    + " ft exceeds NFPA 13 ceiling for " + hazardClass + " (" + ceilingFt.ToString("F2")
+                    + " ft); clamped to " + ceilingFt.ToString("F2") + " ft.";
+                return ceilingFt;
             }
             if (requestedFt <= 0.0)
             {
@@ -615,13 +1582,66 @@ namespace FireProtection.Backend.Services.Placement.Sprinklers.Final.BruteForce
             return requestedFt;
         }
 
+        /// <summary>
+        /// Returns the NFPA 13 maximum permitted sprinkler spacing (feet) for the given hazard class.
+        /// Light=15, OH1/OH2=12, EH1/EH2=10.
+        /// </summary>
+        private static double GetNfpa13MaxSpacingCeiling(HazardClass hazardClass)
+        {
+            switch (hazardClass)
+            {
+                case HazardClass.EH1:
+                case HazardClass.EH2:
+                    return 10.0;
+                case HazardClass.OH1:
+                case HazardClass.OH2:
+                    return 12.0;
+                case HazardClass.Light:
+                default:
+                    return 15.0;
+            }
+        }
+
         private sealed class ObstacleBox
         {
             public double MinX { get; set; }
             public double MinY { get; set; }
             public double MaxX { get; set; }
             public double MaxY { get; set; }
+
+            /// <summary>Obstacle bottom in feet. <c>double.NaN</c> when the obstacle has no Z info.</summary>
+            public double MinZ { get; set; }
+
+            /// <summary>Obstacle top in feet. <c>double.NaN</c> when the obstacle has no Z info.</summary>
+            public double MaxZ { get; set; }
+
             public string Category { get; set; }
+            /// <summary>
+            /// Per-box clearance in feet. Resolved from
+            /// <see cref="HazardPlacementRuleSet.ObstacleSpecificClearances"/> via
+            /// <see cref="HazardPlacementRuleSet.GetObstacleClearance"/>; falls back
+            /// to <see cref="HazardPlacementRuleSet.ObstacleClearanceFt"/> when the
+            /// category is unknown.
+            /// </summary>
+            public double ClearanceFt { get; set; }
+
+            /// <summary>
+            /// True when the obstacle's vertical extent contains the candidate's
+            /// placement Z (with a small tolerance). Beams that sit below ceiling
+            /// will have MaxZ well below the placement plane and therefore do NOT
+            /// block; ducts/soffits that reach up to the ceiling plane DO block.
+            /// When the obstacle has no usable Z info (NaN or a collapsed
+            /// <c>MinZ == MaxZ</c> range — the legacy "set Z to 0" default) the
+            /// default is to assume it blocks. This preserves the pre-3D
+            /// behaviour for legacy/test input that never populated Z properly.
+            /// </summary>
+            public bool SpansZ(double placementZ, double toleranceFt)
+            {
+                if (double.IsNaN(MinZ) || double.IsNaN(MaxZ)) return true;
+                if (System.Math.Abs(MaxZ - MinZ) < 1e-6) return true;
+                return placementZ >= MinZ - toleranceFt
+                    && placementZ <= MaxZ + toleranceFt;
+            }
         }
     }
 }

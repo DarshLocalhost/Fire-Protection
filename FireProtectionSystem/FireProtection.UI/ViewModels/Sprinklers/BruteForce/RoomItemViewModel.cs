@@ -30,6 +30,11 @@ namespace FireProtection.UI.ViewModels.Sprinklers.BruteForce
         private double? _boundaryClearanceFtOverride;
         private double? _defaultMaxSpacingFt;
         private double? _defaultBoundaryClearanceFt;
+        private string _selectedOrientation;
+        private string _defaultOrientation;
+
+        private static readonly IReadOnlyList<string> OrientationOptionsList =
+            new List<string> { "(auto)", "pendent", "upright", "sidewall" };
 
         public RoomItemViewModel(
             RoomUiData room,
@@ -445,6 +450,9 @@ namespace FireProtection.UI.ViewModels.Sprinklers.BruteForce
                 {
                     OnPropertyChanged(nameof(IsSpacingOverridden));
                     OnPropertyChanged(nameof(MaxSpacingFtOverrideDisplay));
+                    // The cell shows the default when no override exists, so a re-seeded default must
+                    // repaint the cell too (unless the user is mid-keystroke).
+                    if (!_editingText) OnPropertyChanged(nameof(MaxSpacingInput));
                 }
             }
         }
@@ -458,6 +466,7 @@ namespace FireProtection.UI.ViewModels.Sprinklers.BruteForce
                 {
                     OnPropertyChanged(nameof(IsWallSpaceOverridden));
                     OnPropertyChanged(nameof(BoundaryClearanceFtOverrideDisplay));
+                    if (!_editingText) OnPropertyChanged(nameof(BoundaryClearanceInput));
                 }
             }
         }
@@ -492,6 +501,24 @@ namespace FireProtection.UI.ViewModels.Sprinklers.BruteForce
             get { return _boundaryClearanceFtOverride.HasValue ? _boundaryClearanceFtOverride.Value.ToString("F2") : "—"; }
         }
 
+        public IReadOnlyList<string> OrientationOptions => OrientationOptionsList;
+
+        public string SelectedOrientation
+        {
+            get { return _selectedOrientation ?? "(auto)"; }
+            set
+            {
+                if (SetProperty(ref _selectedOrientation, value == "(auto)" ? null : value))
+                {
+                    OnPropertyChanged(nameof(IsOrientationOverridden));
+                }
+            }
+        }
+
+        public bool IsOrientationOverridden =>
+            !string.IsNullOrEmpty(_selectedOrientation) &&
+            !string.Equals(_selectedOrientation, _defaultOrientation ?? string.Empty, StringComparison.OrdinalIgnoreCase);
+
         // ----- Inline cell validation (item 8) -------------------------------------------------------
         // The editable cells bind to these strings rather than to the nullable doubles. A non-numeric or
         // non-positive entry is refused AT THE CELL: the typed text stays visible, an error is published for
@@ -504,9 +531,19 @@ namespace FireProtection.UI.ViewModels.Sprinklers.BruteForce
         private string _clearanceError;
         private bool _editingText;
 
+        // Sane engineering bounds (decimal feet) for the editable spacing cells. These are NOT NFPA
+        // values - the rule set + backend clamp still decide the real ceiling; they only stop an
+        // obviously-wrong keystroke (negative, huge, or a zero that erases the layout) at the cell.
+        private const double MaxSpacingMinFt = 1.0;
+        private const double MaxSpacingMaxFt = 40.0;
+        private const double ClearanceMinFt = 0.0;
+        private const double ClearanceMaxFt = 10.0;
+
         public string MaxSpacingInput
         {
-            get { return _maxSpacingText ?? FormatEditable(_maxSpacingFtOverride); }
+            // Shows the user's override; with no override, the real value the calculation used
+            // (seeded from the eligibility calc pass) so the cell never lies about what is active.
+            get { return _maxSpacingText ?? FormatEditable(_maxSpacingFtOverride ?? _defaultMaxSpacingFt); }
             set
             {
                 _maxSpacingText = value;
@@ -515,7 +552,7 @@ namespace FireProtection.UI.ViewModels.Sprinklers.BruteForce
                 {
                     double? feet;
                     string error;
-                    if (TryReadCell(value, out feet, out error)) MaxSpacingFtOverride = feet;
+                    if (TryReadCell(value, MaxSpacingMinFt, MaxSpacingMaxFt, "Spacing", out feet, out error)) MaxSpacingFtOverride = feet;
                     MaxSpacingError = error;
                 }
                 finally { _editingText = false; }
@@ -540,7 +577,7 @@ namespace FireProtection.UI.ViewModels.Sprinklers.BruteForce
 
         public string BoundaryClearanceInput
         {
-            get { return _clearanceText ?? FormatEditable(_boundaryClearanceFtOverride); }
+            get { return _clearanceText ?? FormatEditable(_boundaryClearanceFtOverride ?? _defaultBoundaryClearanceFt); }
             set
             {
                 _clearanceText = value;
@@ -549,7 +586,7 @@ namespace FireProtection.UI.ViewModels.Sprinklers.BruteForce
                 {
                     double? feet;
                     string error;
-                    if (TryReadCell(value, out feet, out error)) BoundaryClearanceFtOverride = feet;
+                    if (TryReadCell(value, ClearanceMinFt, ClearanceMaxFt, "Wall space", out feet, out error)) BoundaryClearanceFtOverride = feet;
                     BoundaryClearanceError = error;
                 }
                 finally { _editingText = false; }
@@ -595,8 +632,10 @@ namespace FireProtection.UI.ViewModels.Sprinklers.BruteForce
         }
 
         /// <summary>Blank (or the em-dash placeholder) clears the override; anything else must parse as a
-        /// positive length. Returns false when the text is unusable, in which case the model is left alone.</summary>
-        private static bool TryReadCell(string text, out double? feet, out string error)
+        /// length within the column's sane bounds. Returns false when the text is unusable, in which case
+        /// the model is left alone. The bounds are UI sanity checks only — the rule set's hazard ceiling
+        /// still clamps in the backend calculation.</summary>
+        private static bool TryReadCell(string text, double minFt, double maxFt, string fieldName, out double? feet, out string error)
         {
             feet = null;
             error = null;
@@ -604,8 +643,15 @@ namespace FireProtection.UI.ViewModels.Sprinklers.BruteForce
             if (string.IsNullOrWhiteSpace(text) || text.Trim() == "—") return true;
 
             double parsed;
-            if (UnitDisplay.TryParseToFeet(text, out parsed, out error)) { feet = parsed; return true; }
-            return false;
+            if (!UnitDisplay.TryParseToFeet(text, out parsed, out error)) return false;
+            if (parsed < minFt || parsed > maxFt)
+            {
+                error = fieldName + " must be between " + UnitDisplay.FromFeet(minFt).ToString("F1") + " and "
+                    + UnitDisplay.FromFeet(maxFt).ToString("F1") + " " + UnitDisplay.Suffix + ".";
+                return false;
+            }
+            feet = parsed;
+            return true;
         }
 
         private static string FormatEditable(double? feet)
@@ -627,7 +673,7 @@ namespace FireProtection.UI.ViewModels.Sprinklers.BruteForce
             OnPropertyChanged(nameof(BoundaryClearanceInput));
         }
 
-        public void SetCatalogDefaults(string family, string type, double? maxSpacingFt, double? boundaryClearanceFt)
+        public void SetCatalogDefaults(string family, string type, double? maxSpacingFt, double? boundaryClearanceFt, string orientation = null)
         {
             // Decision 019 semantics, row scope: the top-level (universal) selection is the
             // default. A row that is still sitting on the previous default follows the new one;
@@ -637,16 +683,19 @@ namespace FireProtection.UI.ViewModels.Sprinklers.BruteForce
             bool typeWasOverridden = IsTypeOverridden;
             bool spacingWasOverridden = IsSpacingOverridden;
             bool wallSpaceWasOverridden = IsWallSpaceOverridden;
+            bool orientationWasOverridden = IsOrientationOverridden;
 
             _defaultFamily = family;
             _defaultType = type;
             _defaultMaxSpacingFt = maxSpacingFt;
             _defaultBoundaryClearanceFt = boundaryClearanceFt;
+            _defaultOrientation = orientation;
 
             if (_selectedFamily == null || !familyWasOverridden) _selectedFamily = family;
             if (_selectedType == null || !typeWasOverridden) _selectedType = type;
             if (!_maxSpacingFtOverride.HasValue || !spacingWasOverridden) _maxSpacingFtOverride = maxSpacingFt;
             if (!_boundaryClearanceFtOverride.HasValue || !wallSpaceWasOverridden) _boundaryClearanceFtOverride = boundaryClearanceFt;
+            if ((_selectedOrientation == null || orientationWasOverridden)) _selectedOrientation = orientation;
 
             // The row's Type list follows the row's Family, which may have just been re-seeded.
             if (_typesResolver != null)
@@ -684,6 +733,8 @@ namespace FireProtection.UI.ViewModels.Sprinklers.BruteForce
             OnPropertyChanged(nameof(MaxSpacingFtOverrideDisplay));
             OnPropertyChanged(nameof(BoundaryClearanceFtOverrideDisplay));
             OnPropertyChanged(nameof(SelectedFamilyTypeDisplay));
+            OnPropertyChanged(nameof(SelectedOrientation));
+            OnPropertyChanged(nameof(IsOrientationOverridden));
             SyncEditableText();
         }
 
@@ -717,12 +768,15 @@ namespace FireProtection.UI.ViewModels.Sprinklers.BruteForce
         {
             _maxSpacingFtOverride = _defaultMaxSpacingFt;
             _boundaryClearanceFtOverride = _defaultBoundaryClearanceFt;
+            _selectedOrientation = _defaultOrientation;
             OnPropertyChanged(nameof(MaxSpacingFtOverride));
             OnPropertyChanged(nameof(BoundaryClearanceFtOverride));
             OnPropertyChanged(nameof(IsSpacingOverridden));
             OnPropertyChanged(nameof(IsWallSpaceOverridden));
             OnPropertyChanged(nameof(MaxSpacingFtOverrideDisplay));
             OnPropertyChanged(nameof(BoundaryClearanceFtOverrideDisplay));
+            OnPropertyChanged(nameof(SelectedOrientation));
+            OnPropertyChanged(nameof(IsOrientationOverridden));
             SyncEditableText();
         }
 

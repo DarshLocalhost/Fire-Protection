@@ -19,13 +19,15 @@ namespace FireProtection.UI.Views.Common
         }
 
         private readonly List<MissingEntry> _entries;
+        private readonly Func<string, string> _loadFamily;
 
         public bool Proceed { get; private set; }
 
-        public MissingFamiliesModal(IEnumerable<MissingEntry> entries)
+        public MissingFamiliesModal(IEnumerable<MissingEntry> entries, Func<string, string> loadFamily = null)
         {
             InitializeComponent();
             _entries = entries != null ? new List<MissingEntry>(entries) : new List<MissingEntry>();
+            _loadFamily = loadFamily;
             MissingList.ItemsSource = _entries;
             UpdateSummary();
         }
@@ -33,6 +35,14 @@ namespace FireProtection.UI.Views.Common
         public static bool ShowDialog(Window owner, IEnumerable<MissingEntry> entries)
         {
             MissingFamiliesModal dlg = new MissingFamiliesModal(entries);
+            DialogOwner.Apply(dlg, owner);
+            bool? result = dlg.ShowDialog();
+            return result == true && dlg.Proceed;
+        }
+
+        public static bool ShowDialog(Window owner, IEnumerable<MissingEntry> entries, Func<string, string> loadFamily)
+        {
+            MissingFamiliesModal dlg = new MissingFamiliesModal(entries, loadFamily);
             DialogOwner.Apply(dlg, owner);
             bool? result = dlg.ShowDialog();
             return result == true && dlg.Proceed;
@@ -48,9 +58,30 @@ namespace FireProtection.UI.Views.Common
             else
             {
                 SummaryText.Text = string.Format(CultureInfo.InvariantCulture,
-                    "{0} room{1} will be SKIPPED. Proceeding will place sprinklers only in rooms whose family/type is loaded in Revit.",
+                    "{0} room{1} reference a family/type that is not loaded. Load the .rfa, then proceed; unresolved rows will fail with a report.",
                     _entries.Count, _entries.Count == 1 ? string.Empty : "s");
             }
+        }
+
+        private void LoadFamilyButton_Click(object sender, RoutedEventArgs e)
+        {
+            if (_loadFamily == null) return;
+
+            OpenFileDialog dlg = new OpenFileDialog
+            {
+                Title = "Select Revit family to load",
+                Filter = "Revit families (*.rfa)|*.rfa|All files (*.*)|*.*",
+                CheckFileExists = true,
+                Multiselect = false
+            };
+            if (dlg.ShowDialog(this) != true) return;
+
+            string error = _loadFamily(dlg.FileName);
+            MessageBox.Show(this,
+                error == null ? "Family loaded into the active model. Select Proceed to continue placement." : "Family could not be loaded:\n\n" + error,
+                "Load family",
+                MessageBoxButton.OK,
+                error == null ? MessageBoxImage.Information : MessageBoxImage.Warning);
         }
 
         private void ProceedButton_Click(object sender, RoutedEventArgs e)

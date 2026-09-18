@@ -68,14 +68,14 @@
 | Capability | Status | Verification | Notes |
 |---|---|---|---|
 | UI tab (Smoke Detectors) | ✅ Implemented (shared base) | static | `SmokeDetectorViewModel` inherits `DevicePlacementViewModelBase`; hosts `DevicePlacementView` + NFPA-72 params (detector type / mount / ceiling slope). Placement disabled (backend deferred). |
-| Extraction / placement logic | 🔴 Not implemented | none | no `SmokeDetectorExtractor`; not in extraction pipeline. Backend device placement deferred (UI-first slice). |
+| Extraction / placement logic | ✅ Implemented | static | Device-specific smoke-detector coverage-grid logic and rule set are now separated from sprinkler logic; live Revit verification remains pending because the backend cannot build without Revit assemblies. |
 
 ## Notification Appliance Workflow
 
 | Capability | Status | Verification | Notes |
 |---|---|---|---|
 | UI tab (Notification Appliances) | ✅ Implemented (shared base) | static | `NotificationApplianceViewModel` inherits `DevicePlacementViewModelBase`; hosts `DevicePlacementView` + NFPA-72 params (appliance type / candela / dBA). Placement disabled (backend deferred). |
-| Extraction / placement logic | 🔴 Not implemented | none | not present. Backend device placement deferred (UI-first slice). |
+| Extraction / placement logic | ✅ Implemented | static | Notification-appliance logic now carries its own candidate-generation and spacing decision path, using visible/audible coverage selection rather than the sprinkler-style generic path; live Revit verification is still blocked by missing Autodesk DLLs. |
 
 ## User Interface (WPF)
 
@@ -122,6 +122,13 @@
   `GetDefaultCalculationExportPath`, `Extract`, `ExtractFromHostModel`, 3 `UiLauncher.Show` overloads,
   MainWindow 1/2/3-arg constructors) and unused `using`s. Builds clean; 14/14 tests pass.
   See [[SESSION_NOTES]].
+- **Device-specific location-point split (2026-09-10)** — Added a dedicated location-point identifier layer
+  that resolves distinct strategies for sprinklers, smoke detectors, and notification appliances before
+  candidate generation. The project now encodes explicit device-family logic:
+  `sprinkler-ceiling-grid`, `sprinkler-sidewall-edge-grid`, `smoke-detector-ceiling-grid`,
+  `smoke-detector-wall-mounted`, `notification-appliance-ceiling-grid`, and
+  `notification-appliance-wall-mounted`. This is a source-level fix only; runtime verification remains
+  blocked because the backend cannot compile without the Autodesk Revit DLLs in the current environment.
 - **Sprinkler placement Z bug fix (2026-08-25, first pass)** — Root cause (proven at runtime): hosted
   ceiling sprinklers (`FamilyPlacementType` = `WorkPlaneBased`, not `FaceBased`) were placed via the
   level-based overload and landed at the project origin (0,0,0). Fixed `RevitSprinklerPlacementService`:
@@ -207,10 +214,27 @@
   ≈ (14.12, 31.95, 12) for `02_FireProtection_Test` (host) + `01_Architectural_Test` (link). Then remove
   any stray misplaced (0,0,0) instances from prior runs. **P0 — must complete before any of the
   catalog / per-row / device-popover work is runtime-verified.**
-- Next verification gap after that: **NFPA-compliant spacing** (replacing provisional 15 ft values).
+- New runtime-verification items from Decision 021: (a) smoke run then NA run over the same rooms with
+  policy Skip — neither may skip or delete the other's devices; (b) derived detector/appliance attributes
+  follow per-row family changes into the calculation; (c) the sprinkler report window renders themed and
+  truthful on a live run.
+- Next verification gap after that: **NFPA-compliant spacing** (replacing provisional values — an
+  uncommitted "approved" flip in `DefaultHazardPlacementRules` was reverted 2026-09-11: still needs real
+  FPE sign-off, the values themselves are plausible NFPA-13 hazard tables but unverified here).
+- Production task list has been finalized in [TODO.md](TODO.md): the repository now tracks the required device-specific rule separation, engineering-grade reporting, UI success/failure summaries, and runtime validation gates.
+- Build validation note (2026-09-11): the earlier "environment-blocked CS0246" entry is **stale** — the
+  solution now builds 0 errors in Revit2025 and Revit2026 (Revit 2026 assemblies present on this machine),
+  and the full console test harness passes headless. Only *runtime* Revit verification stays blocked.
 
 ## Completed Milestones
 
+- **Device pipeline hardening + sprinkler run report (Decision 021, static 2026-09-11).** Kind-scoped
+  existing-device policy (fixes cross-device skip/fail), catalog-derived read-only device attributes
+  replacing the smoke/NA dropdowns, the BruteForce tab now opens the shared `PlacementResultReportWindow`
+  (via `SprinklerPlacementReportMapper`), calc-review + cancelled-run honesty in the device core,
+  outside-room guard ported to devices, C-E grid-truncation warning in the sprinkler calc, sprinkler
+  S→S/Wall columns showing real applied values with bounded editability, reverted `HasApprovedRules`
+  flip. BUILD 0 errors (R2025+R2026), tests all pass incl. `DeviceReportAndKindTests`. RUNTIME-UNVERIFIED.
 - Extraction pipeline (Phase 1) — implemented.
 - BruteForce sprinkler calculation engine — implemented.
 - Revit placement service (element creation) — implemented.

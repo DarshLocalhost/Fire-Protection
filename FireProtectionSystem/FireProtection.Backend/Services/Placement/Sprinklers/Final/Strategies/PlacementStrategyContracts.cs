@@ -1,4 +1,5 @@
 using Autodesk.Revit.DB;
+using FireProtection.Backend.Models.Placement.Sprinklers.Final;
 
 namespace FireProtection.Backend.Services.Placement.Sprinklers.Final.Strategies
 {
@@ -44,6 +45,22 @@ namespace FireProtection.Backend.Services.Placement.Sprinklers.Final.Strategies
         public XYZ RequestedPoint;
         public string FamilyPlacementType;
         public CeilingHostResolver CeilingHostResolver;
+
+        /// <summary>Resolved placement behavior (e.g. WallSidewall, CeilingOverhead).
+        /// Strategies use this to distinguish sidewall from ceiling families when both
+        /// share the same FamilyPlacementType (WorkPlaneBased).</summary>
+        public DevicePlacementBehavior Behavior;
+
+        /// <summary>Sprinkler orientation string (e.g. "sidewall", "pendent", "upright").
+        /// Used by strategies that need the user-visible orientation label.</summary>
+        public string Orientation;
+
+        /// <summary>Polygon edge index this point was generated from (sidewall only).
+        /// The wall strategy uses this to find the wall face to host on.</summary>
+        public int? WallEdgeIndex;
+
+        /// <summary>Room boundary polygon (host coordinates) for wall lookup.</summary>
+        public System.Collections.Generic.List<double[]> RoomPolygon;
     }
 
     /// <summary>

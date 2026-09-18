@@ -37,6 +37,12 @@ namespace FireProtection.UI.Services
         /// <summary>Per-row boundary (wall) clearance override in feet (Decision 018). null = use rule-set default.</summary>
         public double? OverrideBoundaryClearanceFt { get; set; }
 
+        /// <summary>Per-room placement behavior override as string ("WallSidewall", "CeilingOverhead", etc.). null = use the universal/default behavior.</summary>
+        public string SelectedSprinklerPlacementBehavior { get; set; }
+
+        /// <summary>Per-room sprinkler orientation override ("pendent", "upright", "sidewall"). null = use default.</summary>
+        public string SelectedSprinklerOrientation { get; set; }
+
         // Full room payload (ceilings, obstacles, existingSprinklers, source, etc.) captured
         // from the ModelSnapshot JSON and forwarded to the exporter. The Backend rehydrates
         // its own DTOs from this, avoiding any circular project dependency.

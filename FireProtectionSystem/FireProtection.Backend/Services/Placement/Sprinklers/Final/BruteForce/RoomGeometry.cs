@@ -39,6 +39,13 @@ namespace FireProtection.Backend.Services.Placement.Sprinklers.Final.BruteForce
         public double MinY => _minY;
         public double MaxY => _maxY;
 
+        /// <summary>
+        /// Read-only view of the outer boundary vertices ([x,y] pairs, feet). Exposed so the
+        /// notification-appliance audible-coverage audit can count wall crossings along a
+        /// sample→appliance line. Pure projection of existing data — no behaviour change.
+        /// </summary>
+        public IReadOnlyList<double[]> OuterPolygon => _outer;
+
         public bool IsPointInsideRoom(double x, double y, double tolerance)
         {
             if (IsDegenerate) return false;

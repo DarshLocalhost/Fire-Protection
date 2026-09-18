@@ -233,9 +233,7 @@
 		<!-- ignore this file but it does not harm them.                 -->
 		<!-- ======================================================= -->
 
-		<Copy SourceFiles="$(MSBuildThisFileDirectory)FireProtection.Backend.dll.config"
-		      DestinationFiles="$(RevitAddinsDirectory)\FireProtection.Backend.dll.config"
-		      SkipUnchangedFiles="true" />
+		<Copy SourceFiles="$(MSBuildThisFileDirectory)FireProtection.Backend.dll.config" DestinationFiles="$(RevitAddinsDirectory)\FireProtection.Backend.dll.config" SkipUnchangedFiles="true" />
 
 
 		<!-- ======================================================= -->
@@ -352,12 +350,9 @@
 		<Delete Files="@(StaleNet8Facades)" ContinueOnError="true" Condition="'$(Configuration)' == 'Revit2025' Or&#xD;&#xA;                 '$(Configuration)' == 'Revit2026'" />
 
 		<Message Text="Deploying ClosedXML runtime dependencies for $(Configuration) to $(RevitAddinsDirectory):" Importance="High" />
-		<Message Text="    @(ClosedXmlRuntimeDlls, '&#x0A;    ')" Importance="High" />
+		<Message Text="    @(ClosedXmlRuntimeDlls, '&#xA;    ')" Importance="High" />
 
-		<Copy SourceFiles="@(ClosedXmlRuntimeDlls)"
-		      DestinationFolder="$(RevitAddinsDirectory)"
-		      SkipUnchangedFiles="true"
-		      Condition="Exists('%(Identity)')" />
+		<Copy SourceFiles="@(ClosedXmlRuntimeDlls)" DestinationFolder="$(RevitAddinsDirectory)" SkipUnchangedFiles="true" Condition="Exists('%(Identity)')" />
 
 
 		<!-- ======================================================= -->

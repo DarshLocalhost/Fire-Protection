@@ -435,6 +435,7 @@
                                 <ColumnDefinition Width="2.0*"/>
                                 <ColumnDefinition Width="0.85*"/>
                                 <ColumnDefinition Width="0.85*"/>
+                                <ColumnDefinition Width="0.85*"/>
                                 <ColumnDefinition Width="76"/>
                                 <ColumnDefinition Width="17"/>
                             </Grid.ColumnDefinitions>
@@ -453,6 +454,8 @@
                                  right edge lines up with the digits inside the box rather than with its border. -->
                             <TextBlock Grid.Column="6" Text="{Binding SpacingColumnHeader}" Margin="0,0,19,0" Style="{StaticResource EyebrowTextRight}"/>
                             <TextBlock Grid.Column="7" Text="{Binding ClearanceColumnHeader}" Margin="0,0,19,0" Style="{StaticResource EyebrowTextRight}"/>
+                            <TextBlock Grid.Column="9" Text="RESET" TextAlignment="Center" Style="{StaticResource EyebrowText}"/>
+                            <!--<TextBlock Grid.Column="8" Text="ORIENTATION" Margin="7,0,12,0" Style="{StaticResource EyebrowText}"/>-->
                         </Grid>
                     </Border>
 
@@ -520,6 +523,7 @@
                                                 <ColumnDefinition Width="1.5*"/>
                                                 <ColumnDefinition Width="0.8*"/>
                                                 <ColumnDefinition Width="2.0*"/>
+                                                <ColumnDefinition Width="0.85*"/>
                                                 <ColumnDefinition Width="0.85*"/>
                                                 <ColumnDefinition Width="0.85*"/>
                                                 <ColumnDefinition Width="76"/>
@@ -649,13 +653,22 @@
                                                 </TextBox.Style>
                                             </TextBox>
 
-                                            <Button Grid.Column="8"
+                                        <!-- <ComboBox Grid.Column="8"
+           Margin="0,0,12,0"
+           VerticalAlignment="Center"
+           Style="{StaticResource CellComboBoxStyle}"
+           ItemsSource="{Binding OrientationOptions}"
+           SelectedItem="{Binding SelectedOrientation, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}"
+           ToolTip="Sprinkler orientation: auto uses the family default"/>-->
+
+                                            <Button Grid.Column="9"
                                                     Style="{StaticResource OutlineButtonStyle}"
                                                     Content="Reset"
+                                                    Width="64"
                                                     Padding="8,3"
-                                                    HorizontalAlignment="Right"
-                                                    Click="RoomResetButton_Click"
-                                                    Tag="{Binding}"
+                                                    HorizontalAlignment="Center"
+                                                    Command="{Binding DataContext.ResetRowToDefaultCommand, RelativeSource={RelativeSource AncestorType=ItemsControl}}"
+                                                    CommandParameter="{Binding}"
                                                     VerticalAlignment="Center"/>
                                         </Grid>
                                     </Border>

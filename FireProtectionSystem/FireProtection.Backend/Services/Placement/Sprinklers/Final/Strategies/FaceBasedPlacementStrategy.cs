@@ -14,7 +14,6 @@ namespace FireProtection.Backend.Services.Placement.Sprinklers.Final.Strategies
         {
             Document doc = context.Document;
 
-            // Ensure symbol is active before placement
             if (!context.Symbol.IsActive)
             {
                 context.Symbol.Activate();
@@ -29,7 +28,7 @@ namespace FireProtection.Backend.Services.Placement.Sprinklers.Final.Strategies
                 return PlacementOutcome.Fail(
                     PlacementStatusCodes.RequiredHostUnavailable,
                     "A FaceBased family requires a host face; no host or linked ceiling face was found at " +
-                    "the requested point. Placement refused rather than creating a hostless instance.",
+                    "the requested point.",
                     hostingStrategy: "FaceBased/RequiredHost",
                     ceilingSource: host.Source,
                     linkInstanceName: host.LinkInstanceName,
@@ -38,11 +37,13 @@ namespace FireProtection.Backend.Services.Placement.Sprinklers.Final.Strategies
 
             try
             {
-                // Dynamically compute reference direction to guarantee it lies in the host plane
                 XYZ refDir = ComputeInPlaneReferenceDirection(doc, host.HostFace);
 
                 FamilyInstance instance = doc.Create.NewFamilyInstance(
                     host.HostFace, context.RequestedPoint, refDir, context.Symbol);
+
+                // FIX: Enforce level association and offset
+                LevelAssociation.EnforceAndVerify(doc, instance, context.Level, context.RequestedPoint.Z);
 
                 return PlacementOutcome.CreatedInstance(
                     instance, "FaceBasedHost", host.Source, host.LinkInstanceName, host.CeilingElementId);
@@ -72,8 +73,7 @@ namespace FireProtection.Backend.Services.Placement.Sprinklers.Final.Strategies
                 }
             }
             catch { }
-
-            return XYZ.BasisX; // Fallback
+            return XYZ.BasisX;
         }
     }
 }

@@ -11,8 +11,8 @@ namespace FireProtection.Backend.Services.Placement.SmokeDetectors
     public static class SmokeDetectorPlacementInputBuilder
     {
         public static SmokeDetectorPlacementInputSnapshot BuildSnapshot(
-            List<DeviceRoomInputItem> roomItems,
-            RevitSmokeDetectorFamilySource familySource)
+     List<DeviceRoomInputItem> roomItems,
+     RevitSmokeDetectorFamilySource familySource)
         {
             var snapshot = new SmokeDetectorPlacementInputSnapshot
             {
@@ -37,7 +37,7 @@ namespace FireProtection.Backend.Services.Placement.SmokeDetectors
                     CeilingHeightFt = item.CeilingHeightFt,
                     CeilingType = item.CeilingType,
                     DetectorType = item.DetectorType,
-                    Mount = item.Mount,
+                    Mount = ResolveMount(item), // Fixed to use robust keyword fallback
                     CeilingSlope = item.CeilingSlope,
                     SelectedFamilyName = item.SelectedFamilyName,
                     SelectedTypeName = item.SelectedTypeName,
@@ -49,6 +49,12 @@ namespace FireProtection.Backend.Services.Placement.SmokeDetectors
                 {
                     roomInput.SelectedPlacementBehavior = familySource.GetPlacementBehavior(
                         item.SelectedFamilyName, item.SelectedTypeName);
+
+                    // Force the mounting to align with the resolved family behavior
+                    if (roomInput.SelectedPlacementBehavior == DevicePlacementBehavior.WallSidewall)
+                    {
+                        roomInput.Mount = "Wall";
+                    }
                 }
 
                 if (item.FullRoomJson != null)
@@ -60,6 +66,22 @@ namespace FireProtection.Backend.Services.Placement.SmokeDetectors
             }
 
             return snapshot;
+        }
+
+        private static string ResolveMount(DeviceRoomInputItem item)
+        {
+            string family = item.SelectedFamilyName ?? string.Empty;
+            string type = item.SelectedTypeName ?? string.Empty;
+            string mountOverride = item.Mount ?? string.Empty;
+
+            if (family.IndexOf("wall", StringComparison.OrdinalIgnoreCase) >= 0
+                || type.IndexOf("wall", StringComparison.OrdinalIgnoreCase) >= 0
+                || mountOverride.IndexOf("wall", StringComparison.OrdinalIgnoreCase) >= 0)
+            {
+                return "Wall";
+            }
+
+            return "Ceiling";
         }
 
         private static void HydrateFromRoomJson(SmokeDetectorRoomInput roomInput, string json)

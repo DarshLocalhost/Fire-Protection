@@ -82,6 +82,7 @@ namespace FireProtection.Backend.Services.Placement.SmokeDetectors
             Family family = symbol.Family;
             FamilyPlacementType placementType = family.FamilyPlacementType;
 
+            // 1. Primary Path: Catalog-driven Mount designation
             ICatalog catalog = _catalogAccessor?.Invoke();
             if (catalog != null)
             {
@@ -90,6 +91,15 @@ namespace FireProtection.Backend.Services.Placement.SmokeDetectors
                 if (entry != null && string.Equals(entry.Mount, "Wall", StringComparison.OrdinalIgnoreCase))
                     return DevicePlacementBehavior.WallSidewall;
             }
+
+            // 2. Secondary Fallback Path: Family and Type Name classification keywords
+            string combined = (familyName ?? string.Empty) + " " + (typeName ?? string.Empty);
+            if (combined.IndexOf("wall", StringComparison.OrdinalIgnoreCase) >= 0)
+                return DevicePlacementBehavior.WallSidewall;
+
+            // 3. Tertiary Fallback Path: Inspect family parameters
+            if (HasWallMountParameter(symbol))
+                return DevicePlacementBehavior.WallSidewall;
 
             switch (placementType)
             {
@@ -106,6 +116,34 @@ namespace FireProtection.Backend.Services.Placement.SmokeDetectors
                 default:
                     return DevicePlacementBehavior.CeilingOverhead;
             }
+        }
+
+        /// <summary>
+        /// Checks the family type parameters for typical wall mount indicators.
+        /// </summary>
+        private static bool HasWallMountParameter(FamilySymbol symbol)
+        {
+            if (symbol == null) return false;
+            try
+            {
+                foreach (Parameter p in symbol.Parameters)
+                {
+                    if (p == null || p.Definition == null) continue;
+                    string name = p.Definition.Name;
+                    if (string.Equals(name, "Mount", StringComparison.OrdinalIgnoreCase)
+                        || string.Equals(name, "Mounting", StringComparison.OrdinalIgnoreCase))
+                    {
+                        string val = p.AsString();
+                        if (!string.IsNullOrWhiteSpace(val)
+                            && val.IndexOf("wall", StringComparison.OrdinalIgnoreCase) >= 0)
+                        {
+                            return true;
+                        }
+                    }
+                }
+            }
+            catch { /* safety fallback */ }
+            return false;
         }
 
         private FamilySymbol FindFamilySymbol(string familyName, string typeName)

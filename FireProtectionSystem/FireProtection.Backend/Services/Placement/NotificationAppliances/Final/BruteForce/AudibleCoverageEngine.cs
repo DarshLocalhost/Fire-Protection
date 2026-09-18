@@ -18,7 +18,8 @@ namespace FireProtection.Backend.Services.Placement.NotificationAppliances.Final
     /// </summary>
     internal static class AudibleCoverageEngine
     {
-        public const double ReferenceDistanceFt = 3.0;
+        // UL 1971 / NFPA 72 reference distance for audible appliance ratings.
+        public const double ReferenceDistanceFt = 10.0;
         public const double MinSampleDistanceFt = 0.5;
         public const double DefaultSurfaceAbsorptionDb = 3.0;
         public const double DefaultDoorAttenuationDb = 6.0;
@@ -28,6 +29,7 @@ namespace FireProtection.Backend.Services.Placement.NotificationAppliances.Final
             IReadOnlyList<CalculatedSmokeDetectorPoint> appliances,
             RoomGeometry geometry,
             List<ObstacleBox> obstacles,
+            double sourceDbaAt10Ft,
             double ambientDb,
             double maxSustainedDb,
             bool isSleepingArea,
@@ -80,7 +82,7 @@ namespace FireProtection.Backend.Services.Placement.NotificationAppliances.Final
 
                     samples++;
 
-                    double sampleDb = CalculateSampleDb(sx, sy, appliances, geometry, obstacles);
+                    double sampleDb = CalculateSampleDb(sx, sy, appliances, geometry, obstacles, sourceDbaAt10Ft);
                     if (sampleDb < requiredDb - config.ToleranceFt)
                     {
                         uncovered++;
@@ -136,7 +138,8 @@ namespace FireProtection.Backend.Services.Placement.NotificationAppliances.Final
             double sx, double sy,
             IReadOnlyList<CalculatedSmokeDetectorPoint> appliances,
             RoomGeometry geometry,
-            List<ObstacleBox> obstacles)
+            List<ObstacleBox> obstacles,
+            double sourceDbaAt10Ft)
         {
             double totalDb = double.NegativeInfinity;
 
@@ -145,8 +148,9 @@ namespace FireProtection.Backend.Services.Placement.NotificationAppliances.Final
                 double distance = GeometryMath.Distance(sx, sy, appliance.X, appliance.Y);
                 if (distance < MinSampleDistanceFt) distance = MinSampleDistanceFt;
 
-                double sourceDb = 85.0;
-                double attenuatedDb = sourceDb - 20.0 * Math.Log10(distance / ReferenceDistanceFt);
+                // Inverse-square-law attenuation from the UL 10 ft reference distance.
+                // sourceDbaAt10Ft is the manufacturer's listed output at 10 ft (e.g. 90 dBA).
+                double attenuatedDb = sourceDbaAt10Ft - 20.0 * Math.Log10(distance / ReferenceDistanceFt);
 
                 attenuatedDb -= DefaultSurfaceAbsorptionDb;
 
@@ -170,6 +174,54 @@ namespace FireProtection.Backend.Services.Placement.NotificationAppliances.Final
 
             return totalDb;
         }
+
+        //private static double CalculateRequiredDb(double ambientDb, double maxSustainedDb, bool isSleepingArea)
+        //{
+        //    if (isSleepingArea)
+        //    {
+        //        return Math.Max(75.0, Math.Max(ambientDb + 15.0, maxSustainedDb + 5.0));
+        //    }
+        //    return Math.Max(ambientDb + 15.0, maxSustainedDb + 5.0);
+        //}
+
+        //private static double CalculateSampleDb(
+        //    double sx, double sy,
+        //    IReadOnlyList<CalculatedSmokeDetectorPoint> appliances,
+        //    RoomGeometry geometry,
+        //    List<ObstacleBox> obstacles)
+        //{
+        //    double totalDb = double.NegativeInfinity;
+
+        //    foreach (CalculatedSmokeDetectorPoint appliance in appliances)
+        //    {
+        //        double distance = GeometryMath.Distance(sx, sy, appliance.X, appliance.Y);
+        //        if (distance < MinSampleDistanceFt) distance = MinSampleDistanceFt;
+
+        //        double sourceDb = 85.0;
+        //        double attenuatedDb = sourceDb - 20.0 * Math.Log10(distance / ReferenceDistanceFt);
+
+        //        attenuatedDb -= DefaultSurfaceAbsorptionDb;
+
+        //        int wallCrossed = CountWallCrossings(sx, sy, appliance.X, appliance.Y, geometry);
+        //        if (wallCrossed > 0)
+        //        {
+        //            attenuatedDb -= wallCrossed * DefaultWallAttenuationDb;
+        //        }
+
+        //        foreach (ObstacleBox box in obstacles)
+        //        {
+        //            if (GeometryMath.InsideExpandedBox(sx, sy, box.MinX, box.MinY, box.MaxX, box.MaxY, 0.0))
+        //            {
+        //                attenuatedDb -= 3.0;
+        //                break;
+        //            }
+        //        }
+
+        //        if (attenuatedDb > totalDb) totalDb = attenuatedDb;
+        //    }
+
+        //    return totalDb;
+        //}
 
         private static int CountWallCrossings(double x1, double y1, double x2, double y2, RoomGeometry geometry)
         {

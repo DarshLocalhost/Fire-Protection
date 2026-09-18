@@ -71,20 +71,33 @@ namespace FireProtection.Backend.Services.Placement.NotificationAppliances
 
         public DevicePlacementBehavior GetPlacementBehavior(string familyName, string typeName)
         {
-            if (string.IsNullOrWhiteSpace(familyName)) return DevicePlacementBehavior.Unknown;
+            if (string.IsNullOrWhiteSpace(familyName) && string.IsNullOrWhiteSpace(typeName))
+                return DevicePlacementBehavior.Unknown;
 
             FamilySymbol symbol = FindFamilySymbol(familyName, typeName);
             if (symbol == null || symbol.Family == null) return DevicePlacementBehavior.Unknown;
 
-            if ((familyName ?? string.Empty).IndexOf("wall", StringComparison.OrdinalIgnoreCase) >= 0)
+            // Check both family name AND type name for wall-mount keywords. Many manufacturer
+            // wall-strobe families omit "wall" from the family name but include it in the type
+            // (e.g. family "SystemSensor_H12SH", type "Wall Strobe 75cd").
+            string combined = (familyName ?? string.Empty) + " " + (typeName ?? string.Empty);
+            if (combined.IndexOf("wall", StringComparison.OrdinalIgnoreCase) >= 0)
                 return DevicePlacementBehavior.WallSidewall;
 
+            // Inspect the family's built-in FamilyPlacementType. FaceBased families whose name
+            // does not contain "wall" are still ceiling-hosted; OneLevelBased families that carry
+            // a "Mount" parameter set to "Wall" are wall-mounted.
             switch (symbol.Family.FamilyPlacementType)
             {
                 case FamilyPlacementType.OneLevelBased:
+                    // Check for a "Mount" or "Mounting" parameter that says "Wall".
+                    if (HasWallMountParameter(symbol))
+                        return DevicePlacementBehavior.WallSidewall;
                     return DevicePlacementBehavior.LevelHosted;
 
                 case FamilyPlacementType.WorkPlaneBased:
+                    if (HasWallMountParameter(symbol))
+                        return DevicePlacementBehavior.WallSidewall;
                     return DevicePlacementBehavior.WorkPlaneDependent;
 
                 case FamilyPlacementType.ViewBased:
@@ -95,6 +108,37 @@ namespace FireProtection.Backend.Services.Placement.NotificationAppliances
                     // No Mount column in the notification catalog: default to ceiling (provisional).
                     return DevicePlacementBehavior.CeilingOverhead;
             }
+        }
+
+        /// <summary>
+        /// Checks whether the family symbol carries a "Mount" or "Mounting" type/instance parameter
+        /// whose value contains "wall". This catches wall-strobe families that lack the keyword in
+        /// their name but declare their mounting orientation as a parameter.
+        /// </summary>
+        private static bool HasWallMountParameter(FamilySymbol symbol)
+        {
+            if (symbol == null) return false;
+            try
+            {
+                foreach (Parameter p in symbol.Parameters)
+                {
+                    if (p == null || p.Definition == null) continue;
+                    string name = p.Definition.Name;
+                    if (string.Equals(name, "Mount", StringComparison.OrdinalIgnoreCase)
+                        || string.Equals(name, "Mounting", StringComparison.OrdinalIgnoreCase)
+                        || string.Equals(name, "Mount Type", StringComparison.OrdinalIgnoreCase))
+                    {
+                        string val = p.AsString();
+                        if (!string.IsNullOrWhiteSpace(val)
+                            && val.IndexOf("wall", StringComparison.OrdinalIgnoreCase) >= 0)
+                        {
+                            return true;
+                        }
+                    }
+                }
+            }
+            catch { /* parameter read failure -> assume ceiling */ }
+            return false;
         }
 
         private FamilySymbol FindFamilySymbol(string familyName, string typeName)

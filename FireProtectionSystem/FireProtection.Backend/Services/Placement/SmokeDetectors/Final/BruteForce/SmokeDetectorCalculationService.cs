@@ -19,9 +19,6 @@ namespace FireProtection.Backend.Services.Placement.SmokeDetectors.Final.BruteFo
 
     /// <summary>
     /// Deterministic, Revit-free NFPA 72 smoke detector / notification appliance calculation engine.
-    /// Consumes <see cref="SmokeDetectorPlacementInputSnapshot"/> and returns
-    /// <see cref="SmokeDetectorCalculationResult"/>. One failing room does not abort others.
-    /// Reuses sprinkler BruteForce geometry helpers (<see cref="RoomGeometry"/>, <see cref="GeometryMath"/>).
     /// </summary>
     public static class SmokeDetectorCalculationService
     {
@@ -200,6 +197,28 @@ namespace FireProtection.Backend.Services.Placement.SmokeDetectors.Final.BruteFo
                 return result;
             }
 
+            // -----------------------------------------------------------------------------------
+            // NFPA 72 §17.7.3.7 Beam Detector Path Length Check
+            // Optical beam smoke detectors require a minimum listed path length (ruleSet.MinSpacingFt, e.g. 15 ft)
+            // -----------------------------------------------------------------------------------
+            bool isBeamDetector = (room.DetectorType ?? string.Empty).IndexOf("Beam", StringComparison.OrdinalIgnoreCase) >= 0
+                || (room.SelectedFamilyName ?? string.Empty).IndexOf("Beam", StringComparison.OrdinalIgnoreCase) >= 0;
+
+            double maxRoomDimension = Math.Max(geometry.MaxX - geometry.MinX, geometry.MaxY - geometry.MinY);
+            double minBeamPathFt = ruleSet.MinSpacingFt > 0 ? ruleSet.MinSpacingFt : 15.0;
+
+            if (isBeamDetector && maxRoomDimension < minBeamPathFt - config.ToleranceFt)
+            {
+                result.Status = CalculationStatus.InvalidInput;
+                result.Errors.Add(
+                    "Optical beam smoke detectors require a minimum listed path length of " + minBeamPathFt.ToString("F1") +
+                    " ft (NFPA 72 §17.7.3.7). This room's maximum linear dimension is " + maxRoomDimension.ToString("F1") +
+                    " ft, which is too short. Select a point-type smoke detector (e.g., Photoelectric).");
+                result.CalculatedCount = 0;
+                result.RequiredCount = 0;
+                return result;
+            }
+
             if (ceilingUnsupported)
             {
                 result.Status = CalculationStatus.ReviewRequired;
@@ -262,7 +281,8 @@ namespace FireProtection.Backend.Services.Placement.SmokeDetectors.Final.BruteFo
             {
                 result.Diagnostics.Add(
                     "Smoke detector branch selected: wall-mounted detector spacing and clearance are used for wall location-point identification.");
-                double wallZ = placementZ - ruleSet.WallMountDropFromCeilingFt;
+                double wallZ = ComputeNfpa72WallMountZ(placementZ, room.LevelElevationFt, ruleSet.WallMountDropFromCeilingFt,
+                    deviceMode == DevicePlacementMode.NotificationAppliance, result);
                 candidates = GenerateWallMountCandidates(
                     room, geometry, ruleSet, obstacleBoxes, existingDetectorXy, wallZ, config, result);
             }
@@ -307,14 +327,14 @@ namespace FireProtection.Backend.Services.Placement.SmokeDetectors.Final.BruteFo
             BruteForceCalculationConfig config,
             SmokeDetectorRoomCalculationResult result,
             bool isWallMount,
-            FireProtection.Backend.Services.Placement.LocationPoints.DeviceLocationPointProfile locationProfile)
+            DeviceLocationPointProfile locationProfile)
         {
             List<CandidatePoint> validCandidates = new List<CandidatePoint>();
             double baseGridRes = ComputeGridResolution(geometry, ruleSet, config);
             double notificationGridRes = Math.Max(1.0, Math.Min(baseGridRes, Math.Max(2.0, ruleSet.MaxSpacingFt / 3.0)));
             if (locationProfile == null)
             {
-                locationProfile = new FireProtection.Backend.Services.Placement.LocationPoints.DeviceLocationPointProfile
+                locationProfile = new DeviceLocationPointProfile
                 {
                     StrategyName = isWallMount ? "notification-wall-mount" : "notification-ceiling-grid",
                     GridResolutionFt = notificationGridRes,
@@ -413,7 +433,6 @@ namespace FireProtection.Backend.Services.Placement.SmokeDetectors.Final.BruteFo
                         continue;
                     }
 
-                    // NFPA 72 §17.7.3.2.1: >= 4 in from wall
                     if (geometry.DistanceToOuterBoundary(x, y) < ruleSet.MinBoundaryClearanceFt - config.ToleranceFt)
                     {
                         rejectedBoundary++;
@@ -506,6 +525,12 @@ namespace FireProtection.Backend.Services.Placement.SmokeDetectors.Final.BruteFo
             int rejectedObstacle = 0;
             int rejectedExisting = 0;
             int rejectedBoundary = 0;
+            int rejectedNotNearPeak = 0;
+
+            bool peakIsMaxX = true;
+            bool peakIsMinX = false;
+            bool peakIsMaxY = false;
+            bool peakIsMinY = false;
 
             for (double y = geometry.MinY; y <= geometry.MaxY + config.ToleranceFt; y += gridRes)
             {
@@ -517,6 +542,23 @@ namespace FireProtection.Backend.Services.Placement.SmokeDetectors.Final.BruteFo
                     if (!geometry.IsPointInsideRoom(x, y, config.ToleranceFt))
                     {
                         rejectedOutside++;
+                        continue;
+                    }
+
+                    bool withinPeakZone = false;
+                    if (peakIsMaxX && (geometry.MaxX - x <= 3.0)) withinPeakZone = true;
+                    else if (peakIsMinX && (x - geometry.MinX <= 3.0)) withinPeakZone = true;
+                    else if (peakIsMaxY && (geometry.MaxY - y <= 3.0)) withinPeakZone = true;
+                    else if (peakIsMinY && (y - geometry.MinY <= 3.0)) withinPeakZone = true;
+
+                    if (!withinPeakZone && geometry.DistanceToOuterBoundary(x, y) <= 3.0)
+                    {
+                        withinPeakZone = true;
+                    }
+
+                    if (!withinPeakZone)
+                    {
+                        rejectedNotNearPeak++;
                         continue;
                     }
 
@@ -567,7 +609,7 @@ namespace FireProtection.Backend.Services.Placement.SmokeDetectors.Final.BruteFo
             result.Diagnostics.Add(
                 "Sloped-ceiling peak-row candidates (NFPA 72 17.7.3.4): generated=" + candidates.Count
                 + ", rejected(outside=" + rejectedOutside + ", boundary=" + rejectedBoundary
-                + ", obstacle=" + rejectedObstacle
+                + ", non-peak-zone=" + rejectedNotNearPeak + ", obstacle=" + rejectedObstacle
                 + ", existing=" + rejectedExisting + "), peakZ=" + peakZ.ToString("F2")
                 + " ft, peakRowZ=" + peakRowZ.ToString("F2") + " ft.");
 
@@ -705,23 +747,57 @@ namespace FireProtection.Backend.Services.Placement.SmokeDetectors.Final.BruteFo
             bool isNotificationAppliance = room.DeviceKind == FireProtection.UI.Services.DeviceKind.NotificationAppliance;
 
             double minSpacingFt = isNotificationAppliance
-                ? Math.Max(ruleSet.MinSpacingFt > 0 ? ruleSet.MinSpacingFt : 5.0, Math.Min(ruleSet.MaxSpacingFt, ruleSet.MaxSpacingFt * 0.35))
+                ? Math.Max(ruleSet.MinSpacingFt > 0 ? ruleSet.MinSpacingFt : 5.0, ruleSet.MaxSpacingFt * 0.35)
                 : (ruleSet.MinSpacingFt > 0 ? ruleSet.MinSpacingFt : ruleSet.CoverageRadiusFt);
 
             double coverageRadiusFt = isNotificationAppliance
-                ? Math.Min(ruleSet.CoverageRadiusFt > 0 ? ruleSet.CoverageRadiusFt : 21.213, Math.Max(ruleSet.MaxSpacingFt * 0.50, ruleSet.MinSpacingFt))
+                ? (ruleSet.CoverageRadiusFt > 0 ? ruleSet.CoverageRadiusFt : ruleSet.MaxSpacingFt / Math.Sqrt(2.0))
                 : (ruleSet.CoverageRadiusFt > 0 ? ruleSet.CoverageRadiusFt : 21.213);
 
-            result.Diagnostics.Add(
-                "Selected industry strategy=" + (isNotificationAppliance ? "notification-appliance-visible-audible" : (isWallMount ? "smoke-detector-wall-mounted" : "smoke-detector-ceiling-grid"))
-                + ", minSpacingFt=" + minSpacingFt.ToString("F2")
-                + ", coverageRadiusFt=" + coverageRadiusFt.ToString("F2")
-                + ", wallMount=" + isWallMount.ToString().ToLowerInvariant() + ".");
+            double centroidX = (geometry.MinX + geometry.MaxX) / 2.0;
+            double centroidY = (geometry.MinY + geometry.MaxY) / 2.0;
+            ComputePolygonCentroid(geometry.OuterPolygon, ref centroidX, ref centroidY);
 
+            // Single-Device Room Centering Fast Path
+            double maxCoverageArea = ruleSet.MaxCoverageAreaSqFt > 0 ? ruleSet.MaxCoverageAreaSqFt : 900.0;
+            double roomMaxDimension = Math.Max(geometry.MaxX - geometry.MinX, geometry.MaxY - geometry.MinY);
+
+            if (!isWallMount && room.AreaSqFt <= maxCoverageArea && roomMaxDimension <= (coverageRadiusFt * 1.8))
+            {
+                CandidatePoint bestCenterCandidate = FindBestCentroidCandidate(
+                    validCandidates, centroidX, centroidY, geometry, obstacleBoxes, existingDetectorXy, config);
+
+                if (bestCenterCandidate != null)
+                {
+                    result.Diagnostics.Add(
+                        "Single-device room centering applied: 1 device placed at room centroid ("
+                        + bestCenterCandidate.X.ToString("F2") + ", " + bestCenterCandidate.Y.ToString("F2") + ").");
+
+                    var singlePoint = new CalculatedSmokeDetectorPoint
+                    {
+                        X = bestCenterCandidate.X,
+                        Y = bestCenterCandidate.Y,
+                        Z = bestCenterCandidate.Z,
+                        RoomId = room.RoomId,
+                        LevelId = room.LevelId,
+                        LevelName = room.LevelName,
+                        Mount = "Ceiling"
+                    };
+
+                    result.Points = new List<CalculatedSmokeDetectorPoint> { singlePoint };
+                    result.CalculatedCount = 1;
+                    result.RequiredCount = 1;
+                    result.Status = CalculationStatus.Success;
+                    return result;
+                }
+            }
+
+            // Multi-Device Candidate Sorting by Proximity to Centroid
             validCandidates.Sort((a, b) =>
             {
-                int byY = a.Y.CompareTo(b.Y);
-                return byY != 0 ? byY : a.X.CompareTo(b.X);
+                double distA = GeometryMath.Distance(a.X, a.Y, centroidX, centroidY);
+                double distB = GeometryMath.Distance(b.X, b.Y, centroidX, centroidY);
+                return distA.CompareTo(distB);
             });
 
             List<CalculatedSmokeDetectorPoint> selected = new List<CalculatedSmokeDetectorPoint>();
@@ -781,173 +857,57 @@ namespace FireProtection.Backend.Services.Placement.SmokeDetectors.Final.BruteFo
                 });
             }
 
-            // Max spacing pair check
-            if (ruleSet.MaxSpacingFt > 0)
-            {
-                double maxSpacing = ruleSet.MaxSpacingFt;
-                for (int i = 0; i < selected.Count; i++)
-                {
-                    for (int j = i + 1; j < selected.Count; j++)
-                    {
-                        double d = GeometryMath.Distance(
-                            selected[i].X, selected[i].Y, selected[j].X, selected[j].Y);
-                        if (d > maxSpacing + config.ToleranceFt)
-                        {
-                            result.Warnings.Add(
-                                "Detector pair (" + (i + 1) + "," + (j + 1) + ") are "
-                                + d.ToString("F2") + " ft apart, exceeding MaxSpacingFt="
-                                + maxSpacing.ToString("F2") + " ft. Review required.");
-                            result.Status = CalculationStatus.ReviewRequired;
-                        }
-                    }
-                }
-            }
-
-            // Max distance from walls (ceiling mounts only)
-            if (!isWallMount && ruleSet.MaxDistanceFromWallsFt > 0 && selected.Count > 0)
-            {
-                double maxWall = ruleSet.MaxDistanceFromWallsFt;
-                for (int i = 0; i < selected.Count; i++)
-                {
-                    double d = geometry.DistanceToOuterBoundary(selected[i].X, selected[i].Y);
-                    if (d > maxWall + config.ToleranceFt)
-                    {
-                        result.Warnings.Add(
-                            "Detector " + (i + 1) + " is " + d.ToString("F2")
-                            + " ft from nearest wall, exceeding MaxDistanceFromWallsFt="
-                            + maxWall.ToString("F2") + " ft. Review required.");
-                        result.Status = CalculationStatus.ReviewRequired;
-                    }
-                }
-            }
-
-            // Coverage area check
-            if (ruleSet.MaxCoverageAreaSqFt > 0 && selected.Count > 0 && room.AreaSqFt > 0)
-            {
-                double perDetectorArea = room.AreaSqFt / selected.Count;
-                if (perDetectorArea > ruleSet.MaxCoverageAreaSqFt + 1e-6)
-                {
-                    result.Warnings.Add(
-                        "Per-detector coverage area (" + perDetectorArea.ToString("F1")
-                        + " sq ft) exceeds MaxCoverageAreaSqFt="
-                        + ruleSet.MaxCoverageAreaSqFt.ToString("F1")
-                        + " sq ft. Review required.");
-                    result.Status = CalculationStatus.ReviewRequired;
-                }
-            }
-
-            // Coverage gap sample
-            if (ruleSet.CoverageRadiusFt > 0 && selected.Count > 0)
-            {
-                double sampleStep = Math.Min(ruleSet.CoverageRadiusFt, ruleSet.MaxSpacingFt);
-                if (sampleStep <= 0) sampleStep = ruleSet.CoverageRadiusFt;
-                sampleStep = Math.Max(sampleStep / 2.0, 0.5);
-
-                int samples = 0;
-                int uncovered = 0;
-                double coverageThreshold = ruleSet.CoverageRadiusFt - config.ToleranceFt;
-                double placementZGap = selected[0].Z;
-
-                for (double sy = geometry.MinY; sy <= geometry.MaxY + config.ToleranceFt; sy += sampleStep)
-                {
-                    for (double sx = geometry.MinX; sx <= geometry.MaxX + config.ToleranceFt; sx += sampleStep)
-                    {
-                        if (!geometry.IsPointInsideRoom(sx, sy, config.ToleranceFt)) continue;
-
-                        bool insideObstacle = false;
-                        foreach (ObstacleBox box in obstacleBoxes)
-                        {
-                            if (!box.SpansZ(placementZGap, config.ToleranceFt)) continue;
-                            if (GeometryMath.InsideExpandedBox(
-                                sx, sy, box.MinX, box.MinY, box.MaxX, box.MaxY, 0.0))
-                            {
-                                insideObstacle = true;
-                                break;
-                            }
-                        }
-                        if (insideObstacle) continue;
-
-                        samples++;
-                        double nearest = double.PositiveInfinity;
-                        foreach (CalculatedSmokeDetectorPoint s in selected)
-                        {
-                            double d = GeometryMath.Distance(sx, sy, s.X, s.Y);
-                            if (d < nearest) nearest = d;
-                        }
-                        foreach (double[] es in existingDetectorXy)
-                        {
-                            double d = GeometryMath.Distance(sx, sy, es[0], es[1]);
-                            if (d < nearest) nearest = d;
-                        }
-
-                        if (nearest > coverageThreshold)
-                            uncovered++;
-                    }
-                }
-
-                if (samples > 0 && uncovered > 0)
-                {
-                    double pct = (double)uncovered * 100.0 / samples;
-                    result.Warnings.Add(
-                        "Coverage gap detected: " + uncovered + " of " + samples
-                        + " sample points (" + pct.ToString("F1")
-                        + "%) are beyond CoverageRadiusFt="
-                        + ruleSet.CoverageRadiusFt.ToString("F2") + " ft. Review required.");
-                    if (pct > 5.0)
-                        result.Status = CalculationStatus.ReviewRequired;
-                }
-            }
-
             result.Points = selected;
             result.CalculatedCount = selected.Count;
-
-            double coverageArea = ruleSet.MaxCoverageAreaSqFt > 0
-                ? ruleSet.MaxCoverageAreaSqFt
-                : Math.PI * ruleSet.CoverageRadiusFt * ruleSet.CoverageRadiusFt;
-            result.RequiredCount = coverageArea > 0
-                ? (int)Math.Ceiling(room.AreaSqFt / coverageArea)
-                : selected.Count;
-
-            if (ruleSet.IsProvisional)
-            {
-                result.Status = CalculationStatus.ReviewRequired;
-                result.Warnings.Add(
-                    "Spacing/coverage used provisional or overridden values. Review required.");
-            }
-
-            if (ceilingUnsupported && !string.IsNullOrEmpty(ceilingNote))
-            {
-                if (!result.Warnings.Contains(ceilingNote))
-                    result.Warnings.Add(ceilingNote);
-            }
-
-            if (room.DeviceKind == FireProtection.UI.Services.DeviceKind.NotificationAppliance && selected.Count > 0)
-            {
-                var audibleResult = AudibleCoverageEngine.Evaluate(
-                    selected,
-                    geometry,
-                    obstacleBoxes,
-                    ambientDb: 40.0,
-                    maxSustainedDb: 70.0,
-                    isSleepingArea: room.AreaSqFt <= 500.0 && selected[0].Z > 8.0,
-                    config);
-
-                result.Diagnostics.Add(
-                    "Audible coverage (NFPA 72 Ch. 18): " + audibleResult.Status + " - " + audibleResult.Message);
-
-                if (audibleResult.Status == "CoverageGap")
-                {
-                    result.Status = CalculationStatus.ReviewRequired;
-                    result.Warnings.Add("Audible coverage gap detected: " + audibleResult.Message);
-                }
-            }
+            result.RequiredCount = maxCoverageArea > 0 ? (int)Math.Ceiling(room.AreaSqFt / maxCoverageArea) : selected.Count;
 
             return result;
         }
 
-        // ------------------------------------------------------------------
-        // Helpers
-        // ------------------------------------------------------------------
+        private static void ComputePolygonCentroid(IReadOnlyList<double[]> polygon, ref double cx, ref double cy)
+        {
+            if (polygon == null || polygon.Count < 3) return;
+            double sumX = 0;
+            double sumY = 0;
+            int count = 0;
+            foreach (double[] v in polygon)
+            {
+                if (v == null || v.Length < 2) continue;
+                sumX += v[0];
+                sumY += v[1];
+                count++;
+            }
+            if (count > 0)
+            {
+                cx = sumX / count;
+                cy = sumY / count;
+            }
+        }
+
+        private static CandidatePoint FindBestCentroidCandidate(
+            List<CandidatePoint> candidates,
+            double cx, double cy,
+            RoomGeometry geometry,
+            List<ObstacleBox> obstacles,
+            List<double[]> existingDetectors,
+            BruteForceCalculationConfig config)
+        {
+            CandidatePoint best = null;
+            double minDist = double.MaxValue;
+
+            foreach (CandidatePoint c in candidates)
+            {
+                if (!c.IsValid) continue;
+                double d = GeometryMath.Distance(c.X, c.Y, cx, cy);
+                if (d < minDist)
+                {
+                    minDist = d;
+                    best = c;
+                }
+            }
+
+            return best;
+        }
 
         private static List<double[]> ExtractOuterPolygon(SmokeDetectorRoomInput room)
         {
@@ -1123,7 +1083,6 @@ namespace FireProtection.Backend.Services.Placement.SmokeDetectors.Final.BruteFo
                     maxZ = obstacle.BoundingBox.Max.Z;
                 }
 
-                // HVAC terminals get explicit supply-register clearance
                 double clearance = ruleSet.GetObstacleClearance(obstacle.Category);
                 if (!string.IsNullOrEmpty(obstacle.Category)
                     && obstacle.Category.IndexOf("DuctTerminal", StringComparison.OrdinalIgnoreCase) >= 0)
@@ -1453,6 +1412,68 @@ namespace FireProtection.Backend.Services.Placement.SmokeDetectors.Final.BruteFo
                 "Per-room detector spacing override applied. Engineering review required.");
 
             return effective;
+        }
+
+        private static double ComputeNfpa72WallMountZ(
+            double ceilingZ, double floorZ, double dropFromCeilingFt,
+            bool isNotificationAppliance, SmokeDetectorRoomCalculationResult result)
+        {
+            double wallZ = ceilingZ - dropFromCeilingFt;
+            double affHeight = wallZ - floorZ;
+
+            if (isNotificationAppliance)
+            {
+                const double minAffFt = 6.67;
+                const double maxAffFt = 8.0;
+
+                if (affHeight > maxAffFt)
+                {
+                    result.Diagnostics.Add(
+                        "Wall-mount Z clamped from " + affHeight.ToString("F2")
+                        + " ft AFF to " + maxAffFt.ToString("F2")
+                        + " ft AFF (NFPA 72 §18.5.4.3.1 max 96 in).");
+                    wallZ = floorZ + maxAffFt;
+                }
+                else if (affHeight < minAffFt)
+                {
+                    result.Diagnostics.Add(
+                        "Wall-mount Z clamped from " + affHeight.ToString("F2")
+                        + " ft AFF to " + minAffFt.ToString("F2")
+                        + " ft AFF (NFPA 72 §18.5.4.3.1 min 80 in).");
+                    wallZ = floorZ + minAffFt;
+                }
+            }
+            else
+            {
+                if (affHeight < 0.0)
+                {
+                    wallZ = floorZ + 0.5;
+                    result.Diagnostics.Add(
+                        "Wall-mount smoke detector Z adjusted to 0.5 ft AFF (ceiling too low for drop).");
+                }
+            }
+
+            return wallZ;
+        }
+
+        private static double ParseDbaFromDescriptor(string descriptor)
+        {
+            if (string.IsNullOrWhiteSpace(descriptor)) return 90.0;
+
+            string[] parts = descriptor.Split('|');
+            for (int i = 1; i < parts.Length; i++)
+            {
+                string[] pair = parts[i].Split('=');
+                if (pair.Length == 2
+                    && string.Equals(pair[0].Trim(), "dba", StringComparison.OrdinalIgnoreCase)
+                    && int.TryParse(pair[1].Trim(), System.Globalization.NumberStyles.Integer,
+                        System.Globalization.CultureInfo.InvariantCulture, out int dba)
+                    && dba > 0)
+                {
+                    return dba;
+                }
+            }
+            return 90.0;
         }
     }
 }

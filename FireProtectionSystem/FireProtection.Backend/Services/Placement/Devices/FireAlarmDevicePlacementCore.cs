@@ -13,19 +13,10 @@ namespace FireProtection.Backend.Services.Placement.Devices
 {
     /// <summary>
     /// Shared Revit placement machinery for fire-alarm devices (smoke detectors AND notification appliances -
-    /// both live in <c>OST_FireAlarmDevices</c> and use the same coverage-grid geometry). The device-specific
-    /// step - building the input snapshot and running the calculation with the right rule set - is injected as
-    /// a <see cref="Func{T,TResult}"/> so this class stays device-neutral. It creates real
-    /// <see cref="FamilyInstance"/> elements for every calculated point using the SAME proven placement
-    /// strategies as the sprinkler service (dispatched by the family's <c>FamilyPlacementType</c>, or by
-    /// wall-edge for sidewall points). Revit API usage is isolated here; the calculation layer stays
-    /// Revit-independent. Returns the UI-friendly <see cref="PlacementRunReport"/> expected by the generic
-    /// device workflow. Thin per-device wrappers (<c>RevitSmokeDetectorPlacementExecutor</c>,
-    /// <c>RevitNotificationAppliancePlacementExecutor</c>) supply the calculation delegate and labels.
+    /// both live in <c>OST_FireAlarmDevices</c> and use the same coverage-grid geometry).
     /// </summary>
     public class FireAlarmDevicePlacementCore : IDevicePlacementExecutor
     {
-        // Kept in lockstep with RevitSprinklerPlacementConfig so all device kinds behave identically.
         private const double DuplicateProximityFt = 0.25;
         private const double PlacementValidationToleranceFt = 0.5;
         private const double ExistingDeviceZWindowFt = 6.0;
@@ -38,9 +29,6 @@ namespace FireProtection.Backend.Services.Placement.Devices
         private readonly CeilingHostResolver _ceilingHostResolver;
         private readonly IReadOnlyList<IFamilyPlacementStrategy> _strategies;
 
-        /// <param name="deviceNoun">Lowercase singular device name used in logs/report messages.</param>
-        /// <param name="transactionGroupName">Undo-stack label for the whole run.</param>
-        /// <param name="calculate">Builds the device-specific snapshot and runs the coverage-grid engine.</param>
         public FireAlarmDevicePlacementCore(
             Document document,
             string deviceNoun,
@@ -55,9 +43,6 @@ namespace FireProtection.Backend.Services.Placement.Devices
             _calculate = calculate ?? throw new ArgumentNullException(nameof(calculate));
             _ceilingHostResolver = new CeilingHostResolver();
 
-            // Same ordered strategy set and dispatch rule as the sprinkler service: selection is by the
-            // family's PROVEN FamilyPlacementType (no silent substitution); WallSidewall is dispatched by a
-            // point's WallEdgeIndex, not by placement type.
             _strategies = new IFamilyPlacementStrategy[]
             {
                 new FaceBasedPlacementStrategy(),
@@ -67,7 +52,6 @@ namespace FireProtection.Backend.Services.Placement.Devices
             };
         }
 
-        /// <summary>Sentence-start capitalization of <see cref="_deviceNoun"/> (e.g. "Smoke detector").</summary>
         private string DeviceNounCap =>
             _deviceNoun.Length == 0 ? _deviceNoun : char.ToUpperInvariant(_deviceNoun[0]) + _deviceNoun.Substring(1);
 
@@ -84,8 +68,6 @@ namespace FireProtection.Backend.Services.Placement.Devices
                 return report;
             }
 
-            // 1. Run the injected (Revit-free) calculation: it builds the device-specific input snapshot and
-            //    invokes the shared coverage-grid engine. The result carries every calculated point.
             SmokeDetectorCalculationResult calc = _calculate(items);
 
             report.RoomsProcessed = calc.Rooms?.Count ?? 0;
@@ -105,18 +87,12 @@ namespace FireProtection.Backend.Services.Placement.Devices
                 + " room(s), " + calc.TotalCalculatedDetectors + " calculated point(s), policy "
                 + existingDevicePolicy + (calc.IsProvisional ? " (PROVISIONAL rules)." : "."));
 
-            // 2. Collect existing fire-alarm devices once: drives the duplicate guard and the room policy.
-            //    This run's own kind comes from the input items (the UI stamps every room with its tab's
-            //    DeviceKind); smoke detectors and notification appliances share OST_FireAlarmDevices, so the
-            //    skip/replace/duplicate logic below MUST be kind-scoped or a smoke run would skip or delete
-            //    (and vice versa) the other kind's devices in the same room.
             DeviceKind ownKind = items[0] != null ? items[0].DeviceKind : DeviceKind.SmokeDetector;
             List<ExistingDevice> existing = CollectExistingDevices(_document, ownKind);
             var existingPoints = existing.Where(e => e.IsOwnKind && e.Point != null).Select(e => e.Point).ToList();
 
             bool cancelled = false;
 
-            // One TransactionGroup: a single named undo entry; cancel rolls the whole run back.
             using (var group = new TransactionGroup(_document, _transactionGroupName))
             {
                 group.Start();
@@ -127,7 +103,6 @@ namespace FireProtection.Backend.Services.Placement.Devices
 
             if (cancelled)
             {
-                // The rollback undid every element; reporting them as placed would be a false success.
                 report.RoomReports.Clear();
                 report.RoomsProcessed = 0;
                 report.RoomsSucceeded = 0;
@@ -174,14 +149,6 @@ namespace FireProtection.Backend.Services.Placement.Devices
             return report;
         }
 
-        // ----- Pre-placement eligibility / preflight (single source of truth with actual placement) -----
-        // Consumed by the UI so it can block rooms the production pipeline provably cannot place, BEFORE the
-        // user runs. It reuses the EXACT calculation, symbol/level resolution and ceiling-host logic that
-        // ExecutePlacement/PlaceSinglePoint use - no second, drifting set of hosting rules - but performs only
-        // READ-ONLY queries: no transaction, no FamilyInstance is ever created. Port of
-        // RevitSprinklerPlacementService.EvaluateRoomEligibility, adapted to the batch device calculation.
-
-        /// <inheritdoc />
         public IReadOnlyDictionary<string, PlacementEligibilityResult> EvaluateEligibility(
             IReadOnlyList<DeviceRoomInputItem> items)
         {
@@ -191,12 +158,10 @@ namespace FireProtection.Backend.Services.Placement.Devices
             SmokeDetectorCalculationResult calc;
             try
             {
-                // Same delegate the real run uses: the preflight can never disagree with placement.
                 calc = _calculate(items);
             }
             catch (Exception ex)
             {
-                // The calculation itself could not run: every room is UNDETERMINED, never falsely blocked.
                 FireProtectionLog.Warn(DeviceNounCap + " eligibility: calculation could not run - " + ex.Message);
                 foreach (DeviceRoomInputItem item in items)
                 {
@@ -223,7 +188,6 @@ namespace FireProtection.Backend.Services.Placement.Devices
 
                 if (!byRoom.TryGetValue(item.RoomId, out SmokeDetectorRoomCalculationResult room) || room == null)
                 {
-                    // The calculation returned no result for this room: cannot decide -> UNDETERMINED.
                     map[item.RoomId] = PlacementEligibilityResult.Undetermined(
                         "The calculation produced no result for this room; eligibility is undetermined.",
                         PlacementEligibilityStatusCodes.CalculationFailed);
@@ -236,24 +200,28 @@ namespace FireProtection.Backend.Services.Placement.Devices
             return map;
         }
 
-        /// <summary>The per-room feasibility ladder, mirroring the sprinkler service. Deterministic calculation
-        /// outcomes decide first; otherwise a read-only host/level probe (identical to PlaceSinglePoint's
-        /// prerequisites) decides ELIGIBLE vs BLOCKED. Any unexpected failure is UNDETERMINED, never BLOCKED.</summary>
         private PlacementEligibilityResult EvaluateRoomEligibility(SmokeDetectorRoomCalculationResult room)
         {
             try
             {
-                // 1. Deterministic calculation outcomes.
                 if (room.Status == CalculationStatus.InvalidRoomGeometry)
                     return PlacementEligibilityResult.Blocked(
                         PlacementEligibilityStatusCodes.MissingRoomGeometry,
                         FirstMessage(room) ?? "Room boundary is incomplete (at least 3 points required for placement).");
 
                 if (room.Status == CalculationStatus.InvalidInput)
-                    // Set today only when the family's proven placement behaviour is Unsupported.
-                    return PlacementEligibilityResult.Blocked(
-                        PlacementEligibilityStatusCodes.UnsupportedFamilyPlacementType,
-                        FirstMessage(room) ?? "The selected family/type has an unsupported placement behaviour.");
+                {
+                    string msg = FirstMessage(room) ?? "The selected family/type has an unsupported placement behaviour.";
+                    string code = PlacementEligibilityStatusCodes.UnsupportedFamilyPlacementType;
+                    if (msg.IndexOf("beam path", StringComparison.OrdinalIgnoreCase) >= 0 ||
+                        msg.IndexOf("minimum listed path", StringComparison.OrdinalIgnoreCase) >= 0 ||
+                        msg.IndexOf("Beam smoke detectors", StringComparison.OrdinalIgnoreCase) >= 0 ||
+                        msg.IndexOf("Optical beam", StringComparison.OrdinalIgnoreCase) >= 0)
+                    {
+                        code = PlacementEligibilityStatusCodes.BeamPathTooShort;
+                    }
+                    return PlacementEligibilityResult.Blocked(code, msg);
+                }
 
                 if (room.Status == CalculationStatus.Failed)
                     return PlacementEligibilityResult.Undetermined(
@@ -261,28 +229,23 @@ namespace FireProtection.Backend.Services.Placement.Devices
                         PlacementEligibilityStatusCodes.CalculationFailed);
 
                 if (room.Points == null || room.Points.Count == 0)
-                    // The calculation completed and produced nothing to place: deterministic.
                     return PlacementEligibilityResult.Blocked(
                         PlacementEligibilityStatusCodes.NoCandidatePoints,
                         FirstMessage(room) ?? "The calculation produced no candidate points for this room; nothing can be placed here.");
 
-                // 2. Read-only feasibility preflight (mirrors PlaceSinglePoint prerequisites; creates nothing).
                 FamilySymbol symbol = ResolveSymbol(_document, room.FamilyName, room.TypeName, out string symbolError);
                 if (symbol == null)
                 {
-                    // Family/type not resolved is a CONFIGURATION error, not proof the room is unplaceable -> UNDETERMINED.
                     return PlacementEligibilityResult.Undetermined(
                         symbolError ?? ("Family/type '" + (room.FamilyName ?? "?") + ":" + (room.TypeName ?? "?")
                             + "' was not found in the active document."),
-                        PlacementEligibilityStatusCodes.UnsupportedFamilyPlacement);
+                        PlacementEligibilityStatusCodes.FamilyNotLoaded);
                 }
 
                 var result = new PlacementEligibilityResult();
                 string placementType = SafePlacementType(symbol);
                 result.FamilyPlacementType = placementType;
 
-                // WallSidewall behaviour (a point carrying a WallEdgeIndex) is wall-mounted regardless of the
-                // family's FamilyPlacementType and does NOT need a ceiling host - it needs a wall face.
                 bool isSidewall = room.Points.Any(p => p != null && p.WallEdgeIndex.HasValue);
                 IFamilyPlacementStrategy strategy = isSidewall
                     ? _strategies.FirstOrDefault(s => s is WallSidewallPlacementStrategy)
@@ -293,9 +256,6 @@ namespace FireProtection.Backend.Services.Placement.Devices
                         PlacementEligibilityStatusCodes.UnsupportedFamilyPlacementType,
                         "No placement strategy supports the family's placement type '" + placementType + "'.");
 
-                // Host requirement by proven FamilyPlacementType (a numeric ceiling height is NOT proof of a host):
-                //   FaceBased / WorkPlaneBased -> require a usable ceiling host for >=1 candidate.
-                //   OneLevelBased              -> requires only a resolvable level.
                 bool requiresCeilingHost = !isSidewall && (
                     string.Equals(placementType, "FaceBased", StringComparison.OrdinalIgnoreCase) ||
                     string.Equals(placementType, "WorkPlaneBased", StringComparison.OrdinalIgnoreCase));
@@ -327,10 +287,10 @@ namespace FireProtection.Backend.Services.Placement.Devices
 
                     CeilingHostLookup host = null;
                     try { host = _ceilingHostResolver.FindCeilingHost(_document, xyz, level); }
-                    catch { /* host lookup is best-effort; never fail eligibility on it */ }
+                    catch { /* host lookup is best-effort */ }
 
                     bool hasHostFace = host != null && host.HostFace != null;
-                    if (requiresCeilingHost && !hasHostFace) continue; // try the next candidate
+                    if (requiresCeilingHost && !hasHostFace) continue;
 
                     anyHostOk = true;
                     validCandidateCount++;
@@ -361,7 +321,6 @@ namespace FireProtection.Backend.Services.Placement.Devices
                         "No candidate point could be placed for the selected " + _deviceNoun + " family/type.");
                 }
 
-                // ELIGIBLE: at least one candidate satisfies every placement prerequisite.
                 if (string.Equals(placementType, "FaceBased", StringComparison.OrdinalIgnoreCase))
                     result.HostingStrategy = "FaceBasedHost";
                 else if (string.Equals(placementType, "WorkPlaneBased", StringComparison.OrdinalIgnoreCase))
@@ -380,7 +339,6 @@ namespace FireProtection.Backend.Services.Placement.Devices
             }
             catch (Exception ex)
             {
-                // An unexpected evaluation failure is UNDETERMINED, never BLOCKED.
                 return PlacementEligibilityResult.Undetermined(
                     "Preflight evaluation failed: " + ex.Message,
                     PlacementEligibilityStatusCodes.PreflightError);
@@ -393,8 +351,6 @@ namespace FireProtection.Backend.Services.Placement.Devices
             catch { return "Unknown"; }
         }
 
-        /// <summary>The placement transaction: activates symbols, walks the rooms, honours the existing-device
-        /// policy, reports progress and stops at a room boundary on cancel. Returns true if cancelled.</summary>
         private bool RunPlacement(
             SmokeDetectorCalculationResult calc,
             List<ExistingDevice> existing,
@@ -419,8 +375,6 @@ namespace FireProtection.Backend.Services.Placement.Devices
                     {
                         roomIndex++;
 
-                        // Cancellation is polled only at room boundaries: no half-placed room is ever left,
-                        // and the group rollback in the caller undoes everything placed so far.
                         if (progress.IsCancellationRequested)
                         {
                             transaction.Commit();
@@ -446,7 +400,6 @@ namespace FireProtection.Backend.Services.Placement.Devices
                             continue;
                         }
 
-                        // Re-run handling: what a second Place does to a room that already contains devices.
                         double refZ = room.Points[0].Z;
                         List<ExistingDevice> inRoom = DevicesInRoom(existing, room.Polygon, refZ);
                         if (inRoom.Count > 0)
@@ -465,7 +418,6 @@ namespace FireProtection.Backend.Services.Placement.Devices
                             {
                                 DeleteDevices(inRoom, existing, existingPoints);
                             }
-                            // AddAnyway: fall through - the coincident-point guard still applies per point.
                         }
 
                         FamilySymbol symbol = ResolveCachedSymbol(
@@ -484,24 +436,26 @@ namespace FireProtection.Backend.Services.Placement.Devices
                         int placed = 0;
                         int invalid = 0;
                         int failed = 0;
+                        string lastFailureReason = null;
 
                         foreach (CalculatedSmokeDetectorPoint point in room.Points)
                         {
-                            PointResult pr = PlaceSinglePoint(symbol, placementType, point, room.Polygon, existingPoints);
+                            PointResult pr = PlaceSinglePoint(symbol, placementType, point, room.Polygon, existingPoints, out string pointError);
                             if (pr == PointResult.Placed) placed++;
                             else if (pr == PointResult.PlacedInvalid) { placed++; invalid++; }
-                            else failed++;
+                            else
+                            {
+                                failed++;
+                                if (pointError != null) lastFailureReason = pointError;
+                            }
                         }
 
                         roomReport.PointsPlaced = placed;
-                        // Calc-level review flags (provisional rules, coverage gaps) must survive placement:
-                        // a room whose calculation says ReviewRequired is never reported as a plain Success,
-                        // even when every point placed within tolerance.
                         bool calcReview = room.Status == CalculationStatus.ReviewRequired;
                         if (placed == 0)
                         {
                             roomReport.Status = "Failed";
-                            roomReport.FailureReason = "No " + _deviceNoun + "s could be placed (" + failed + " point(s) failed).";
+                            roomReport.FailureReason = lastFailureReason ?? ("No " + _deviceNoun + "s could be placed (" + failed + " point(s) failed).");
                             roomReport.Message = roomReport.FailureReason;
                         }
                         else if (invalid > 0 || calcReview)
@@ -551,44 +505,48 @@ namespace FireProtection.Backend.Services.Placement.Devices
         private enum PointResult { Placed, PlacedInvalid, Failed }
 
         private PointResult PlaceSinglePoint(
-            FamilySymbol symbol,
-            string familyPlacementType,
-            CalculatedSmokeDetectorPoint point,
-            List<double[]> roomPolygon,
-            List<XYZ> existingPoints)
+    FamilySymbol symbol,
+    string familyPlacementType,
+    CalculatedSmokeDetectorPoint point,
+    List<double[]> roomPolygon,
+    List<XYZ> existingPoints,
+    out string failureReason)
         {
-            if (point == null || !IsFinite(point.X, point.Y, point.Z)) return PointResult.Failed;
-
-            var xyz = new XYZ(point.X, point.Y, point.Z);
-
-            // Coordinate-space guard (mirrors the sprinkler service): a candidate must fall inside its own
-            // room polygon in HOST coordinates. One that does not is almost always an untransformed
-            // linked-model point, and creating it would drop a device far outside the room. The 0.5 ft
-            // tolerance lets wall-edge (sidewall) candidates sit on the boundary itself.
-            if (roomPolygon != null && roomPolygon.Count >= 3
-                && !GeometryMath.PointInPolygon(point.X, point.Y, roomPolygon, InRoomToleranceFt))
+            failureReason = null;
+            if (point == null || !IsFinite(point.X, point.Y, point.Z))
             {
-                FireProtectionLog.Warn(DeviceNounCap + " point refused at (" + point.X.ToString("F2") + ","
-                    + point.Y.ToString("F2") + "): outside the room boundary in host coordinates "
-                    + "(check the linked-model coordinate transform).");
+                failureReason = "Non-finite point coordinates.";
                 return PointResult.Failed;
             }
 
-            // Minimal duplicate safety check (does not re-implement calc spacing).
+            var xyz = new XYZ(point.X, point.Y, point.Z);
+
+            List<double[]> hostPolygon = roomPolygon;
+            if (roomPolygon != null && roomPolygon.Count >= 3)
+            {
+                hostPolygon = TransformPolygonToHostSpace(roomPolygon, point.LevelId, point.LevelName);
+            }
+
+            if (hostPolygon != null && hostPolygon.Count >= 3
+                && !GeometryMath.PointInPolygon(point.X, point.Y, hostPolygon, InRoomToleranceFt))
+            {
+                failureReason = "Point falls outside host room boundary.";
+                return PointResult.Failed;
+            }
+
             if (existingPoints.Any(p => p != null && p.DistanceTo(xyz) <= DuplicateProximityFt))
             {
+                failureReason = "Point skipped (duplicate existing device nearby).";
                 return PointResult.Failed;
             }
 
             Level level = ResolveHostLevel(point.LevelId, point.LevelName, out string levelError);
             if (level == null)
             {
-                FireProtectionLog.Warn(DeviceNounCap + " point skipped: " + (levelError ?? "level unresolved") + ".");
+                failureReason = levelError ?? "Host level unresolved.";
                 return PointResult.Failed;
             }
 
-            // Sidewall override: a point carrying a WallEdgeIndex is wall-mounted regardless of the family's
-            // FamilyPlacementType. Otherwise select by proven placement type; no match => refuse (no default).
             IFamilyPlacementStrategy strategy = null;
             if (point.WallEdgeIndex.HasValue)
             {
@@ -600,13 +558,9 @@ namespace FireProtection.Backend.Services.Placement.Devices
             }
             if (strategy == null)
             {
-                FireProtectionLog.Warn(DeviceNounCap + " point skipped: no strategy supports FamilyPlacementType '"
-                    + familyPlacementType + "' with device-kind '" + _deviceNoun + "'.");
+                failureReason = "No strategy supports placement type '" + familyPlacementType + "'.";
                 return PointResult.Failed;
             }
-
-            FireProtectionLog.Info(DeviceNounCap + " location-point strategy selected: "
-                + strategy.GetType().Name + " (family placement type " + familyPlacementType + ").");
 
             try
             {
@@ -619,30 +573,34 @@ namespace FireProtection.Backend.Services.Placement.Devices
                     FamilyPlacementType = familyPlacementType,
                     CeilingHostResolver = _ceilingHostResolver,
                     WallEdgeIndex = point.WallEdgeIndex,
-                    RoomPolygon = roomPolygon
+                    RoomPolygon = hostPolygon
                 };
 
                 PlacementOutcome outcome = strategy.Place(context);
                 if (!outcome.Created || outcome.Instance == null)
                 {
-                    FireProtectionLog.Warn(DeviceNounCap + " placement failed: "
-                        + (outcome.Message ?? outcome.ErrorCode ?? "unknown reason") + ".");
+                    failureReason = outcome.Message ?? outcome.ErrorCode ?? "Placement strategy returned failure.";
                     return PointResult.Failed;
                 }
 
+                // Removed redundant EnforceLevelAndOffset call here since it's strictly handled in the strategies!
+
                 existingPoints.Add(xyz);
 
-                // Post-placement validation: a gross deviation (e.g. a hosted family snapping to the origin)
-                // is PLACED_BUT_INVALID, never a silent success. The element still exists (counted as placed).
                 var placedLocation = outcome.Instance.Location as LocationPoint;
                 XYZ actual = placedLocation?.Point;
-                bool valid = actual != null && actual.DistanceTo(xyz) <= PlacementValidationToleranceFt;
+                bool valid = false;
+
+                if (actual != null)
+                {
+                    double xyDeviationFt = Math.Sqrt(Math.Pow(actual.X - xyz.X, 2) + Math.Pow(actual.Y - xyz.Y, 2));
+                    double zDeviationFt = Math.Abs(actual.Z - xyz.Z);
+
+                    valid = xyDeviationFt <= PlacementValidationToleranceFt && zDeviationFt <= ExistingDeviceZWindowFt;
+                }
+
                 if (!valid)
                 {
-                    FireProtectionLog.Warn("[REVIEW] " + DeviceNounCap + " " + outcome.Instance.Id
-                        + " (room " + point.RoomId + ", strategy " + outcome.HostingStrategy
-                        + ") placed but spatially INVALID (deviation > "
-                        + PlacementValidationToleranceFt.ToString("F2", CultureInfo.InvariantCulture) + " ft).");
                     return PointResult.PlacedInvalid;
                 }
 
@@ -650,8 +608,7 @@ namespace FireProtection.Backend.Services.Placement.Devices
             }
             catch (Exception ex)
             {
-                FireProtectionLog.Error(DeviceNounCap + " Revit placement failed at (" + point.X.ToString("F2")
-                    + "," + point.Y.ToString("F2") + "," + point.Z.ToString("F2") + ").", ex);
+                failureReason = "Revit creation exception: " + ex.Message;
                 return PointResult.Failed;
             }
         }
@@ -708,24 +665,15 @@ namespace FireProtection.Backend.Services.Placement.Devices
             return null;
         }
 
-        /// <summary>
-        /// Maps the level identifier carried by a calculated point to the correct host-document Level.
-        /// Handles the direct host-ElementId fast path, then linked-model levels (elevation-transformed into
-        /// host space), then a host-name match. Never selects an arbitrary level silently. Port of the
-        /// sprinkler service's resolver, reduced to the Level (the report only carries a message).
-        /// </summary>
         private Level ResolveHostLevel(string levelId, string levelName, out string error)
         {
             error = null;
 
-            // 1. Direct host-document ElementId.
             if (!string.IsNullOrWhiteSpace(levelId) && long.TryParse(levelId, out long idValue))
             {
                 if (_document.GetElement(new ElementId(idValue)) is Level hostLevel) return hostLevel;
             }
 
-            // 2. Linked-model level: find it in each link document, transform its elevation into host space,
-            //    then match a host Level by elevation (or name).
             var linkCollector = new FilteredElementCollector(_document).OfClass(typeof(RevitLinkInstance));
             foreach (Element element in linkCollector)
             {
@@ -750,7 +698,6 @@ namespace FireProtection.Backend.Services.Placement.Devices
                 if (mapped != null) return mapped;
             }
 
-            // 3. Last resort: host-document name match.
             if (!string.IsNullOrWhiteSpace(levelName))
             {
                 Level byName = FindLevelByName(_document, levelName);
@@ -774,11 +721,6 @@ namespace FireProtection.Backend.Services.Placement.Devices
                 .FirstOrDefault(l => string.Equals(l.Name, levelName, StringComparison.OrdinalIgnoreCase));
         }
 
-        /// <summary>
-        /// An existing fire-alarm device: its id and location, for the duplicate guard and room policy.
-        /// <see cref="IsOwnKind"/> is true only when the device's family/type name classifies as the kind
-        /// this run places — the only kind the policy may skip, delete, or treat as a duplicate.
-        /// </summary>
         private sealed class ExistingDevice
         {
             public ElementId Id;
@@ -799,8 +741,6 @@ namespace FireProtection.Backend.Services.Placement.Devices
             {
                 if (element is FamilyInstance fi && fi.Location is LocationPoint lp && lp.Point != null)
                 {
-                    // Name-based kind attribution (OST cannot tell smoke from notification). An
-                    // unclassifiable name is NOT own-kind: never touched, never a duplicate.
                     bool isOwn = false;
                     try
                     {
@@ -809,7 +749,7 @@ namespace FireProtection.Backend.Services.Placement.Devices
                         if (DeviceKindResolver.TryResolve(fam, typ, out DeviceKind kind))
                             isOwn = kind == ownKind;
                     }
-                    catch { /* name read failure -> not own-kind (conservative) */ }
+                    catch { /* name read failure -> not own-kind */ }
 
                     found.Add(new ExistingDevice { Id = fi.Id, Point = lp.Point, IsOwnKind = isOwn });
                 }
@@ -818,10 +758,6 @@ namespace FireProtection.Backend.Services.Placement.Devices
             return found;
         }
 
-        /// <summary>Own-kind existing devices whose XY falls inside the room polygon and whose Z is within the
-        /// vertical window of this room's placement plane (so devices on other floors are not counted).
-        /// Other-kind devices are deliberately excluded — a room with only sprinklers/NA devices is NOT
-        /// "already has smoke detectors".</summary>
         private static List<ExistingDevice> DevicesInRoom(List<ExistingDevice> devices, List<double[]> polygon, double refZ)
         {
             var inRoom = new List<ExistingDevice>();
@@ -871,6 +807,46 @@ namespace FireProtection.Backend.Services.Placement.Devices
             if (room.Errors != null && room.Errors.Count > 0) return room.Errors[0];
             if (room.Warnings != null && room.Warnings.Count > 0) return room.Warnings[0];
             return null;
+        }
+
+        private List<double[]> TransformPolygonToHostSpace(
+            List<double[]> polygon, string levelId, string levelName)
+        {
+            if (polygon == null || polygon.Count < 3) return polygon;
+
+            if (!string.IsNullOrWhiteSpace(levelId) && long.TryParse(levelId, out long idValue))
+            {
+                if (_document.GetElement(new ElementId(idValue)) is Level)
+                    return polygon;
+            }
+
+            var linkCollector = new FilteredElementCollector(_document).OfClass(typeof(RevitLinkInstance));
+            foreach (Element element in linkCollector)
+            {
+                if (!(element is RevitLinkInstance linkInstance)) continue;
+                Document linkDoc = linkInstance.GetLinkDocument();
+                if (linkDoc == null) continue;
+
+                Level linkLevel = null;
+                if (!string.IsNullOrWhiteSpace(levelId) && long.TryParse(levelId, out long linkIdValue))
+                    linkLevel = linkDoc.GetElement(new ElementId(linkIdValue)) as Level;
+                if (linkLevel == null && !string.IsNullOrWhiteSpace(levelName))
+                    linkLevel = FindLevelByName(linkDoc, levelName);
+                if (linkLevel == null) continue;
+
+                Transform toHost = linkInstance.GetTotalTransform();
+                var transformed = new List<double[]>(polygon.Count);
+                foreach (double[] v in polygon)
+                {
+                    if (v == null || v.Length < 2) continue;
+                    XYZ linkPt = new XYZ(v[0], v[1], 0);
+                    XYZ hostPt = toHost.OfPoint(linkPt);
+                    transformed.Add(new double[] { hostPt.X, hostPt.Y });
+                }
+                return transformed;
+            }
+
+            return polygon;
         }
     }
 }

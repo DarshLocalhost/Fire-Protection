@@ -4,19 +4,11 @@ namespace FireProtection.UI.Services
 {
     /// <summary>
     /// Maps a <see cref="PlacementEligibilityResult.StatusCode"/> to a short, grid-friendly label.
-    /// <para>
-    /// The room rows have a few characters of width for the "why", so the full
-    /// <see cref="PlacementEligibilityResult.Reason"/> gets truncated to something unreadable
-    /// ("Sprinkler f&#8230;"). The row shows this label instead and keeps the full reason in its tooltip:
-    /// nothing is lost and nothing is clipped. Status codes are the contract here — the reason text is a
-    /// human supplement and is never parsed.
-    /// </para>
     /// </summary>
     public static class EligibilityShortText
     {
         /// <summary>
-        /// Short label for a status code. Falls back to the first sentence of <paramref name="reason"/>
-        /// for codes with no mapping, so a new code degrades to something readable instead of blank.
+        /// Short label for a status code.
         /// </summary>
         public static string For(string statusCode, string reason)
         {
@@ -28,9 +20,13 @@ namespace FireProtection.UI.Services
                     return "Pick family/type";
                 case PlacementEligibilityStatusCodes.MissingRoomGeometry:
                     return "No room geometry";
+                case PlacementEligibilityStatusCodes.FamilyNotLoaded:
+                    return "Family not loaded";
                 case PlacementEligibilityStatusCodes.UnsupportedFamilyPlacement:
                 case PlacementEligibilityStatusCodes.UnsupportedFamilyPlacementType:
-                    return "Unsupported family";
+                    return "Unsupported placement type";
+                case PlacementEligibilityStatusCodes.BeamPathTooShort:
+                    return "Beam path too short";
                 case PlacementEligibilityStatusCodes.MissingHostLevel:
                     return "No host level";
                 case PlacementEligibilityStatusCodes.NoCandidatePoints:

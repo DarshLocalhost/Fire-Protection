@@ -80,6 +80,10 @@ namespace FireProtection.UI.ViewModels.Devices
 
             set
             {
+                // Ineligible / blocked rooms can never be selected
+                if (value && !_isEligible)
+                    return;
+
                 if (SetProperty(ref _isSelected, value))
                 {
                     SelectionChanged?.Invoke(this, EventArgs.Empty);

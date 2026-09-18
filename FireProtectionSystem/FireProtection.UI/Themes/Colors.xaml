@@ -141,5 +141,7 @@
     <SolidColorBrush x:Key="SurfaceBrush" Color="{StaticResource ColorSurfaceRaised}"/>
     <SolidColorBrush x:Key="SubtleBrush" Color="{StaticResource ColorSurfaceOverlay}"/>
     <SolidColorBrush x:Key="WarningBrush" Color="{StaticResource ColorUndetermined}"/>
+    <SolidColorBrush x:Key="CardBrush" Color="{StaticResource ColorSurfaceRaised}"/>
+    <SolidColorBrush x:Key="DangerBrush" Color="{StaticResource ColorBlocked}"/>
 
 </ResourceDictionary>

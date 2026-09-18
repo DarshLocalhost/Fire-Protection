@@ -17,27 +17,17 @@ namespace FireProtection.Backend.Services.Placement.Sprinklers.Final.Strategies
     }
 
     /// <summary>
-    /// Dedicated resolver (master prompt §21, Phase 4) that locates a ceiling face suitable for hosting a
-    /// sprinkler. Searches the host document first, then linked models (ceilings commonly live in the
-    /// architectural link). For a linked ceiling the face reference is converted into a host-document
-    /// reference via <see cref="Reference.CreateLinkReference"/>.
-    ///
-    /// Coordinate discipline (hard rules 10, 11): the placement point supplied by the caller is in HOST
-    /// coordinates and is returned unchanged; only the internal SEARCH point is transformed into link space
-    /// (exactly once) to locate link geometry.
+    /// Dedicated resolver that locates a ceiling/soffit face suitable for hosting a sprinkler.
+    /// Searches Ceilings, Floors (slabs), and Roofs in the host document first, then linked models.
     /// </summary>
     internal sealed class CeilingHostResolver
     {
-        /// <summary>
-        /// Find a ceiling face whose footprint contains <paramref name="point"/> (host coords). Returns a
-        /// lookup whose <see cref="CeilingHostLookup.HostFace"/> is null when none is available.
-        /// </summary>
         public CeilingHostLookup FindCeilingHost(Document doc, XYZ point, Level level)
         {
             var lookup = new CeilingHostLookup();
             if (doc == null) return lookup;
 
-            // 1. Host-document ceilings (level-aware).
+            // 1. Host-document ceiling/soffit lookup
             ElementId hostCeilingId;
             Reference hostRef = FindCeilingFaceInDocument(doc, point, level, useLevelFilter: true, ceilingId: out hostCeilingId);
             if (hostRef != null)
@@ -48,7 +38,7 @@ namespace FireProtection.Backend.Services.Placement.Sprinklers.Final.Strategies
                 return lookup;
             }
 
-            // 2. Linked-model ceilings.
+            // 2. Linked-model ceiling/soffit lookup
             FilteredElementCollector linkCollector = new FilteredElementCollector(doc).OfClass(typeof(RevitLinkInstance));
             foreach (Element element in linkCollector)
             {
@@ -57,7 +47,6 @@ namespace FireProtection.Backend.Services.Placement.Sprinklers.Final.Strategies
                 Document linkDoc = linkInstance.GetLinkDocument();
                 if (linkDoc == null) continue;
 
-                // Link geometry lives in link coordinate space; map the host-space point into it (once).
                 Transform hostToLink = linkInstance.GetTotalTransform().Inverse;
                 XYZ linkPoint = hostToLink.OfPoint(point);
 
@@ -65,7 +54,6 @@ namespace FireProtection.Backend.Services.Placement.Sprinklers.Final.Strategies
                 Reference linkFaceRef = FindCeilingFaceInDocument(linkDoc, linkPoint, level, useLevelFilter: false, ceilingId: out linkCeilingId);
                 if (linkFaceRef == null) continue;
 
-                // Convert the linked-document face reference into a host-document reference.
                 Reference hostRefFromLink = linkFaceRef.CreateLinkReference(linkInstance);
                 lookup.HostFace = hostRefFromLink;
                 lookup.Source = "link:" + (linkInstance.Name ?? linkInstance.Id.ToString());
@@ -77,47 +65,43 @@ namespace FireProtection.Backend.Services.Placement.Sprinklers.Final.Strategies
             return lookup;
         }
 
-        /// <summary>
-        /// Find a ceiling face reference in a specific document near the supplied point. When
-        /// <paramref name="useLevelFilter"/> is true the ceiling must belong to the supplied host Level;
-        /// for linked documents this is false because <c>ceiling.LevelId</c> references the link document,
-        /// so correctness is enforced by the 3D face-proximity check instead.
-        /// </summary>
         private static Reference FindCeilingFaceInDocument(Document doc, XYZ point, Level level, bool useLevelFilter, out ElementId ceilingId)
         {
             ceilingId = null;
             if (doc == null) return null;
 
-            FilteredElementCollector collector = new FilteredElementCollector(doc).OfClass(typeof(Ceiling));
+            // Broaden category search to include Ceilings, Floors (slabs), and Roofs acting as overhead soffits
+            List<Element> candidates = new List<Element>();
+            candidates.AddRange(new FilteredElementCollector(doc).OfClass(typeof(Ceiling)).ToElements());
+            candidates.AddRange(new FilteredElementCollector(doc).OfClass(typeof(Floor)).ToElements());
+            candidates.AddRange(new FilteredElementCollector(doc).OfClass(typeof(RoofBase)).ToElements());
+
             Options geomOptions = new Options { ComputeReferences = true, DetailLevel = ViewDetailLevel.Coarse };
 
-            foreach (Element element in collector)
+            foreach (Element element in candidates)
             {
-                if (!(element is Ceiling ceiling)) continue;
-
-                if (useLevelFilter && level != null && ceiling.LevelId != null && ceiling.LevelId != ElementId.InvalidElementId)
+                if (useLevelFilter && level != null && element.LevelId != null && element.LevelId != ElementId.InvalidElementId)
                 {
-                    if (!ceiling.LevelId.Equals(level.Id)) continue;
+                    if (!element.LevelId.Equals(level.Id)) continue;
                 }
 
-                BoundingBoxXYZ bb = ceiling.get_BoundingBox(null);
+                BoundingBoxXYZ bb = element.get_BoundingBox(null);
                 if (bb == null) continue;
 
-                const double tol = 0.5;
-                if (point.X < bb.Min.X - tol || point.X > bb.Max.X + tol) continue;
-                if (point.Y < bb.Min.Y - tol || point.Y > bb.Max.Y + tol) continue;
-                // Z-range pre-filter: skip ceilings whose vertical extent doesn't
-                // overlap the search point. For linked ceilings (useLevelFilter=false)
-                // this avoids expensive geometry iteration on ceilings at other levels.
-                if (point.Z < bb.Min.Z - tol || point.Z > bb.Max.Z + tol) continue;
+                const double xyTol = 1.0;
+                const double zTol = 4.0; // Expanded Z tolerance to catch ceiling soffits
 
-                GeometryElement geom = ceiling.get_Geometry(geomOptions);
+                if (point.X < bb.Min.X - xyTol || point.X > bb.Max.X + xyTol) continue;
+                if (point.Y < bb.Min.Y - xyTol || point.Y > bb.Max.Y + xyTol) continue;
+                if (point.Z < bb.Min.Z - zTol || point.Z > bb.Max.Z + zTol) continue;
+
+                GeometryElement geom = element.get_Geometry(geomOptions);
                 if (geom == null) continue;
 
-                Reference found = FindHostFaceReference(geom, point, tol);
+                Reference found = FindHostFaceReference(geom, point, zTol);
                 if (found != null)
                 {
-                    ceilingId = ceiling.Id;
+                    ceilingId = element.Id;
                     return found;
                 }
             }
@@ -125,11 +109,6 @@ namespace FireProtection.Backend.Services.Placement.Sprinklers.Final.Strategies
             return null;
         }
 
-        /// <summary>
-        /// A pendent sprinkler is hosted on the UNDERSIDE of a ceiling — the face whose normal points DOWN
-        /// (Z &lt; 0). Prefer the closest downward-facing planar face; fall back to the closest planar face so
-        /// placement is not needlessly rejected when face orientation is ambiguous.
-        /// </summary>
         private static Reference FindHostFaceReference(GeometryElement geom, XYZ point, double tol)
         {
             Reference bestDownward = null;
@@ -153,7 +132,7 @@ namespace FireProtection.Backend.Services.Placement.Sprinklers.Final.Strategies
                         double d = Math.Abs(ir.Distance);
                         if (d > tol) continue;
 
-                        if (planar.FaceNormal.Z < -0.5) // downward-facing (pendant host)
+                        if (planar.FaceNormal.Z < -0.5) // downward-facing soffit face
                         {
                             if (d < bestDownwardDist)
                             {

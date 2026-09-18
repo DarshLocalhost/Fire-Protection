@@ -654,3 +654,42 @@ were invisible to it.
 - [[PROGRESS]]
 - [[TODO]]
 - [[SPRINKLER_POINT_CALCULATION_EXPLAINED]]
+
+---
+
+### 2026-09-11 — Cross-device skip/fail fix, catalog-derived attributes, sprinkler run report (Decision 021)
+
+- **Context:** continued the device-pipeline work (smoke/NA calc repaired 2026-09-10). Three defects fixed
+  together; one honesty regression reverted. All static — the Revit runtime gate is unchanged (no host here).
+- **Actions Taken:**
+  - `FireAlarmDevicePlacementCore`: existing-device collection + skip/replace + duplicate guard are now
+    **kind-scoped** (`DeviceKindResolver.TryResolve` attributes every `OST_FireAlarmDevices` instance by
+    family/type name; only own-kind drives the policy; unclassifiable = never touched). Skip messages name
+    the kind. Root cause of "smoke→NA skipped / NA→smoke failed".
+  - Device core also gained: calc-level `ReviewRequired` no longer clobbered to "Success";
+    `OverallStatus="Cancelled"` + summary on rollback; outside-room coordinate guard (ported from the
+    sprinkler service).
+  - `DevicePlacementViewModelBase` + smoke/NA VMs + both views: DetectorType/Mount/CeilingSlope and
+    ApplianceType/Candela/dBA are **derived from the catalog row of the row's own family/type** and shown
+    read-only when derivable (new `DeriveAttribute` / `OnUniversalFamilyTypeChanged` hooks,
+    `Show*Picker` visibility); per-level attribute popover retired (`HasLevelSettings=false` hides the ⋯).
+  - New `SprinklerPlacementReportMapper` (UI) + `SprinklerBruteForceViewModel`: sprinkler runs open the
+    same `PlacementResultReportWindow`; report shows OverallStatus, provisional/rules line, skipped-room
+    issues; window now merges the theme dictionaries (was silently falling back to system grey).
+  - `DefaultHazardPlacementRules`: uncommitted `HasApprovedRules=true`/`IsProvisional=false` flip reverted
+    — **no FPE sign-off exists anywhere in the repo** (docs still list it as TODO P1). Spacing values kept;
+    only the approval claim fixed.
+  - `BruteForceCalculationService`: C-E grid-truncation guard — when the candidate sweep stops at
+    `MaxCandidatePoints` with points left over, the room flags ReviewRequired with a warning.
+  - Sprinkler S→S / Wall columns: cells now show the value the calculation actually used
+    (`AppliedMaxSpacingFt/Clearance` fed back from the eligibility pass), editable with range validation
+    (1–40 ft spacing, 0–10 ft wall space; blank = clear override); bulk apply + per-row reset re-run the
+    preflight so columns refresh.
+  - New tests: `FireProtection.Tests/DeviceReportAndKindTests.cs` (mapper verdicts, kind separation).
+- **Decisions:** [[DECISIONS]] 021. PROJECT_MEMORY §Update 2026-09-11.
+- **Verification:** BUILD 0 errors (Revit2025 + Revit2026) · TESTS all PASS · RUNTIME-UNVERIFIED.
+- **Open Questions / Blockers:** who signed off the NFPA-13 values (if anyone) — until an FPE confirms,
+  `HasApprovedRules` stays false; name-based kind attribution can mis-bucket oddly-named families.
+- **Handoff:** live Revit pass — (1) place smoke → place NA in same rooms with policy Skip: neither may
+  skip/delete the other; (2) confirm derived attributes follow per-row family changes into the calc;
+  (3) confirm the sprinkler report window renders themed + truthful on a real run.

@@ -16,7 +16,9 @@ namespace FireProtection.UI.ViewModels.NotificationAppliances
     ///
     /// Every option list here comes from the loaded Excel catalog (Decision 017) — nothing is hardcoded, and
     /// the Candela / dBA list is the set of combinations that actually exist in the workbook rather than a
-    /// cartesian product of two invented ranges. Placement backend is deferred (UI-first slice).
+    /// cartesian product of two invented ranges. Appliance type and the Candela/dBA pair are DERIVED from
+    /// the catalog row of the selected family/type and shown read-only when derivable; placement consumes
+    /// the derived values per room, following that row's own family/type.
     /// </summary>
     public class NotificationApplianceViewModel : DevicePlacementViewModelBase
     {
@@ -35,16 +37,31 @@ namespace FireProtection.UI.ViewModels.NotificationAppliances
         }
 
         public NotificationApplianceViewModel(FireProtectionUiData data, CatalogViewModel catalogViewModel)
-            : base(data, null, null, catalogViewModel)
+            : this(data, null, null, catalogViewModel)
+        {
+        }
+
+        public NotificationApplianceViewModel(
+            FireProtectionUiData data,
+            IDeviceFamilySource deviceFamilySource,
+            IDevicePlacementExecutor deviceExecutor,
+            CatalogViewModel catalogViewModel)
+            : base(data, deviceFamilySource, deviceExecutor, catalogViewModel)
         {
             SeedAttributeDefaultsFromCatalog();
 
             // The base ctor applied its default selection before the attributes above existed; re-apply
             // now that they are seeded, matching the sprinkler tab's "arrive ready to place" behaviour.
             ApplyDefaultSelection();
+
+            // Last statement: clear the base ctor's construction-time suppression and run the single
+            // initial eligibility preflight now that all defaults/attributes are seeded (no-op with no backend).
+            InitializeEligibility();
         }
 
         public override string DeviceDisplayName => "NOTIFICATION APPLIANCE CONFIGURATION";
+
+        protected override FireProtection.UI.Services.DeviceKind TabDeviceKind => FireProtection.UI.Services.DeviceKind.NotificationAppliance;
 
         // ---------------------------------------------------------------------------------------
         // Catalog-driven option lists (workbook only — no hardcoded fallback).
@@ -61,6 +78,97 @@ namespace FireProtection.UI.ViewModels.NotificationAppliances
 
         /// <summary>The Candela / dBA pairs that actually exist in the workbook, deduplicated.</summary>
         public IReadOnlyList<string> CandelaDbaOptions => BuildCandelaDbaOptions();
+
+        // ---------------------------------------------------------------------------------------
+        // Family/type-derived attributes. The catalog carries ApplianceType, Candela and dBA per
+        // (family, type) row, so with a catalog family/type selected these are READ-ONLY facts about
+        // the device, not user choices: the pickers are replaced by text, and placement uses the
+        // derived values ahead of any level default (per-room, following that row's own family/type).
+        // Candela and dBA are derived together (one catalog row) or not at all.
+        // ---------------------------------------------------------------------------------------
+
+        public string DerivedApplianceType => DeriveAttribute("ApplianceType", UniversalFamilyName, UniversalTypeName);
+        public string DerivedCandelaDba => DeriveAttribute("CandelaDba", UniversalFamilyName, UniversalTypeName);
+
+        /// <summary>Individual read-only displays for the Candela / dBA pairs (derived together or not at all).</summary>
+        public string DerivedCandela
+        {
+            get
+            {
+                NotificationApplianceCatalogEntry e = FindCatalogEntry(Catalog, UniversalFamilyName, UniversalTypeName);
+                return e == null ? null : e.Candela.ToString(CultureInfo.InvariantCulture);
+            }
+        }
+
+        public string DerivedNotificationDba
+        {
+            get
+            {
+                NotificationApplianceCatalogEntry e = FindCatalogEntry(Catalog, UniversalFamilyName, UniversalTypeName);
+                return e == null ? null : e.NotificationDba.ToString(CultureInfo.InvariantCulture);
+            }
+        }
+
+        public bool ShowApplianceTypePicker => string.IsNullOrWhiteSpace(DerivedApplianceType);
+        public bool ShowCandelaDbaPickers => string.IsNullOrWhiteSpace(DerivedCandelaDba);
+
+        private string UniversalFamilyName => SelectedDeviceFamily != null ? SelectedDeviceFamily.FamilyName : null;
+        private string UniversalTypeName => SelectedDeviceType != null ? SelectedDeviceType.TypeName : null;
+
+        protected override void OnUniversalFamilyTypeChanged()
+        {
+            RaiseDerivedAttributeNotifications();
+        }
+
+        protected override string DeriveAttribute(string key, string familyName, string typeName)
+        {
+            NotificationApplianceCatalogEntry entry = FindCatalogEntry(Catalog, familyName, typeName);
+            if (entry == null) return null;
+
+            switch (key)
+            {
+                case "ApplianceType": return entry.ApplianceType;
+                case "CandelaDba":
+                    // A row with no visible AND no audible rating carries no derivable information; leave
+                    // it undesired so the tab/level/row pickers stay functional.
+                    if (entry.Candela <= 0 && entry.NotificationDba <= 0) return null;
+                    return FormatCandelaDba(
+                        entry.Candela.ToString(CultureInfo.InvariantCulture),
+                        entry.NotificationDba.ToString(CultureInfo.InvariantCulture));
+                default: return null;
+            }
+        }
+
+        private static NotificationApplianceCatalogEntry FindCatalogEntry(ICatalog catalog, string familyName, string typeName)
+        {
+            if (catalog == null || string.IsNullOrWhiteSpace(familyName) || string.IsNullOrWhiteSpace(typeName))
+                return null;
+
+            IReadOnlyList<NotificationApplianceCatalogEntry> entries;
+            try
+            {
+                entries = catalog.GetNotificationAppliancesForFamily(familyName);
+            }
+            catch { return null; }
+
+            if (entries == null) return null;
+            foreach (NotificationApplianceCatalogEntry entry in entries)
+            {
+                if (entry != null && string.Equals(entry.TypeName, typeName, StringComparison.OrdinalIgnoreCase))
+                    return entry;
+            }
+            return null;
+        }
+
+        private void RaiseDerivedAttributeNotifications()
+        {
+            OnPropertyChanged(nameof(DerivedApplianceType));
+            OnPropertyChanged(nameof(DerivedCandelaDba));
+            OnPropertyChanged(nameof(DerivedCandela));
+            OnPropertyChanged(nameof(DerivedNotificationDba));
+            OnPropertyChanged(nameof(ShowApplianceTypePicker));
+            OnPropertyChanged(nameof(ShowCandelaDbaPickers));
+        }
 
         public string ApplianceType
         {
@@ -149,6 +257,7 @@ namespace FireProtection.UI.ViewModels.NotificationAppliances
             OnPropertyChanged(nameof(CandelaOptions));
             OnPropertyChanged(nameof(NotificationDbaOptions));
             OnPropertyChanged(nameof(CandelaDbaOptions));
+            RaiseDerivedAttributeNotifications();
         }
 
         private void SeedAttributeDefaultsFromCatalog()
@@ -225,25 +334,9 @@ namespace FireProtection.UI.ViewModels.NotificationAppliances
 
         private static readonly IReadOnlyList<string> Empty = new List<string>();
 
-        // ---------------------------------------------------------------------------------------
-        // Per-level settings popover (Decision 019).
-        // ---------------------------------------------------------------------------------------
-
-        public override void OpenLevelSettings(DeviceLevelItemViewModel level)
-        {
-            if (level == null) return;
-            // Dialogs.Owner is the tool window, the only window WPF will accept as an owner here.
-            LevelSettingsResult result = LevelSettingsPopover.Show(
-                Dialogs.Owner,
-                level.Name,
-                "Appliance type and a Candela / dBA combo apply to all rooms on this level. " +
-                "Rooms can override these per-row. Values come from the loaded catalog.",
-                "ApplianceType", "Appliance Type", level.ApplianceType, ApplianceTypeOptions,
-                "CandelaDba", "Candela / dBA", level.CandelaDba, CandelaDbaOptions,
-                null, null, null, null);
-            if (result == null) return;
-            if (result.Field1Key == "ApplianceType" && result.Field1Value != null) level.ApplianceType = result.Field1Value;
-            if (result.Field2Key == "CandelaDba" && !string.IsNullOrEmpty(result.Field2Value)) level.CandelaDba = result.Field2Value;
-        }
+        // Per-level attribute settings (Decision 019 popover) are retired for this tab: ApplianceType and
+        // the Candela / dBA pair are now derived from the catalog row of the selected (or per-row)
+        // family/type; when not derivable, the tab-wide pickers above are the fallback chain. The base's
+        // no-op OpenLevelSettings + HasLevelSettings=false hide the level "..." button.
     }
 }

@@ -37,6 +37,20 @@ namespace FireProtection.UI.Views
                 json, placementInputExporter, sprinklerFamilySource, sprinklerPlacementService, catalog);
         }
 
+        public MainWindow(
+            string json,
+            IPlacementInputExporter placementInputExporter,
+            ISprinklerFamilySource sprinklerFamilySource,
+            ISprinklerPlacementService sprinklerPlacementService,
+            CatalogViewModel catalog,
+            DevicePlacementSeams deviceSeams)
+        {
+            InitializeComponent();
+            FitToWorkArea();
+            DataContext = new MainWindowViewModel(
+                json, placementInputExporter, sprinklerFamilySource, sprinklerPlacementService, catalog, deviceSeams);
+        }
+
         /// <summary>
         /// Keeps the 1400x900 design size from overflowing a smaller screen (laptops, scaled displays):
         /// the window opens at most as large as the working area, and never below its MinWidth/MinHeight.

@@ -914,3 +914,69 @@ possible place to surface catalog errors.
   direction is "fail-fast and show a popup" (Q12 answer).
 - *Persist the catalog path across sessions* — rejected for v1: seniors said user selects each session
   (Q7); persistence adds a settings layer not in scope.
+
+---
+
+## Decision 021 — Device-kind-scoped existing-device policy + catalog-derived device attributes (2026-09-11)
+
+### Context
+Three defects found together while wiring the smoke / notification placement legs:
+1. **Cross-device skip/fail.** Smoke detectors and notification appliances both live in
+   `OST_FireAlarmDevices`. `FireAlarmDevicePlacementCore` collected *every* fire-alarm device as
+   "existing", so a smoke run treated a room holding notification appliances as "already has devices"
+   and skipped it (and `Replace` would DELETE the other kind's devices; the 0.25 ft duplicate guard
+   counted the other kind too).
+2. **Device attributes were user-owned.** Detector Type / Mount / Ceiling Slope and Appliance Type /
+   Candela / dBA were tab+level+row dropdowns, but the catalog already carries them *per
+   (family, type)* row — they are facts about the device, not choices.
+3. **Sprinklers bypassed the run report.** The BruteForce tab ended with a plain text dialog while
+   smoke/notification opened the new `PlacementResultReportWindow`.
+
+### Decision
+- **Kind-scoped existing devices.** `FireAlarmDevicePlacementCore` derives its own kind from the
+  input items (`DeviceRoomInputItem.DeviceKind`, stamped by each tab) and, in
+  `CollectExistingDevices`, attributes every found `FamilyInstance` to a kind via
+  `DeviceKindResolver.TryResolve(familyName, typeName)`. **Only own-kind devices** drive the
+  skip/replace policy and the duplicate guard. An *unclassifiable* name (no keyword) is never
+  own-kind — conservative: a run can never skip or delete a device it cannot positively identify.
+  Skip messages now name the kind ("Room already has N smoke detector(s) — other device kinds in
+  this room do not count").
+- **Catalog-derived attributes.** `DevicePlacementViewModelBase` gains `DeriveAttribute(key, family,
+  type)` (virtual, default null) and `OnUniversalFamilyTypeChanged()`; `BuildRoomInputItem` prefers
+  the value derived from **that row's own** family/type over the row-override/level-default chain.
+  `SmokeDetectorViewModel` / `NotificationApplianceViewModel` implement it against
+  `GetSmokeDetectorEntriesForFamily` / `GetNotificationAppliancesForFamily`. The XAML shows the
+  derived value as read-only text and only keeps a picker for a field the catalog cannot derive
+  (`Show*Picker` + `BoolToVis`/`InverseBoolToVis`). The per-level popover for these attributes is
+  retired (`OpenLevelSettings` → base virtual no-op, `HasLevelSettings` gates the ⋯ button off).
+- **Sprinkler run report.** New `SprinklerPlacementReportMapper` (UI, Revit-free) folds
+  `SprinklerPlacementResult` + `BruteForceCalculationResult` into the shared `PlacementRunReport`;
+  the BruteForce tab opens the same `PlacementResultReportWindow`. Verdicts follow device semantics
+  (Failed / ReviewRequired / Skipped / Success); duplicates, outside-room refusals and spatially
+  INVALID instances surface in the issue list; provisional rules force a ReviewRequired verdict.
+- **Honesty guards restored.** `DefaultHazardPlacementRules` had its uncommitted
+  `HasApprovedRules`/`IsProvisional` flipped to "approved" with no FPE sign-off on record anywhere in
+  the repo — reverted to `false`/`true` (the values are kept, only the *claim* is fixed; notes now
+  read "provisional … NOT yet AHJ/FPE-verified"). Device core: calc-level `ReviewRequired` is no
+  longer clobbered to "Success" when placements happen to be spatially valid; a cancelled run reports
+  `OverallStatus="Cancelled"` with a real summary instead of a zeroed "Success".
+- **Two missing placement guards ported** from the sprinkler service into the device core: the
+  outside-room coordinate-space guard (`OUTSIDE_ROOM_BOUNDARY`-equivalent refusal before creating an
+  element) and, sprinkler-side, a C-E grid-truncation warning (a room whose candidate sweep hits the
+  `MaxCandidatePoints` cap now flags ReviewRequired instead of silently leaving the rest of the room
+  unsampled).
+
+### Evidence
+- BUILD-VERIFIED: solution Revit2026 + Revit2025, 0 errors.
+- TEST-VERIFIED: `FireProtection.Tests` all green, incl. new `DeviceReportAndKindTests` (mapper
+  verdicts + smoke-vs-notification kind separation).
+- RUNTIME-UNVERIFIED as ever — no Revit host here. The kind attribution is *name-based* because
+  Revit's category cannot distinguish the two; the live test is "place smoke → place notification in
+  the same room → neither skips nor deletes the other".
+
+### Consequences
+- A mis-named family (no "smoke"/"strobe"/"horn"/… in family or type name) is invisible to the
+  policy: it will not trigger SkipRoom and will not be replaced. That is deliberate (never destroy
+  what you cannot identify); the message path still reports the room's outcome.
+- `DeviceKindResolver` is now load-bearing (was dead code); its `Resolve()` fallback-to-smoke remains
+  for diagnostics, `TryResolve` is the policy-safe entry point.

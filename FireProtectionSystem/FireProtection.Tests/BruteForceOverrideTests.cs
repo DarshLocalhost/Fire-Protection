@@ -95,20 +95,59 @@ namespace FireProtection.Tests
                 snapshot, new DefaultHazardPlacementRules(), BruteForceCalculationConfig.Default());
         }
 
+        private static double PointToSegment(double px, double py, double ax, double ay, double bx, double by)
+        {
+            double dx = bx - ax, dy = by - ay;
+            double len2 = dx * dx + dy * dy;
+            double t = len2 <= 0 ? 0.0 : ((px - ax) * dx + (py - ay) * dy) / len2;
+            if (t < 0) t = 0; else if (t > 1) t = 1;
+            double cx = ax + t * dx, cy = ay + t * dy;
+            double ex = px - cx, ey = py - cy;
+            return Math.Sqrt(ex * ex + ey * ey);
+        }
+
+        private static double MinWallDistance(List<double[]> poly, double px, double py)
+        {
+            double min = double.PositiveInfinity;
+            for (int i = 0; i < poly.Count; i++)
+            {
+                double[] a = poly[i];
+                double[] b = poly[(i + 1) % poly.Count];
+                double d = PointToSegment(px, py, a[0], a[1], b[0], b[1]);
+                if (d < min) min = d;
+            }
+            return min;
+        }
+
+        // Smallest wall distance across every placed head — the perimeter heads that hug the
+        // wall. A larger BoundaryClearanceFt must push this value up (heads shift inward).
+        private static double MinWallDistanceAcrossHeads(RoomCalculationResult room, List<double[]> poly)
+        {
+            double min = double.PositiveInfinity;
+            if (room.Points != null)
+            {
+                foreach (var p in room.Points)
+                {
+                    double d = MinWallDistance(poly, p.X, p.Y);
+                    if (d < min) min = d;
+                }
+            }
+            return min;
+        }
+
         private static void TestOverrideTighterMaxSpacingFlagsReview()
         {
-            Console.WriteLine("Test: tighter MaxSpacingFt override that cannot be satisfied flags ReviewRequired");
+            Console.WriteLine("Test: tighter MaxSpacingFt override drives a denser grid and flags ReviewRequired");
             List<double[]> poly = Rect(0, 0, 30, 20);
 
-            // Baseline uses 15 ft max spacing (placeholder). With 15 ft max the room needs ~12
-            // sprinklers, all comfortably within 15 ft of each other.
+            // Baseline uses the 15 ft placeholder max spacing -> a coarse centered grid.
             PlacementInputSnapshot baseline = new PlacementInputSnapshot();
             baseline.Rooms.Add(MakeRoom("R", poly));
             int baselineCount = Calc(baseline).Rooms[0].CalculatedCount;
 
-            // Tighter override (8 ft) cannot be satisfied by the coverage-driven greedy selection
-            // (which spreads sprinklers to cover the room). The room should be flagged
-            // ReviewRequired, and the count should not be artificially constrained.
+            // Tighter override (8 ft) drives a denser centered grid, so it places MORE heads
+            // than the 15 ft baseline. The room is flagged ReviewRequired (provisional rules),
+            // and the count must not fall below the baseline.
             PlacementInputSnapshot tighter = new PlacementInputSnapshot();
             tighter.Rooms.Add(MakeRoom("R", poly, maxSpacing: 8.0));
             BruteForceCalculationResult tighterResult = Calc(tighter);
@@ -116,29 +155,42 @@ namespace FireProtection.Tests
             CalculationStatus tighterStatus = tighterResult.Rooms[0].Status;
 
             Check(tighterStatus == CalculationStatus.ReviewRequired,
-                "tighter max-spacing override that cannot be satisfied by greedy selection flags ReviewRequired (got " + tighterStatus + ")");
+                "tighter max-spacing override flags ReviewRequired (got " + tighterStatus + ")");
             Check(tighterCount >= baselineCount,
-                "tighter override does not artificially reduce the coverage-driven count (baseline=" + baselineCount + ", tighter=" + tighterCount + ")");
+                "tighter override drives at least as many heads as the baseline (baseline=" + baselineCount + ", tighter=" + tighterCount + ")");
         }
 
         private static void TestOverrideBoundaryClearanceChangesCandidateSet()
         {
-            Console.WriteLine("Test: larger BoundaryClearanceFt override reduces valid candidates");
+            Console.WriteLine("Test: larger BoundaryClearanceFt override shifts heads inward");
             List<double[]> poly = Rect(0, 0, 30, 30);
 
             PlacementInputSnapshot baseline = new PlacementInputSnapshot();
             baseline.Rooms.Add(MakeRoom("R", poly));
-            int baselineCount = Calc(baseline).Rooms[0].CalculatedCount;
+            RoomCalculationResult baseRoom = Calc(baseline).Rooms[0];
+            double baseMinWall = MinWallDistanceAcrossHeads(baseRoom, poly);
 
+            // A 10 ft boundary clearance invalidates the natural near-wall grid targets, so the
+            // centered grid snaps every head inward onto candidates that clear the wall by 10 ft.
+            // The head count need not drop (unlike the old greedy assumption); what MUST change
+            // is that no head sits closer than ~10 ft to a wall, and the closest head is farther
+            // from the wall than under the 1 ft baseline.
             PlacementInputSnapshot widerBoundary = new PlacementInputSnapshot();
             widerBoundary.Rooms.Add(MakeRoom("R", poly, boundary: 10.0));
-            int widerCount = Calc(widerBoundary).Rooms[0].CalculatedCount;
+            RoomCalculationResult widerRoom = Calc(widerBoundary).Rooms[0];
+            int widerCount = widerRoom.CalculatedCount;
+            double widerMinWall = MinWallDistanceAcrossHeads(widerRoom, poly);
 
-            Check(widerCount < baselineCount,
-                "wider boundary clearance reduces sprinklers (baseline=" + baselineCount
-                + ", wider=10ft=" + widerCount + ")");
+            Check(widerCount > 0,
+                "wider boundary clearance still places heads by snapping inward (count=" + widerCount + ")");
+            Check(widerMinWall >= 10.0 - 0.1,
+                "every head under a 10 ft clearance override clears the wall by ~10 ft (min="
+                + widerMinWall.ToString("F2") + " ft)");
+            Check(widerMinWall > baseMinWall + 0.1,
+                "wider clearance pushes heads inward vs the 1 ft baseline (baseline min wall="
+                + baseMinWall.ToString("F2") + " ft, wider=" + widerMinWall.ToString("F2") + " ft)");
 
-            // 6x6 room with 5 ft boundary on every side -> nothing fits.
+            // 6x6 room with 5 ft boundary on every side -> nothing fits (no valid candidate at all).
             List<double[]> tiny = Rect(0, 0, 6, 6);
             PlacementInputSnapshot impossible = new PlacementInputSnapshot();
             impossible.Rooms.Add(MakeRoom("R", tiny, boundary: 5.0));

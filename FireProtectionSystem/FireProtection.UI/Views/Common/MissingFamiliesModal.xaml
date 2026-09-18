@@ -86,20 +86,27 @@
                 <ColumnDefinition Width="Auto"/>
                 <ColumnDefinition Width="8"/>
                 <ColumnDefinition Width="Auto"/>
+                <ColumnDefinition Width="8"/>
+                <ColumnDefinition Width="Auto"/>
             </Grid.ColumnDefinitions>
 
             <Button Grid.Column="1"
                     Style="{StaticResource OutlineButtonStyle}"
+                    Content="Load family..."
+                    Click="LoadFamilyButton_Click"
+                    Padding="14,6"/>
+                <Button Grid.Column="3"
+                    Style="{StaticResource OutlineButtonStyle}"
                     Content="Export missing list (CSV)"
                     Click="ExportCsvButton_Click"
                     Padding="14,6"/>
-            <Button Grid.Column="3"
+                <Button Grid.Column="5"
                     Style="{StaticResource OutlineButtonStyle}"
                     Content="Cancel"
                     Click="CancelButton_Click"
                     Padding="18,6"
                     IsCancel="True"/>
-            <Button Grid.Column="5"
+                <Button Grid.Column="7"
                     Style="{StaticResource PrimaryButtonStyle}"
                     Content="Proceed with available"
                     Click="ProceedButton_Click"

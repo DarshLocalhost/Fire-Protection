@@ -1,15 +1,8 @@
 using System;
 using Autodesk.Revit.DB;
-using Autodesk.Revit.DB.Structure;
 
 namespace FireProtection.Backend.Services.Placement.Sprinklers.Final.Strategies
 {
-    /// <summary>
-    /// FaceBased families (master prompt §13, §14). Requires a real host face (host ceiling, or a linked
-    /// ceiling via <see cref="Reference.CreateLinkReference"/>). If no valid host face exists the placement
-    /// FAILS with <see cref="PlacementStatusCodes.RequiredHostUnavailable"/> — a FaceBased family is never
-    /// forced onto a Level, and no apparently-successful-but-hostless instance is created (hard rule 8).
-    /// </summary>
     internal sealed class FaceBasedPlacementStrategy : IFamilyPlacementStrategy
     {
         public string Name => "FaceBased";
@@ -19,8 +12,17 @@ namespace FireProtection.Backend.Services.Placement.Sprinklers.Final.Strategies
 
         public PlacementOutcome Place(PlacementContext context)
         {
+            Document doc = context.Document;
+
+            // Ensure symbol is active before placement
+            if (!context.Symbol.IsActive)
+            {
+                context.Symbol.Activate();
+                doc.Regenerate();
+            }
+
             CeilingHostLookup host = context.CeilingHostResolver.FindCeilingHost(
-                context.Document, context.RequestedPoint, context.Level);
+                doc, context.RequestedPoint, context.Level);
 
             if (host.HostFace == null)
             {
@@ -36,12 +38,11 @@ namespace FireProtection.Backend.Services.Placement.Sprinklers.Final.Strategies
 
             try
             {
-                // Face-hosted placement. The point stays in HOST coordinates (hard rules 10, 11).
-                // referenceDirection must lie in the host face (perpendicular to its normal): a ceiling
-                // underside is horizontal, so BasisX is valid; (0,0,1) would be parallel to the vertical
-                // face normal and Revit would reject it (zero-length projection onto the face).
-                FamilyInstance instance = context.Document.Create.NewFamilyInstance(
-                    host.HostFace, context.RequestedPoint, XYZ.BasisX, context.Symbol);
+                // Dynamically compute reference direction to guarantee it lies in the host plane
+                XYZ refDir = ComputeInPlaneReferenceDirection(doc, host.HostFace);
+
+                FamilyInstance instance = doc.Create.NewFamilyInstance(
+                    host.HostFace, context.RequestedPoint, refDir, context.Symbol);
 
                 return PlacementOutcome.CreatedInstance(
                     instance, "FaceBasedHost", host.Source, host.LinkInstanceName, host.CeilingElementId);
@@ -56,6 +57,23 @@ namespace FireProtection.Backend.Services.Placement.Sprinklers.Final.Strategies
                     linkInstanceName: host.LinkInstanceName,
                     hostCeilingElementId: host.CeilingElementId);
             }
+        }
+
+        private static XYZ ComputeInPlaneReferenceDirection(Document doc, Reference faceRef)
+        {
+            try
+            {
+                GeometryObject geomObj = doc.GetElement(faceRef)?.GetGeometryObjectFromReference(faceRef);
+                if (geomObj is PlanarFace planarFace)
+                {
+                    XYZ normal = planarFace.FaceNormal;
+                    XYZ temp = Math.Abs(normal.DotProduct(XYZ.BasisZ)) < 0.8 ? XYZ.BasisZ : XYZ.BasisY;
+                    return normal.CrossProduct(temp).Normalize();
+                }
+            }
+            catch { }
+
+            return XYZ.BasisX; // Fallback
         }
     }
 }

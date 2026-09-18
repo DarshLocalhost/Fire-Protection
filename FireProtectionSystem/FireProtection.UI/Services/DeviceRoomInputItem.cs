@@ -33,9 +33,29 @@ namespace FireProtection.UI.Services
         public string SelectedFamilyName { get; set; }
         public string SelectedTypeName { get; set; }
 
+        /// <summary>Effective per-room device attributes (row override else level default), resolved by the UI
+        /// via <c>GetEffective(...)</c>. Null when the device kind does not expose that attribute — smoke
+        /// detectors use <see cref="DetectorType"/>/<see cref="Mount"/>/<see cref="CeilingSlope"/>, notification
+        /// appliances use <see cref="ApplianceType"/>/<see cref="CandelaDba"/>. The Backend calc engines read
+        /// these to select NFPA rules; a null attribute falls back to the engine default.</summary>
+        public string DetectorType { get; set; }
+        public string Mount { get; set; }
+        public string CeilingSlope { get; set; }
+        public string ApplianceType { get; set; }
+        public string CandelaDba { get; set; }
+
+        public DeviceKind DeviceKind { get; set; } = DeviceKind.SmokeDetector;
+
         public DeviceRoomInputItem()
         {
             Polygon = new List<double[]>();
         }
+    }
+
+    public enum DeviceKind
+    {
+        Sprinkler,
+        SmokeDetector,
+        NotificationAppliance
     }
 }

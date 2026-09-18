@@ -1239,26 +1239,82 @@ namespace FireProtection.Backend.Services.Placement.Sprinklers.Final
         {
             try
             {
-                ElementId levelId = instance?.LevelId;
+                if (instance == null || doc == null) return null;
+                ElementId levelId = GetActualLevelId(instance);
                 if (levelId == null || levelId == ElementId.InvalidElementId) return null;
-                return SafeName(doc?.GetElement(levelId));
+                return SafeName(doc.GetElement(levelId));
             }
             catch { return null; }
+        }
+        private static ElementId GetActualLevelId(FamilyInstance instance)
+        {
+            if (instance == null) return ElementId.InvalidElementId;
+
+            // 1. Try standard LevelId property
+            ElementId levelId = instance.LevelId;
+            if (levelId != null && levelId != ElementId.InvalidElementId)
+            {
+                return levelId;
+            }
+
+            // 2. Try "Reference Level" (Common for face-hosted and work-plane-hosted families)
+            Parameter refLevelParam = instance.get_Parameter(BuiltInParameter.INSTANCE_REFERENCE_LEVEL_PARAM);
+            if (refLevelParam != null && refLevelParam.StorageType == StorageType.ElementId)
+            {
+                ElementId id = refLevelParam.AsElementId();
+                if (id != null && id != ElementId.InvalidElementId) return id;
+            }
+
+            // 3. Try "Schedule Level"
+            Parameter scheduleLevelParam = instance.get_Parameter(BuiltInParameter.INSTANCE_SCHEDULE_ONLY_LEVEL_PARAM);
+            if (scheduleLevelParam != null && scheduleLevelParam.StorageType == StorageType.ElementId)
+            {
+                ElementId id = scheduleLevelParam.AsElementId();
+                if (id != null && id != ElementId.InvalidElementId) return id;
+            }
+
+            // 4. Try generic "Level" parameter
+            Parameter levelParam = instance.get_Parameter(BuiltInParameter.LEVEL_PARAM);
+            if (levelParam != null && levelParam.StorageType == StorageType.ElementId)
+            {
+                ElementId id = levelParam.AsElementId();
+                if (id != null && id != ElementId.InvalidElementId) return id;
+            }
+
+            // 5. Fallback: Check host element's level (e.g. if hosted on a ceiling or roof)
+            if (instance.Host != null)
+            {
+                ElementId hostLevelId = instance.Host.LevelId;
+                if (hostLevelId != null && hostLevelId != ElementId.InvalidElementId) return hostLevelId;
+
+                Parameter hostLevelParam = instance.Host.get_Parameter(BuiltInParameter.LEVEL_PARAM);
+                if (hostLevelParam != null && hostLevelParam.StorageType == StorageType.ElementId)
+                {
+                    ElementId id = hostLevelParam.AsElementId();
+                    if (id != null && id != ElementId.InvalidElementId) return id;
+                }
+            }
+
+            return ElementId.InvalidElementId;
         }
 
         private static string ReadActualScheduleLevelName(Document doc, FamilyInstance instance)
         {
             try
             {
-                if (instance == null) return null;
-                // The "Schedule Level" association drives which plan view shows the instance; for a
-                // face/work-plane-hosted family this is often the only level association present.
-                Parameter scheduleLevel = instance.get_Parameter(BuiltInParameter.INSTANCE_SCHEDULE_ONLY_LEVEL_PARAM);
-                if (scheduleLevel == null || scheduleLevel.StorageType != StorageType.ElementId) return null;
+                if (instance == null || doc == null) return null;
 
-                ElementId scheduleLevelId = scheduleLevel.AsElementId();
-                if (scheduleLevelId == null || scheduleLevelId == ElementId.InvalidElementId) return null;
-                return SafeName(doc?.GetElement(scheduleLevelId));
+                // Specifically look for the Schedule Level parameter
+                Parameter scheduleLevel = instance.get_Parameter(BuiltInParameter.INSTANCE_SCHEDULE_ONLY_LEVEL_PARAM);
+                if (scheduleLevel != null && scheduleLevel.StorageType == StorageType.ElementId)
+                {
+                    ElementId scheduleLevelId = scheduleLevel.AsElementId();
+                    if (scheduleLevelId != null && scheduleLevelId != ElementId.InvalidElementId)
+                    {
+                        return SafeName(doc.GetElement(scheduleLevelId));
+                    }
+                }
+                return null;
             }
             catch { return null; }
         }
@@ -1268,6 +1324,7 @@ namespace FireProtection.Backend.Services.Placement.Sprinklers.Final
             try { return element?.Name; }
             catch { return null; }
         }
+
     }
 
     /// <summary>

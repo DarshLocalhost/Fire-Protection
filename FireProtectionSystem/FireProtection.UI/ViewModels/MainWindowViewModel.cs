@@ -68,12 +68,25 @@ namespace FireProtection.UI.ViewModels
             ISprinklerFamilySource sprinklerFamilySource,
             ISprinklerPlacementService sprinklerPlacementService,
             CatalogViewModel catalog)
+            : this(data, placementInputExporter, sprinklerFamilySource, sprinklerPlacementService, catalog, null)
+        {
+        }
+
+        public MainWindowViewModel(
+            FireProtectionUiData data,
+            IPlacementInputExporter placementInputExporter,
+            ISprinklerFamilySource sprinklerFamilySource,
+            ISprinklerPlacementService sprinklerPlacementService,
+            CatalogViewModel catalog,
+            DevicePlacementSeams deviceSeams)
         {
             Data = data;
             Catalog = catalog ?? new CatalogViewModel();
             Sprinkler = new SprinklerViewModel(data, placementInputExporter, sprinklerFamilySource, sprinklerPlacementService, Catalog);
-            SmokeDetector = new SmokeDetectorViewModel(data, Catalog);
-            NotificationAppliance = new NotificationApplianceViewModel(data, Catalog);
+            SmokeDetector = new SmokeDetectorViewModel(
+                data, deviceSeams?.SmokeFamilySource, deviceSeams?.SmokeExecutor, Catalog);
+            NotificationAppliance = new NotificationApplianceViewModel(
+                data, deviceSeams?.NotificationFamilySource, deviceSeams?.NotificationExecutor, Catalog);
             _selectedTabViewModel = Sprinkler;
         }
 
@@ -83,14 +96,19 @@ namespace FireProtection.UI.ViewModels
             ISprinklerFamilySource sprinklerFamilySource,
             ISprinklerPlacementService sprinklerPlacementService,
             CatalogViewModel catalog)
+            : this(DeserializeData(json), placementInputExporter, sprinklerFamilySource, sprinklerPlacementService, catalog, null)
         {
-            FireProtectionUiData data = DeserializeData(json);
-            Data = data;
-            Catalog = catalog ?? new CatalogViewModel();
-            Sprinkler = new SprinklerViewModel(data, placementInputExporter, sprinklerFamilySource, sprinklerPlacementService, Catalog);
-            SmokeDetector = new SmokeDetectorViewModel(data, Catalog);
-            NotificationAppliance = new NotificationApplianceViewModel(data, Catalog);
-            _selectedTabViewModel = Sprinkler;
+        }
+
+        public MainWindowViewModel(
+            string json,
+            IPlacementInputExporter placementInputExporter,
+            ISprinklerFamilySource sprinklerFamilySource,
+            ISprinklerPlacementService sprinklerPlacementService,
+            CatalogViewModel catalog,
+            DevicePlacementSeams deviceSeams)
+            : this(DeserializeData(json), placementInputExporter, sprinklerFamilySource, sprinklerPlacementService, catalog, deviceSeams)
+        {
         }
 
         public MainWindowViewModel(

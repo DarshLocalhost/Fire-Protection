@@ -450,6 +450,9 @@ namespace FireProtection.UI.ViewModels.Sprinklers.BruteForce
                 {
                     OnPropertyChanged(nameof(IsSpacingOverridden));
                     OnPropertyChanged(nameof(MaxSpacingFtOverrideDisplay));
+                    // The cell shows the default when no override exists, so a re-seeded default must
+                    // repaint the cell too (unless the user is mid-keystroke).
+                    if (!_editingText) OnPropertyChanged(nameof(MaxSpacingInput));
                 }
             }
         }
@@ -463,6 +466,7 @@ namespace FireProtection.UI.ViewModels.Sprinklers.BruteForce
                 {
                     OnPropertyChanged(nameof(IsWallSpaceOverridden));
                     OnPropertyChanged(nameof(BoundaryClearanceFtOverrideDisplay));
+                    if (!_editingText) OnPropertyChanged(nameof(BoundaryClearanceInput));
                 }
             }
         }
@@ -527,9 +531,19 @@ namespace FireProtection.UI.ViewModels.Sprinklers.BruteForce
         private string _clearanceError;
         private bool _editingText;
 
+        // Sane engineering bounds (decimal feet) for the editable spacing cells. These are NOT NFPA
+        // values - the rule set + backend clamp still decide the real ceiling; they only stop an
+        // obviously-wrong keystroke (negative, huge, or a zero that erases the layout) at the cell.
+        private const double MaxSpacingMinFt = 1.0;
+        private const double MaxSpacingMaxFt = 40.0;
+        private const double ClearanceMinFt = 0.0;
+        private const double ClearanceMaxFt = 10.0;
+
         public string MaxSpacingInput
         {
-            get { return _maxSpacingText ?? FormatEditable(_maxSpacingFtOverride); }
+            // Shows the user's override; with no override, the real value the calculation used
+            // (seeded from the eligibility calc pass) so the cell never lies about what is active.
+            get { return _maxSpacingText ?? FormatEditable(_maxSpacingFtOverride ?? _defaultMaxSpacingFt); }
             set
             {
                 _maxSpacingText = value;
@@ -538,7 +552,7 @@ namespace FireProtection.UI.ViewModels.Sprinklers.BruteForce
                 {
                     double? feet;
                     string error;
-                    if (TryReadCell(value, out feet, out error)) MaxSpacingFtOverride = feet;
+                    if (TryReadCell(value, MaxSpacingMinFt, MaxSpacingMaxFt, "Spacing", out feet, out error)) MaxSpacingFtOverride = feet;
                     MaxSpacingError = error;
                 }
                 finally { _editingText = false; }
@@ -563,7 +577,7 @@ namespace FireProtection.UI.ViewModels.Sprinklers.BruteForce
 
         public string BoundaryClearanceInput
         {
-            get { return _clearanceText ?? FormatEditable(_boundaryClearanceFtOverride); }
+            get { return _clearanceText ?? FormatEditable(_boundaryClearanceFtOverride ?? _defaultBoundaryClearanceFt); }
             set
             {
                 _clearanceText = value;
@@ -572,7 +586,7 @@ namespace FireProtection.UI.ViewModels.Sprinklers.BruteForce
                 {
                     double? feet;
                     string error;
-                    if (TryReadCell(value, out feet, out error)) BoundaryClearanceFtOverride = feet;
+                    if (TryReadCell(value, ClearanceMinFt, ClearanceMaxFt, "Wall space", out feet, out error)) BoundaryClearanceFtOverride = feet;
                     BoundaryClearanceError = error;
                 }
                 finally { _editingText = false; }
@@ -618,8 +632,10 @@ namespace FireProtection.UI.ViewModels.Sprinklers.BruteForce
         }
 
         /// <summary>Blank (or the em-dash placeholder) clears the override; anything else must parse as a
-        /// positive length. Returns false when the text is unusable, in which case the model is left alone.</summary>
-        private static bool TryReadCell(string text, out double? feet, out string error)
+        /// length within the column's sane bounds. Returns false when the text is unusable, in which case
+        /// the model is left alone. The bounds are UI sanity checks only — the rule set's hazard ceiling
+        /// still clamps in the backend calculation.</summary>
+        private static bool TryReadCell(string text, double minFt, double maxFt, string fieldName, out double? feet, out string error)
         {
             feet = null;
             error = null;
@@ -627,8 +643,15 @@ namespace FireProtection.UI.ViewModels.Sprinklers.BruteForce
             if (string.IsNullOrWhiteSpace(text) || text.Trim() == "—") return true;
 
             double parsed;
-            if (UnitDisplay.TryParseToFeet(text, out parsed, out error)) { feet = parsed; return true; }
-            return false;
+            if (!UnitDisplay.TryParseToFeet(text, out parsed, out error)) return false;
+            if (parsed < minFt || parsed > maxFt)
+            {
+                error = fieldName + " must be between " + UnitDisplay.FromFeet(minFt).ToString("F1") + " and "
+                    + UnitDisplay.FromFeet(maxFt).ToString("F1") + " " + UnitDisplay.Suffix + ".";
+                return false;
+            }
+            feet = parsed;
+            return true;
         }
 
         private static string FormatEditable(double? feet)

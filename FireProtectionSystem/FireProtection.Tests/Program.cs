@@ -92,6 +92,18 @@ namespace FireProtection.Tests
             Console.WriteLine();
             Console.WriteLine("Test: SidewallPlacementTests");
             RunGuarded("SidewallPlacementTests", SidewallPlacementTests.RunAll);
+            Console.WriteLine();
+            Console.WriteLine("Test: NotificationApplianceRulesTests");
+            RunGuarded("NotificationApplianceRulesTests", NotificationApplianceRulesTests.RunAll);
+            Console.WriteLine();
+            Console.WriteLine("Test: SmokeDetectorCalculationTests");
+            RunGuarded("SmokeDetectorCalculationTests", SmokeDetectorCalculationTests.RunAll);
+            Console.WriteLine();
+            Console.WriteLine("Test: DeviceReportAndKindTests");
+            RunGuarded("DeviceReportAndKindTests", DeviceReportAndKindTests.RunAll);
+            Console.WriteLine();
+            Console.WriteLine("Test: CenteredGridPlacementTests");
+            RunGuarded("CenteredGridPlacementTests", CenteredGridPlacementTests.RunAll);
         }
 
         /// <summary>
@@ -424,57 +436,44 @@ namespace FireProtection.Tests
 
         private static void TestObstacleZAwareRejection()
         {
-            // The obstacle-rejection filter must check the obstacle's vertical extent
-            // against the placement plane Z. A beam that lives BELOW the ceiling must
-            // not block ceiling-sprinkler candidates whose XY footprint overlaps it; a
-            // duct that reaches the ceiling must still block.
+            // The obstacle-rejection filter must check the obstacle's vertical extent against
+            // the placement plane Z. A beam that lives BELOW the ceiling must not block a
+            // ceiling sprinkler whose XY footprint overlaps it; a duct that reaches the ceiling
+            // must block it. Asserted by POSITION (is a head allowed inside the obstacle
+            // footprint?), which is robust to how the centered grid snaps around a blocked
+            // cell — unlike a raw candidate count, which snapping can leave unchanged.
             //
-            //  - baseline: empty room produces a baseline valid-candidate count
-            //  - low beam  (MaxZ = 8 ft) sits below the 9 ft ceiling -> counts MATCH
-            //  - tall duct (MaxZ = 12 ft) reaches above the 9 ft ceiling -> counts drop
-            //  - legacy zero-Z box is treated as "unknown / block" (preserved behaviour)
+            //  - low beam  (MaxZ = 8 ft, below the 9 ft ceiling) -> a head MAY sit in the box
+            //  - tall duct (MaxZ = 12 ft, through the ceiling)   -> NO head inside the box
+            //  - legacy zero-Z box (unknown extent)              -> blocks, NO head inside
             Console.WriteLine("Test: obstacle Z-axis rejection (low beam vs tall duct)");
 
             List<double[]> roomPoly = Rect(0, 0, 20, 10);
+            // The centered grid's first-row targets land at (5,5) and (15,5); (5,5) is the
+            // cell that overlaps the obstacle footprint (4,4)-(6,6).
+            const double bx0 = 4, by0 = 4, bx1 = 6, by1 = 6;
 
-            // Baseline: no obstacles.
-            PlacementInputSnapshot baseline = Snapshot(MakeRoom("B", roomPoly,
-                ceilings: new List<CeilingData> { FlatCeiling(9.0) }, areaSqFt: 200));
-            int baselineValid = Calc(baseline).Rooms[0].CalculatedCount;
+            // Beam: Z = 0..8 ft, below the 9 ft ceiling. Must NOT block -> a head stays in the box.
+            List<ObstacleData> lowBeam = new List<ObstacleData> { BoxObstacle3D("Beam", bx0, by0, bx1, by1, 0.0, 8.0) };
+            RoomCalculationResult beamRoom = Calc(Snapshot(MakeRoom("LB", roomPoly,
+                ceilings: new List<CeilingData> { FlatCeiling(9.0) }, obstacles: lowBeam, areaSqFt: 200))).Rooms[0];
+            Check(beamRoom.Points.Any(p => p.X >= bx0 && p.X <= bx1 && p.Y >= by0 && p.Y <= by1),
+                "low beam (MaxZ=8 ft, below 9 ft ceiling) does NOT block the ceiling sprinkler over it");
 
-            // Beam: Z = 0..8 ft, well below the 9 ft ceiling. Should NOT block.
-            List<ObstacleData> lowBeam = new List<ObstacleData>
-            {
-                BoxObstacle3D("Beam", 4, 4, 6, 6, 0.0, 8.0)
-            };
-            PlacementInputSnapshot sBeam = Snapshot(MakeRoom("LB", roomPoly,
-                ceilings: new List<CeilingData> { FlatCeiling(9.0) }, obstacles: lowBeam, areaSqFt: 200));
-            int beamValid = Calc(sBeam).Rooms[0].CalculatedCount;
-            Check(beamValid == baselineValid,
-                "low beam (MaxZ=8 ft, below 9 ft ceiling) does not block ceiling-sprinkler candidates (baseline=" + baselineValid + ", beam=" + beamValid + ")");
+            // Duct: Z = 0..12 ft, reaches the ceiling. Must block -> no head inside the box.
+            List<ObstacleData> tallDuct = new List<ObstacleData> { BoxObstacle3D("Duct", bx0, by0, bx1, by1, 0.0, 12.0) };
+            RoomCalculationResult ductRoom = Calc(Snapshot(MakeRoom("TD", roomPoly,
+                ceilings: new List<CeilingData> { FlatCeiling(9.0) }, obstacles: tallDuct, areaSqFt: 200))).Rooms[0];
+            Check(ductRoom.Points.All(p => !(p.X >= bx0 && p.X <= bx1 && p.Y >= by0 && p.Y <= by1)),
+                "tall duct (MaxZ=12 ft, reaches ceiling) keeps every head out of its footprint (placed=" + ductRoom.CalculatedCount + ")");
 
-            // Duct: Z = 0..12 ft, reaches the ceiling. SHOULD block the same XY footprint.
-            List<ObstacleData> tallDuct = new List<ObstacleData>
-            {
-                BoxObstacle3D("Duct", 4, 4, 6, 6, 0.0, 12.0)
-            };
-            PlacementInputSnapshot sDuct = Snapshot(MakeRoom("TD", roomPoly,
-                ceilings: new List<CeilingData> { FlatCeiling(9.0) }, obstacles: tallDuct, areaSqFt: 200));
-            int ductValid = Calc(sDuct).Rooms[0].CalculatedCount;
-            Check(ductValid < baselineValid,
-                "tall duct (MaxZ=12 ft, reaches ceiling) blocks some candidates (baseline=" + baselineValid + ", duct=" + ductValid + ")");
-
-            // Legacy obstacle with collapsed Z (0,0) must STILL block, so existing
+            // Legacy obstacle with collapsed Z (0,0): unknown extent -> treat as blocking so
             // pipelines that never populated Z do not silently lose rejection.
-            List<ObstacleData> legacy = new List<ObstacleData>
-            {
-                BoxObstacle("Beam", 4, 4, 6, 6)
-            };
-            PlacementInputSnapshot sLegacy = Snapshot(MakeRoom("LG", roomPoly,
-                ceilings: new List<CeilingData> { FlatCeiling(9.0) }, obstacles: legacy, areaSqFt: 200));
-            int legacyValid = Calc(sLegacy).Rooms[0].CalculatedCount;
-            Check(legacyValid < baselineValid,
-                "legacy collapsed-Z obstacle (MinZ==MaxZ==0) still blocks (baseline=" + baselineValid + ", legacy=" + legacyValid + ")");
+            List<ObstacleData> legacy = new List<ObstacleData> { BoxObstacle("Beam", bx0, by0, bx1, by1) };
+            RoomCalculationResult legacyRoom = Calc(Snapshot(MakeRoom("LG", roomPoly,
+                ceilings: new List<CeilingData> { FlatCeiling(9.0) }, obstacles: legacy, areaSqFt: 200))).Rooms[0];
+            Check(legacyRoom.Points.All(p => !(p.X >= bx0 && p.X <= bx1 && p.Y >= by0 && p.Y <= by1)),
+                "legacy collapsed-Z obstacle (MinZ==MaxZ==0) keeps every head out of its footprint (placed=" + legacyRoom.CalculatedCount + ")");
         }
 
         private static int ExtractObstacleRejected(List<string> diagnostics)

@@ -453,3 +453,27 @@ Future sessions MUST:
 [[STANDARDS_MEMORY]] · [[DECISIONS]] · [[ARCHITECTURE_AUDIT]] · [[MIGRATION_PLAN]] · [[RISK_REGISTER]] ·
 [[STANDARDS_COMPLIANCE_MATRIX]] · [[PROGRESS]] · [[TODO]] · [[SESSION_NOTES]] ·
 [[SPRINKLER_POINT_CALCULATION_EXPLAINED]] · [[PROJECT_CONTEXT]] · [[ARCHITECTURE]]
+
+### Update 2026-09-11 — Device-kind-scoped existing-device policy, catalog-derived attributes, sprinkler run report (Decision 021)
+
+- **Cross-device skip/fail fix (static):** smoke + NA share `OST_FireAlarmDevices`, so
+  `FireAlarmDevicePlacementCore.CollectExistingDevices` now attributes every found instance to a kind via
+  `DeviceKindResolver.TryResolve(family, type)` and scopes the skip/replace policy + duplicate guard to the
+  run's own kind (from `DeviceRoomInputItem.DeviceKind`). Unclassifiable names are never own-kind (never
+  skipped/deleted). `DeviceKindResolver` went from dead code to load-bearing.
+- **Catalog-derived device attributes:** DetectorType/Mount/CeilingSlope + ApplianceType/CandelaDba are now
+  derived per-room from the catalog row of that room's family/type (`DeriveAttribute` hook on
+  `DevicePlacementViewModelBase`) and shown read-only; pickers only remain for non-derivable fields.
+  Per-level attribute popover retired (`OpenLevelSettings` no-op, `HasLevelSettings=false` hides ⋯).
+- **Sprinkler run report:** `SprinklerPlacementReportMapper` (UI, Revit-free) folds
+  `SprinklerPlacementResult` into `PlacementRunReport`; BruteForce opens the same
+  `PlacementResultReportWindow` as the device tabs. The window now merges the theme dictionaries (it is its
+  own visual root) and shows OverallStatus + the provisional/rules line; Skipped rooms join the issue list.
+- **Honesty guards:** an uncommitted `DefaultHazardPlacementRules` flip (`HasApprovedRules=true`,
+  `IsProvisional=false`, "NFPA 13 (2022) design basis") had **no FPE sign-off recorded anywhere** → reverted
+  to false/true (values kept, claim fixed). Device core: calc-level `ReviewRequired` no longer clobbered to
+  "Success"; cancelled runs report `Cancelled`. Ported the outside-room coordinate guard into the device
+  core and added a C-E grid-truncation `ReviewRequired` warning to the sprinkler calc.
+- **Verification:** BUILD-VERIFIED Revit2025+2026 (0 errors) · TEST-VERIFIED (all green, new
+  `DeviceReportAndKindTests`) · **RUNTIME-UNVERIFIED** (still no Revit host — kind attribution, derived
+  values feeding placement, and the report window all need the live check). Full text: DECISIONS.md 021.

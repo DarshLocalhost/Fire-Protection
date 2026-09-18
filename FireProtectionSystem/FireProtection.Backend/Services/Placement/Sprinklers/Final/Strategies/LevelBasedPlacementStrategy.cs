@@ -4,12 +4,6 @@ using Autodesk.Revit.DB.Structure;
 
 namespace FireProtection.Backend.Services.Placement.Sprinklers.Final.Strategies
 {
-    /// <summary>
-    /// OneLevelBased families (master prompt §13). These are genuinely level-hosted, so the level overload
-    /// <c>NewFamilyInstance(xyz, symbol, level, NonStructural)</c> is the CORRECT placement — it is used
-    /// here only because the family's proven <c>FamilyPlacementType</c> is OneLevelBased, never as a
-    /// fallback for a hosted family (hard rules 5, 6).
-    /// </summary>
     internal sealed class LevelBasedPlacementStrategy : IFamilyPlacementStrategy
     {
         public string Name => "LevelBased";
@@ -21,8 +15,26 @@ namespace FireProtection.Backend.Services.Placement.Sprinklers.Final.Strategies
         {
             try
             {
+                // Ensure symbol is active before placement
+                if (!context.Symbol.IsActive)
+                {
+                    context.Symbol.Activate();
+                    context.Document.Regenerate();
+                }
+
                 FamilyInstance instance = context.Document.Create.NewFamilyInstance(
                     context.RequestedPoint, context.Symbol, context.Level, StructuralType.NonStructural);
+
+                // Ensure the elevation parameter is explicitly aligned to the requested point elevation
+                Parameter elevationParam = instance.get_Parameter(BuiltInParameter.INSTANCE_ELEVATION_PARAM)
+                                        ?? instance.get_Parameter(BuiltInParameter.INSTANCE_FREE_HOST_OFFSET_PARAM);
+
+                if (elevationParam != null && !elevationParam.IsReadOnly)
+                {
+                    double levelElevation = context.Level?.Elevation ?? 0.0;
+                    double offsetFromLevel = context.RequestedPoint.Z - levelElevation;
+                    elevationParam.Set(offsetFromLevel);
+                }
 
                 return PlacementOutcome.CreatedInstance(instance, "LevelBased", "none");
             }

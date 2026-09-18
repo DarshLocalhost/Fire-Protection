@@ -24,5 +24,10 @@ namespace FireProtection.UI.Views.NotificationAppliances
         {
             InitializeComponent();
         }
+
+        private void DevicePlacementView_Loaded(object sender, RoutedEventArgs e)
+        {
+
+        }
     }
 }

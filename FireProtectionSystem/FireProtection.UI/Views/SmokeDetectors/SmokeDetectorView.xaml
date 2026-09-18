@@ -24,7 +24,9 @@
             <RowDefinition Height="*"/>
         </Grid.RowDefinitions>
 
-        <!-- Device-specific parameter card. Every list below is filled from the loaded Excel catalog. -->
+        <!-- Device-specific parameters. Detector Type, Mount and Ceiling Slope come from the catalog
+             row for the selected family/type, so they read as facts about the device (plain text);
+             each one only shows its editable picker when the catalog cannot derive it. -->
         <Border Grid.Row="0"
                 Background="{StaticResource SurfaceBrush}"
                 BorderBrush="{StaticResource BorderBrush}"
@@ -37,30 +39,53 @@
                     <RowDefinition Height="Auto"/>
                 </Grid.RowDefinitions>
 
-                <!-- One run of label/field pairs: each caption sits 10px from its own control, 36px
-                     separates one pair from the next. WrapPanel so a narrow window wraps whole pairs
-                     onto the next line instead of clipping the last combo. Fixed label columns used to
-                     strand the caption an inch away from the combo it belongs to. -->
                 <WrapPanel Grid.Row="0">
                     <StackPanel Orientation="Horizontal" Margin="0,0,36,6">
                         <TextBlock Text="Detector Type" Style="{StaticResource FieldLabel}"/>
                         <ComboBox Width="220" ItemsSource="{Binding DetectorTypeOptions}"
                                   SelectedItem="{Binding DetectorType, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}"
-                                  Style="{StaticResource StandardComboBoxStyle}"/>
+                                  Style="{StaticResource StandardComboBoxStyle}"
+                                  Visibility="{Binding ShowDetectorTypePicker, Converter={StaticResource BoolToVis}}"/>
+                        <TextBlock Text="{Binding DerivedDetectorType}"
+                                   Style="{StaticResource DataText}"
+                                   FontSize="12.5"
+                                   MinHeight="32"
+                                   VerticalAlignment="Center"
+                                   MinWidth="120"
+                                   Visibility="{Binding ShowDetectorTypePicker, Converter={StaticResource InverseBoolToVis}}"
+                                   ToolTip="From the catalog row for the selected family/type."/>
                     </StackPanel>
 
                     <StackPanel Orientation="Horizontal" Margin="0,0,36,6">
                         <TextBlock Text="Mount" Style="{StaticResource FieldLabel}"/>
                         <ComboBox Width="220" ItemsSource="{Binding CeilingMountOptions}"
                                   SelectedItem="{Binding CeilingMount, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}"
-                                  Style="{StaticResource StandardComboBoxStyle}"/>
+                                  Style="{StaticResource StandardComboBoxStyle}"
+                                  Visibility="{Binding ShowMountPicker, Converter={StaticResource BoolToVis}}"/>
+                        <TextBlock Text="{Binding DerivedMount}"
+                                   Style="{StaticResource DataText}"
+                                   FontSize="12.5"
+                                   MinHeight="32"
+                                   VerticalAlignment="Center"
+                                   MinWidth="120"
+                                   Visibility="{Binding ShowMountPicker, Converter={StaticResource InverseBoolToVis}}"
+                                   ToolTip="From the catalog row for the selected family/type."/>
                     </StackPanel>
 
                     <StackPanel Orientation="Horizontal" Margin="0,0,0,6">
                         <TextBlock Text="Ceiling Slope" Style="{StaticResource FieldLabel}"/>
                         <ComboBox Width="220" ItemsSource="{Binding CeilingSlopeOptions}"
                                   SelectedItem="{Binding CeilingSlope, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}"
-                                  Style="{StaticResource StandardComboBoxStyle}"/>
+                                  Style="{StaticResource StandardComboBoxStyle}"
+                                  Visibility="{Binding ShowCeilingSlopePicker, Converter={StaticResource BoolToVis}}"/>
+                        <TextBlock Text="{Binding DerivedCeilingSlope}"
+                                   Style="{StaticResource DataText}"
+                                   FontSize="12.5"
+                                   MinHeight="32"
+                                   VerticalAlignment="Center"
+                                   MinWidth="120"
+                                   Visibility="{Binding ShowCeilingSlopePicker, Converter={StaticResource InverseBoolToVis}}"
+                                   ToolTip="From the catalog row for the selected family/type."/>
                     </StackPanel>
                 </WrapPanel>
 

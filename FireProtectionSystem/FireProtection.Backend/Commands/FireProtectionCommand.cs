@@ -6,6 +6,8 @@ using FireProtection.Backend.Services;
 using FireProtection.Backend.Services.Catalog;
 using FireProtection.Backend.Services.Extraction;
 using FireProtection.Backend.Services.Placement;
+using FireProtection.Backend.Services.Placement.NotificationAppliances;
+using FireProtection.Backend.Services.Placement.SmokeDetectors;
 using FireProtection.Backend.Services.Placement.Sprinklers.Final;
 using FireProtection.UI.Services;
 using FireProtection.UI.ViewModels.Catalog;
@@ -95,6 +97,20 @@ namespace FireProtection.Backend.Commands
                 // source's resolver then sees the new catalog on its next call.
                 CatalogViewModel catalogViewModel = new CatalogViewModel(BuildCatalogFromPath, catalogHolder);
 
+                // Device seams: the Revit-aware family source + placement executor for each device tab. The
+                // smoke-detector sources read the CURRENT catalog lazily via the same holder as the sprinkler
+                // source, so a catalog (re)load after the window opens is picked up on the next call. The
+                // notification-appliance executor uses rating-aware NFPA 72 Chapter 18 planning rules
+                // keyed by appliance type, candela, dBA, mount, ceiling slope, obstacles, and duplicates;
+                // the result remains flagged for engineering review until the project design basis is approved.
+                DevicePlacementSeams deviceSeams = new DevicePlacementSeams
+                {
+                    SmokeFamilySource = new RevitSmokeDetectorFamilySource(hostDocument, () => catalogHolder.Current),
+                    SmokeExecutor = new RevitSmokeDetectorPlacementExecutor(hostDocument, () => catalogHolder.Current),
+                    NotificationFamilySource = new RevitNotificationApplianceFamilySource(hostDocument),
+                    NotificationExecutor = new RevitNotificationAppliancePlacementExecutor(hostDocument, () => catalogHolder.Current)
+                };
+
                 // Modeless + owned by Revit's main window: Revit stays fully usable while the tool is open.
                 UiLauncher.Show(
                     json,
@@ -102,7 +118,8 @@ namespace FireProtection.Backend.Commands
                     sprinklerFamilySource,
                     placementService,
                     catalogViewModel,
-                    uiApplication.MainWindowHandle);
+                    uiApplication.MainWindowHandle,
+                    deviceSeams);
 
                 return Result.Succeeded;
             }

@@ -1,0 +1,18 @@
+<Window x:Class="FireProtection.UI.Views.Common.PlacementResultReportWindow"
+        xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        Background="{DynamicResource BackgroundBrush}"
+        FontFamily="Segoe UI">
+    <!-- The window is its own visual root: it cannot see the dictionaries MainWindow merged, so the
+         BackgroundBrush above would silently fall back to the system grey. Merge the same two theme
+         dictionaries the inner view uses so the chrome matches the dark content. Reuses existing
+         brushes only - no palette change. -->
+    <Window.Resources>
+        <ResourceDictionary>
+            <ResourceDictionary.MergedDictionaries>
+                <ResourceDictionary Source="/FireProtection.UI;component/Themes/Colors.xaml"/>
+                <ResourceDictionary Source="/FireProtection.UI;component/Themes/Styles.xaml"/>
+            </ResourceDictionary.MergedDictionaries>
+        </ResourceDictionary>
+    </Window.Resources>
+</Window>

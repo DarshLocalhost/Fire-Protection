@@ -4,9 +4,11 @@ using FireProtection.Backend.Models.Hazard;
 namespace FireProtection.Backend.Services.Placement.Sprinklers.Final.BruteForce
 {
     /// <summary>
-    /// NFPA13-2022 compliant rule provider. Values are based on standard sprinkler spacing
-    /// requirements for different hazard classifications. Set HasApprovedRules to true when
-    /// values are confirmed by a qualified fire protection engineer.
+    /// Default hazard placement rule provider. The spacing values match commonly published NFPA 13
+    /// hazard tables, but they are NOT verified against the actual standard text or signed off by an
+    /// FPE — so HasApprovedRules stays false and every rule set is flagged IsProvisional until a
+    /// qualified fire protection engineer confirms the design basis (see STANDARDS_MEMORY.md).
+    /// Flip HasApprovedRules to true ONLY after that sign-off, with sourced values.
     /// </summary>
     public class DefaultHazardPlacementRules : IHazardPlacementRules
     {
@@ -37,7 +39,7 @@ namespace FireProtection.Backend.Services.Placement.Sprinklers.Final.BruteForce
                             { "duct", 1.5 }
                         },
                         IsProvisional = true,
-                        Notes = "NFPA13-2022 Light Hazard spacing (15 ft max, 225 sq ft max coverage). Engineering review required."
+                        Notes = "Provisional Light Hazard spacing (15 ft max, 225 sq ft max coverage). Values match NFPA 13 hazard tables but are NOT yet AHJ/FPE-verified — engineering review required."
                     };
 
                 case HazardClass.OH1:
@@ -61,7 +63,7 @@ namespace FireProtection.Backend.Services.Placement.Sprinklers.Final.BruteForce
                             { "duct", 1.5 }
                         },
                         IsProvisional = true,
-                        Notes = "NFPA13-2022 OH1 spacing (12 ft max, 130 sq ft max coverage). Engineering review required."
+                        Notes = "Provisional OH1 spacing (12 ft max, 130 sq ft max coverage). NOT yet AHJ/FPE-verified - engineering review required."
                     };
 
                 case HazardClass.OH2:
@@ -85,7 +87,7 @@ namespace FireProtection.Backend.Services.Placement.Sprinklers.Final.BruteForce
                             { "duct", 2.0 }
                         },
                         IsProvisional = true,
-                        Notes = "NFPA13-2022 OH2 spacing (12 ft max, 100 sq ft max coverage). Engineering review required."
+                        Notes = "Provisional OH2 spacing (12 ft max, 100 sq ft max coverage). NOT yet AHJ/FPE-verified - engineering review required."
                     };
 
                 case HazardClass.EH1:
@@ -109,7 +111,7 @@ namespace FireProtection.Backend.Services.Placement.Sprinklers.Final.BruteForce
                             { "duct", 2.5 }
                         },
                         IsProvisional = true,
-                        Notes = "NFPA13-2022 EH1 spacing (10 ft max, 90 sq ft max coverage). Engineering review required."
+                        Notes = "Provisional EH1 spacing (10 ft max, 90 sq ft max coverage). NOT yet AHJ/FPE-verified - engineering review required."
                     };
 
                 case HazardClass.EH2:
@@ -133,7 +135,7 @@ namespace FireProtection.Backend.Services.Placement.Sprinklers.Final.BruteForce
                             { "duct", 3.0 }
                         },
                         IsProvisional = true,
-                        Notes = "NFPA13-2022 EH2 spacing (10 ft max, 90 sq ft max coverage). Engineering review required."
+                        Notes = "Provisional EH2 spacing (10 ft max, 90 sq ft max coverage). NOT yet AHJ/FPE-verified - engineering review required."
                     };
 
                 default:
@@ -157,7 +159,7 @@ namespace FireProtection.Backend.Services.Placement.Sprinklers.Final.BruteForce
                             { "duct", 1.5 }
                         },
                         IsProvisional = true,
-                        Notes = "Default Light Hazard spacing applied. Engineering review required."
+                        Notes = "Default Light Hazard spacing applied (provisional). Engineering review required."
                     };
             }
         }

@@ -127,14 +127,14 @@ Optional columns left blank produce no issue at all — the value is only range-
 
 ## Template
 
-`CatalogTemplate.xlsx` is a checked-in starter: 39 sprinkler rows, 14 smoke-detector rows, 22
+`CatalogTemplate.xlsx` is a checked-in starter: 39 sprinkler rows, 9 smoke-detector rows, 5
 notification-appliance rows.
 
 Its `Sprinklers` sheet mirrors the 9 sprinkler families (39 types) loaded in the
 `02_FireProtection_Test.rvt` host model, so those strings are real. **The `SmokeDetectors` and
-`NotificationAppliances` `FamilyName` / `TypeName` strings are placeholders** — no Revit family
-listing was supplied for those two categories, so they will not resolve against a real model and
-must be replaced with the actual `Family.Name` / `FamilySymbol.Name` values before placement. Their
+`SmokeDetectors` and `NotificationAppliances` contain the family/type names observed in the target
+Revit model. If a selected row is not loaded in the active model, placement opens the missing-family
+loader before proceeding. Their
 *parameter* columns (`DetectorType`, `Mount`, `CeilingSlope`, `ApplianceType`, `Candela`,
 `NotificationDba`) are real, chosen to span the selectable ranges described above.
 

@@ -32,8 +32,6 @@
         </ResourceDictionary>
     </UserControl.Resources>
 
-    <!-- No top margin: the hosting device tab already puts its parameter card 16px in from the
-         edge and leaves a 12px gutter above this control, so the cards below line up with it. -->
     <Grid Margin="16,0,16,16">
         <Grid.RowDefinitions>
             <RowDefinition Height="Auto"/>
@@ -45,10 +43,7 @@
 
         <!-- ================= TOP: DEVICE CONFIGURATION ================= -->
         <Border Grid.Row="0"
-                Background="{StaticResource SurfaceBrush}"
-                BorderBrush="{StaticResource BorderBrush}"
-                BorderThickness="1"
-                CornerRadius="6">
+                Style="{StaticResource CardBorder}">
             <Grid Margin="18">
                 <Grid.RowDefinitions>
                     <RowDefinition Height="Auto"/>
@@ -62,9 +57,6 @@
                            FontWeight="SemiBold"
                            Foreground="{StaticResource TextPrimaryBrush}"/>
 
-                <!-- Label packed directly against its own control (10px), 36px between pairs, so a
-                     caption reads as belonging to the combo beside it. WrapPanel so the pairs wrap
-                     rather than clip when the window is narrow. -->
                 <WrapPanel Grid.Row="2">
                     <StackPanel Orientation="Horizontal" Margin="0,0,36,6">
                         <TextBlock Text="Device Family" Style="{StaticResource FieldLabel}"/>
@@ -91,8 +83,6 @@
         <!-- ================= MAIN CONTENT ================= -->
         <Grid Grid.Row="2">
             <Grid.ColumnDefinitions>
-                <!-- Proportional with a floor and a ceiling: the levels pane no longer eats a fixed 300px
-                     out of a narrow window, and never grows past 320px on a wide one. -->
                 <ColumnDefinition Width="0.28*" MinWidth="220" MaxWidth="320"/>
                 <ColumnDefinition Width="16"/>
                 <ColumnDefinition Width="*"/>
@@ -100,10 +90,7 @@
 
             <!-- ================= LEFT: LEVELS ================= -->
             <Border Grid.Row="0" Grid.Column="0"
-                    Background="{StaticResource SurfaceBrush}"
-                    BorderBrush="{StaticResource BorderBrush}"
-                    BorderThickness="1"
-                    CornerRadius="6">
+                    Style="{StaticResource CardBorder}">
 
                 <Grid Margin="14">
                     <Grid.RowDefinitions>
@@ -120,30 +107,31 @@
                             <ColumnDefinition Width="Auto"/>
                         </Grid.ColumnDefinitions>
 
-                        <TextBlock Text="Level Selection"
-                                   FontSize="15"
-                                   FontWeight="SemiBold"
-                                   Foreground="{StaticResource TextPrimaryBrush}"
-                                   VerticalAlignment="Center"/>
+                        <StackPanel Orientation="Horizontal">
+                            <Rectangle Width="3" Height="14"
+                                       Fill="{StaticResource BrassBrush}"
+                                       Margin="0,0,10,0"
+                                       VerticalAlignment="Center"/>
+                            <TextBlock Text="LEVELS"
+                                       Style="{StaticResource EyebrowText}"/>
+                        </StackPanel>
 
                         <Button Grid.Column="1"
                                 Style="{StaticResource OutlineButtonStyle}"
-                                Command="{Binding ToggleHideUnselectedLevelsCommand}">
-                            <StackPanel Orientation="Horizontal">
-                                <TextBlock Text="&#x1F441;" FontSize="12" Margin="0,0,6,0" VerticalAlignment="Center"/>
-                                <TextBlock VerticalAlignment="Center">
-                                    <TextBlock.Style>
-                                        <Style TargetType="TextBlock">
-                                            <Setter Property="Text" Value="Hide Unselected"/>
-                                            <Style.Triggers>
-                                                <DataTrigger Binding="{Binding HideUnselectedLevels}" Value="True">
-                                                    <Setter Property="Text" Value="Show All"/>
-                                                </DataTrigger>
-                                            </Style.Triggers>
-                                        </Style>
-                                    </TextBlock.Style>
-                                </TextBlock>
-                            </StackPanel>
+                                Command="{Binding ToggleHideUnselectedLevelsCommand}"
+                                Padding="10,5">
+                            <TextBlock FontSize="11.5" VerticalAlignment="Center">
+                                <TextBlock.Style>
+                                    <Style TargetType="TextBlock">
+                                        <Setter Property="Text" Value="Hide unselected"/>
+                                        <Style.Triggers>
+                                            <DataTrigger Binding="{Binding HideUnselectedLevels}" Value="True">
+                                                <Setter Property="Text" Value="Show all"/>
+                                            </DataTrigger>
+                                        </Style.Triggers>
+                                    </Style>
+                                </TextBlock.Style>
+                            </TextBlock>
                         </Button>
                     </Grid>
 
@@ -163,7 +151,7 @@
                         </Grid.ColumnDefinitions>
 
                         <CheckBox Grid.Column="0"
-                                  Content="Show levels with rooms only"
+                                  Content="Levels with rooms only"
                                   IsChecked="{Binding ShowLevelsWithRoomsOnly, Mode=TwoWay}"
                                   VerticalAlignment="Center"
                                   Foreground="{StaticResource TextSecondaryBrush}"
@@ -187,13 +175,13 @@
 
                         <ListBox.ItemTemplate>
                             <DataTemplate>
-                                <Grid Margin="12,10">
+                                <Grid Margin="12,9">
                                     <Grid.Style>
                                         <Style TargetType="Grid">
                                             <Setter Property="Opacity" Value="1"/>
                                             <Style.Triggers>
                                                 <DataTrigger Binding="{Binding HasRooms}" Value="False">
-                                                    <Setter Property="Opacity" Value="0.5"/>
+                                                    <Setter Property="Opacity" Value="0.45"/>
                                                     <Setter Property="ToolTip"
                                                             Value="This level has no rooms and cannot be selected for placement."/>
                                                 </DataTrigger>
@@ -216,13 +204,14 @@
 
                                     <StackPanel Grid.Column="1">
                                         <TextBlock Text="{Binding Name}"
-                                                   FontSize="14"
+                                                   FontSize="13"
                                                    FontWeight="SemiBold"
-                                                   Foreground="{StaticResource TextPrimaryBrush}"/>
-                                        <TextBlock FontSize="12"
-                                                   Foreground="{StaticResource TextSecondaryBrush}"
+                                                   Foreground="{StaticResource TextPrimaryBrush}"
+                                                   TextTrimming="CharacterEllipsis"/>
+                                        <TextBlock FontSize="11"
+                                                   Style="{StaticResource DataMuted}"
                                                    Margin="0,2,0,0">
-                                            <Run Text="Elev."/>
+                                            <Run Text="ELEV "/>
                                             <Run Text="{Binding ElevationFt,Mode=OneWay, StringFormat={}{0:F2} ft}"/>
                                         </TextBlock>
                                     </StackPanel>
@@ -232,46 +221,46 @@
                                             Content="&#x22EF;"
                                             Padding="6,2"
                                             Margin="0,0,8,0"
-                                            ToolTip="Level settings (declarative metadata only)"
+                                            ToolTip="Level settings"
                                             Click="LevelSettingsButton_Click"
                                             Tag="{Binding}"
                                             Visibility="{Binding DataContext.HasLevelSettings, RelativeSource={RelativeSource AncestorType=UserControl}, Converter={StaticResource BoolToVis}}"
                                             VerticalAlignment="Center"/>
 
-                                    <TextBlock Grid.Column="3"
-                                               VerticalAlignment="Center"
-                                               FontSize="13"
-                                               FontWeight="SemiBold"
-                                               Foreground="{StaticResource TextSecondaryBrush}">
-                                        <Run Text="{Binding SelectedRoomCount, Mode=OneWay}"/>
-                                        <Run Text="/"/>
-                                        <Run Text="{Binding TotalRoomCount, Mode=OneWay}"/>
-                                    </TextBlock>
+                                    <Border Grid.Column="3"
+                                            VerticalAlignment="Center"
+                                            Background="{StaticResource BackgroundOverlayBrush}"
+                                            CornerRadius="3"
+                                            Padding="7,3">
+                                        <TextBlock FontSize="11.5"
+                                                   Style="{StaticResource DataMuted}">
+                                            <Run Text="{Binding SelectedRoomCount, Mode=OneWay}"/>
+                                            <Run Text="/"/>
+                                            <Run Text="{Binding TotalRoomCount, Mode=OneWay}"/>
+                                        </TextBlock>
+                                    </Border>
                                 </Grid>
                             </DataTemplate>
                         </ListBox.ItemTemplate>
                     </ListBox>
 
                     <Border Grid.Row="4"
-                            BorderBrush="{StaticResource BorderBrush}"
+                            BorderBrush="{StaticResource DividerBrush}"
                             BorderThickness="0,1,0,0"
                             Padding="0,10,0,0"
                             Margin="0,10,0,0">
                         <TextBlock Text="{Binding SelectedLevelSummary}"
-                                   FontSize="12"
-                                   Foreground="{StaticResource TextSecondaryBrush}"/>
+                                   FontSize="11.5"
+                                   Style="{StaticResource DataMuted}"/>
                     </Border>
                 </Grid>
             </Border>
 
             <!-- ================= RIGHT: ROOMS ================= -->
             <Border Grid.Row="0" Grid.Column="2"
-                    Background="{StaticResource SurfaceBrush}"
-                    BorderBrush="{StaticResource BorderBrush}"
-                    BorderThickness="1"
-                    CornerRadius="6">
+                    Style="{StaticResource CardBorder}">
 
-                <Grid Margin="18">
+                <Grid Margin="18,14">
                     <Grid.RowDefinitions>
                         <RowDefinition Height="Auto"/>
                         <RowDefinition Height="Auto"/>
@@ -289,54 +278,64 @@
 
                         <StackPanel Grid.Column="0" VerticalAlignment="Center">
                             <TextBlock Text="{Binding RoomsHeader}"
-                                       FontSize="18"
+                                       FontSize="17"
                                        FontWeight="SemiBold"
                                        Foreground="{StaticResource TextPrimaryBrush}"/>
                             <TextBlock Text="{Binding RoomsFoundText}"
-                                       FontSize="12"
-                                       Foreground="{StaticResource TextSecondaryBrush}"
-                                       Margin="0,4,0,0"/>
+                                       FontSize="11.5"
+                                       Style="{StaticResource DataMuted}"
+                                       Margin="0,3,0,0"/>
                         </StackPanel>
 
                         <ctrl:SearchBox Grid.Column="1"
-                                        Width="320" Margin="12,0"
+                                        Width="300" Margin="12,0"
                                         Text="{Binding RoomSearchText, UpdateSourceTrigger=PropertyChanged}"
                                         Placeholder="Search rooms by name or number..."/>
 
                         <Button Grid.Column="2"
                                 Style="{StaticResource OutlineButtonStyle}"
-                                Command="{Binding ToggleHideUnselectedRoomsCommand}">
-                            <StackPanel Orientation="Horizontal">
-                                <TextBlock Text="&#x1F441;" FontSize="12" Margin="0,0,6,0" VerticalAlignment="Center"/>
-                                <TextBlock VerticalAlignment="Center">
-                                    <TextBlock.Style>
-                                        <Style TargetType="TextBlock">
-                                            <Setter Property="Text" Value="Hide Unselected"/>
-                                            <Style.Triggers>
-                                                <DataTrigger Binding="{Binding HideUnselectedRooms}" Value="True">
-                                                    <Setter Property="Text" Value="Show All"/>
-                                                </DataTrigger>
-                                            </Style.Triggers>
-                                        </Style>
-                                    </TextBlock.Style>
-                                </TextBlock>
-                            </StackPanel>
+                                Command="{Binding ToggleHideUnselectedRoomsCommand}"
+                                Padding="10,5">
+                            <TextBlock FontSize="11.5" VerticalAlignment="Center">
+                                <TextBlock.Style>
+                                    <Style TargetType="TextBlock">
+                                        <Setter Property="Text" Value="Hide unselected"/>
+                                        <Style.Triggers>
+                                            <DataTrigger Binding="{Binding HideUnselectedRooms}" Value="True">
+                                                <Setter Property="Text" Value="Show all"/>
+                                            </DataTrigger>
+                                        </Style.Triggers>
+                                    </Style>
+                                </TextBlock.Style>
+                            </TextBlock>
                         </Button>
                     </Grid>
 
                     <StackPanel Grid.Row="1" Margin="0,12,0,0">
-                        <Button Style="{StaticResource OutlineButtonStyle}"
-                                Content="{Binding RoomSelectionToggleLabel}"
-                                Command="{Binding ToggleSelectAllRoomsCommand}"
-                                HorizontalAlignment="Right"/>
+                        <Grid>
+                            <Grid.ColumnDefinitions>
+                                <ColumnDefinition Width="Auto"/>
+                                <ColumnDefinition Width="*"/>
+                            </Grid.ColumnDefinitions>
 
-                        <!-- Bulk edit (item 8, list 2) + re-run policy (item 3, list 2). WrapPanel so a narrow
-                             window wraps rather than clips. Both act on the rooms that are selected. -->
+                            <CheckBox Grid.Column="0"
+                                      Content="Eligible rooms only"
+                                      IsChecked="{Binding ShowEligibleRoomsOnly, Mode=TwoWay}"
+                                      VerticalAlignment="Center"
+                                      Foreground="{StaticResource TextSecondaryBrush}"
+                                      FontSize="12"
+                                      Margin="0,0,16,0"/>
+
+                            <Button Grid.Column="1"
+                                    Style="{StaticResource OutlineButtonStyle}"
+                                    Content="{Binding RoomSelectionToggleLabel}"
+                                    Command="{Binding ToggleSelectAllRoomsCommand}"
+                                    HorizontalAlignment="Right"/>
+                        </Grid>
+
                         <WrapPanel Margin="0,10,0,0" Orientation="Horizontal">
-                            <TextBlock Text="If room already has devices"
-                                       FontSize="12"
-                                       FontWeight="SemiBold"
-                                       Foreground="{StaticResource TextSecondaryBrush}"
+                            <TextBlock Text="IF ROOM ALREADY HAS DEVICES"
+                                       Style="{StaticResource EyebrowText}"
                                        VerticalAlignment="Center"
                                        Margin="0,0,8,6"/>
                             <ComboBox Width="210"
@@ -360,48 +359,40 @@
                                     ToolTip="Resets Family/Type on every selected room back to the tab selection."/>
 
                             <TextBlock Text="{Binding BulkTargetSummary}"
-                                       FontSize="12"
-                                       Foreground="{StaticResource TextSecondaryBrush}"
+                                       Style="{StaticResource DataMuted}"
+                                       FontSize="11.5"
                                        VerticalAlignment="Center"
                                        Margin="0,0,0,6"/>
                         </WrapPanel>
                     </StackPanel>
 
+                    <!-- ROOM TABLE HEADER (Status Column Removed) -->
                     <Border Grid.Row="2"
-                            BorderBrush="{StaticResource BorderBrush}"
+                            Background="{StaticResource BackgroundOverlayBrush}"
+                            BorderBrush="{StaticResource DividerBrush}"
                             BorderThickness="0,1,0,1"
-                            Padding="0,10"
-                            Margin="0,12,0,0">
+                            Padding="10,7"
+                            Margin="0,12,0,0"
+                            CornerRadius="3">
                         <Grid>
-                            <!-- Column widths and per-column margins are duplicated verbatim in the row
-                                 DataTemplate below; the two must be edited together or the header stops
-                                 lining up with its values. Numeric columns are centred so they sit clear
-                                 of the Family / Type combos instead of crowding them. The last column here
-                                 is a scrollbar reserve: the list's scrollbar takes that width out of the
-                                 rows but not out of this header, so without it every column drifts. -->
                             <Grid.ColumnDefinitions>
                                 <ColumnDefinition Width="36"/>
-                                <ColumnDefinition Width="2.2*"/>
-                                <ColumnDefinition Width="1.0*"/>
-                                <ColumnDefinition Width="1.0*"/>
                                 <ColumnDefinition Width="2.4*"/>
+                                <ColumnDefinition Width="1.0*"/>
+                                <ColumnDefinition Width="1.0*"/>
+                                <ColumnDefinition Width="2.2*"/>
                                 <ColumnDefinition Width="17"/>
                             </Grid.ColumnDefinitions>
 
                             <CheckBox Grid.Column="0" IsEnabled="False" VerticalAlignment="Center"/>
-                            <TextBlock Grid.Column="1" Text="Room Name" Margin="0,0,16,0" VerticalAlignment="Center" FontSize="12" FontWeight="SemiBold" Foreground="{StaticResource TextSecondaryBrush}"/>
-                            <TextBlock Grid.Column="2" Text="{Binding AreaColumnHeader}" Margin="0,0,16,0" VerticalAlignment="Center" TextAlignment="Center" FontSize="12" FontWeight="SemiBold" Foreground="{StaticResource TextSecondaryBrush}"/>
-                            <TextBlock Grid.Column="3" Text="{Binding CeilingColumnHeader}" Margin="0,0,20,0" VerticalAlignment="Center" TextAlignment="Center" FontSize="12" FontWeight="SemiBold" Foreground="{StaticResource TextSecondaryBrush}"/>
-                            <!-- 7 = the combo's own left padding, so this header lines up with the text
-                                 inside the combo below rather than with its border. -->
-                            <TextBlock Grid.Column="4" Text="Family / Type" Margin="7,0,4,0" VerticalAlignment="Center" FontSize="12" FontWeight="SemiBold" Foreground="{StaticResource TextSecondaryBrush}"/>
+                            <TextBlock Grid.Column="1" Text="ROOM NAME" Margin="0,0,12,0" Style="{StaticResource EyebrowText}"/>
+                            <TextBlock Grid.Column="2" Text="{Binding AreaColumnHeader}" Margin="0,0,12,0" TextAlignment="Center" Style="{StaticResource EyebrowTextRight}"/>
+                            <TextBlock Grid.Column="3" Text="{Binding CeilingColumnHeader}" Margin="0,0,12,0" TextAlignment="Center" Style="{StaticResource EyebrowTextRight}"/>
+                            <TextBlock Grid.Column="4" Text="FAMILY / TYPE" Margin="7,0,4,0" Style="{StaticResource EyebrowText}"/>
                         </Grid>
                     </Border>
 
-                    <!-- Virtualized room list (item 1). An ItemsControl inside a ScrollViewer measures with
-                         infinite height and realizes EVERY row; giving the ItemsControl its own template with
-                         the ScrollViewer inside it plus a recycling VirtualizingStackPanel realizes only the
-                         visible rows. Checkbox state lives on the ViewModel, so scrolling never loses a tick. -->
+                    <!-- VIRTUALIZED ROOM ROWS -->
                     <ItemsControl Grid.Row="3"
                                   ItemsSource="{Binding RoomsView}"
                                   VirtualizingPanel.IsVirtualizing="True"
@@ -424,83 +415,117 @@
                             </ItemsPanelTemplate>
                         </ItemsControl.ItemsPanel>
                         <ItemsControl.ItemTemplate>
-                                <DataTemplate>
-                                    <Border BorderBrush="{StaticResource BorderBrush}"
-                                            BorderThickness="0,0,0,1"
-                                            Padding="0,12">
-                                        <!-- MinHeight keeps every row the same height, so the columns read
-                                             as straight vertical lines down the list. -->
-                                        <Grid MinHeight="44">
-                                            <!-- Must stay identical to the header Grid above, minus its
-                                                 trailing scrollbar-reserve column (the scrollbar already
-                                                 takes that width out of this grid). -->
-                                            <Grid.ColumnDefinitions>
-                                                <ColumnDefinition Width="36"/>
-                                                <ColumnDefinition Width="2.2*"/>
-                                                <ColumnDefinition Width="1.0*"/>
-                                                <ColumnDefinition Width="1.0*"/>
-                                                <ColumnDefinition Width="2.4*"/>
-                                            </Grid.ColumnDefinitions>
+                            <DataTemplate>
+                                <Border BorderBrush="{StaticResource DividerBrush}"
+                                        BorderThickness="0,0,0,1"
+                                        Padding="10,10">
+                                    <Border.Style>
+                                        <Style TargetType="Border">
+                                            <Style.Triggers>
+                                                <DataTrigger Binding="{Binding IsEligible}" Value="False">
+                                                    <Setter Property="Opacity" Value="0.5"/>
+                                                </DataTrigger>
+                                                <DataTrigger Binding="{Binding IsUndetermined}" Value="True">
+                                                    <Setter Property="BorderBrush" Value="{StaticResource UndeterminedBrush}"/>
+                                                    <Setter Property="BorderThickness" Value="3,0,0,1"/>
+                                                    <Setter Property="Padding" Value="7,10,10,10"/>
+                                                </DataTrigger>
+                                                <DataTrigger Binding="{Binding IsBlocked}" Value="True">
+                                                    <Setter Property="BorderBrush" Value="{StaticResource BlockedBrush}"/>
+                                                    <Setter Property="BorderThickness" Value="3,0,0,1"/>
+                                                    <Setter Property="Padding" Value="7,10,10,10"/>
+                                                </DataTrigger>
+                                            </Style.Triggers>
+                                        </Style>
+                                    </Border.Style>
+                                    <Grid MinHeight="44">
+                                        <Grid.ColumnDefinitions>
+                                            <ColumnDefinition Width="36"/>
+                                            <ColumnDefinition Width="2.4*"/>
+                                            <ColumnDefinition Width="1.0*"/>
+                                            <ColumnDefinition Width="1.0*"/>
+                                            <ColumnDefinition Width="2.2*"/>
+                                        </Grid.ColumnDefinitions>
 
-                                            <CheckBox Grid.Column="0"
-                                                      IsChecked="{Binding IsSelected, Mode=TwoWay}"
-                                                      VerticalAlignment="Center"/>
+                                        <!-- Disabled CheckBox when room is ineligible -->
+                                        <CheckBox Grid.Column="0"
+                                                  IsChecked="{Binding IsSelected, Mode=TwoWay}"
+                                                  IsEnabled="{Binding IsEligible}"
+                                                  VerticalAlignment="Center"
+                                                  ToolTip="{Binding EligibilityReason}"/>
 
-                                            <TextBlock Grid.Column="1"
-                                                       Text="{Binding Name}"
-                                                       Margin="0,0,16,0"
+                                        <StackPanel Grid.Column="1" VerticalAlignment="Center" Margin="0,0,12,0">
+                                            <TextBlock Text="{Binding Name}"
                                                        FontSize="13"
                                                        FontWeight="SemiBold"
                                                        Foreground="{StaticResource TextPrimaryBrush}"
                                                        TextTrimming="CharacterEllipsis"
-                                                       VerticalAlignment="Center"
                                                        ToolTip="{Binding Name}"/>
+                                            <!-- Short reason sub-line: displayed directly beneath the room name -->
+                                            <TextBlock FontSize="10.5"
+                                                       Margin="0,3,0,0"
+                                                       TextTrimming="CharacterEllipsis"
+                                                       ToolTip="{Binding EligibilityReason}">
+                                                <TextBlock.Style>
+                                                    <Style TargetType="TextBlock" BasedOn="{StaticResource DataMuted}">
+                                                        <Setter Property="Visibility" Value="Collapsed"/>
+                                                        <Style.Triggers>
+                                                            <DataTrigger Binding="{Binding IsEligible}" Value="False">
+                                                                <Setter Property="Visibility" Value="Visible"/>
+                                                            </DataTrigger>
+                                                            <DataTrigger Binding="{Binding IsBlocked}" Value="True">
+                                                                <Setter Property="Foreground" Value="{StaticResource BlockedOnDarkBrush}"/>
+                                                            </DataTrigger>
+                                                            <DataTrigger Binding="{Binding IsUndetermined}" Value="True">
+                                                                <Setter Property="Foreground" Value="{StaticResource UndeterminedOnDarkBrush}"/>
+                                                            </DataTrigger>
+                                                        </Style.Triggers>
+                                                    </Style>
+                                                </TextBlock.Style>
+                                                <Run Text="{Binding EligibilityState, Mode=OneWay}"
+                                                     FontWeight="Bold"/>
+                                                <Run Text=" &#x2014; "/>
+                                                <Run Text="{Binding EligibilityShortReason, Mode=OneWay}"/>
+                                            </TextBlock>
+                                        </StackPanel>
 
-                                            <TextBlock Grid.Column="2"
-                                                       Text="{Binding AreaSqFt, StringFormat={}{0:N2}}"
-                                                       Margin="0,0,16,0"
-                                                       FontSize="13"
-                                                       TextAlignment="Center"
-                                                       Foreground="{StaticResource TextPrimaryBrush}"
-                                                       VerticalAlignment="Center"/>
+                                        <TextBlock Grid.Column="2"
+                                                   Text="{Binding AreaSqFt, StringFormat={}{0:N1}}"
+                                                   Margin="0,0,12,0"
+                                                   TextAlignment="Center"
+                                                   Style="{StaticResource DataNumeric}"/>
 
-                                            <TextBlock Grid.Column="3"
-                                                       Text="{Binding CeilingHeightFt, StringFormat={}{0:F2}}"
-                                                       Margin="0,0,20,0"
-                                                       FontSize="13"
-                                                       TextAlignment="Center"
-                                                       Foreground="{StaticResource TextPrimaryBrush}"
-                                                       VerticalAlignment="Center"/>
+                                        <TextBlock Grid.Column="3"
+                                                   Text="{Binding CeilingHeightFt, StringFormat={}{0:F2}}"
+                                                   Margin="0,0,12,0"
+                                                   TextAlignment="Center"
+                                                   Style="{StaticResource DataNumeric}"/>
 
-                                            <!-- Per-row Family / Type override (item 5 + 7). The tab's
-                                                 universal selection is this row's default; changing it here
-                                                 overrides only this room. The Type list follows this row's
-                                                 own Family via DeviceRoomItemViewModel's types resolver. -->
-                                            <StackPanel Grid.Column="4" VerticalAlignment="Center" Margin="0,0,4,0">
-                                                <ComboBox Style="{StaticResource CellComboBoxStyle}"
-                                                          ItemsSource="{Binding AvailableFamilies}"
-                                                          SelectedItem="{Binding SelectedFamily, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}"
-                                                          ToolTip="Device family for this room. Defaults to the tab selection above."/>
-                                                <ComboBox Style="{StaticResource CellComboBoxStyle}"
-                                                          Margin="0,4,0,0"
-                                                          ItemsSource="{Binding AvailableTypes}"
-                                                          SelectedItem="{Binding SelectedType, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}"
-                                                          ToolTip="Device type for this room. The list follows this row's family."/>
-                                            </StackPanel>
-                                        </Grid>
-                                    </Border>
-                                </DataTemplate>
-                            </ItemsControl.ItemTemplate>
-                        </ItemsControl>
+                                        <StackPanel Grid.Column="4" VerticalAlignment="Center" Margin="0,0,4,0">
+                                            <ComboBox Style="{StaticResource CellComboBoxStyle}"
+                                                      ItemsSource="{Binding AvailableFamilies}"
+                                                      SelectedItem="{Binding SelectedFamily, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}"
+                                                      ToolTip="Device family for this room. Defaults to the tab selection above."/>
+                                            <ComboBox Style="{StaticResource CellComboBoxStyle}"
+                                                      Margin="0,4,0,0"
+                                                      ItemsSource="{Binding AvailableTypes}"
+                                                      SelectedItem="{Binding SelectedType, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}"
+                                                      ToolTip="Device type for this room. The list follows this row's family."/>
+                                        </StackPanel>
+                                    </Grid>
+                                </Border>
+                            </DataTemplate>
+                        </ItemsControl.ItemTemplate>
+                    </ItemsControl>
 
                     <Border Grid.Row="4"
-                            BorderBrush="{StaticResource BorderBrush}"
+                            BorderBrush="{StaticResource DividerBrush}"
                             BorderThickness="0,1,0,0"
                             Padding="0,10,0,0"
                             Margin="0,10,0,0">
                         <TextBlock Text="{Binding RoomsSelectedSummary}"
-                                   FontSize="12"
-                                   Foreground="{StaticResource TextSecondaryBrush}"/>
+                                   FontSize="11.5"
+                                   Style="{StaticResource DataMuted}"/>
                     </Border>
                 </Grid>
             </Border>
@@ -508,10 +533,7 @@
 
         <!-- ================= RUN LOG ================= -->
         <Border Grid.Row="3"
-                Background="{StaticResource SurfaceBrush}"
-                BorderBrush="{StaticResource BorderBrush}"
-                BorderThickness="1"
-                CornerRadius="6"
+                Style="{StaticResource CardBorder}"
                 Margin="0,12,0,0"
                 Visibility="{Binding IsRunLogVisible, Converter={StaticResource BoolToVis}}">
             <Grid Margin="12">
@@ -573,22 +595,20 @@
 
             <ctrl:InfoBanner Grid.Column="0">
                 <StackPanel>
-                    <TextBlock FontSize="12"
-                               Foreground="{StaticResource AccentBrush}"
+                    <TextBlock FontSize="11.5"
+                               Style="{StaticResource DataMuted}"
                                Text="{Binding CatalogStatusMessage}"/>
-                    <TextBlock FontSize="12"
-                               Foreground="{StaticResource AccentBrush}"
+                    <TextBlock FontSize="11.5"
+                               Style="{StaticResource DataMuted}"
                                Margin="0,2,0,0"
                                Text="{Binding PlacementStatusMessage}"/>
                 </StackPanel>
             </ctrl:InfoBanner>
 
-            <!-- Progress + cancel (item 3). Plumbed through IDevicePlacementExecutor so it works the moment
-                 the device backend lands; with the placeholder executor there is nothing to report. -->
             <TextBlock Grid.Column="1"
                        Text="{Binding PlacementProgressText}"
-                       FontSize="12"
-                       Foreground="{StaticResource TextSecondaryBrush}"
+                       Style="{StaticResource DataMuted}"
+                       FontSize="11.5"
                        MaxWidth="260"
                        TextTrimming="CharacterEllipsis"
                        VerticalAlignment="Center"
@@ -599,7 +619,7 @@
                     Style="{StaticResource OutlineButtonStyle}"
                     Command="{Binding CancelPlacementCommand}"
                     Content="Cancel"
-                    Padding="14,10"
+                    Padding="14,9"
                     Margin="10,0,0,0"
                     Visibility="{Binding CanCancelPlacement, Converter={StaticResource BoolToVis}}"/>
 
@@ -617,7 +637,7 @@
                     Style="{StaticResource OutlineButtonStyle}"
                     Command="{Binding ResetCommand}"
                     Margin="10,0,0,0"
-                    Padding="18,10">
+                    Padding="18,9">
                 <StackPanel Orientation="Horizontal">
                     <TextBlock Text="&#x21BB;" FontSize="13" Margin="0,0,8,0" VerticalAlignment="Center"/>
                     <TextBlock Text="Reset" VerticalAlignment="Center"/>

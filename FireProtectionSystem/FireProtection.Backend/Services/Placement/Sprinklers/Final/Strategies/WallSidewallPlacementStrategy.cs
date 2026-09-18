@@ -1,24 +1,19 @@
 using System;
 using System.Collections.Generic;
 using Autodesk.Revit.DB;
+using Autodesk.Revit.DB.Structure;
 
 namespace FireProtection.Backend.Services.Placement.Sprinklers.Final.Strategies
 {
     /// <summary>
-    /// Wall-hosted sidewall placement. Walls often live in an architectural link.
-    /// NewFamilyInstance on a CreateLinkReference wall face is runtime-proven to snap
-    /// WorkPlaneBased sprinklers to (0,0,0) while reporting the link instance as Host
-    /// (see placement_result JSON 2026-09-08). Correct path: host-space wall plane +
-    /// SketchPlane (same discipline as WorkPlaneBased ceiling fallback). Face-host is
-    /// attempted first only when post-create location stays near the request.
+    /// Professional Wall-Hosted / Sidewall Placement Strategy.
+    /// Strictly anchors devices to the room's boundary edge line (segment A->B) and ensures
+    /// correct Level association and positive elevation offsets.
     /// </summary>
     internal sealed class WallSidewallPlacementStrategy : IFamilyPlacementStrategy
     {
         public string Name => "WallSidewall";
 
-        // Only claim WallSidewall as a FamilyPlacementType string. Service already
-        // routes by point.WallEdgeIndex; claiming FaceBased/WorkPlaneBased here steals
-        // ceiling families if order ever changes.
         public bool CanHandle(string familyPlacementType) =>
             string.Equals(familyPlacementType, "WallSidewall", StringComparison.OrdinalIgnoreCase);
 
@@ -63,27 +58,8 @@ namespace FireProtection.Backend.Services.Placement.Sprinklers.Final.Strategies
             }
             edgeDir = edgeDir.Normalize();
 
-            // Inward horizontal direction (from edge midpoint toward room centroid) — used to pick the room-facing face.
+            // Inward horizontal unit vector pointing into the room interior
             XYZ roomInward2D = ComputeRoomInwardHorizontal(polygon, midPt2D);
-
-            WallFaceHost host = FindWallFaceHost(doc, midPt2D, edgeDir, xyz, roomInward2D);
-            if (host == null || host.HostPlane == null)
-            {
-                return PlacementOutcome.Fail(
-                    PlacementStatusCodes.PlacementFailed,
-                    $"No wall found near edge {edgeIdx} (midpoint [{midPt2D.X:F2}, {midPt2D.Y:F2}]). " +
-                    "Ensure the room boundary corresponds to wall elements in the host or a loaded link.");
-            }
-
-            // Placement location must lie on the host plane (candidates are ~0.5 ft inboard of the face).
-            XYZ pointOnFace = ProjectPointOntoPlane(xyz, host.HostPlane);
-            XYZ refDir = edgeDir;
-            // referenceDirection must lie in the plane (perpendicular to normal).
-            XYZ n = host.HostPlane.Normal;
-            refDir = (refDir - n.Multiply(refDir.DotProduct(n)));
-            if (refDir.GetLength() < 1e-9)
-                refDir = n.CrossProduct(Math.Abs(n.DotProduct(XYZ.BasisZ)) < 0.9 ? XYZ.BasisZ : XYZ.BasisX);
-            refDir = refDir.Normalize();
 
             if (!context.Symbol.IsActive)
             {
@@ -91,81 +67,113 @@ namespace FireProtection.Backend.Services.Placement.Sprinklers.Final.Strategies
                 doc.Regenerate();
             }
 
-            string linkName = host.LinkInstance != null
-                ? (host.LinkInstance.Name ?? host.LinkInstance.Id.ToString())
-                : null;
-            string ceilingSourceTag = host.LinkInstance != null
-                ? ("link-wall-edge-" + edgeIdx)
-                : ("wall-edge-" + edgeIdx);
+            // Tight 1.5 ft search along the specific edge segment A->B
+            WallFaceHost host = FindWallFaceHostForEdge(doc, a, b, edgeDir, xyz, roomInward2D);
 
-            // --- Attempt 1: face reference (host or CreateLinkReference). Keep only if location is sane. ---
-            if (host.FaceReference != null)
+            Plane wallPlane = host?.HostPlane;
+            Reference faceRef = host?.FaceReference;
+            string linkName = host?.LinkInstance != null ? (host.LinkInstance.Name ?? host.LinkInstance.Id.ToString()) : null;
+            string wallElemId = host?.WallElementId ?? ("wall-edge-" + edgeIdx);
+            string ceilingSourceTag = host?.LinkInstance != null ? ("link-wall-edge-" + edgeIdx) : ("wall-edge-" + edgeIdx);
+
+            // Precision Fallback: Construct plane directly on room boundary line A->B
+            if (wallPlane == null)
+            {
+                XYZ wallNormal = new XYZ(-edgeDir.Y, edgeDir.X, 0);
+                if (wallNormal.DotProduct(roomInward2D) < 0) wallNormal = wallNormal.Negate();
+                XYZ edgePoint3D = new XYZ(midPt2D.X, midPt2D.Y, xyz.Z);
+                wallPlane = Plane.CreateByNormalAndOrigin(wallNormal, edgePoint3D);
+            }
+
+            XYZ pointOnWall = ProjectPointOntoPlane(xyz, wallPlane);
+
+            // --- Attempt 1: Physical Face Reference (FaceBased wall families) ---
+            if (faceRef != null)
             {
                 FamilyInstance faceInst = null;
                 try
                 {
-                    faceInst = doc.Create.NewFamilyInstance(
-                        host.FaceReference, pointOnFace, refDir, context.Symbol);
+                    faceInst = doc.Create.NewFamilyInstance(faceRef, pointOnWall, XYZ.BasisZ, context.Symbol);
+
+                    // FIX: Enforce level AND offset BEFORE checking spatial sanity
+                    LevelAssociation.EnforceAndVerify(doc, faceInst, context.Level, xyz.Z);
 
                     if (IsSpatiallySane(faceInst, xyz, maxDeviationFt: 2.0))
                     {
                         return PlacementOutcome.CreatedInstance(
-                            faceInst, "WallSidewallFace", ceilingSourceTag, linkName, host.WallElementId);
+                            faceInst, "WallSidewallFace", ceilingSourceTag, linkName, wallElemId);
                     }
 
-                    // Origin-snap / bad bind: delete and fall through to SketchPlane.
-                    try { doc.Delete(faceInst.Id); } catch { /* best-effort */ }
+                    try { doc.Delete(faceInst.Id); } catch { }
                 }
                 catch
                 {
-                    if (faceInst != null)
-                    {
-                        try { doc.Delete(faceInst.Id); } catch { }
-                    }
+                    if (faceInst != null) { try { doc.Delete(faceInst.Id); } catch { } }
                 }
             }
 
-            // --- Attempt 2: SketchPlane on the wall plane in HOST coordinates (WorkPlaneBased-safe). ---
+            // --- Attempt 2: Level-Hosted Family Placement (OneLevelBased wall-strobe families) ---
             try
             {
-                // Plane through the projected point with the wall normal (host space).
-                Plane plane = Plane.CreateByNormalAndOrigin(host.HostPlane.Normal, pointOnFace);
+                FamilyInstance lvlInst = doc.Create.NewFamilyInstance(
+                    pointOnWall, context.Symbol, context.Level, StructuralType.NonStructural);
+
+                // FIX: Enforce level AND offset BEFORE checking spatial sanity
+                LevelAssociation.EnforceAndVerify(doc, lvlInst, context.Level, xyz.Z);
+                OrientTowardRoomInterior(doc, lvlInst, pointOnWall, roomInward2D);
+
+                if (IsSpatiallySane(lvlInst, xyz, maxDeviationFt: 2.0))
+                {
+                    return PlacementOutcome.CreatedInstance(
+                        lvlInst, "WallSidewallLevelHosted", ceilingSourceTag, linkName, wallElemId);
+                }
+
+                try { doc.Delete(lvlInst.Id); } catch { }
+            }
+            catch { }
+
+            // --- Attempt 3: SketchPlane Work-Plane Fallback ---
+            try
+            {
+                Plane plane = Plane.CreateByNormalAndOrigin(wallPlane.Normal, pointOnWall);
                 SketchPlane sketchPlane = SketchPlane.Create(doc, plane);
 
                 FamilyInstance instance = doc.Create.NewFamilyInstance(
-                    sketchPlane.GetPlaneReference(), pointOnFace, refDir, context.Symbol);
+                    sketchPlane.GetPlaneReference(), pointOnWall, edgeDir, context.Symbol);
 
-                if (!IsSpatiallySane(instance, xyz, maxDeviationFt: 2.0))
+                // FIX: Enforce level AND offset BEFORE checking spatial sanity
+                LevelAssociation.EnforceAndVerify(doc, instance, context.Level, xyz.Z);
+
+                if (IsSpatiallySane(instance, xyz, maxDeviationFt: 2.0))
                 {
-                    try { doc.Delete(instance.Id); } catch { }
-                    return PlacementOutcome.Fail(
-                        PlacementStatusCodes.RevitCreationFailed,
-                        "WallSidewall SketchPlane placement produced a spatially invalid instance " +
-                        "(e.g. origin snap). Refused rather than keeping a mis-hosted element.",
-                        hostingStrategy: "WallSidewallSketchPlane",
-                        ceilingSource: ceilingSourceTag,
-                        linkInstanceName: linkName,
-                        hostCeilingElementId: host.WallElementId);
+                    return PlacementOutcome.CreatedInstance(
+                        instance, "WallSidewallSketchPlane", ceilingSourceTag, linkName, wallElemId);
                 }
 
-                return PlacementOutcome.CreatedInstance(
-                    instance, "WallSidewallSketchPlane", ceilingSourceTag, linkName, host.WallElementId);
+                try { doc.Delete(instance.Id); } catch { }
             }
-            catch (Exception ex)
-            {
-                return PlacementOutcome.Fail(
-                    PlacementStatusCodes.PlacementFailed,
-                    "WallSidewall placement failed on face and SketchPlane: " + ex.Message,
-                    hostingStrategy: "WallSidewallSketchPlane",
-                    ceilingSource: ceilingSourceTag,
-                    linkInstanceName: linkName,
-                    hostCeilingElementId: host.WallElementId);
-            }
+            catch { }
+
+            return PlacementOutcome.Fail(
+                PlacementStatusCodes.PlacementFailed,
+                $"Wall placement failed near edge {edgeIdx}.",
+                hostingStrategy: "WallSidewall",
+                ceilingSource: ceilingSourceTag,
+                linkInstanceName: linkName,
+                hostCeilingElementId: wallElemId);
         }
 
-        // -------------------------------------------------------------------------------------------------
-        // Spatial sanity (catches the historic (0,0,0) bind without waiting for the service summary)
-        // -------------------------------------------------------------------------------------------------
+        private static void OrientTowardRoomInterior(Document doc, FamilyInstance instance, XYZ origin, XYZ roomInward2D)
+        {
+            if (instance == null || roomInward2D == null) return;
+            try
+            {
+                Line axis = Line.CreateBound(origin, new XYZ(origin.X, origin.Y, origin.Z + 1.0));
+                double angle = XYZ.BasisX.AngleOnPlaneTo(roomInward2D, XYZ.BasisZ);
+                ElementTransformUtils.RotateElement(doc, instance.Id, axis, angle);
+            }
+            catch { }
+        }
 
         private static bool IsSpatiallySane(FamilyInstance instance, XYZ requested, double maxDeviationFt)
         {
@@ -173,9 +181,12 @@ namespace FireProtection.Backend.Services.Placement.Sprinklers.Final.Strategies
             LocationPoint lp = instance.Location as LocationPoint;
             if (lp == null || lp.Point == null) return false;
             XYZ p = lp.Point;
-            // Explicit origin-snap guard (any near-origin placement when request is far away).
+
+            // Reject origin (0,0,0) snaps
             if (p.GetLength() < 0.5 && requested.GetLength() > 2.0) return false;
-            return p.DistanceTo(requested) <= maxDeviationFt;
+
+            double xyDev = Math.Sqrt(Math.Pow(p.X - requested.X, 2) + Math.Pow(p.Y - requested.Y, 2));
+            return xyDev <= maxDeviationFt;
         }
 
         private static XYZ ProjectPointOntoPlane(XYZ p, Plane plane)
@@ -201,25 +212,22 @@ namespace FireProtection.Backend.Services.Placement.Sprinklers.Final.Strategies
             return inward.GetLength() > 1e-9 ? inward.Normalize() : XYZ.BasisX;
         }
 
-        // -------------------------------------------------------------------------------------------------
-        // Wall discovery (host + links)
-        // -------------------------------------------------------------------------------------------------
-
         private sealed class WallFaceHost
         {
-            public Reference FaceReference;   // may be null if only plane is available
-            public Plane HostPlane;           // always in HOST coordinates
+            public Reference FaceReference;
+            public Plane HostPlane;
             public RevitLinkInstance LinkInstance;
             public string WallElementId;
         }
 
-        private static WallFaceHost FindWallFaceHost(
-            Document doc, XYZ midPt2D, XYZ edgeDir, XYZ requestedPoint, XYZ roomInward2D)
+        private static WallFaceHost FindWallFaceHostForEdge(
+            Document doc, double[] pA, double[] pB, XYZ edgeDir, XYZ requestedPoint, XYZ roomInward2D)
         {
-            double maxDistFt = 6.0;
-            double minDot = 0.707; // 45°
+            XYZ midPt2D = new XYZ((pA[0] + pB[0]) * 0.5, (pA[1] + pB[1]) * 0.5, 0);
+            double tightSearchMaxDistFt = 1.5;
+            double minDot = 0.707;
 
-            WallFaceHost best = FindWallInDoc(doc, null, midPt2D, edgeDir, requestedPoint, roomInward2D, maxDistFt, minDot);
+            WallFaceHost best = FindWallInDoc(doc, null, midPt2D, edgeDir, requestedPoint, roomInward2D, tightSearchMaxDistFt, minDot);
             if (best != null) return best;
 
             foreach (Element e in new FilteredElementCollector(doc).OfClass(typeof(RevitLinkInstance)))
@@ -235,7 +243,7 @@ namespace FireProtection.Backend.Services.Placement.Sprinklers.Final.Strategies
                 XYZ inwardLink = toLink.OfVector(roomInward2D);
                 if (inwardLink.GetLength() > 1e-9) inwardLink = inwardLink.Normalize();
 
-                WallFaceHost hit = FindWallInDoc(linkDoc, link, midLink, dirLink, reqLink, inwardLink, maxDistFt, minDot);
+                WallFaceHost hit = FindWallInDoc(linkDoc, link, midLink, dirLink, reqLink, inwardLink, tightSearchMaxDistFt, minDot);
                 if (hit != null) return hit;
             }
 
@@ -277,8 +285,9 @@ namespace FireProtection.Backend.Services.Placement.Sprinklers.Final.Strategies
                 double perp = Math.Sqrt(
                     (midPt2D.X - closest.X) * (midPt2D.X - closest.X) +
                     (midPt2D.Y - closest.Y) * (midPt2D.Y - closest.Y));
+
                 if (perp > maxDistFt) continue;
-                if (proj < -3.0 || proj > len + 3.0) continue;
+                if (proj < -1.5 || proj > len + 1.5) continue;
 
                 if (perp < bestDist)
                 {
@@ -301,7 +310,6 @@ namespace FireProtection.Backend.Services.Placement.Sprinklers.Final.Strategies
         {
             Transform toHost = linkInstance != null ? linkInstance.GetTotalTransform() : Transform.Identity;
 
-            // Prefer planar vertical face whose normal points toward the room (inward).
             Options opt = new Options { ComputeReferences = true, DetailLevel = ViewDetailLevel.Fine };
             GeometryElement geom = wall.get_Geometry(opt);
 
@@ -320,15 +328,13 @@ namespace FireProtection.Backend.Services.Placement.Sprinklers.Final.Strategies
                         {
                             PlanarFace pf = face as PlanarFace;
                             if (pf == null) continue;
-                            if (Math.Abs(pf.FaceNormal.Z) > 0.3) continue; // need vertical-ish
+                            if (Math.Abs(pf.FaceNormal.Z) > 0.3) continue;
 
-                            // Normal in this document; score by alignment with room inward.
                             double towardRoom = pf.FaceNormal.DotProduct(
                                 new XYZ(roomInward2DInThisDoc.X, roomInward2DInThisDoc.Y, 0));
 
                             IntersectionResult ir = pf.Project(requestedPointInThisDoc);
                             double dist = ir != null ? Math.Abs(ir.Distance) : 999.0;
-                            // Prefer faces that face the room and are close to the point.
                             double score = towardRoom * 10.0 - dist;
                             if (score > bestScore && pf.Reference != null)
                             {
@@ -341,7 +347,6 @@ namespace FireProtection.Backend.Services.Placement.Sprinklers.Final.Strategies
                 }
             }
 
-            // Fallback: HostObjectUtils side faces if geometry walk found nothing.
             if (bestFace == null)
             {
                 try
@@ -356,12 +361,11 @@ namespace FireProtection.Backend.Services.Placement.Sprinklers.Final.Strategies
                         bestFace = go as PlanarFace;
                     }
                 }
-                catch { /* ignore */ }
+                catch { }
             }
 
             if (bestFace == null)
             {
-                // Last resort: vertical plane from location curve + inward normal.
                 LocationCurve lc = wall.Location as LocationCurve;
                 if (lc?.Curve == null) return null;
                 XYZ p0 = lc.Curve.GetEndPoint(0);

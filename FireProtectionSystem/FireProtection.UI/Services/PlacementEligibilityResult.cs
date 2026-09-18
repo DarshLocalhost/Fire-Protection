@@ -136,26 +136,21 @@ namespace FireProtection.UI.Services
     }
 
     /// <summary>
-    /// Structured status codes for <see cref="PlacementEligibilityResult"/>. Machine-readable; the
-    /// <see cref="PlacementEligibilityResult.Reason"/> is a human supplement only.
+    /// Structured status codes for <see cref="PlacementEligibilityResult"/>.
     /// </summary>
     public static class PlacementEligibilityStatusCodes
     {
         public const string Eligible = "ELIGIBLE";
         public const string PendingFamilySelection = "PENDING_FAMILY_SELECTION";
         public const string MissingRoomGeometry = "MISSING_ROOM_GEOMETRY";
+        public const string FamilyNotLoaded = "FAMILY_NOT_LOADED";
         public const string UnsupportedFamilyPlacement = "UNSUPPORTED_FAMILY_PLACEMENT";
         public const string UnsupportedFamilyPlacementType = "UNSUPPORTED_FAMILY_PLACEMENT_TYPE";
+        public const string BeamPathTooShort = "BEAM_PATH_TOO_SHORT";
         public const string MissingHostLevel = "MISSING_HOST_LEVEL";
         public const string NoCandidatePoints = "NO_CANDIDATE_POINTS";
-
-        /// <summary>Required ceiling host does not exist for a family/strategy that requires one (FaceBased and
-        /// WorkPlaneBased; a numeric "Ceiling Height" UI value is NOT proof of a usable host).</summary>
         public const string NoUsableCeilingHost = "NO_USABLE_CEILING_HOST";
-
-        /// <summary>Candidate calculation could not be run (insufficient evidence) — UNDETERMINED, never BLOCKED.</summary>
         public const string CalculationFailed = "CALCULATION_FAILED";
-
         public const string PreflightError = "PREFLIGHT_ERROR";
     }
 }

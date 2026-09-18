@@ -192,7 +192,7 @@
             </Grid>
         </Border>
 
-        <!-- Issue list -->
+        <!-- Issue list (Scrollable) -->
         <Border Grid.Row="5" Style="{StaticResource CardBorder}" Margin="0,12,0,0">
             <Grid Margin="16,12">
                 <Grid.RowDefinitions>
@@ -202,7 +202,14 @@
 
                 <TextBlock Text="Issues &amp; Warnings" Style="{StaticResource EyebrowText}" Margin="0,0,0,12"/>
 
-                <ListBox Grid.Row="1" ItemsSource="{Binding Issues}" BorderThickness="0" Background="Transparent">
+                <ListBox Grid.Row="1"
+                         ItemsSource="{Binding Issues}"
+                         BorderThickness="0"
+                         Background="Transparent"
+                         MaxHeight="180"
+                         ScrollViewer.VerticalScrollBarVisibility="Auto"
+                         ScrollViewer.HorizontalScrollBarVisibility="Disabled"
+                         ScrollViewer.CanContentScroll="True">
                     <ListBox.ItemTemplate>
                         <DataTemplate>
                             <StackPanel Orientation="Horizontal" Margin="0,2,0,2">
@@ -211,7 +218,7 @@
                                         <SolidColorBrush Color="{Binding SeverityColor}"/>
                                     </Ellipse.Fill>
                                 </Ellipse>
-                                <TextBlock Text="{Binding Message}" FontSize="12" Foreground="{StaticResource TextSecondaryBrush}"/>
+                                <TextBlock Text="{Binding Message}" FontSize="12" Foreground="{StaticResource TextSecondaryBrush}" TextWrapping="Wrap"/>
                             </StackPanel>
                         </DataTemplate>
                     </ListBox.ItemTemplate>

@@ -15,23 +15,24 @@ namespace FireProtection.Backend.Services.Placement.Sprinklers.Final.Strategies
             Document doc = context.Document;
             XYZ xyz = context.RequestedPoint;
 
-            // Ensure symbol is active
             if (!context.Symbol.IsActive)
             {
                 context.Symbol.Activate();
                 doc.Regenerate();
             }
 
-            // --- Attempt 1: Host on a ceiling face (host or linked). ---
             CeilingHostLookup host = context.CeilingHostResolver.FindCeilingHost(doc, xyz, context.Level);
+
             if (host.HostFace != null)
             {
                 try
                 {
                     XYZ refDir = ComputeInPlaneReferenceDirection(doc, host.HostFace);
-
                     FamilyInstance faceInstance = doc.Create.NewFamilyInstance(
                         host.HostFace, xyz, refDir, context.Symbol);
+
+                    // FIX: Enforce level association and offset
+                    LevelAssociation.EnforceAndVerify(doc, faceInstance, context.Level, xyz.Z);
 
                     return PlacementOutcome.CreatedInstance(
                         faceInstance, "WorkPlaneCeilingFace", host.Source, host.LinkInstanceName, host.CeilingElementId);
@@ -48,7 +49,6 @@ namespace FireProtection.Backend.Services.Placement.Sprinklers.Final.Strategies
                 }
             }
 
-            // --- Attempt 2: Place on a SketchPlane through requested world XYZ (honors Z). ---
             try
             {
                 Plane plane = Plane.CreateByNormalAndOrigin(XYZ.BasisZ, xyz);
@@ -56,6 +56,9 @@ namespace FireProtection.Backend.Services.Placement.Sprinklers.Final.Strategies
 
                 FamilyInstance instance = doc.Create.NewFamilyInstance(
                     sketchPlane.GetPlaneReference(), xyz, XYZ.BasisX, context.Symbol);
+
+                // FIX: Enforce level association and offset
+                LevelAssociation.EnforceAndVerify(doc, instance, context.Level, xyz.Z);
 
                 return PlacementOutcome.CreatedInstance(
                     instance, "WorkPlaneSketchPlane", host.Source);
@@ -86,7 +89,6 @@ namespace FireProtection.Backend.Services.Placement.Sprinklers.Final.Strategies
                 }
             }
             catch { }
-
             return XYZ.BasisX;
         }
     }

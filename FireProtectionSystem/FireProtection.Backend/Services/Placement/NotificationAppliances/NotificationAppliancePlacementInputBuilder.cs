@@ -9,12 +9,6 @@ using Newtonsoft.Json;
 
 namespace FireProtection.Backend.Services.Placement.NotificationAppliances
 {
-    /// <summary>
-    /// Builds the calculation-engine input snapshot for notification appliances from the UI's selected rooms.
-    /// Reuses the shared geometry transport, while preserving notification-specific appliance type, candela,
-    /// dBA, mount, and ceiling-slope metadata for the Chapter 18 rule provider. Boundary/ceiling geometry is
-    /// hydrated from the room JSON exactly as for smoke detectors.
-    /// </summary>
     public static class NotificationAppliancePlacementInputBuilder
     {
         public static SmokeDetectorPlacementInputSnapshot BuildSnapshot(
@@ -57,8 +51,13 @@ namespace FireProtection.Backend.Services.Placement.NotificationAppliances
                 {
                     roomInput.SelectedPlacementBehavior = familySource.GetPlacementBehavior(
                         item.SelectedFamilyName, item.SelectedTypeName);
-                    if (roomInput.SelectedPlacementBehavior == DevicePlacementBehavior.WallSidewall)
+
+                    if (string.Equals(roomInput.Mount, "Wall", StringComparison.OrdinalIgnoreCase) ||
+                        roomInput.SelectedPlacementBehavior == DevicePlacementBehavior.WallSidewall)
+                    {
                         roomInput.Mount = "Wall";
+                        roomInput.SelectedPlacementBehavior = DevicePlacementBehavior.WallSidewall;
+                    }
                 }
 
                 if (item.FullRoomJson != null)
@@ -92,9 +91,22 @@ namespace FireProtection.Backend.Services.Placement.NotificationAppliances
         {
             string family = item.SelectedFamilyName ?? string.Empty;
             string type = item.SelectedTypeName ?? string.Empty;
-            return family.IndexOf("wall", StringComparison.OrdinalIgnoreCase) >= 0
+            string appType = item.ApplianceType ?? string.Empty;
+            string mountOverride = item.Mount ?? string.Empty;
+
+            // Naming indicators for wall notification devices (e.g. Horn, Strobe, Chime, Wall)
+            if (family.IndexOf("wall", StringComparison.OrdinalIgnoreCase) >= 0
                 || type.IndexOf("wall", StringComparison.OrdinalIgnoreCase) >= 0
-                ? "Wall" : "Ceiling";
+                || appType.IndexOf("wall", StringComparison.OrdinalIgnoreCase) >= 0
+                || mountOverride.IndexOf("wall", StringComparison.OrdinalIgnoreCase) >= 0
+                || family.IndexOf("horn", StringComparison.OrdinalIgnoreCase) >= 0
+                || type.IndexOf("horn", StringComparison.OrdinalIgnoreCase) >= 0
+                || appType.IndexOf("horn", StringComparison.OrdinalIgnoreCase) >= 0)
+            {
+                return "Wall";
+            }
+
+            return "Ceiling";
         }
 
         private static void HydrateFromRoomJson(SmokeDetectorRoomInput roomInput, string json)
@@ -121,10 +133,7 @@ namespace FireProtection.Backend.Services.Placement.NotificationAppliances
                     roomInput.Ceilings = roomData.Ceilings;
                 }
             }
-            catch
-            {
-                // Fallback to basic geometry already populated
-            }
+            catch { }
         }
     }
 }

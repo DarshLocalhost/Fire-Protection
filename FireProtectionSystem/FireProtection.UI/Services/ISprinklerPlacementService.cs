@@ -44,10 +44,46 @@ namespace FireProtection.UI.Services
             string selectedTypeName);
 
         /// <summary>
-        /// Drops any cached eligibility results. Call when inputs that influence placement feasibility change
-        /// (family/type/level/model state) so the next probe is authoritative, not stale.
+        /// Drops any cached eligibility results.
         /// </summary>
+        /// <remarks>
+        /// Deliberately NOT called automatically before every sweep. The cache key already covers
+        /// room identity, level name, hazard class, family and type (see
+        /// RevitSprinklerPlacementService), so those inputs miss the cache on their own. Clearing
+        /// unconditionally made every sweep start cold, which multiplied the cost of an already
+        /// expensive probe by the number of triggers.
+        ///
+        /// Call it when the DOCUMENT changes in a way the key cannot see - in practice, after
+        /// <c>TryLoadFamily</c> succeeds. Known remaining gap: a linked-model edit, or an in-place
+        /// ceiling move, is not visible to the key and can therefore serve stale results until the
+        /// next family load or manual invalidation. Subscribing to Revit's DocumentChanged event is
+        /// the proper fix and is deliberately left open rather than faked here.
+        /// </remarks>
         void ClearEligibilityCache();
+
+        /// <summary>
+        /// Opens a read-only host-resolution pass: ceiling/floor/roof and link-instance element lists
+        /// are collected once and reused for every candidate point until
+        /// <see cref="EndHostResolutionPass"/>.
+        /// </summary>
+        /// <remarks>
+        /// This exists purely for performance. Without it, each candidate point rebuilt the same
+        /// document-wide element lists, which is O(rooms x candidates x document) collectors on the
+        /// thread that also pumps the UI - the main cause of the tool freezing.
+        ///
+        /// Callers MUST bracket a single read-only sweep and MUST end it before any document
+        /// modification. Elements are only valid while the document is unmodified, which is why the
+        /// cache is scoped to one pass rather than kept for the session.
+        /// </remarks>
+        void BeginHostResolutionPass();
+
+        /// <summary>Ends the pass opened by <see cref="BeginHostResolutionPass"/> and releases cached elements.</summary>
+        void EndHostResolutionPass();
+
+        /// <summary>
+        /// Document-wide collector invocations avoided by the host-resolution cache, for diagnostics.
+        /// </summary>
+        long HostCollectorCallsSaved { get; }
 
         /// <summary>
         /// Read-only probe that lists (Room, Family, Type) entries whose chosen family/type

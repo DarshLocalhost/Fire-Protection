@@ -72,6 +72,24 @@ namespace FireProtection.Backend.Models.Placement.SmokeDetectors.Final
         [JsonProperty("overrideBoundaryClearanceFt")]
         public double? OverrideBoundaryClearanceFt { get; set; }
 
+        /// <summary>
+        /// Per-room MAXIMUM distance-to-wall (device→wall) override in feet, enforced
+        /// post-selection independently of the MINIMUM <see cref="OverrideBoundaryClearanceFt"/>.
+        /// null = use the engine-derived value (½·spacing). NOT clamped — flagged provisional.
+        /// </summary>
+        [JsonProperty("overrideMaxDistanceToWallFt")]
+        public double? OverrideMaxDistanceToWallFt { get; set; }
+
+        /// <summary>Per-room fallback ceiling-tile pitch (feet), primary axis, used only when the
+        /// ceiling has no readable grid pattern. Enables tile-center snapping from a user-entered
+        /// tile size. null = free lattice (no synthetic grid).</summary>
+        [JsonProperty("overrideCeilingTileUFt")]
+        public double? OverrideCeilingTileUFt { get; set; }
+
+        /// <summary>Per-room fallback ceiling-tile pitch (feet), secondary axis. null = square tile.</summary>
+        [JsonProperty("overrideCeilingTileVFt")]
+        public double? OverrideCeilingTileVFt { get; set; }
+
         [JsonProperty("boundaryPolygon")]
         public List<double[]> BoundaryPolygon { get; set; }
 

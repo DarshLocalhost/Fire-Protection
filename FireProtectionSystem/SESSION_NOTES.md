@@ -16,6 +16,55 @@
 
 ---
 
+### 2026-09-22 — sim_expl_2.md: ELI5 location-point logic for all 3 devices
+
+- **Context**: User found the sprinkler section of `explanation_2.md` hard to follow and asked for an
+  ELI5 covering location-point logic only, then for the same style for smoke detectors and notification
+  appliances in one new root-level file.
+- **Actions Taken** (documentation only; **no product code changed**):
+  - Re-read source to ground the simplified explanations: `BruteForceCalculationService` (centered grid,
+    sidewall directional solver, four candidate filters), `SmokeDetectorCalculationService` (ceiling /
+    wall / peak-row candidates, single-device centroid fast path, center-out greedy selection),
+    `Nfpa72SmokeDetectorRules`, `Nfpa72NotificationApplianceRules` (candela/dBA stricter-of tables),
+    `AudibleCoverageEngine` (post-placement dBA audit; tests/internal wiring).
+  - Wrote **`sim_expl_2.md`** (project root): three parallel ELI5 sections (sprinkler / smoke detector /
+    notification appliance), each structured as rules → grid → discard bad dots → pick final points →
+    honesty checks, plus a one-glance side-by-side table. Provisional status called out throughout.
+- **Decisions**: none new.
+- **Open Questions / Blockers**: same as prior entry — runtime verification pending; all three rule
+  providers remain provisional; `AudibleCoverageEngine` still not on the main placement path.
+- **Handoff**: next session should treat `sim_expl_2.md` as the plain-language companion to the more
+  technical `explanation_2.md`; do not treat either as proof of runtime behavior.
+
+### 2026-09-22 — explanation_2.md: candidate-location identification for all 3 devices
+
+- **Context**: User requested a new root-level document `explanation_2.md` describing, for sprinklers, smoke
+  detectors, and notification appliances, how candidate location points are identified — plain-English first,
+  then a technical walkthrough with key codeblocks, class/method index, family/type coverage, all scenarios,
+  and edge cases. Clarifying answers: full pipeline (generate + filter + select + post-checks); key excerpts
+  + index (not full method bodies); flag provisional (`HasApprovedRules=false`), static-only status, and
+  doc-vs-code discrepancies.
+- **Actions Taken** (documentation only; **no product code changed**):
+  - Read all project-memory files + `Explanation.md` + `TARGET_DEVICE_PLACEMENT_LOGIC.md`.
+  - Verified source: `DeviceLocationPointIdentifier`, `BruteForceCalculationService` (CalculateRoom /
+    SelectCenteredGrid / SelectSidewallDirectional), `SmokeDetectorCalculationService` (mode branch,
+    ceiling/wall/peak candidates, SelectFromCandidates), `Nfpa72SmokeDetectorRules`,
+    `Nfpa72NotificationApplianceRules`, `DefaultHazardPlacementRules`, `FireAlarmDevicePlacementCore`.
+  - Wrote **`explanation_2.md`** (project root): shared foundation; per-device plain-English + technical
+    deep-dive (rules → Z → generate → filter → select → post-checks); side-by-side comparison; family/type
+    matrix; edge-case catalogue; class & method index; 12 known doc-vs-code discrepancies (§9), including
+    centered-grid vs older “divide-and-centre” wording, silent smoke/NA `MaxCandidatePoints` truncation,
+    `AudibleCoverageEngine` tests-only, and `DeviceLocationPointIdentifier` as labeling not dispatcher.
+- **Decisions**: none new; documented existing Decisions 004/009/011/016–021 as they appear in code.
+- **Open Questions / Blockers**: P0 runtime verification of Decision 011/012 still pending; all three rule
+  providers remain provisional; smoke/NA post-check depth and truncation honesty are known asymmetries
+  recorded in explanation_2 §9 (code changes not requested this session).
+- **Handoff**: Treat `explanation_2.md` as the candidate-identification explainer; do not let
+  `TARGET_DEVICE_PLACEMENT_LOGIC.md` override its §9 discrepancy list. Next engineering work still gated
+  on P0 runtime verify, then NFPA-approved rule values.
+
+---
+
 ### 2026-09-02 — ClosedXML "Browse → load Excel" popup: missing/mis-redirected runtime dependencies (deployment fix)
 
 - **Context**: Clicking **Browse** in the catalog bar and selecting a workbook produced an error popup
@@ -170,9 +219,12 @@
     `SprinklerPlacementResult.SkippedMissingFamilyCount` counter.
   - `FireProtection.UI/ViewModels/Sprinklers/BruteForce/RoomItemViewModel.cs` — per-row
     `SelectedFamily` / `SelectedType` / `MaxSpacingFtOverride` / `BoundaryClearanceFtOverride` /
-    `FamilyAvailability` + `SetCatalogDefaults` / `ResetFamilyAndTypeToDefault` /
-    `ResetSpacingOverridesToDefault` / `Apply*ToAllEligible` commands. New
-    `FamilyAvailability` enum.
+    `SetCatalogDefaults` / `ResetFamilyAndTypeToDefault` /
+    `ResetSpacingOverridesToDefault` / `Apply*ToAllEligible` commands.
+    NOTE: this entry previously also claimed a `FamilyAvailability` property and enum. Neither
+    exists — grep finds no such member. Whether a family is loaded in the project is reported
+    through the eligibility preflight instead (`PlacementEligibilityStatusCodes.FamilyNotLoaded`,
+    surfaced as `RoomItemViewModel.EligibilityShortReason` = "Family not loaded").
   - `FireProtection.UI/ViewModels/Sprinklers/BruteForce/SprinklerBruteForceViewModel.cs` — ctor
     takes `ICatalog catalog`; `SeedPerRowCatalogDefaults()` populates per-row dropdowns;
     `ApplyFamily/Type/MaxSpacing/BoundaryClearanceToAllEligibleCommand` set; per-row family/type

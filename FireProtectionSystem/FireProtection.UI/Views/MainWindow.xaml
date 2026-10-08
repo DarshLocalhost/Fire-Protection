@@ -11,6 +11,7 @@
         xmlns:vNotif="clr-namespace:FireProtection.UI.Views.NotificationAppliances"
         xmlns:vSmoke="clr-namespace:FireProtection.UI.Views.SmokeDetectors"
         xmlns:vSprinklers="clr-namespace:FireProtection.UI.Views.Sprinklers"
+        xmlns:ctrl="clr-namespace:FireProtection.UI.Controls"
         Width="1400"
         Height="900"
         MinWidth="1040"
@@ -46,6 +47,7 @@
       <RowDefinition Height="Auto" />
       <RowDefinition Height="Auto" />
       <RowDefinition Height="*" />
+      <RowDefinition Height="Auto" />
     </Grid.RowDefinitions>
 
     <!-- ================= HEADER ================= -->
@@ -54,7 +56,8 @@
             BorderBrush="{StaticResource BorderBrush}"
             BorderThickness="0"
             Padding="24,16,24,0">
-      <StackPanel Orientation="Horizontal">
+      <DockPanel LastChildFill="False">
+        <StackPanel Orientation="Horizontal" DockPanel.Dock="Left">
         <!-- Brand mark: sprinkler deflector plate -->
         <Border Width="38"
                 Height="38"
@@ -84,7 +87,18 @@
                      Foreground="{StaticResource TextMutedBrush}"
                      Text="AUTOMATED LAYOUT WITH CODE-BASED CALCULATIONS"/>
         </StackPanel>
-      </StackPanel>
+        </StackPanel>
+
+        <!-- Loads a picked .rfa into the active model. Shared across all three device tabs; the
+             actual load is marshalled onto Revit's idle thread by the view model. -->
+        <Button DockPanel.Dock="Right"
+                Content="Load families…"
+                Style="{StaticResource OutlineButtonStyle}"
+                Padding="14,6"
+                VerticalAlignment="Center"
+                Command="{Binding LoadFamiliesCommand}"
+                ToolTip="Load Revit families (.rfa) into the current model. Available for every device tab."/>
+      </DockPanel>
     </Border>
 
     <!-- Top-level tabs -->
@@ -110,5 +124,15 @@
     <vCatalog:CatalogBar Grid.Row="1"
                          Margin="16,0,16,0"
                          DataContext="{Binding Catalog}"/>
+
+    <!-- Source-status banner. Hosted ONCE here rather than per tab, because the catalog source is
+         a single shared decision. It exists so a missing per-type engineering value is never
+         silent: in model mode without a workbook the calculation falls back to provisional
+         rulebook spacing, and without this the user cannot tell that happened. -->
+    <ctrl:InfoBanner Grid.Row="2"
+                     Margin="16,0,16,0"
+                     Content="{Binding Catalog.StatusMessage}"
+                     DataContext="{Binding Catalog}"
+                     Visibility="{Binding HasStatusMessage, Converter={StaticResource InverseBoolToVis}}"/>
   </Grid>
 </Window>

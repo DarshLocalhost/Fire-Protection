@@ -48,10 +48,11 @@ namespace FireProtection.UI.Services
         {
             try
             {
-                Dispatcher dispatcher = Application.Current != null
-                    ? Application.Current.Dispatcher
-                    : Dispatcher.CurrentDispatcher;
-
+                // Deliberately NOT Dispatcher.CurrentDispatcher as a fallback. On a thread with no
+                // dispatcher that call CREATES one and attaches an activation context to the
+                // thread, which is exactly what later throws SEHException in DeactivateActCtx.
+                // WpfHost returns null instead of manufacturing a dispatcher.
+                Dispatcher dispatcher = WpfHost.UiDispatcher;
                 if (dispatcher == null) return;
                 dispatcher.Invoke(DispatcherPriority.Background, new Action(delegate { }));
             }

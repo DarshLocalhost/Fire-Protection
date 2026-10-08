@@ -2,6 +2,7 @@
 using System.Linq;
 using System.Reflection;
 using Autodesk.Revit.UI;
+using FireProtection.UI.Services;
 
 namespace FireProtection.Backend.Revit
 {
@@ -22,6 +23,8 @@ namespace FireProtection.Backend.Revit
 
         public Result OnStartup(UIControlledApplication application)
         {
+            InstallCrashDiagnostics();
+
             try
             {
                 // 1) Ensure the ribbon tab exists (Revit throws if it already exists).
@@ -67,6 +70,34 @@ namespace FireProtection.Backend.Revit
         public Result OnShutdown(UIControlledApplication application)
         {
             return Result.Succeeded;
+        }
+
+        private static void InstallCrashDiagnostics()
+        {
+            try
+            {
+                // Without this, an unhandled fault anywhere in the add-in is reported to the user as
+                // a bare "SEHException: External component has thrown an exception" at
+                // DeactivateActCtx during teardown, with the CAUSE already lost. Logging it here
+                // is the difference between a diagnosable bug and an unreportable one.
+                AppDomain.CurrentDomain.UnhandledException += delegate (object sender, UnhandledExceptionEventArgs e)
+                {
+                    FireProtectionLog.Error(
+                        "UNHANDLED exception (terminating=" + e.IsTerminating + ") — this is the real fault "
+                        + "behind any later SEHException/DeactivateActCtx message.",
+                        e.ExceptionObject as Exception);
+                };
+
+                // WPF swallows binding/converter exceptions by default and they resurface at
+                // teardown. The dispatcher's own handler is attached by WpfHost when it creates the
+                // Application — it cannot be attached from here because Application.Current is
+                // still null at ribbon-load time.
+            }
+            catch (Exception ex)
+            {
+                // Diagnostics must never prevent the ribbon from loading.
+                FireProtectionLog.Warn("Could not install crash diagnostics: " + ex.Message);
+            }
         }
 
         private static void TryCreateRibbonTab(UIControlledApplication application, string tabName)

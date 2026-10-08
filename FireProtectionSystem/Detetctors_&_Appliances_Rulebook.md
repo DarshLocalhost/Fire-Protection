@@ -1,3 +1,8 @@
+# NFPA 72 - National Fire Alarm and Signaling Code (2019 Edition)
+
+The extracted source text is retained in PDF page order. Chapter, annex, and section headings are formatted for navigation; page markers identify the corresponding source page.
+
+<!-- Source PDF page 1 -->
 72
 NFPA
 2019
@@ -11,7 +16,8 @@ Customer ID
 Copyright 2019 National Fire Protection Association (NFPA®). Licensed by agreement to Carl Weaver FOR INDIVIDUAL USE ONLY and downloaded on 11/05/2019. No reproduction or transmission in any form permitted without
 written permission of NFPA®. For inquiries or access for multiple users, or to report unauthorized use, contact licensing@nfpa.org.
 {C56A4DC7-64F7-4C88-B368-41DE5BD47BC8}
-===PAGE_BREAK===
+<!-- Source PDF page 2 -->
+
 ISBN: 978-145592057-0 (PDF)
 ISBN: 978-145592058-7 (eBook)
 IMPORTANT NOTICES AND DISCLAIMERS CONCERNING NFPA® STANDARDS
@@ -63,7 +69,8 @@ FOR INDIVIDUAL USE ONLY
 Copyright 2019 National Fire Protection Association (NFPA®). Licensed by agreement to Carl Weaver FOR INDIVIDUAL USE ONLY and downloaded on 11/05/2019. No reproduction or transmission in any form permitted without
 written permission of NFPA®. For inquiries or access for multiple users, or to report unauthorized use, contact licensing@nfpa.org.
 {C56A4DC7-64F7-4C88-B368-41DE5BD47BC8}
-===PAGE_BREAK===
+<!-- Source PDF page 3 -->
+
 ADDITIONAL IMPORTANT NOTICES AND DISCLAIMERS CONCERNING NFPA® STANDARDS
 Updating of NFPA Standards
 Users of NFPA codes, standards, recommended practices, and guides (“NFPA Standards”) should be aware that these
@@ -121,7 +128,8 @@ FOR INDIVIDUAL USE ONLY
 Copyright 2019 National Fire Protection Association (NFPA®). Licensed by agreement to Carl Weaver FOR INDIVIDUAL USE ONLY and downloaded on 11/05/2019. No reproduction or transmission in any form permitted without
 written permission of NFPA®. For inquiries or access for multiple users, or to report unauthorized use, contact licensing@nfpa.org.
 {C56A4DC7-64F7-4C88-B368-41DE5BD47BC8}
-===PAGE_BREAK===
+<!-- Source PDF page 4 -->
+
 72-1
 NFPA 72, National Fire Alarm and Signaling Code, NFPA and National Fire Protection Association are registered trademarks of the National Fire Protection
 Association, Quincy, Massachusetts 02169.
@@ -180,7 +188,8 @@ FOR INDIVIDUAL USE ONLY
 Copyright 2019 National Fire Protection Association (NFPA®). Licensed by agreement to Carl Weaver FOR INDIVIDUAL USE ONLY and downloaded on 11/05/2019. No reproduction or transmission in any form permitted without
 written permission of NFPA®. For inquiries or access for multiple users, or to report unauthorized use, contact licensing@nfpa.org.
 {C56A4DC7-64F7-4C88-B368-41DE5BD47BC8}
-===PAGE_BREAK===
+<!-- Source PDF page 5 -->
+
 NATIONAL FIRE ALARM AND SIGNALING CODE	72-2
 2019 Edition
 The 2002 edition contained a number of technical revisions throughout the Code, including the following:
@@ -244,7 +253,8 @@ FOR INDIVIDUAL USE ONLY
 Copyright 2019 National Fire Protection Association (NFPA®). Licensed by agreement to Carl Weaver FOR INDIVIDUAL USE ONLY and downloaded on 11/05/2019. No reproduction or transmission in any form permitted without
 written permission of NFPA®. For inquiries or access for multiple users, or to report unauthorized use, contact licensing@nfpa.org.
 {C56A4DC7-64F7-4C88-B368-41DE5BD47BC8}
-===PAGE_BREAK===
+<!-- Source PDF page 6 -->
+
 ORIGIN & DEVELOPMENT 72-3
 2019 Edition
 In addition to the content of the new chapters, the 2010 edition included significant technical changes. These included new
@@ -306,7 +316,8 @@ FOR INDIVIDUAL USE ONLY
 Copyright 2019 National Fire Protection Association (NFPA®). Licensed by agreement to Carl Weaver FOR INDIVIDUAL USE ONLY and downloaded on 11/05/2019. No reproduction or transmission in any form permitted without
 written permission of NFPA®. For inquiries or access for multiple users, or to report unauthorized use, contact licensing@nfpa.org.
 {C56A4DC7-64F7-4C88-B368-41DE5BD47BC8}
-===PAGE_BREAK===
+<!-- Source PDF page 7 -->
+
 NATIONAL FIRE ALARM AND SIGNALING CODE	72-4
 2019 Edition
 Perhaps the most significant changes to the Code pertained to wiring. The 2016 edition added Class N, which addressed
@@ -361,7 +372,8 @@ FOR INDIVIDUAL USE ONLY
 Copyright 2019 National Fire Protection Association (NFPA®). Licensed by agreement to Carl Weaver FOR INDIVIDUAL USE ONLY and downloaded on 11/05/2019. No reproduction or transmission in any form permitted without
 written permission of NFPA®. For inquiries or access for multiple users, or to report unauthorized use, contact licensing@nfpa.org.
 {C56A4DC7-64F7-4C88-B368-41DE5BD47BC8}
-===PAGE_BREAK===
+<!-- Source PDF page 8 -->
+
 COMMITTEE PERSONNEL 72-5
 2019 Edition
 Correlating Committee on Signaling Systems for the Protection of Life and Property
@@ -453,7 +465,8 @@ FOR INDIVIDUAL USE ONLY
 Copyright 2019 National Fire Protection Association (NFPA®). Licensed by agreement to Carl Weaver FOR INDIVIDUAL USE ONLY and downloaded on 11/05/2019. No reproduction or transmission in any form permitted without
 written permission of NFPA®. For inquiries or access for multiple users, or to report unauthorized use, contact licensing@nfpa.org.
 {C56A4DC7-64F7-4C88-B368-41DE5BD47BC8}
-===PAGE_BREAK===
+<!-- Source PDF page 9 -->
+
 NATIONAL FIRE ALARM AND SIGNALING CODE	72-6
 2019 Edition
 This list represents the membership at the time the Committee was balloted on the final text of this edition.
@@ -468,7 +481,8 @@ FOR INDIVIDUAL USE ONLY
 Copyright 2019 National Fire Protection Association (NFPA®). Licensed by agreement to Carl Weaver FOR INDIVIDUAL USE ONLY and downloaded on 11/05/2019. No reproduction or transmission in any form permitted without
 written permission of NFPA®. For inquiries or access for multiple users, or to report unauthorized use, contact licensing@nfpa.org.
 {C56A4DC7-64F7-4C88-B368-41DE5BD47BC8}
-===PAGE_BREAK===
+<!-- Source PDF page 10 -->
+
 COMMITTEE PERSONNEL 72-7
 2019 Edition
 Technical Committee on Emergency Communication Systems (SIG-ECS)
@@ -557,7 +571,8 @@ FOR INDIVIDUAL USE ONLY
 Copyright 2019 National Fire Protection Association (NFPA®). Licensed by agreement to Carl Weaver FOR INDIVIDUAL USE ONLY and downloaded on 11/05/2019. No reproduction or transmission in any form permitted without
 written permission of NFPA®. For inquiries or access for multiple users, or to report unauthorized use, contact licensing@nfpa.org.
 {C56A4DC7-64F7-4C88-B368-41DE5BD47BC8}
-===PAGE_BREAK===
+<!-- Source PDF page 11 -->
+
 NATIONAL FIRE ALARM AND SIGNALING CODE	72-8
 2019 Edition
 Technical Committee on Fundamentals of Fire Alarm and Signaling Systems (SIG-FUN)
@@ -645,7 +660,8 @@ FOR INDIVIDUAL USE ONLY
 Copyright 2019 National Fire Protection Association (NFPA®). Licensed by agreement to Carl Weaver FOR INDIVIDUAL USE ONLY and downloaded on 11/05/2019. No reproduction or transmission in any form permitted without
 written permission of NFPA®. For inquiries or access for multiple users, or to report unauthorized use, contact licensing@nfpa.org.
 {C56A4DC7-64F7-4C88-B368-41DE5BD47BC8}
-===PAGE_BREAK===
+<!-- Source PDF page 12 -->
+
 COMMITTEE PERSONNEL 72-9
 2019 Edition
 Technical Committee on Single- and Multiple-Station Alarms and Household Signaling Systems (SIG-HOU)
@@ -721,7 +737,8 @@ FOR INDIVIDUAL USE ONLY
 Copyright 2019 National Fire Protection Association (NFPA®). Licensed by agreement to Carl Weaver FOR INDIVIDUAL USE ONLY and downloaded on 11/05/2019. No reproduction or transmission in any form permitted without
 written permission of NFPA®. For inquiries or access for multiple users, or to report unauthorized use, contact licensing@nfpa.org.
 {C56A4DC7-64F7-4C88-B368-41DE5BD47BC8}
-===PAGE_BREAK===
+<!-- Source PDF page 13 -->
+
 NATIONAL FIRE ALARM AND SIGNALING CODE	72-10
 2019 Edition
 Technical Committee on Initiating Devices for Fire Alarm and Signaling Systems (SIG-IDS)
@@ -815,7 +832,8 @@ FOR INDIVIDUAL USE ONLY
 Copyright 2019 National Fire Protection Association (NFPA®). Licensed by agreement to Carl Weaver FOR INDIVIDUAL USE ONLY and downloaded on 11/05/2019. No reproduction or transmission in any form permitted without
 written permission of NFPA®. For inquiries or access for multiple users, or to report unauthorized use, contact licensing@nfpa.org.
 {C56A4DC7-64F7-4C88-B368-41DE5BD47BC8}
-===PAGE_BREAK===
+<!-- Source PDF page 14 -->
+
 COMMITTEE PERSONNEL 72-11
 2019 Edition
 Technical Committee on Notification Appliances for Fire Alarm and Signaling Systems (SIG-NAS)
@@ -885,7 +903,8 @@ FOR INDIVIDUAL USE ONLY
 Copyright 2019 National Fire Protection Association (NFPA®). Licensed by agreement to Carl Weaver FOR INDIVIDUAL USE ONLY and downloaded on 11/05/2019. No reproduction or transmission in any form permitted without
 written permission of NFPA®. For inquiries or access for multiple users, or to report unauthorized use, contact licensing@nfpa.org.
 {C56A4DC7-64F7-4C88-B368-41DE5BD47BC8}
-===PAGE_BREAK===
+<!-- Source PDF page 15 -->
+
 NATIONAL FIRE ALARM AND SIGNALING CODE	72-12
 2019 Edition
 Technical Committee on Protected Premises Fire Alarm and Signaling Systems (SIG-PRO)
@@ -977,7 +996,8 @@ FOR INDIVIDUAL USE ONLY
 Copyright 2019 National Fire Protection Association (NFPA®). Licensed by agreement to Carl Weaver FOR INDIVIDUAL USE ONLY and downloaded on 11/05/2019. No reproduction or transmission in any form permitted without
 written permission of NFPA®. For inquiries or access for multiple users, or to report unauthorized use, contact licensing@nfpa.org.
 {C56A4DC7-64F7-4C88-B368-41DE5BD47BC8}
-===PAGE_BREAK===
+<!-- Source PDF page 16 -->
+
 COMMITTEE PERSONNEL 72-13
 2019 Edition
 Technical Committee on Public Emergency Reporting Systems (SIG-PRS)
@@ -1034,7 +1054,8 @@ FOR INDIVIDUAL USE ONLY
 Copyright 2019 National Fire Protection Association (NFPA®). Licensed by agreement to Carl Weaver FOR INDIVIDUAL USE ONLY and downloaded on 11/05/2019. No reproduction or transmission in any form permitted without
 written permission of NFPA®. For inquiries or access for multiple users, or to report unauthorized use, contact licensing@nfpa.org.
 {C56A4DC7-64F7-4C88-B368-41DE5BD47BC8}
-===PAGE_BREAK===
+<!-- Source PDF page 17 -->
+
 NATIONAL FIRE ALARM AND SIGNALING CODE	72-14
 2019 Edition
 Technical Committee on Supervising Station Fire Alarm and Signaling Systems (SIG-SSS)
@@ -1111,7 +1132,8 @@ FOR INDIVIDUAL USE ONLY
 Copyright 2019 National Fire Protection Association (NFPA®). Licensed by agreement to Carl Weaver FOR INDIVIDUAL USE ONLY and downloaded on 11/05/2019. No reproduction or transmission in any form permitted without
 written permission of NFPA®. For inquiries or access for multiple users, or to report unauthorized use, contact licensing@nfpa.org.
 {C56A4DC7-64F7-4C88-B368-41DE5BD47BC8}
-===PAGE_BREAK===
+<!-- Source PDF page 18 -->
+
 COMMITTEE PERSONNEL 72-15
 2019 Edition
 Technical Committee on Testing and Maintenance of Fire Alarm and Signaling Systems (SIG-TMS)
@@ -1197,7 +1219,8 @@ FOR INDIVIDUAL USE ONLY
 Copyright 2019 National Fire Protection Association (NFPA®). Licensed by agreement to Carl Weaver FOR INDIVIDUAL USE ONLY and downloaded on 11/05/2019. No reproduction or transmission in any form permitted without
 written permission of NFPA®. For inquiries or access for multiple users, or to report unauthorized use, contact licensing@nfpa.org.
 {C56A4DC7-64F7-4C88-B368-41DE5BD47BC8}
-===PAGE_BREAK===
+<!-- Source PDF page 19 -->
+
 NATIONAL FIRE ALARM AND SIGNALING CODE	72-16
 2019 Edition
 Contents
@@ -1320,7 +1343,8 @@ FOR INDIVIDUAL USE ONLY
 Copyright 2019 National Fire Protection Association (NFPA®). Licensed by agreement to Carl Weaver FOR INDIVIDUAL USE ONLY and downloaded on 11/05/2019. No reproduction or transmission in any form permitted without
 written permission of NFPA®. For inquiries or access for multiple users, or to report unauthorized use, contact licensing@nfpa.org.
 {C56A4DC7-64F7-4C88-B368-41DE5BD47BC8}
-===PAGE_BREAK===
+<!-- Source PDF page 20 -->
+
 CONTENTS 72-17
 2019 Edition
 Chapter 20 Reserved ......................................................... 72– 123
@@ -1440,7 +1464,8 @@ FOR INDIVIDUAL USE ONLY
 Copyright 2019 National Fire Protection Association (NFPA®). Licensed by agreement to Carl Weaver FOR INDIVIDUAL USE ONLY and downloaded on 11/05/2019. No reproduction or transmission in any form permitted without
 written permission of NFPA®. For inquiries or access for multiple users, or to report unauthorized use, contact licensing@nfpa.org.
 {C56A4DC7-64F7-4C88-B368-41DE5BD47BC8}
-===PAGE_BREAK===
+<!-- Source PDF page 21 -->
+
 NATIONAL FIRE ALARM AND SIGNALING CODE	72-18
 2019 Edition Shaded text = Revisions. Δ = Text deletions and figure/table revisions. • = Section deletions. N = New material.
 NFPA 72
@@ -1486,8 +1511,8 @@ graph. Committee acronyms are keyed to the acronyms shown
 with the committee lists at the front of the document.
 Information on referenced publications can be found in
 Chapter 2 and Annex I.
-Chapter 1 Administration
-1.1 Scope.
+## Chapter 1 Administration
+### 1.1 Scope.
 Δ 1.1.1 NFPA 72 covers the application, installation, location,
 performance, inspection, testing, and maintenance of fire
 alarm systems, supervising station alarm systems, public emer‐
@@ -1499,7 +1524,7 @@ Code unless otherwise noted.
 N 1.1.3 For the purposes of carbon monoxide detection, this
 standard is primarily concerned with life safety, not property
 protection.
-1.2* Purpose.
+### 1.2* Purpose.
 1.2.1 The purpose of this Code shall be to define the means of
 signal initiation, transmission, notification, and annunciation;
 the levels of performance; and the reliability of the various
@@ -1518,7 +1543,7 @@ ments are to be achieved.
 1.2.4* This Code shall not be interpreted to require a level of
 protection that is greater than that which would otherwise be
 required by the applicable building or fire code.
-1.3 Application.
+### 1.3 Application.
 1.3.1 Alarm systems shall be classified as follows:
 (1) Fire alarm systems
 (a) Household fire alarm systems
@@ -1557,12 +1582,13 @@ FOR INDIVIDUAL USE ONLY
 Copyright 2019 National Fire Protection Association (NFPA®). Licensed by agreement to Carl Weaver FOR INDIVIDUAL USE ONLY and downloaded on 11/05/2019. No reproduction or transmission in any form permitted without
 written permission of NFPA®. For inquiries or access for multiple users, or to report unauthorized use, contact licensing@nfpa.org.
 {C56A4DC7-64F7-4C88-B368-41DE5BD47BC8}
-===PAGE_BREAK===
+<!-- Source PDF page 22 -->
+
 REFERENCED PUBLICATIONS 72-19
 Shaded text = Revisions. Δ = Text deletions and figure/table revisions. • = Section deletions. N = New material. 2019 Edition
 specific chapter. Chapter 29 is designed to stand alone unless it
 specifically references an earlier chapter.
-1.4 Retroactivity.
+### 1.4 Retroactivity.
 1.4.1 Unless otherwise noted, it is not intended that the provi‐
 sions of this document be applied to facilities, equipment,
 structures, or installations that were existing or approved for
@@ -1572,7 +1598,7 @@ document.
 having jurisdiction that the existing situation involves a distinct
 hazard to life or property, retroactive application of the provi‐
 sions of this document shall be permitted.
-1.5 Equivalency.
+### 1.5 Equivalency.
 1.5.1 Nothing in this Code shall prevent the use of systems,
 methods, devices, or appliances of equivalent or superior qual‐
 ity, strength, fire resistance, effectiveness, durability, and safety
@@ -1581,7 +1607,7 @@ over those prescribed by this Code.
 authority having jurisdiction to demonstrate equivalency.
 1.5.3 The systems, methods, devices, or appliances that are
 found equivalent shall be approved.
-1.6 Units and Formulas.
+### 1.6 Units and Formulas.
 1.6.1 The units of measure in this Code are presented in U.S.
 Customary Units (inch-pound units).
 1.6.2 Where presented, the International System (SI) of Units
@@ -1605,7 +1631,7 @@ ment.
 istered and enforced by the authority having jurisdiction desig‐
 nated by the governing authority. (See Annex E for sample wording
 for enabling legislation.)
-Chapter 2 Referenced Publications
+## Chapter 2 Referenced Publications
 2.1 General. The documents or portions thereof listed in this
 chapter are referenced within this Code and shall be consid‐
 ered part of the requirements of this document.
@@ -1639,7 +1665,7 @@ of Emergency Services Communications Systems, 2019 edition.
 NFPA 1600®, Standard on Disaster/Emergency Management and
 Business Continuity Programs, 2019 edition.
 NFPA 1620, Standard for Pre-Incident Planning, 2015 edition.
-2.3 Other Publications.
+### 2.3 Other Publications.
 2.3.1 ANSI Publications. American National Standards Insti‐
 tute, Inc., 25 West 43rd Street, 4th Floor, New York, NY 10036.
 ANSI A-58.1, Building Code Requirements for Minimum Design
@@ -1670,7 +1696,8 @@ FOR INDIVIDUAL USE ONLY
 Copyright 2019 National Fire Protection Association (NFPA®). Licensed by agreement to Carl Weaver FOR INDIVIDUAL USE ONLY and downloaded on 11/05/2019. No reproduction or transmission in any form permitted without
 written permission of NFPA®. For inquiries or access for multiple users, or to report unauthorized use, contact licensing@nfpa.org.
 {C56A4DC7-64F7-4C88-B368-41DE5BD47BC8}
-===PAGE_BREAK===
+<!-- Source PDF page 23 -->
+
 NATIONAL FIRE ALARM AND SIGNALING CODE	72-20
 2019 Edition Shaded text = Revisions. Δ = Text deletions and figure/table revisions. • = Section deletions. N = New material.
 2.3.5 ISO Publications. International Organization for Stand‐
@@ -1732,7 +1759,7 @@ ment 2 issued May 2013.
 2.3.9 Other Publications.
 Merriam-Webster’s Collegiate Dictionary, 11th edition, Merriam-
 Webster, Inc., Springfield, MA, 2003.
-2.4 References for Extracts in Mandatory Sections.
+### 2.4 References for Extracts in Mandatory Sections.
 NFPA 13, Standard for the Installation of Sprinkler Systems, 2016
 edition.
 NFPA 70®, National Electrical Code®, 2017 edition.
@@ -1744,7 +1771,7 @@ NFPA 1221, Standard for the Installation, Maintenance, and Use
 of Emergency Services Communications Systems, 2019 edition.
 NFPA 5000®, Building Construction and Safety Code®, 2018
 edition.
-Chapter 3 Definitions
+## Chapter 3 Definitions
 3.1 General. The definitions contained in this chapter shall
 apply to the terms used in this Code. Where terms are not
 defined in this chapter or within another chapter, they shall be
@@ -1752,7 +1779,7 @@ defined using their ordinarily accepted meanings within the
 context in which they are used. Merriam-Webster’s Collegiate
 Dictionary, 11th edition, shall be the source for the ordinarily
 accepted meaning.
-3.2 NFPA Official Definitions.
+### 3.2 NFPA Official Definitions.
 3.2.1* Approved. Acceptable to the authority having jurisdic‐
 tion.
 3.2.2* Authority Having Jurisdiction (AHJ). An organization,
@@ -1780,7 +1807,8 @@ FOR INDIVIDUAL USE ONLY
 Copyright 2019 National Fire Protection Association (NFPA®). Licensed by agreement to Carl Weaver FOR INDIVIDUAL USE ONLY and downloaded on 11/05/2019. No reproduction or transmission in any form permitted without
 written permission of NFPA®. For inquiries or access for multiple users, or to report unauthorized use, contact licensing@nfpa.org.
 {C56A4DC7-64F7-4C88-B368-41DE5BD47BC8}
-===PAGE_BREAK===
+<!-- Source PDF page 24 -->
+
 DEFINITIONS 72-21
 Shaded text = Revisions. Δ = Text deletions and figure/table revisions. • = Section deletions. N = New material. 2019 Edition
 ment, material, or service meets appropriate designated
@@ -1789,7 +1817,7 @@ purpose.
 3.2.6 Shall. Indicates a mandatory requirement.
 3.2.7 Should. Indicates a recommendation or that which is
 advised but not required.
-3.3 General Definitions.
+### 3.3 General Definitions.
 3.3.1 Accessible (as applied to equipment). Admitting close
 approach; not guarded by locked doors, elevation, or other
 effective means. [70:100] (SIG-FUN)
@@ -1895,7 +1923,8 @@ FOR INDIVIDUAL USE ONLY
 Copyright 2019 National Fire Protection Association (NFPA®). Licensed by agreement to Carl Weaver FOR INDIVIDUAL USE ONLY and downloaded on 11/05/2019. No reproduction or transmission in any form permitted without
 written permission of NFPA®. For inquiries or access for multiple users, or to report unauthorized use, contact licensing@nfpa.org.
 {C56A4DC7-64F7-4C88-B368-41DE5BD47BC8}
-===PAGE_BREAK===
+<!-- Source PDF page 25 -->
+
 NATIONAL FIRE ALARM AND SIGNALING CODE	72-22
 2019 Edition Shaded text = Revisions. Δ = Text deletions and figure/table revisions. • = Section deletions. N = New material.
 3.3.24 Automatic Extinguishing System Supervisory Device.
@@ -2004,7 +2033,8 @@ FOR INDIVIDUAL USE ONLY
 Copyright 2019 National Fire Protection Association (NFPA®). Licensed by agreement to Carl Weaver FOR INDIVIDUAL USE ONLY and downloaded on 11/05/2019. No reproduction or transmission in any form permitted without
 written permission of NFPA®. For inquiries or access for multiple users, or to report unauthorized use, contact licensing@nfpa.org.
 {C56A4DC7-64F7-4C88-B368-41DE5BD47BC8}
-===PAGE_BREAK===
+<!-- Source PDF page 26 -->
+
 DEFINITIONS 72-23
 Shaded text = Revisions. Δ = Text deletions and figure/table revisions. • = Section deletions. N = New material. 2019 Edition
 3.3.40.3* Smooth Ceiling. A ceiling surface uninterrupted
@@ -2117,7 +2147,8 @@ FOR INDIVIDUAL USE ONLY
 Copyright 2019 National Fire Protection Association (NFPA®). Licensed by agreement to Carl Weaver FOR INDIVIDUAL USE ONLY and downloaded on 11/05/2019. No reproduction or transmission in any form permitted without
 written permission of NFPA®. For inquiries or access for multiple users, or to report unauthorized use, contact licensing@nfpa.org.
 {C56A4DC7-64F7-4C88-B368-41DE5BD47BC8}
-===PAGE_BREAK===
+<!-- Source PDF page 27 -->
+
 NATIONAL FIRE ALARM AND SIGNALING CODE	72-24
 2019 Edition Shaded text = Revisions. Δ = Text deletions and figure/table revisions. • = Section deletions. N = New material.
 3.3.62 Contiguous Property. See 3.3.213, Property.
@@ -2232,7 +2263,8 @@ FOR INDIVIDUAL USE ONLY
 Copyright 2019 National Fire Protection Association (NFPA®). Licensed by agreement to Carl Weaver FOR INDIVIDUAL USE ONLY and downloaded on 11/05/2019. No reproduction or transmission in any form permitted without
 written permission of NFPA®. For inquiries or access for multiple users, or to report unauthorized use, contact licensing@nfpa.org.
 {C56A4DC7-64F7-4C88-B368-41DE5BD47BC8}
-===PAGE_BREAK===
+<!-- Source PDF page 28 -->
+
 DEFINITIONS 72-25
 Shaded text = Revisions. Δ = Text deletions and figure/table revisions. • = Section deletions. N = New material. 2019 Edition
 3.3.70.14 Other Fire Detectors. Devices that detect a
@@ -2339,7 +2371,8 @@ FOR INDIVIDUAL USE ONLY
 Copyright 2019 National Fire Protection Association (NFPA®). Licensed by agreement to Carl Weaver FOR INDIVIDUAL USE ONLY and downloaded on 11/05/2019. No reproduction or transmission in any form permitted without
 written permission of NFPA®. For inquiries or access for multiple users, or to report unauthorized use, contact licensing@nfpa.org.
 {C56A4DC7-64F7-4C88-B368-41DE5BD47BC8}
-===PAGE_BREAK===
+<!-- Source PDF page 29 -->
+
 NATIONAL FIRE ALARM AND SIGNALING CODE	72-26
 2019 Edition Shaded text = Revisions. Δ = Text deletions and figure/table revisions. • = Section deletions. N = New material.
 N 3.3.86 Electromechanical Releasing Device. Mechanical devi‐
@@ -2453,7 +2486,8 @@ FOR INDIVIDUAL USE ONLY
 Copyright 2019 National Fire Protection Association (NFPA®). Licensed by agreement to Carl Weaver FOR INDIVIDUAL USE ONLY and downloaded on 11/05/2019. No reproduction or transmission in any form permitted without
 written permission of NFPA®. For inquiries or access for multiple users, or to report unauthorized use, contact licensing@nfpa.org.
 {C56A4DC7-64F7-4C88-B368-41DE5BD47BC8}
-===PAGE_BREAK===
+<!-- Source PDF page 30 -->
+
 DEFINITIONS 72-27
 Shaded text = Revisions. Δ = Text deletions and figure/table revisions. • = Section deletions. N = New material. 2019 Edition
 N 3.3.99.2 Electrochemical Energy Storage System. Consists of a
@@ -2568,7 +2602,8 @@ FOR INDIVIDUAL USE ONLY
 Copyright 2019 National Fire Protection Association (NFPA®). Licensed by agreement to Carl Weaver FOR INDIVIDUAL USE ONLY and downloaded on 11/05/2019. No reproduction or transmission in any form permitted without
 written permission of NFPA®. For inquiries or access for multiple users, or to report unauthorized use, contact licensing@nfpa.org.
 {C56A4DC7-64F7-4C88-B368-41DE5BD47BC8}
-===PAGE_BREAK===
+<!-- Source PDF page 31 -->
+
 NATIONAL FIRE ALARM AND SIGNALING CODE	72-28
 2019 Edition Shaded text = Revisions. Δ = Text deletions and figure/table revisions. • = Section deletions. N = New material.
 3.3.117 Fixed-Temperature Detector. See 3.3.70, Detector.
@@ -2679,7 +2714,8 @@ FOR INDIVIDUAL USE ONLY
 Copyright 2019 National Fire Protection Association (NFPA®). Licensed by agreement to Carl Weaver FOR INDIVIDUAL USE ONLY and downloaded on 11/05/2019. No reproduction or transmission in any form permitted without
 written permission of NFPA®. For inquiries or access for multiple users, or to report unauthorized use, contact licensing@nfpa.org.
 {C56A4DC7-64F7-4C88-B368-41DE5BD47BC8}
-===PAGE_BREAK===
+<!-- Source PDF page 32 -->
+
 DEFINITIONS 72-29
 Shaded text = Revisions. Δ = Text deletions and figure/table revisions. • = Section deletions. N = New material. 2019 Edition
 3.3.141.5 Supervisory Signal Initiating Device. An initiating
@@ -2791,7 +2827,8 @@ FOR INDIVIDUAL USE ONLY
 Copyright 2019 National Fire Protection Association (NFPA®). Licensed by agreement to Carl Weaver FOR INDIVIDUAL USE ONLY and downloaded on 11/05/2019. No reproduction or transmission in any form permitted without
 written permission of NFPA®. For inquiries or access for multiple users, or to report unauthorized use, contact licensing@nfpa.org.
 {C56A4DC7-64F7-4C88-B368-41DE5BD47BC8}
-===PAGE_BREAK===
+<!-- Source PDF page 33 -->
+
 NATIONAL FIRE ALARM AND SIGNALING CODE	72-30
 2019 Edition Shaded text = Revisions. Δ = Text deletions and figure/table revisions. • = Section deletions. N = New material.
 3.3.170 Multiple-Station Alarm. A single-station alarm capable
@@ -2905,7 +2942,8 @@ FOR INDIVIDUAL USE ONLY
 Copyright 2019 National Fire Protection Association (NFPA®). Licensed by agreement to Carl Weaver FOR INDIVIDUAL USE ONLY and downloaded on 11/05/2019. No reproduction or transmission in any form permitted without
 written permission of NFPA®. For inquiries or access for multiple users, or to report unauthorized use, contact licensing@nfpa.org.
 {C56A4DC7-64F7-4C88-B368-41DE5BD47BC8}
-===PAGE_BREAK===
+<!-- Source PDF page 34 -->
+
 DEFINITIONS 72-31
 Shaded text = Revisions. Δ = Text deletions and figure/table revisions. • = Section deletions. N = New material. 2019 Edition
 3.3.198 Pathway Survivability. The ability of any conductor,
@@ -3015,7 +3053,8 @@ FOR INDIVIDUAL USE ONLY
 Copyright 2019 National Fire Protection Association (NFPA®). Licensed by agreement to Carl Weaver FOR INDIVIDUAL USE ONLY and downloaded on 11/05/2019. No reproduction or transmission in any form permitted without
 written permission of NFPA®. For inquiries or access for multiple users, or to report unauthorized use, contact licensing@nfpa.org.
 {C56A4DC7-64F7-4C88-B368-41DE5BD47BC8}
-===PAGE_BREAK===
+<!-- Source PDF page 35 -->
+
 NATIONAL FIRE ALARM AND SIGNALING CODE	72-32
 2019 Edition Shaded text = Revisions. Δ = Text deletions and figure/table revisions. • = Section deletions. N = New material.
 3.3.221.1.2 Shunt-Type Auxiliary Alarm System. An auxiliary
@@ -3129,7 +3168,8 @@ FOR INDIVIDUAL USE ONLY
 Copyright 2019 National Fire Protection Association (NFPA®). Licensed by agreement to Carl Weaver FOR INDIVIDUAL USE ONLY and downloaded on 11/05/2019. No reproduction or transmission in any form permitted without
 written permission of NFPA®. For inquiries or access for multiple users, or to report unauthorized use, contact licensing@nfpa.org.
 {C56A4DC7-64F7-4C88-B368-41DE5BD47BC8}
-===PAGE_BREAK===
+<!-- Source PDF page 36 -->
+
 DEFINITIONS 72-33
 Shaded text = Revisions. Δ = Text deletions and figure/table revisions. • = Section deletions. N = New material. 2019 Edition
 3.3.251 Response Time Index (RTI). A numerical value that
@@ -3240,7 +3280,8 @@ FOR INDIVIDUAL USE ONLY
 Copyright 2019 National Fire Protection Association (NFPA®). Licensed by agreement to Carl Weaver FOR INDIVIDUAL USE ONLY and downloaded on 11/05/2019. No reproduction or transmission in any form permitted without
 written permission of NFPA®. For inquiries or access for multiple users, or to report unauthorized use, contact licensing@nfpa.org.
 {C56A4DC7-64F7-4C88-B368-41DE5BD47BC8}
-===PAGE_BREAK===
+<!-- Source PDF page 37 -->
+
 NATIONAL FIRE ALARM AND SIGNALING CODE	72-34
 2019 Edition Shaded text = Revisions. Δ = Text deletions and figure/table revisions. • = Section deletions. N = New material.
 and used to convey an alarm condition when it meets preset
@@ -3357,7 +3398,8 @@ FOR INDIVIDUAL USE ONLY
 Copyright 2019 National Fire Protection Association (NFPA®). Licensed by agreement to Carl Weaver FOR INDIVIDUAL USE ONLY and downloaded on 11/05/2019. No reproduction or transmission in any form permitted without
 written permission of NFPA®. For inquiries or access for multiple users, or to report unauthorized use, contact licensing@nfpa.org.
 {C56A4DC7-64F7-4C88-B368-41DE5BD47BC8}
-===PAGE_BREAK===
+<!-- Source PDF page 38 -->
+
 DEFINITIONS 72-35
 Shaded text = Revisions. Δ = Text deletions and figure/table revisions. • = Section deletions. N = New material. 2019 Edition
 3.3.291.2 Proprietary Supervising Station Alarm System. An
@@ -3478,7 +3520,8 @@ FOR INDIVIDUAL USE ONLY
 Copyright 2019 National Fire Protection Association (NFPA®). Licensed by agreement to Carl Weaver FOR INDIVIDUAL USE ONLY and downloaded on 11/05/2019. No reproduction or transmission in any form permitted without
 written permission of NFPA®. For inquiries or access for multiple users, or to report unauthorized use, contact licensing@nfpa.org.
 {C56A4DC7-64F7-4C88-B368-41DE5BD47BC8}
-===PAGE_BREAK===
+<!-- Source PDF page 39 -->
+
 NATIONAL FIRE ALARM AND SIGNALING CODE	72-36
 2019 Edition Shaded text = Revisions. Δ = Text deletions and figure/table revisions. • = Section deletions. N = New material.
 3.3.306 Transmitter. A system component that provides an
@@ -3569,17 +3612,18 @@ ded to receive common notification. (SIG-PRO)
 3.3.328.2* Signaling Zone. An area consisting of one or
 more notification zones where identical signals are activated
 simultaneously. (SIG-ECS)
-Chapter 4 Reserved
-Chapter 5 Reserved
-Chapter 6 Reserved
+## Chapter 4 Reserved
+## Chapter 5 Reserved
+## Chapter 6 Reserved
 FOR INDIVIDUAL USE ONLY
 Copyright 2019 National Fire Protection Association (NFPA®). Licensed by agreement to Carl Weaver FOR INDIVIDUAL USE ONLY and downloaded on 11/05/2019. No reproduction or transmission in any form permitted without
 written permission of NFPA®. For inquiries or access for multiple users, or to report unauthorized use, contact licensing@nfpa.org.
 {C56A4DC7-64F7-4C88-B368-41DE5BD47BC8}
-===PAGE_BREAK===
+<!-- Source PDF page 40 -->
+
 DOCUMENTATION 72-37
 Shaded text = Revisions. Δ = Text deletions and figure/table revisions. • = Section deletions. N = New material. 2019 Edition
-Chapter 7 Documentation
+## Chapter 7 Documentation
 7.1 Application. (SIG-FUN)
 7.1.1 The documentation of the design, acceptance, and
 completion of new systems required under this Code shall
@@ -3650,7 +3694,7 @@ contact information of the system designer.
 7.2.3 All fire alarm drawings shall use symbols described in
 NFPA 170 or other symbols acceptable to the authority having
 jurisdiction.
-7.3 Design (Layout) Documentation.
+### 7.3 Design (Layout) Documentation.
 7.3.1* The requirements of Section 7.3 shall apply only where
 required by other governing laws, codes, or standards; by other
 parts of this Code; or by project specifications or drawings.
@@ -3695,7 +3739,8 @@ FOR INDIVIDUAL USE ONLY
 Copyright 2019 National Fire Protection Association (NFPA®). Licensed by agreement to Carl Weaver FOR INDIVIDUAL USE ONLY and downloaded on 11/05/2019. No reproduction or transmission in any form permitted without
 written permission of NFPA®. For inquiries or access for multiple users, or to report unauthorized use, contact licensing@nfpa.org.
 {C56A4DC7-64F7-4C88-B368-41DE5BD47BC8}
-===PAGE_BREAK===
+<!-- Source PDF page 41 -->
+
 NATIONAL FIRE ALARM AND SIGNALING CODE	72-38
 2019 Edition Shaded text = Revisions. Δ = Text deletions and figure/table revisions. • = Section deletions. N = New material.
 7.3.4.4 The documentation of acoustically distinguishable
@@ -3807,7 +3852,8 @@ FOR INDIVIDUAL USE ONLY
 Copyright 2019 National Fire Protection Association (NFPA®). Licensed by agreement to Carl Weaver FOR INDIVIDUAL USE ONLY and downloaded on 11/05/2019. No reproduction or transmission in any form permitted without
 written permission of NFPA®. For inquiries or access for multiple users, or to report unauthorized use, contact licensing@nfpa.org.
 {C56A4DC7-64F7-4C88-B368-41DE5BD47BC8}
-===PAGE_BREAK===
+<!-- Source PDF page 42 -->
+
 DOCUMENTATION 72-39
 Shaded text = Revisions. Δ = Text deletions and figure/table revisions. • = Section deletions. N = New material. 2019 Edition
 7.4.6 System riser diagrams shall be coordinated with the floor
@@ -3843,7 +3889,7 @@ ation shall be provided to describe the sequence of operation.
 (2) Notification appliance circuit voltage drop calculations
 (3) Other required calculations, such as line resistance calcu‐
 lations, where required
-7.5 Completion Documentation.
+### 7.5 Completion Documentation.
 7.5.1* The requirements of Section 7.5 shall apply only where
 required by other governing laws, codes, or standards; by other
 parts of this Code; or by project specifications or drawings.
@@ -3929,7 +3975,8 @@ FOR INDIVIDUAL USE ONLY
 Copyright 2019 National Fire Protection Association (NFPA®). Licensed by agreement to Carl Weaver FOR INDIVIDUAL USE ONLY and downloaded on 11/05/2019. No reproduction or transmission in any form permitted without
 written permission of NFPA®. For inquiries or access for multiple users, or to report unauthorized use, contact licensing@nfpa.org.
 {C56A4DC7-64F7-4C88-B368-41DE5BD47BC8}
-===PAGE_BREAK===
+<!-- Source PDF page 43 -->
+
 NATIONAL FIRE ALARM AND SIGNALING CODE	72-40
 2019 Edition Shaded text = Revisions. Δ = Text deletions and figure/table revisions. • = Section deletions. N = New material.
 7.5.8. When more than one contractor has been responsible
@@ -4006,7 +4053,7 @@ required corrective actions have been completed.
 accordance with 26.3.4. (SIG-SSS)
 7.5.10 Documentation of remote station service shall be in
 accordance with 26.5.2. (SIG-SSS)
-7.6 Inspection, Testing, and Maintenance Documentation.
+### 7.6 Inspection, Testing, and Maintenance Documentation.
 (SIG-TMS)
 7.6.1 Test plan documentation shall be provided in accord‐
 ance with 14.2.10.
@@ -4024,7 +4071,7 @@ shall be documented using either the record of inspection and
 testing forms, Figure 7.8.2(g) through Figure 7.8.2(l), or an
 alternative record that includes all the applicable information
 shown in Figure 7.8.2(g) through Figure 7.8.2(l).
-7.7 Records, Record Retention, and Record Maintenance.
+### 7.7 Records, Record Retention, and Record Maintenance.
 7.7.1 Records. (SIG-FUN)
 7.7.1.1 A complete record of the tests and operations of each
 system shall be kept until the next test and for 1 year thereafter
@@ -4044,7 +4091,8 @@ FOR INDIVIDUAL USE ONLY
 Copyright 2019 National Fire Protection Association (NFPA®). Licensed by agreement to Carl Weaver FOR INDIVIDUAL USE ONLY and downloaded on 11/05/2019. No reproduction or transmission in any form permitted without
 written permission of NFPA®. For inquiries or access for multiple users, or to report unauthorized use, contact licensing@nfpa.org.
 {C56A4DC7-64F7-4C88-B368-41DE5BD47BC8}
-===PAGE_BREAK===
+<!-- Source PDF page 44 -->
+
 DOCUMENTATION 72-41
 Shaded text = Revisions. Δ = Text deletions and figure/table revisions. • = Section deletions. N = New material. 2019 Edition
 7.7.1.4 Required documents regarding system design and
@@ -4087,7 +4135,7 @@ public access, it shall be permitted to remove sensitive informa‐
 tion from record documents provided the owner retains
 complete documentation that will be made accessible to the
 authority having jurisdiction at an owner designated location.
-7.8 Forms.
+### 7.8 Forms.
 7.8.1 General.
 7.8.1.1* The requirements of Section 7.8 shall apply only
 where required by other governing laws, codes, or standards; by
@@ -4118,7 +4166,8 @@ FOR INDIVIDUAL USE ONLY
 Copyright 2019 National Fire Protection Association (NFPA®). Licensed by agreement to Carl Weaver FOR INDIVIDUAL USE ONLY and downloaded on 11/05/2019. No reproduction or transmission in any form permitted without
 written permission of NFPA®. For inquiries or access for multiple users, or to report unauthorized use, contact licensing@nfpa.org.
 {C56A4DC7-64F7-4C88-B368-41DE5BD47BC8}
-===PAGE_BREAK===
+<!-- Source PDF page 45 -->
+
 NATIONAL FIRE ALARM AND SIGNALING CODE	72-42
 2019 Edition Shaded text = Revisions. Δ = Text deletions and figure/table revisions. • = Section deletions. N = New material.
 NFPA 72 (p. 1 of 3)	© 2018 National Fire Protection Association
@@ -4168,7 +4217,8 @@ FOR INDIVIDUAL USE ONLY
 Copyright 2019 National Fire Protection Association (NFPA®). Licensed by agreement to Carl Weaver FOR INDIVIDUAL USE ONLY and downloaded on 11/05/2019. No reproduction or transmission in any form permitted without
 written permission of NFPA®. For inquiries or access for multiple users, or to report unauthorized use, contact licensing@nfpa.org.
 {C56A4DC7-64F7-4C88-B368-41DE5BD47BC8}
-===PAGE_BREAK===
+<!-- Source PDF page 46 -->
+
 DOCUMENTATION 72-43
 Shaded text = Revisions. Δ = Text deletions and figure/table revisions. • = Section deletions. N = New material. 2019 Edition
 NFPA 72 (p. 2 of 3)	© 2018 National Fire Protection Association
@@ -4221,7 +4271,8 @@ FOR INDIVIDUAL USE ONLY
 Copyright 2019 National Fire Protection Association (NFPA®). Licensed by agreement to Carl Weaver FOR INDIVIDUAL USE ONLY and downloaded on 11/05/2019. No reproduction or transmission in any form permitted without
 written permission of NFPA®. For inquiries or access for multiple users, or to report unauthorized use, contact licensing@nfpa.org.
 {C56A4DC7-64F7-4C88-B368-41DE5BD47BC8}
-===PAGE_BREAK===
+<!-- Source PDF page 47 -->
+
 NATIONAL FIRE ALARM AND SIGNALING CODE	72-44
 2019 Edition Shaded text = Revisions. Δ = Text deletions and figure/table revisions. • = Section deletions. N = New material.
 NFPA 72 (p. 3 of 3)	© 2018 National Fire Protection Association
@@ -4262,7 +4313,8 @@ FOR INDIVIDUAL USE ONLY
 Copyright 2019 National Fire Protection Association (NFPA®). Licensed by agreement to Carl Weaver FOR INDIVIDUAL USE ONLY and downloaded on 11/05/2019. No reproduction or transmission in any form permitted without
 written permission of NFPA®. For inquiries or access for multiple users, or to report unauthorized use, contact licensing@nfpa.org.
 {C56A4DC7-64F7-4C88-B368-41DE5BD47BC8}
-===PAGE_BREAK===
+<!-- Source PDF page 48 -->
+
 DOCUMENTATION 72-45
 Shaded text = Revisions. Δ = Text deletions and figure/table revisions. • = Section deletions. N = New material. 2019 Edition
 NFPA 72 (p. 1 of 3)	© 2018 National Fire Protection Association
@@ -4303,7 +4355,8 @@ FOR INDIVIDUAL USE ONLY
 Copyright 2019 National Fire Protection Association (NFPA®). Licensed by agreement to Carl Weaver FOR INDIVIDUAL USE ONLY and downloaded on 11/05/2019. No reproduction or transmission in any form permitted without
 written permission of NFPA®. For inquiries or access for multiple users, or to report unauthorized use, contact licensing@nfpa.org.
 {C56A4DC7-64F7-4C88-B368-41DE5BD47BC8}
-===PAGE_BREAK===
+<!-- Source PDF page 49 -->
+
 NATIONAL FIRE ALARM AND SIGNALING CODE	72-46
 2019 Edition Shaded text = Revisions. Δ = Text deletions and figure/table revisions. • = Section deletions. N = New material.
 NFPA 72 (p. 2 of 3)	© 2018 National Fire Protection Association
@@ -4346,7 +4399,8 @@ FOR INDIVIDUAL USE ONLY
 Copyright 2019 National Fire Protection Association (NFPA®). Licensed by agreement to Carl Weaver FOR INDIVIDUAL USE ONLY and downloaded on 11/05/2019. No reproduction or transmission in any form permitted without
 written permission of NFPA®. For inquiries or access for multiple users, or to report unauthorized use, contact licensing@nfpa.org.
 {C56A4DC7-64F7-4C88-B368-41DE5BD47BC8}
-===PAGE_BREAK===
+<!-- Source PDF page 50 -->
+
 DOCUMENTATION 72-47
 Shaded text = Revisions. Δ = Text deletions and figure/table revisions. • = Section deletions. N = New material. 2019 Edition
 NFPA 72 (p. 3 of 3)	© 2018 National Fire Protection Association
@@ -4370,7 +4424,8 @@ FOR INDIVIDUAL USE ONLY
 Copyright 2019 National Fire Protection Association (NFPA®). Licensed by agreement to Carl Weaver FOR INDIVIDUAL USE ONLY and downloaded on 11/05/2019. No reproduction or transmission in any form permitted without
 written permission of NFPA®. For inquiries or access for multiple users, or to report unauthorized use, contact licensing@nfpa.org.
 {C56A4DC7-64F7-4C88-B368-41DE5BD47BC8}
-===PAGE_BREAK===
+<!-- Source PDF page 51 -->
+
 NATIONAL FIRE ALARM AND SIGNALING CODE	72-48
 2019 Edition Shaded text = Revisions. Δ = Text deletions and figure/table revisions. • = Section deletions. N = New material.
 NFPA 72 (p. 1 of 3)	© 2018 National Fire Protection Association
@@ -4415,7 +4470,8 @@ FOR INDIVIDUAL USE ONLY
 Copyright 2019 National Fire Protection Association (NFPA®). Licensed by agreement to Carl Weaver FOR INDIVIDUAL USE ONLY and downloaded on 11/05/2019. No reproduction or transmission in any form permitted without
 written permission of NFPA®. For inquiries or access for multiple users, or to report unauthorized use, contact licensing@nfpa.org.
 {C56A4DC7-64F7-4C88-B368-41DE5BD47BC8}
-===PAGE_BREAK===
+<!-- Source PDF page 52 -->
+
 DOCUMENTATION 72-49
 Shaded text = Revisions. Δ = Text deletions and figure/table revisions. • = Section deletions. N = New material. 2019 Edition
 NFPA 72 (p. 2 of 3)	© 2018 National Fire Protection Association
@@ -4458,7 +4514,8 @@ FOR INDIVIDUAL USE ONLY
 Copyright 2019 National Fire Protection Association (NFPA®). Licensed by agreement to Carl Weaver FOR INDIVIDUAL USE ONLY and downloaded on 11/05/2019. No reproduction or transmission in any form permitted without
 written permission of NFPA®. For inquiries or access for multiple users, or to report unauthorized use, contact licensing@nfpa.org.
 {C56A4DC7-64F7-4C88-B368-41DE5BD47BC8}
-===PAGE_BREAK===
+<!-- Source PDF page 53 -->
+
 NATIONAL FIRE ALARM AND SIGNALING CODE	72-50
 2019 Edition Shaded text = Revisions. Δ = Text deletions and figure/table revisions. • = Section deletions. N = New material.
 NFPA 72 (p. 3 of 3)	© 2018 National Fire Protection Association
@@ -4491,7 +4548,8 @@ FOR INDIVIDUAL USE ONLY
 Copyright 2019 National Fire Protection Association (NFPA®). Licensed by agreement to Carl Weaver FOR INDIVIDUAL USE ONLY and downloaded on 11/05/2019. No reproduction or transmission in any form permitted without
 written permission of NFPA®. For inquiries or access for multiple users, or to report unauthorized use, contact licensing@nfpa.org.
 {C56A4DC7-64F7-4C88-B368-41DE5BD47BC8}
-===PAGE_BREAK===
+<!-- Source PDF page 54 -->
+
 DOCUMENTATION 72-51
 Shaded text = Revisions. Δ = Text deletions and figure/table revisions. • = Section deletions. N = New material. 2019 Edition
 NFPA 72	© 2018 National Fire Protection Association
@@ -4514,7 +4572,8 @@ FOR INDIVIDUAL USE ONLY
 Copyright 2019 National Fire Protection Association (NFPA®). Licensed by agreement to Carl Weaver FOR INDIVIDUAL USE ONLY and downloaded on 11/05/2019. No reproduction or transmission in any form permitted without
 written permission of NFPA®. For inquiries or access for multiple users, or to report unauthorized use, contact licensing@nfpa.org.
 {C56A4DC7-64F7-4C88-B368-41DE5BD47BC8}
-===PAGE_BREAK===
+<!-- Source PDF page 55 -->
+
 NATIONAL FIRE ALARM AND SIGNALING CODE	72-52
 2019 Edition Shaded text = Revisions. Δ = Text deletions and figure/table revisions. • = Section deletions. N = New material.
 NFPA 72	© 2018 National Fire Protection Association
@@ -4537,7 +4596,8 @@ FOR INDIVIDUAL USE ONLY
 Copyright 2019 National Fire Protection Association (NFPA®). Licensed by agreement to Carl Weaver FOR INDIVIDUAL USE ONLY and downloaded on 11/05/2019. No reproduction or transmission in any form permitted without
 written permission of NFPA®. For inquiries or access for multiple users, or to report unauthorized use, contact licensing@nfpa.org.
 {C56A4DC7-64F7-4C88-B368-41DE5BD47BC8}
-===PAGE_BREAK===
+<!-- Source PDF page 56 -->
+
 DOCUMENTATION 72-53
 Shaded text = Revisions. Δ = Text deletions and figure/table revisions. • = Section deletions. N = New material. 2019 Edition
 NFPA 72	© 2018 National Fire Protection Association
@@ -4560,7 +4620,8 @@ FOR INDIVIDUAL USE ONLY
 Copyright 2019 National Fire Protection Association (NFPA®). Licensed by agreement to Carl Weaver FOR INDIVIDUAL USE ONLY and downloaded on 11/05/2019. No reproduction or transmission in any form permitted without
 written permission of NFPA®. For inquiries or access for multiple users, or to report unauthorized use, contact licensing@nfpa.org.
 {C56A4DC7-64F7-4C88-B368-41DE5BD47BC8}
-===PAGE_BREAK===
+<!-- Source PDF page 57 -->
+
 NATIONAL FIRE ALARM AND SIGNALING CODE	72-54
 2019 Edition Shaded text = Revisions. Δ = Text deletions and figure/table revisions. • = Section deletions. N = New material.
 NFPA 72 (p. 1 of 4)	© 2018 National Fire Protection Association
@@ -4604,7 +4665,8 @@ FOR INDIVIDUAL USE ONLY
 Copyright 2019 National Fire Protection Association (NFPA®). Licensed by agreement to Carl Weaver FOR INDIVIDUAL USE ONLY and downloaded on 11/05/2019. No reproduction or transmission in any form permitted without
 written permission of NFPA®. For inquiries or access for multiple users, or to report unauthorized use, contact licensing@nfpa.org.
 {C56A4DC7-64F7-4C88-B368-41DE5BD47BC8}
-===PAGE_BREAK===
+<!-- Source PDF page 58 -->
+
 DOCUMENTATION 72-55
 Shaded text = Revisions. Δ = Text deletions and figure/table revisions. • = Section deletions. N = New material. 2019 Edition
 NFPA 72 (p. 2 of 4)	© 2018 National Fire Protection Association
@@ -4653,7 +4715,8 @@ FOR INDIVIDUAL USE ONLY
 Copyright 2019 National Fire Protection Association (NFPA®). Licensed by agreement to Carl Weaver FOR INDIVIDUAL USE ONLY and downloaded on 11/05/2019. No reproduction or transmission in any form permitted without
 written permission of NFPA®. For inquiries or access for multiple users, or to report unauthorized use, contact licensing@nfpa.org.
 {C56A4DC7-64F7-4C88-B368-41DE5BD47BC8}
-===PAGE_BREAK===
+<!-- Source PDF page 59 -->
+
 NATIONAL FIRE ALARM AND SIGNALING CODE	72-56
 2019 Edition Shaded text = Revisions. Δ = Text deletions and figure/table revisions. • = Section deletions. N = New material.
 NFPA 72 (p. 3 of 4)	© 2018 National Fire Protection Association
@@ -4687,7 +4750,8 @@ FOR INDIVIDUAL USE ONLY
 Copyright 2019 National Fire Protection Association (NFPA®). Licensed by agreement to Carl Weaver FOR INDIVIDUAL USE ONLY and downloaded on 11/05/2019. No reproduction or transmission in any form permitted without
 written permission of NFPA®. For inquiries or access for multiple users, or to report unauthorized use, contact licensing@nfpa.org.
 {C56A4DC7-64F7-4C88-B368-41DE5BD47BC8}
-===PAGE_BREAK===
+<!-- Source PDF page 60 -->
+
 DOCUMENTATION 72-57
 Shaded text = Revisions. Δ = Text deletions and figure/table revisions. • = Section deletions. N = New material. 2019 Edition
 7. NOTIFICATIONS THAT TESTING IS COMPLETE
@@ -4716,7 +4780,8 @@ FOR INDIVIDUAL USE ONLY
 Copyright 2019 National Fire Protection Association (NFPA®). Licensed by agreement to Carl Weaver FOR INDIVIDUAL USE ONLY and downloaded on 11/05/2019. No reproduction or transmission in any form permitted without
 written permission of NFPA®. For inquiries or access for multiple users, or to report unauthorized use, contact licensing@nfpa.org.
 {C56A4DC7-64F7-4C88-B368-41DE5BD47BC8}
-===PAGE_BREAK===
+<!-- Source PDF page 61 -->
+
 NATIONAL FIRE ALARM AND SIGNALING CODE	72-58
 2019 Edition Shaded text = Revisions. Δ = Text deletions and figure/table revisions. • = Section deletions. N = New material.
 NFPA 72 (p. 1 of 2)	© 2018 National Fire Protection Association
@@ -4739,7 +4804,8 @@ FOR INDIVIDUAL USE ONLY
 Copyright 2019 National Fire Protection Association (NFPA®). Licensed by agreement to Carl Weaver FOR INDIVIDUAL USE ONLY and downloaded on 11/05/2019. No reproduction or transmission in any form permitted without
 written permission of NFPA®. For inquiries or access for multiple users, or to report unauthorized use, contact licensing@nfpa.org.
 {C56A4DC7-64F7-4C88-B368-41DE5BD47BC8}
-===PAGE_BREAK===
+<!-- Source PDF page 62 -->
+
 DOCUMENTATION 72-59
 Shaded text = Revisions. Δ = Text deletions and figure/table revisions. • = Section deletions. N = New material. 2019 Edition
 NFPA 72 (p. 2 of 2)	© 2018 National Fire Protection Association
@@ -4753,7 +4819,8 @@ FOR INDIVIDUAL USE ONLY
 Copyright 2019 National Fire Protection Association (NFPA®). Licensed by agreement to Carl Weaver FOR INDIVIDUAL USE ONLY and downloaded on 11/05/2019. No reproduction or transmission in any form permitted without
 written permission of NFPA®. For inquiries or access for multiple users, or to report unauthorized use, contact licensing@nfpa.org.
 {C56A4DC7-64F7-4C88-B368-41DE5BD47BC8}
-===PAGE_BREAK===
+<!-- Source PDF page 63 -->
+
 NATIONAL FIRE ALARM AND SIGNALING CODE	72-60
 2019 Edition Shaded text = Revisions. Δ = Text deletions and figure/table revisions. • = Section deletions. N = New material.
 NFPA 72 (p. 1 of 2)	© 2018 National Fire Protection Association
@@ -4776,7 +4843,8 @@ FOR INDIVIDUAL USE ONLY
 Copyright 2019 National Fire Protection Association (NFPA®). Licensed by agreement to Carl Weaver FOR INDIVIDUAL USE ONLY and downloaded on 11/05/2019. No reproduction or transmission in any form permitted without
 written permission of NFPA®. For inquiries or access for multiple users, or to report unauthorized use, contact licensing@nfpa.org.
 {C56A4DC7-64F7-4C88-B368-41DE5BD47BC8}
-===PAGE_BREAK===
+<!-- Source PDF page 64 -->
+
 DOCUMENTATION 72-61
 Shaded text = Revisions. Δ = Text deletions and figure/table revisions. • = Section deletions. N = New material. 2019 Edition
 NFPA 72 (p. 2 of 2)	© 2018 National Fire Protection Association
@@ -4790,7 +4858,8 @@ FOR INDIVIDUAL USE ONLY
 Copyright 2019 National Fire Protection Association (NFPA®). Licensed by agreement to Carl Weaver FOR INDIVIDUAL USE ONLY and downloaded on 11/05/2019. No reproduction or transmission in any form permitted without
 written permission of NFPA®. For inquiries or access for multiple users, or to report unauthorized use, contact licensing@nfpa.org.
 {C56A4DC7-64F7-4C88-B368-41DE5BD47BC8}
-===PAGE_BREAK===
+<!-- Source PDF page 65 -->
+
 NATIONAL FIRE ALARM AND SIGNALING CODE	72-62
 2019 Edition Shaded text = Revisions. Δ = Text deletions and figure/table revisions. • = Section deletions. N = New material.
 NFPA 72 (p. 1 of 2)	© 2018 National Fire Protection Association
@@ -4837,7 +4906,8 @@ FOR INDIVIDUAL USE ONLY
 Copyright 2019 National Fire Protection Association (NFPA®). Licensed by agreement to Carl Weaver FOR INDIVIDUAL USE ONLY and downloaded on 11/05/2019. No reproduction or transmission in any form permitted without
 written permission of NFPA®. For inquiries or access for multiple users, or to report unauthorized use, contact licensing@nfpa.org.
 {C56A4DC7-64F7-4C88-B368-41DE5BD47BC8}
-===PAGE_BREAK===
+<!-- Source PDF page 66 -->
+
 DOCUMENTATION 72-63
 Shaded text = Revisions. Δ = Text deletions and figure/table revisions. • = Section deletions. N = New material. 2019 Edition
 NFPA 72 (p. 2 of 2)	© 2018 National Fire Protection Association
@@ -4885,7 +4955,8 @@ FOR INDIVIDUAL USE ONLY
 Copyright 2019 National Fire Protection Association (NFPA®). Licensed by agreement to Carl Weaver FOR INDIVIDUAL USE ONLY and downloaded on 11/05/2019. No reproduction or transmission in any form permitted without
 written permission of NFPA®. For inquiries or access for multiple users, or to report unauthorized use, contact licensing@nfpa.org.
 {C56A4DC7-64F7-4C88-B368-41DE5BD47BC8}
-===PAGE_BREAK===
+<!-- Source PDF page 67 -->
+
 NATIONAL FIRE ALARM AND SIGNALING CODE	72-64
 2019 Edition Shaded text = Revisions. Δ = Text deletions and figure/table revisions. • = Section deletions. N = New material.
 NFPA 72 (p. 1 of 5)	© 2018 National Fire Protection Association
@@ -4927,7 +4998,8 @@ FOR INDIVIDUAL USE ONLY
 Copyright 2019 National Fire Protection Association (NFPA®). Licensed by agreement to Carl Weaver FOR INDIVIDUAL USE ONLY and downloaded on 11/05/2019. No reproduction or transmission in any form permitted without
 written permission of NFPA®. For inquiries or access for multiple users, or to report unauthorized use, contact licensing@nfpa.org.
 {C56A4DC7-64F7-4C88-B368-41DE5BD47BC8}
-===PAGE_BREAK===
+<!-- Source PDF page 68 -->
+
 DOCUMENTATION 72-65
 Shaded text = Revisions. Δ = Text deletions and figure/table revisions. • = Section deletions. N = New material. 2019 Edition
 NFPA 72 (p. 2 of 5)	© 2018 National Fire Protection Association
@@ -4970,7 +5042,8 @@ FOR INDIVIDUAL USE ONLY
 Copyright 2019 National Fire Protection Association (NFPA®). Licensed by agreement to Carl Weaver FOR INDIVIDUAL USE ONLY and downloaded on 11/05/2019. No reproduction or transmission in any form permitted without
 written permission of NFPA®. For inquiries or access for multiple users, or to report unauthorized use, contact licensing@nfpa.org.
 {C56A4DC7-64F7-4C88-B368-41DE5BD47BC8}
-===PAGE_BREAK===
+<!-- Source PDF page 69 -->
+
 NATIONAL FIRE ALARM AND SIGNALING CODE	72-66
 2019 Edition Shaded text = Revisions. Δ = Text deletions and figure/table revisions. • = Section deletions. N = New material.
 NFPA 72 (p. 3 of 5)	© 2018 National Fire Protection Association
@@ -5016,7 +5089,8 @@ FOR INDIVIDUAL USE ONLY
 Copyright 2019 National Fire Protection Association (NFPA®). Licensed by agreement to Carl Weaver FOR INDIVIDUAL USE ONLY and downloaded on 11/05/2019. No reproduction or transmission in any form permitted without
 written permission of NFPA®. For inquiries or access for multiple users, or to report unauthorized use, contact licensing@nfpa.org.
 {C56A4DC7-64F7-4C88-B368-41DE5BD47BC8}
-===PAGE_BREAK===
+<!-- Source PDF page 70 -->
+
 DOCUMENTATION 72-67
 Shaded text = Revisions. Δ = Text deletions and figure/table revisions. • = Section deletions. N = New material. 2019 Edition
 NFPA 72 (p. 4 of 5)	© 2018 National Fire Protection Association
@@ -5067,7 +5141,8 @@ FOR INDIVIDUAL USE ONLY
 Copyright 2019 National Fire Protection Association (NFPA®). Licensed by agreement to Carl Weaver FOR INDIVIDUAL USE ONLY and downloaded on 11/05/2019. No reproduction or transmission in any form permitted without
 written permission of NFPA®. For inquiries or access for multiple users, or to report unauthorized use, contact licensing@nfpa.org.
 {C56A4DC7-64F7-4C88-B368-41DE5BD47BC8}
-===PAGE_BREAK===
+<!-- Source PDF page 71 -->
+
 NATIONAL FIRE ALARM AND SIGNALING CODE	72-68
 2019 Edition Shaded text = Revisions. Δ = Text deletions and figure/table revisions. • = Section deletions. N = New material.
 NFPA 72 (p. 5 of 5)	© 2018 National Fire Protection Association
@@ -5106,7 +5181,8 @@ FOR INDIVIDUAL USE ONLY
 Copyright 2019 National Fire Protection Association (NFPA®). Licensed by agreement to Carl Weaver FOR INDIVIDUAL USE ONLY and downloaded on 11/05/2019. No reproduction or transmission in any form permitted without
 written permission of NFPA®. For inquiries or access for multiple users, or to report unauthorized use, contact licensing@nfpa.org.
 {C56A4DC7-64F7-4C88-B368-41DE5BD47BC8}
-===PAGE_BREAK===
+<!-- Source PDF page 72 -->
+
 DOCUMENTATION 72-69
 Shaded text = Revisions. Δ = Text deletions and figure/table revisions. • = Section deletions. N = New material. 2019 Edition
 NFPA 72 (p. 1 of 2)	© 2018 National Fire Protection Association
@@ -5129,7 +5205,8 @@ FOR INDIVIDUAL USE ONLY
 Copyright 2019 National Fire Protection Association (NFPA®). Licensed by agreement to Carl Weaver FOR INDIVIDUAL USE ONLY and downloaded on 11/05/2019. No reproduction or transmission in any form permitted without
 written permission of NFPA®. For inquiries or access for multiple users, or to report unauthorized use, contact licensing@nfpa.org.
 {C56A4DC7-64F7-4C88-B368-41DE5BD47BC8}
-===PAGE_BREAK===
+<!-- Source PDF page 73 -->
+
 NATIONAL FIRE ALARM AND SIGNALING CODE	72-70
 2019 Edition Shaded text = Revisions. Δ = Text deletions and figure/table revisions. • = Section deletions. N = New material.
 NFPA 72 (p. 2 of 2)	© 2018 National Fire Protection Association
@@ -5143,7 +5220,8 @@ FOR INDIVIDUAL USE ONLY
 Copyright 2019 National Fire Protection Association (NFPA®). Licensed by agreement to Carl Weaver FOR INDIVIDUAL USE ONLY and downloaded on 11/05/2019. No reproduction or transmission in any form permitted without
 written permission of NFPA®. For inquiries or access for multiple users, or to report unauthorized use, contact licensing@nfpa.org.
 {C56A4DC7-64F7-4C88-B368-41DE5BD47BC8}
-===PAGE_BREAK===
+<!-- Source PDF page 74 -->
+
 DOCUMENTATION 72-71
 Shaded text = Revisions. Δ = Text deletions and figure/table revisions. • = Section deletions. N = New material. 2019 Edition
 Other:	E-Mail:
@@ -5198,13 +5276,14 @@ FOR INDIVIDUAL USE ONLY
 Copyright 2019 National Fire Protection Association (NFPA®). Licensed by agreement to Carl Weaver FOR INDIVIDUAL USE ONLY and downloaded on 11/05/2019. No reproduction or transmission in any form permitted without
 written permission of NFPA®. For inquiries or access for multiple users, or to report unauthorized use, contact licensing@nfpa.org.
 {C56A4DC7-64F7-4C88-B368-41DE5BD47BC8}
-===PAGE_BREAK===
+<!-- Source PDF page 75 -->
+
 NATIONAL FIRE ALARM AND SIGNALING CODE	72-72
 2019 Edition Shaded text = Revisions. Δ = Text deletions and figure/table revisions. • = Section deletions. N = New material.
-Chapter 8 Reserved
-Chapter 9 Reserved
-Chapter 10 Fundamentals
-10.1 Application.
+## Chapter 8 Reserved
+## Chapter 9 Reserved
+## Chapter 10 Fundamentals
+### 10.1 Application.
 10.1.1 The basic functions of a complete fire alarm and/or
 signaling system shall comply with the requirements of this
 chapter.
@@ -5218,7 +5297,7 @@ enced in Chapter 10.
 systems shall be primarily to provide notification of alarm,
 supervisory, and trouble conditions; to alert the occupants; to
 summon aid; and to control emergency control functions.
-10.3 Equipment.
+### 10.3 Equipment.
 10.3.1 Equipment constructed and installed in conformity
 with this Code shall be listed for the purpose for which it is
 used.
@@ -5239,7 +5318,7 @@ primary (main) and secondary (standby) input voltage(s)
 (2) At ambient temperatures of 32°F (0°C) and 120°F (49°C)
 (3) At a relative humidity of 85 percent and an ambient
 temperature of 86°F (30°C)
-10.4 Design and Installation.
+### 10.4 Design and Installation.
 10.4.1* All systems shall be installed in accordance with the
 plans, specifications, and standards approved by the authority
 having jurisdiction.
@@ -5283,7 +5362,7 @@ ing ways:
 (3) A means contained within a locked cabinet or arranged
 to provide equivalent protection against unauthorized
 use
-10.5 Personnel Qualifications.
+### 10.5 Personnel Qualifications.
 10.5.1 System Designer.
 10.5.1.1 Plans and specifications shall be developed in accord‐
 ance with this Code by persons who are experienced in the
@@ -5309,7 +5388,8 @@ FOR INDIVIDUAL USE ONLY
 Copyright 2019 National Fire Protection Association (NFPA®). Licensed by agreement to Carl Weaver FOR INDIVIDUAL USE ONLY and downloaded on 11/05/2019. No reproduction or transmission in any form permitted without
 written permission of NFPA®. For inquiries or access for multiple users, or to report unauthorized use, contact licensing@nfpa.org.
 {C56A4DC7-64F7-4C88-B368-41DE5BD47BC8}
-===PAGE_BREAK===
+<!-- Source PDF page 76 -->
+
 FUNDAMENTALS 72-73
 Shaded text = Revisions. Δ = Text deletions and figure/table revisions. • = Section deletions. N = New material. 2019 Edition
 10.5.2 System Installer.
@@ -5423,7 +5503,8 @@ FOR INDIVIDUAL USE ONLY
 Copyright 2019 National Fire Protection Association (NFPA®). Licensed by agreement to Carl Weaver FOR INDIVIDUAL USE ONLY and downloaded on 11/05/2019. No reproduction or transmission in any form permitted without
 written permission of NFPA®. For inquiries or access for multiple users, or to report unauthorized use, contact licensing@nfpa.org.
 {C56A4DC7-64F7-4C88-B368-41DE5BD47BC8}
-===PAGE_BREAK===
+<!-- Source PDF page 77 -->
+
 NATIONAL FIRE ALARM AND SIGNALING CODE	72-74
 2019 Edition Shaded text = Revisions. Δ = Text deletions and figure/table revisions. • = Section deletions. N = New material.
 10.5.6.1.2 The system design documents shall include the
@@ -5457,7 +5538,7 @@ be provided when requested by the authority having jurisdic‐
 tion. A license or qualification listing shall be current in
 accordance with the requirements of the issuing authority or
 organization.
-10.6 Power Supplies.
+### 10.6 Power Supplies.
 Δ 10.6.1* Scope. The provisions of this section shall apply to
 power supplies.
 10.6.2 Code Conformance. All power supplies shall be instal‐
@@ -5535,7 +5616,8 @@ FOR INDIVIDUAL USE ONLY
 Copyright 2019 National Fire Protection Association (NFPA®). Licensed by agreement to Carl Weaver FOR INDIVIDUAL USE ONLY and downloaded on 11/05/2019. No reproduction or transmission in any form permitted without
 written permission of NFPA®. For inquiries or access for multiple users, or to report unauthorized use, contact licensing@nfpa.org.
 {C56A4DC7-64F7-4C88-B368-41DE5BD47BC8}
-===PAGE_BREAK===
+<!-- Source PDF page 78 -->
+
 FUNDAMENTALS 72-75
 Shaded text = Revisions. Δ = Text deletions and figure/table revisions. • = Section deletions. N = New material. 2019 Edition
 10.6.6.3.2 Where an ESS is employed in 10.6.6.3.1, a positive
@@ -5653,7 +5735,8 @@ FOR INDIVIDUAL USE ONLY
 Copyright 2019 National Fire Protection Association (NFPA®). Licensed by agreement to Carl Weaver FOR INDIVIDUAL USE ONLY and downloaded on 11/05/2019. No reproduction or transmission in any form permitted without
 written permission of NFPA®. For inquiries or access for multiple users, or to report unauthorized use, contact licensing@nfpa.org.
 {C56A4DC7-64F7-4C88-B368-41DE5BD47BC8}
-===PAGE_BREAK===
+<!-- Source PDF page 79 -->
+
 NATIONAL FIRE ALARM AND SIGNALING CODE	72-76
 2019 Edition Shaded text = Revisions. Δ = Text deletions and figure/table revisions. • = Section deletions. N = New material.
 10.6.8.4 The location of remotely located power supplies shall
@@ -5763,7 +5846,8 @@ FOR INDIVIDUAL USE ONLY
 Copyright 2019 National Fire Protection Association (NFPA®). Licensed by agreement to Carl Weaver FOR INDIVIDUAL USE ONLY and downloaded on 11/05/2019. No reproduction or transmission in any form permitted without
 written permission of NFPA®. For inquiries or access for multiple users, or to report unauthorized use, contact licensing@nfpa.org.
 {C56A4DC7-64F7-4C88-B368-41DE5BD47BC8}
-===PAGE_BREAK===
+<!-- Source PDF page 80 -->
+
 FUNDAMENTALS 72-77
 Shaded text = Revisions. Δ = Text deletions and figure/table revisions. • = Section deletions. N = New material. 2019 Edition
 10.6.11.3.1.3 Where survivability of circuits is required by
@@ -5837,7 +5921,7 @@ signals where acceptable to the authority having jurisdiction.
 10.7.9* Where separate systems are installed, they shall be
 permitted to achieve the priority of signals in accordance with
 Section 10.7.
-10.8 Detection and Signaling of Conditions.
+### 10.8 Detection and Signaling of Conditions.
 10.8.1 Abnormal Condition Detection. Where required by
 this Code, the system shall be provided with means to detect
 and signal abnormal conditions.
@@ -5856,7 +5940,7 @@ signal trouble conditions.
 10.8.2.4 Normal Condition Detection. Where required by this
 Code, the system shall generate a restoration signal when the
 device or signaling system returns to normal.
-10.9 Responses.
+### 10.9 Responses.
 10.9.1 Alarm. The response to an alarm signal shall be in
 accordance with this Code.
 10.9.2 Pre-Alarm. The response to a pre-alarm signal shall be
@@ -5865,7 +5949,7 @@ in accordance with this Code.
 be in accordance with this Code.
 10.9.4 Trouble. The response to trouble signal shall be in
 accordance with this Code.
-10.10 Distinctive Signals.
+### 10.10 Distinctive Signals.
 10.10.1 Priority alarm signals, fire alarm signals, carbon
 monoxide alarm signals, supervisory signals, pre-alarm signals,
 and trouble signals shall be distinctively and descriptively
@@ -5874,7 +5958,8 @@ FOR INDIVIDUAL USE ONLY
 Copyright 2019 National Fire Protection Association (NFPA®). Licensed by agreement to Carl Weaver FOR INDIVIDUAL USE ONLY and downloaded on 11/05/2019. No reproduction or transmission in any form permitted without
 written permission of NFPA®. For inquiries or access for multiple users, or to report unauthorized use, contact licensing@nfpa.org.
 {C56A4DC7-64F7-4C88-B368-41DE5BD47BC8}
-===PAGE_BREAK===
+<!-- Source PDF page 81 -->
+
 NATIONAL FIRE ALARM AND SIGNALING CODE	72-78
 2019 Edition Shaded text = Revisions. Δ = Text deletions and figure/table revisions. • = Section deletions. N = New material.
 10.10.2 Audible alarm notification appliances for a fire alarm
@@ -5909,7 +5994,7 @@ other signals, and their sound shall not be used for any other
 purpose except as permitted in 10.10.4.
 N 10.10.9 Carbon monoxide alarm signals shall comply with
 18.4.4.2.
-10.11 Alarm Signals.
+### 10.11 Alarm Signals.
 10.11.1* Actuation of alarm notification appliances or emer‐
 gency voice communications, emergency control function
 interface devices, and annunciation at the protected premises
@@ -5939,7 +6024,7 @@ unit only shall automatically reactivate every 24 hours or less
 until alarm signal conditions are restored to normal.
 10.11.8.2 The audible and visible alarm signal shall operate
 until it is manually silenced or acknowledged.
-10.12* Fire Alarm Notification Appliance Deactivation.
+### 10.12* Fire Alarm Notification Appliance Deactivation.
 10.12.1 A means for turning off activated alarm notification
 appliance(s) shall be permitted.
 10.12.2* When an occupant notification alarm signal deactiva‐
@@ -5966,7 +6051,7 @@ N 10.13 Carbon Monoxide (CO) Notification Appliance Deacti‐
 vation. A CO initiating device with an integral sounder shall
 be permitted to be silenced locally if the CO alarm or supervi‐
 sory status continues to be displayed at the control unit.
-10.14 Supervisory Signals.
+### 10.14 Supervisory Signals.
 10.14.1 Self-Restoring Supervisory Signal Indication. Visible
 and audible indication of self-restoring supervisory signals and
 visible indication of their restoration to normal shall be auto‐
@@ -5987,7 +6072,8 @@ FOR INDIVIDUAL USE ONLY
 Copyright 2019 National Fire Protection Association (NFPA®). Licensed by agreement to Carl Weaver FOR INDIVIDUAL USE ONLY and downloaded on 11/05/2019. No reproduction or transmission in any form permitted without
 written permission of NFPA®. For inquiries or access for multiple users, or to report unauthorized use, contact licensing@nfpa.org.
 {C56A4DC7-64F7-4C88-B368-41DE5BD47BC8}
-===PAGE_BREAK===
+<!-- Source PDF page 82 -->
+
 FUNDAMENTALS 72-79
 Shaded text = Revisions. Δ = Text deletions and figure/table revisions. • = Section deletions. N = New material. 2019 Edition
 10.14.3 Coded Supervisory Signal.
@@ -6031,7 +6117,7 @@ matrix.
 appliances that remains in the deactivated position when there
 is no supervisory condition shall operate an audible trouble
 notification appliance until the means is restored to normal.
-10.15 Trouble Signals.
+### 10.15 Trouble Signals.
 10.15.1 Trouble signals and their restoration to normal shall
 be indicated within 200 seconds at the locations identified in
 10.15.7 and 10.15.8.
@@ -6101,10 +6187,11 @@ FOR INDIVIDUAL USE ONLY
 Copyright 2019 National Fire Protection Association (NFPA®). Licensed by agreement to Carl Weaver FOR INDIVIDUAL USE ONLY and downloaded on 11/05/2019. No reproduction or transmission in any form permitted without
 written permission of NFPA®. For inquiries or access for multiple users, or to report unauthorized use, contact licensing@nfpa.org.
 {C56A4DC7-64F7-4C88-B368-41DE5BD47BC8}
-===PAGE_BREAK===
+<!-- Source PDF page 83 -->
+
 NATIONAL FIRE ALARM AND SIGNALING CODE	72-80
 2019 Edition Shaded text = Revisions. Δ = Text deletions and figure/table revisions. • = Section deletions. N = New material.
-10.16 Emergency Control Function Status Indicators.
+### 10.16 Emergency Control Function Status Indicators.
 10.16.1 All controls provided specifically for the purpose of
 manually overriding any automatic emergency control function
 shall provide visible indication of the status of the associated
@@ -6113,7 +6200,7 @@ control circuits.
 equipment or control functions, they shall be arranged to
 reflect the actual status of the associated equipment or func‐
 tion.
-10.17 Notification Appliance Circuits and Control Circuits.
+### 10.17 Notification Appliance Circuits and Control Circuits.
 10.17.1 An open, ground-fault, or short-circuit fault on the
 installation conductors of one alarm notification appliance
 circuit shall not affect the operation of any other alarm notifi‐
@@ -6133,7 +6220,7 @@ accordance with Section 12.6.
 (3) A fault in the control circuit installation conductors shall
 result in a trouble signal in accordance with
 Section 10.15.
-10.18 Annunciation and Annunciation Zoning.
+### 10.18 Annunciation and Annunciation Zoning.
 10.18.1 Alarm Annunciation.
 10.18.1.1 Where required by other governing laws, codes, or
 standards, the location of an operated initiating device shall be
@@ -6205,19 +6292,20 @@ circuit to become fully or partially inoperative.
 10.19.2.3 Two-way telephone communications circuit fault
 conditions shall result in a trouble signal in accordance with
 Section 10.15.
-10.20 Documentation and Notification.
+### 10.20 Documentation and Notification.
 10.20.1 Documentation shall be in accordance with Chap‐
 ter 7.
 FOR INDIVIDUAL USE ONLY
 Copyright 2019 National Fire Protection Association (NFPA®). Licensed by agreement to Carl Weaver FOR INDIVIDUAL USE ONLY and downloaded on 11/05/2019. No reproduction or transmission in any form permitted without
 written permission of NFPA®. For inquiries or access for multiple users, or to report unauthorized use, contact licensing@nfpa.org.
 {C56A4DC7-64F7-4C88-B368-41DE5BD47BC8}
-===PAGE_BREAK===
+<!-- Source PDF page 84 -->
+
 CIRCUITS AND PATHWAYS 72-81
 Shaded text = Revisions. Δ = Text deletions and figure/table revisions. • = Section deletions. N = New material. 2019 Edition
 10.20.2 The authority having jurisdiction shall be notified
 prior to installation or alteration of equipment or wiring.
-10.21* Impairments.
+### 10.21* Impairments.
 10.21.1 The system owner or the owner’s designated represen‐
 tative shall be notified when a system or part thereof is
 impaired. Impairments to systems shall include out-of-service
@@ -6245,13 +6333,13 @@ following:
 (2) Nuisance alarm
 (3) Unintentional alarm
 (4) Unknown alarm
-Chapter 11 Reserved
-Chapter 12 Circuits and Pathways
-12.1 Application.
+## Chapter 11 Reserved
+## Chapter 12 Circuits and Pathways
+### 12.1 Application.
 12.1.1 Pathways (interconnections) shall be designated based
 on the performance characteristics defined in this chapter.
 12.1.2 The requirements of Chapter 14 shall apply.
-12.2 General.
+### 12.2 General.
 12.2.1* Performance and survivability characteristics of signal‐
 ing pathways (interconnections) shall comply with the defined
 designations of this chapter.
@@ -6326,7 +6414,8 @@ FOR INDIVIDUAL USE ONLY
 Copyright 2019 National Fire Protection Association (NFPA®). Licensed by agreement to Carl Weaver FOR INDIVIDUAL USE ONLY and downloaded on 11/05/2019. No reproduction or transmission in any form permitted without
 written permission of NFPA®. For inquiries or access for multiple users, or to report unauthorized use, contact licensing@nfpa.org.
 {C56A4DC7-64F7-4C88-B368-41DE5BD47BC8}
-===PAGE_BREAK===
+<!-- Source PDF page 85 -->
+
 NATIONAL FIRE ALARM AND SIGNALING CODE	72-82
 2019 Edition Shaded text = Revisions. Δ = Text deletions and figure/table revisions. • = Section deletions. N = New material.
 but the intended operation is performed in the event of a path‐
@@ -6449,7 +6538,8 @@ FOR INDIVIDUAL USE ONLY
 Copyright 2019 National Fire Protection Association (NFPA®). Licensed by agreement to Carl Weaver FOR INDIVIDUAL USE ONLY and downloaded on 11/05/2019. No reproduction or transmission in any form permitted without
 written permission of NFPA®. For inquiries or access for multiple users, or to report unauthorized use, contact licensing@nfpa.org.
 {C56A4DC7-64F7-4C88-B368-41DE5BD47BC8}
-===PAGE_BREAK===
+<!-- Source PDF page 86 -->
+
 INSPECTION, TESTING, AND MAINTENANCE 72-83
 Shaded text = Revisions. Δ = Text deletions and figure/table revisions. • = Section deletions. N = New material. 2019 Edition
 connecting conductors or equivalent path so that the restora‐
@@ -6524,9 +6614,9 @@ connections and survivability:
 (1) System(s) interconnections
 (2) Survivability levels (not required if Level 0)
 (3) Shared pathway levels (not required if Level 0)
-Chapter 13 Reserved
-Chapter 14 Inspection, Testing, and Maintenance
-14.1 Application.
+## Chapter 13 Reserved
+## Chapter 14 Inspection, Testing, and Maintenance
+### 14.1 Application.
 14.1.1 The inspection, testing, and maintenance of systems,
 their initiating devices, and notification appliances shall
 comply with the requirements of this chapter.
@@ -6539,7 +6629,7 @@ exceed the requirements of this chapter shall be permitted.
 new and existing systems.
 14.1.5 The requirements of Chapter 7 shall apply where refer‐
 enced in Chapter 14.
-14.2 General.
+### 14.2 General.
 14.2.1 Purpose.
 14.2.1.1* The purpose for initial and reacceptance inspec‐
 tions shall be to ensure compliance with approved design docu‐
@@ -6561,7 +6651,8 @@ FOR INDIVIDUAL USE ONLY
 Copyright 2019 National Fire Protection Association (NFPA®). Licensed by agreement to Carl Weaver FOR INDIVIDUAL USE ONLY and downloaded on 11/05/2019. No reproduction or transmission in any form permitted without
 written permission of NFPA®. For inquiries or access for multiple users, or to report unauthorized use, contact licensing@nfpa.org.
 {C56A4DC7-64F7-4C88-B368-41DE5BD47BC8}
-===PAGE_BREAK===
+<!-- Source PDF page 87 -->
+
 NATIONAL FIRE ALARM AND SIGNALING CODE	72-84
 2019 Edition Shaded text = Revisions. Δ = Text deletions and figure/table revisions. • = Section deletions. N = New material.
 14.2.2.1.1 Inspection, testing, and maintenance programs
@@ -6676,7 +6767,8 @@ FOR INDIVIDUAL USE ONLY
 Copyright 2019 National Fire Protection Association (NFPA®). Licensed by agreement to Carl Weaver FOR INDIVIDUAL USE ONLY and downloaded on 11/05/2019. No reproduction or transmission in any form permitted without
 written permission of NFPA®. For inquiries or access for multiple users, or to report unauthorized use, contact licensing@nfpa.org.
 {C56A4DC7-64F7-4C88-B368-41DE5BD47BC8}
-===PAGE_BREAK===
+<!-- Source PDF page 88 -->
+
 INSPECTION, TESTING, AND MAINTENANCE 72-85
 Shaded text = Revisions. Δ = Text deletions and figure/table revisions. • = Section deletions. N = New material. 2019 Edition
 14.2.10* Test Plan.
@@ -6684,7 +6776,7 @@ Shaded text = Revisions. Δ = Text deletions and figure/table revisions. • = S
 scope of the testing for the fire alarm or signaling system.
 14.2.10.2 The test plan and results shall be documented with
 the testing records.
-14.3 Inspection.
+### 14.3 Inspection.
 Δ 14.3.1* Unless otherwise permitted by 14.3.2, visual inspec‐
 tions shall be performed in accordance with the schedules in
 Table 14.3.1 or more often if required by the authority having
@@ -6702,7 +6794,7 @@ required installation standards.
 14.3.5 Periodic visual inspections in accordance with Table
 14.3.1 shall be made to assure that there are no changes that
 affect equipment performance.
-14.4 Testing.
+### 14.4 Testing.
 14.4.1 Initial Acceptance Testing.
 14.4.1.1 All new systems shall be inspected and tested in
 accordance with the requirements of Chapter 14.
@@ -6789,7 +6881,8 @@ FOR INDIVIDUAL USE ONLY
 Copyright 2019 National Fire Protection Association (NFPA®). Licensed by agreement to Carl Weaver FOR INDIVIDUAL USE ONLY and downloaded on 11/05/2019. No reproduction or transmission in any form permitted without
 written permission of NFPA®. For inquiries or access for multiple users, or to report unauthorized use, contact licensing@nfpa.org.
 {C56A4DC7-64F7-4C88-B368-41DE5BD47BC8}
-===PAGE_BREAK===
+<!-- Source PDF page 89 -->
+
 NATIONAL FIRE ALARM AND SIGNALING CODE	72-86
 2019 Edition Shaded text = Revisions. Δ = Text deletions and figure/table revisions. • = Section deletions. N = New material.
 Δ Table 14.3.1 Visual Inspection
@@ -6871,7 +6964,8 @@ FOR INDIVIDUAL USE ONLY
 Copyright 2019 National Fire Protection Association (NFPA®). Licensed by agreement to Carl Weaver FOR INDIVIDUAL USE ONLY and downloaded on 11/05/2019. No reproduction or transmission in any form permitted without
 written permission of NFPA®. For inquiries or access for multiple users, or to report unauthorized use, contact licensing@nfpa.org.
 {C56A4DC7-64F7-4C88-B368-41DE5BD47BC8}
-===PAGE_BREAK===
+<!-- Source PDF page 90 -->
+
 INSPECTION, TESTING, AND MAINTENANCE 72-87
 Shaded text = Revisions. Δ = Text deletions and figure/table revisions. • = Section deletions. N = New material. 2019 Edition
 Δ Table 14.3.1 Continued
@@ -6956,7 +7050,8 @@ FOR INDIVIDUAL USE ONLY
 Copyright 2019 National Fire Protection Association (NFPA®). Licensed by agreement to Carl Weaver FOR INDIVIDUAL USE ONLY and downloaded on 11/05/2019. No reproduction or transmission in any form permitted without
 written permission of NFPA®. For inquiries or access for multiple users, or to report unauthorized use, contact licensing@nfpa.org.
 {C56A4DC7-64F7-4C88-B368-41DE5BD47BC8}
-===PAGE_BREAK===
+<!-- Source PDF page 91 -->
+
 NATIONAL FIRE ALARM AND SIGNALING CODE	72-88
 2019 Edition Shaded text = Revisions. Δ = Text deletions and figure/table revisions. • = Section deletions. N = New material.
 Δ Table 14.3.1 Continued
@@ -7020,7 +7115,8 @@ FOR INDIVIDUAL USE ONLY
 Copyright 2019 National Fire Protection Association (NFPA®). Licensed by agreement to Carl Weaver FOR INDIVIDUAL USE ONLY and downloaded on 11/05/2019. No reproduction or transmission in any form permitted without
 written permission of NFPA®. For inquiries or access for multiple users, or to report unauthorized use, contact licensing@nfpa.org.
 {C56A4DC7-64F7-4C88-B368-41DE5BD47BC8}
-===PAGE_BREAK===
+<!-- Source PDF page 92 -->
+
 INSPECTION, TESTING, AND MAINTENANCE 72-89
 Shaded text = Revisions. Δ = Text deletions and figure/table revisions. • = Section deletions. N = New material. 2019 Edition
 Δ Table 14.4.3.2 Testing
@@ -7102,7 +7198,8 @@ FOR INDIVIDUAL USE ONLY
 Copyright 2019 National Fire Protection Association (NFPA®). Licensed by agreement to Carl Weaver FOR INDIVIDUAL USE ONLY and downloaded on 11/05/2019. No reproduction or transmission in any form permitted without
 written permission of NFPA®. For inquiries or access for multiple users, or to report unauthorized use, contact licensing@nfpa.org.
 {C56A4DC7-64F7-4C88-B368-41DE5BD47BC8}
-===PAGE_BREAK===
+<!-- Source PDF page 93 -->
+
 NATIONAL FIRE ALARM AND SIGNALING CODE	72-90
 2019 Edition Shaded text = Revisions. Δ = Text deletions and figure/table revisions. • = Section deletions. N = New material.
 Δ Table 14.4.3.2 Continued
@@ -7185,7 +7282,8 @@ FOR INDIVIDUAL USE ONLY
 Copyright 2019 National Fire Protection Association (NFPA®). Licensed by agreement to Carl Weaver FOR INDIVIDUAL USE ONLY and downloaded on 11/05/2019. No reproduction or transmission in any form permitted without
 written permission of NFPA®. For inquiries or access for multiple users, or to report unauthorized use, contact licensing@nfpa.org.
 {C56A4DC7-64F7-4C88-B368-41DE5BD47BC8}
-===PAGE_BREAK===
+<!-- Source PDF page 94 -->
+
 INSPECTION, TESTING, AND MAINTENANCE 72-91
 Shaded text = Revisions. Δ = Text deletions and figure/table revisions. • = Section deletions. N = New material. 2019 Edition
 Δ Table 14.4.3.2 Continued
@@ -7266,7 +7364,8 @@ FOR INDIVIDUAL USE ONLY
 Copyright 2019 National Fire Protection Association (NFPA®). Licensed by agreement to Carl Weaver FOR INDIVIDUAL USE ONLY and downloaded on 11/05/2019. No reproduction or transmission in any form permitted without
 written permission of NFPA®. For inquiries or access for multiple users, or to report unauthorized use, contact licensing@nfpa.org.
 {C56A4DC7-64F7-4C88-B368-41DE5BD47BC8}
-===PAGE_BREAK===
+<!-- Source PDF page 95 -->
+
 NATIONAL FIRE ALARM AND SIGNALING CODE	72-92
 2019 Edition Shaded text = Revisions. Δ = Text deletions and figure/table revisions. • = Section deletions. N = New material.
 Δ Table 14.4.3.2 Continued
@@ -7352,7 +7451,8 @@ FOR INDIVIDUAL USE ONLY
 Copyright 2019 National Fire Protection Association (NFPA®). Licensed by agreement to Carl Weaver FOR INDIVIDUAL USE ONLY and downloaded on 11/05/2019. No reproduction or transmission in any form permitted without
 written permission of NFPA®. For inquiries or access for multiple users, or to report unauthorized use, contact licensing@nfpa.org.
 {C56A4DC7-64F7-4C88-B368-41DE5BD47BC8}
-===PAGE_BREAK===
+<!-- Source PDF page 96 -->
+
 INSPECTION, TESTING, AND MAINTENANCE 72-93
 Shaded text = Revisions. Δ = Text deletions and figure/table revisions. • = Section deletions. N = New material. 2019 Edition
 Δ Table 14.4.3.2 Continued
@@ -7455,7 +7555,8 @@ FOR INDIVIDUAL USE ONLY
 Copyright 2019 National Fire Protection Association (NFPA®). Licensed by agreement to Carl Weaver FOR INDIVIDUAL USE ONLY and downloaded on 11/05/2019. No reproduction or transmission in any form permitted without
 written permission of NFPA®. For inquiries or access for multiple users, or to report unauthorized use, contact licensing@nfpa.org.
 {C56A4DC7-64F7-4C88-B368-41DE5BD47BC8}
-===PAGE_BREAK===
+<!-- Source PDF page 97 -->
+
 NATIONAL FIRE ALARM AND SIGNALING CODE	72-94
 2019 Edition Shaded text = Revisions. Δ = Text deletions and figure/table revisions. • = Section deletions. N = New material.
 Δ Table 14.4.3.2 Continued
@@ -7550,7 +7651,8 @@ FOR INDIVIDUAL USE ONLY
 Copyright 2019 National Fire Protection Association (NFPA®). Licensed by agreement to Carl Weaver FOR INDIVIDUAL USE ONLY and downloaded on 11/05/2019. No reproduction or transmission in any form permitted without
 written permission of NFPA®. For inquiries or access for multiple users, or to report unauthorized use, contact licensing@nfpa.org.
 {C56A4DC7-64F7-4C88-B368-41DE5BD47BC8}
-===PAGE_BREAK===
+<!-- Source PDF page 98 -->
+
 INSPECTION, TESTING, AND MAINTENANCE 72-95
 Shaded text = Revisions. Δ = Text deletions and figure/table revisions. • = Section deletions. N = New material. 2019 Edition
 Δ Table 14.4.3.2 Continued
@@ -7642,7 +7744,8 @@ FOR INDIVIDUAL USE ONLY
 Copyright 2019 National Fire Protection Association (NFPA®). Licensed by agreement to Carl Weaver FOR INDIVIDUAL USE ONLY and downloaded on 11/05/2019. No reproduction or transmission in any form permitted without
 written permission of NFPA®. For inquiries or access for multiple users, or to report unauthorized use, contact licensing@nfpa.org.
 {C56A4DC7-64F7-4C88-B368-41DE5BD47BC8}
-===PAGE_BREAK===
+<!-- Source PDF page 99 -->
+
 NATIONAL FIRE ALARM AND SIGNALING CODE	72-96
 2019 Edition Shaded text = Revisions. Δ = Text deletions and figure/table revisions. • = Section deletions. N = New material.
 Δ Table 14.4.3.2 Continued
@@ -7730,7 +7833,8 @@ FOR INDIVIDUAL USE ONLY
 Copyright 2019 National Fire Protection Association (NFPA®). Licensed by agreement to Carl Weaver FOR INDIVIDUAL USE ONLY and downloaded on 11/05/2019. No reproduction or transmission in any form permitted without
 written permission of NFPA®. For inquiries or access for multiple users, or to report unauthorized use, contact licensing@nfpa.org.
 {C56A4DC7-64F7-4C88-B368-41DE5BD47BC8}
-===PAGE_BREAK===
+<!-- Source PDF page 100 -->
+
 INSPECTION, TESTING, AND MAINTENANCE 72-97
 Shaded text = Revisions. Δ = Text deletions and figure/table revisions. • = Section deletions. N = New material. 2019 Edition
 Δ Table 14.4.3.2 Continued
@@ -7819,7 +7923,8 @@ FOR INDIVIDUAL USE ONLY
 Copyright 2019 National Fire Protection Association (NFPA®). Licensed by agreement to Carl Weaver FOR INDIVIDUAL USE ONLY and downloaded on 11/05/2019. No reproduction or transmission in any form permitted without
 written permission of NFPA®. For inquiries or access for multiple users, or to report unauthorized use, contact licensing@nfpa.org.
 {C56A4DC7-64F7-4C88-B368-41DE5BD47BC8}
-===PAGE_BREAK===
+<!-- Source PDF page 101 -->
+
 NATIONAL FIRE ALARM AND SIGNALING CODE	72-98
 2019 Edition Shaded text = Revisions. Δ = Text deletions and figure/table revisions. • = Section deletions. N = New material.
 Δ Table 14.4.3.2 Continued
@@ -7896,7 +8001,8 @@ FOR INDIVIDUAL USE ONLY
 Copyright 2019 National Fire Protection Association (NFPA®). Licensed by agreement to Carl Weaver FOR INDIVIDUAL USE ONLY and downloaded on 11/05/2019. No reproduction or transmission in any form permitted without
 written permission of NFPA®. For inquiries or access for multiple users, or to report unauthorized use, contact licensing@nfpa.org.
 {C56A4DC7-64F7-4C88-B368-41DE5BD47BC8}
-===PAGE_BREAK===
+<!-- Source PDF page 102 -->
+
 INSPECTION, TESTING, AND MAINTENANCE 72-99
 Shaded text = Revisions. Δ = Text deletions and figure/table revisions. • = Section deletions. N = New material. 2019 Edition
 14.4.4.3.3.2 In zones or in areas where nuisance alarms show
@@ -8008,7 +8114,8 @@ FOR INDIVIDUAL USE ONLY
 Copyright 2019 National Fire Protection Association (NFPA®). Licensed by agreement to Carl Weaver FOR INDIVIDUAL USE ONLY and downloaded on 11/05/2019. No reproduction or transmission in any form permitted without
 written permission of NFPA®. For inquiries or access for multiple users, or to report unauthorized use, contact licensing@nfpa.org.
 {C56A4DC7-64F7-4C88-B368-41DE5BD47BC8}
-===PAGE_BREAK===
+<!-- Source PDF page 103 -->
+
 NATIONAL FIRE ALARM AND SIGNALING CODE	72-100
 2019 Edition Shaded text = Revisions. Δ = Text deletions and figure/table revisions. • = Section deletions. N = New material.
 N 14.4.8.1.3* Notwithstanding other requirements of 14.2.3.6,
@@ -8044,7 +8151,7 @@ intelligible in accordance with the requirements of 18.4.11.
 through quantitative measurements.
 14.4.11.3 Quantitative measurements as described in Annex D
 shall be permitted but shall not be required.
-14.5 Maintenance.
+### 14.5 Maintenance.
 14.5.1 System equipment shall be maintained in accordance
 with the manufacturer’s published instructions.
 14.5.2 The frequency of maintenance of system equipment
@@ -8065,7 +8172,7 @@ vals to confirm its operation to each communications center.
 14.5.7 As a part of the testing required in 14.5.5, the retrans‐
 mission signal and the time and date of the retransmission shall
 be recorded in the central station.
-14.6 Records.
+### 14.6 Records.
 14.6.1* Permanent Records. After successful completion of
 acceptance tests approved by the authority having jurisdiction,
 the requirements in 14.6.1.1 through 14.6.1.3 shall apply.
@@ -8102,17 +8209,18 @@ to the authority having jurisdiction.
 device, circuit, fire alarm control unit function, or special
 hazard system interface is simulated, it shall be noted on the
 inspection/test form that the operation was simulated.
-Chapter 15 Reserved
-Chapter 16 Reserved
+## Chapter 15 Reserved
+## Chapter 16 Reserved
 FOR INDIVIDUAL USE ONLY
 Copyright 2019 National Fire Protection Association (NFPA®). Licensed by agreement to Carl Weaver FOR INDIVIDUAL USE ONLY and downloaded on 11/05/2019. No reproduction or transmission in any form permitted without
 written permission of NFPA®. For inquiries or access for multiple users, or to report unauthorized use, contact licensing@nfpa.org.
 {C56A4DC7-64F7-4C88-B368-41DE5BD47BC8}
-===PAGE_BREAK===
+<!-- Source PDF page 104 -->
+
 INITIATING DEVICES 72-101
 Shaded text = Revisions. Δ = Text deletions and figure/table revisions. • = Section deletions. N = New material. 2019 Edition
-Chapter 17 Initiating Devices
-17.1 Application.
+## Chapter 17 Initiating Devices
+### 17.1 Application.
 Δ 17.1.1* The performance, selection, use, and location of auto‐
 matic or manual initiating devices shall comply with the mini‐
 mum requirements of this chapter.
@@ -8139,7 +8247,7 @@ contribute to life safety, fire protection, and property conserva‐
 tion by providing a reliable means to signal other equipment
 arranged to monitor the initiating devices and to initiate a
 response to those signals.
-17.3* Performance-Based Design.
+### 17.3* Performance-Based Design.
 17.3.1 Performance-based designs submitted to the authority
 having jurisdiction for review and approval shall include docu‐
 mentation, in an approved format, of each performance objec‐
@@ -8152,7 +8260,7 @@ ate and have been met.
 17.3.3 The authority having jurisdiction shall approve modifi‐
 cations to or variations from the approved design or design
 basis in advance.
-17.4 General Requirements.
+### 17.4 General Requirements.
 17.4.1 The requirements of 17.4.2 through 17.4.7 shall apply
 to all initiating devices.
 17.4.2 Mechanical Protection.
@@ -8199,7 +8307,7 @@ alarm indicators as specified in 17.4.6.
 threatens a specific object or space, the detector shall be
 permitted to be installed in close proximity to that object or
 space.
-17.5 Requirements for Smoke and Heat Detectors.
+### 17.5 Requirements for Smoke and Heat Detectors.
 17.5.1 Recessed Mounting. Unless tested and listed for
 recessed mounting, detectors shall not be recessed into the
 mounting surface.
@@ -8223,7 +8331,8 @@ FOR INDIVIDUAL USE ONLY
 Copyright 2019 National Fire Protection Association (NFPA®). Licensed by agreement to Carl Weaver FOR INDIVIDUAL USE ONLY and downloaded on 11/05/2019. No reproduction or transmission in any form permitted without
 written permission of NFPA®. For inquiries or access for multiple users, or to report unauthorized use, contact licensing@nfpa.org.
 {C56A4DC7-64F7-4C88-B368-41DE5BD47BC8}
-===PAGE_BREAK===
+<!-- Source PDF page 105 -->
+
 NATIONAL FIRE ALARM AND SIGNALING CODE	72-102
 2019 Edition Shaded text = Revisions. Δ = Text deletions and figure/table revisions. • = Section deletions. N = New material.
 (1) Where the ceiling is attached directly to the underside of
@@ -8280,7 +8389,7 @@ the exception of the prescriptive spacing criteria of Chapter 17.
 17.5.3.3.2 Where nonrequired detectors are installed for
 achieving specific fire safety objectives, additional detectors not
 necessary to achieve the objectives shall not be required.
-17.6 Heat-Sensing Fire Detectors.
+### 17.6 Heat-Sensing Fire Detectors.
 17.6.1 General.
 17.6.1.1* The heat detection design documentation shall state
 the required performance objective of the system.
@@ -8337,7 +8446,8 @@ FOR INDIVIDUAL USE ONLY
 Copyright 2019 National Fire Protection Association (NFPA®). Licensed by agreement to Carl Weaver FOR INDIVIDUAL USE ONLY and downloaded on 11/05/2019. No reproduction or transmission in any form permitted without
 written permission of NFPA®. For inquiries or access for multiple users, or to report unauthorized use, contact licensing@nfpa.org.
 {C56A4DC7-64F7-4C88-B368-41DE5BD47BC8}
-===PAGE_BREAK===
+<!-- Source PDF page 106 -->
+
 INITIATING DEVICES 72-103
 Shaded text = Revisions. Δ = Text deletions and figure/table revisions. • = Section deletions. N = New material. 2019 Edition
 17.6.2.2.2.2 Heat-sensing fire detectors where the alarm
@@ -8453,7 +8563,8 @@ FOR INDIVIDUAL USE ONLY
 Copyright 2019 National Fire Protection Association (NFPA®). Licensed by agreement to Carl Weaver FOR INDIVIDUAL USE ONLY and downloaded on 11/05/2019. No reproduction or transmission in any form permitted without
 written permission of NFPA®. For inquiries or access for multiple users, or to report unauthorized use, contact licensing@nfpa.org.
 {C56A4DC7-64F7-4C88-B368-41DE5BD47BC8}
-===PAGE_BREAK===
+<!-- Source PDF page 107 -->
+
 NATIONAL FIRE ALARM AND SIGNALING CODE	72-104
 2019 Edition Shaded text = Revisions. Δ = Text deletions and figure/table revisions. • = Section deletions. N = New material.
 17.6.3.5.3* Spacing Minimum. The minimum spacing of heat
@@ -8469,7 +8580,7 @@ er’s published instructions shall be followed.
 17.6.3.8 Alternative Design Methods. Annex B shall be
 permitted to be used as one alternative design method for
 determining detector spacing.
-17.7 Smoke-Sensing Fire Detectors.
+### 17.7 Smoke-Sensing Fire Detectors.
 17.7.1 General.
 17.7.1.1* The smoke detection design documentation shall
 state the required performance objective of the system.
@@ -8570,7 +8681,8 @@ FOR INDIVIDUAL USE ONLY
 Copyright 2019 National Fire Protection Association (NFPA®). Licensed by agreement to Carl Weaver FOR INDIVIDUAL USE ONLY and downloaded on 11/05/2019. No reproduction or transmission in any form permitted without
 written permission of NFPA®. For inquiries or access for multiple users, or to report unauthorized use, contact licensing@nfpa.org.
 {C56A4DC7-64F7-4C88-B368-41DE5BD47BC8}
-===PAGE_BREAK===
+<!-- Source PDF page 108 -->
+
 INITIATING DEVICES 72-105
 Shaded text = Revisions. Δ = Text deletions and figure/table revisions. • = Section deletions. N = New material. 2019 Edition
 17.7.3.2.2* To minimize dust contamination, smoke detectors,
@@ -8693,7 +8805,8 @@ FOR INDIVIDUAL USE ONLY
 Copyright 2019 National Fire Protection Association (NFPA®). Licensed by agreement to Carl Weaver FOR INDIVIDUAL USE ONLY and downloaded on 11/05/2019. No reproduction or transmission in any form permitted without
 written permission of NFPA®. For inquiries or access for multiple users, or to report unauthorized use, contact licensing@nfpa.org.
 {C56A4DC7-64F7-4C88-B368-41DE5BD47BC8}
-===PAGE_BREAK===
+<!-- Source PDF page 109 -->
+
 NATIONAL FIRE ALARM AND SIGNALING CODE	72-106
 2019 Edition Shaded text = Revisions. Δ = Text deletions and figure/table revisions. • = Section deletions. N = New material.
 (2) The ceiling height shall be taken as the average height
@@ -8809,7 +8922,8 @@ FOR INDIVIDUAL USE ONLY
 Copyright 2019 National Fire Protection Association (NFPA®). Licensed by agreement to Carl Weaver FOR INDIVIDUAL USE ONLY and downloaded on 11/05/2019. No reproduction or transmission in any form permitted without
 written permission of NFPA®. For inquiries or access for multiple users, or to report unauthorized use, contact licensing@nfpa.org.
 {C56A4DC7-64F7-4C88-B368-41DE5BD47BC8}
-===PAGE_BREAK===
+<!-- Source PDF page 110 -->
+
 INITIATING DEVICES 72-107
 Shaded text = Revisions. Δ = Text deletions and figure/table revisions. • = Section deletions. N = New material. 2019 Edition
 N 17.7.3.6.4 Special Applications.
@@ -8922,7 +9036,8 @@ FOR INDIVIDUAL USE ONLY
 Copyright 2019 National Fire Protection Association (NFPA®). Licensed by agreement to Carl Weaver FOR INDIVIDUAL USE ONLY and downloaded on 11/05/2019. No reproduction or transmission in any form permitted without
 written permission of NFPA®. For inquiries or access for multiple users, or to report unauthorized use, contact licensing@nfpa.org.
 {C56A4DC7-64F7-4C88-B368-41DE5BD47BC8}
-===PAGE_BREAK===
+<!-- Source PDF page 111 -->
+
 NATIONAL FIRE ALARM AND SIGNALING CODE	72-108
 2019 Edition Shaded text = Revisions. Δ = Text deletions and figure/table revisions. • = Section deletions. N = New material.
 (A) Additional smoke detectors shall not be required to be
@@ -9090,7 +9205,8 @@ FOR INDIVIDUAL USE ONLY
 Copyright 2019 National Fire Protection Association (NFPA®). Licensed by agreement to Carl Weaver FOR INDIVIDUAL USE ONLY and downloaded on 11/05/2019. No reproduction or transmission in any form permitted without
 written permission of NFPA®. For inquiries or access for multiple users, or to report unauthorized use, contact licensing@nfpa.org.
 {C56A4DC7-64F7-4C88-B368-41DE5BD47BC8}
-===PAGE_BREAK===
+<!-- Source PDF page 112 -->
+
 INITIATING DEVICES 72-109
 Shaded text = Revisions. Δ = Text deletions and figure/table revisions. • = Section deletions. N = New material. 2019 Edition
 wall-mounted detectors shall be required, one on each side of
@@ -9241,7 +9357,8 @@ FOR INDIVIDUAL USE ONLY
 Copyright 2019 National Fire Protection Association (NFPA®). Licensed by agreement to Carl Weaver FOR INDIVIDUAL USE ONLY and downloaded on 11/05/2019. No reproduction or transmission in any form permitted without
 written permission of NFPA®. For inquiries or access for multiple users, or to report unauthorized use, contact licensing@nfpa.org.
 {C56A4DC7-64F7-4C88-B368-41DE5BD47BC8}
-===PAGE_BREAK===
+<!-- Source PDF page 113 -->
+
 NATIONAL FIRE ALARM AND SIGNALING CODE	72-110
 2019 Edition Shaded text = Revisions. Δ = Text deletions and figure/table revisions. • = Section deletions. N = New material.
 tors intended for early warning of fire in high air movement
@@ -9317,7 +9434,7 @@ purpose by the video system manufacturer.
 protected from unauthorized changes.
 N 17.7.7.5 All changes to the software or component settings
 shall be tested in accordance with Chapter 14.
-17.8 Radiant Energy–Sensing Fire Detectors.
+### 17.8 Radiant Energy–Sensing Fire Detectors.
 17.8.1* General.
 17.8.1.1 The radiant energy detection design documentation
 shall state the required performance objective of the system.
@@ -9350,7 +9467,8 @@ FOR INDIVIDUAL USE ONLY
 Copyright 2019 National Fire Protection Association (NFPA®). Licensed by agreement to Carl Weaver FOR INDIVIDUAL USE ONLY and downloaded on 11/05/2019. No reproduction or transmission in any form permitted without
 written permission of NFPA®. For inquiries or access for multiple users, or to report unauthorized use, contact licensing@nfpa.org.
 {C56A4DC7-64F7-4C88-B368-41DE5BD47BC8}
-===PAGE_BREAK===
+<!-- Source PDF page 114 -->
+
 INITIATING DEVICES 72-111
 Shaded text = Revisions. Δ = Text deletions and figure/table revisions. • = Section deletions. N = New material. 2019 Edition
 17.8.3.1.2 Detector quantity shall be based on the detectors
@@ -9453,7 +9571,7 @@ purpose by the video system manufacturer.
 protected from unauthorized changes.
 N 17.8.5.5 All changes to the software or component settings
 shall be tested in accordance with Chapter 14.
-17.9 Combination, Multi-Criteria, and Multi-Sensor Detectors.
+### 17.9 Combination, Multi-Criteria, and Multi-Sensor Detectors.
 Δ 17.9.1 General. The requirements for the selection, location,
 and spacing of combination, multi-criteria, and multi-sensor
 detectors shall comply with Section 17.9.
@@ -9466,7 +9584,8 @@ FOR INDIVIDUAL USE ONLY
 Copyright 2019 National Fire Protection Association (NFPA®). Licensed by agreement to Carl Weaver FOR INDIVIDUAL USE ONLY and downloaded on 11/05/2019. No reproduction or transmission in any form permitted without
 written permission of NFPA®. For inquiries or access for multiple users, or to report unauthorized use, contact licensing@nfpa.org.
 {C56A4DC7-64F7-4C88-B368-41DE5BD47BC8}
-===PAGE_BREAK===
+<!-- Source PDF page 115 -->
+
 NATIONAL FIRE ALARM AND SIGNALING CODE	72-112
 2019 Edition Shaded text = Revisions. Δ = Text deletions and figure/table revisions. • = Section deletions. N = New material.
 17.9.3 Multi-Criteria Detectors.
@@ -9484,7 +9603,7 @@ tion of multi-sensor detectors to reduce unwanted alarms and
 improve detector response to a nonspecific fire source, loca‐
 tion and spacing criteria included with the detector installation
 instructions shall be followed.
-17.10 Gas Detection.
+### 17.10 Gas Detection.
 17.10.1 General. The purpose and scope of Section 17.10
 shall be to provide requirements for the selection, installation,
 and operation of gas detectors other than carbon monoxide
@@ -9502,7 +9621,7 @@ Chapters 1, 10, 14, 17, and 23 of this Code.
 detection systems used solely for process control.
 17.10.2.4* The selection and placement of the gas detectors
 shall be based on an engineering evaluation.
-17.11 Other Fire Detectors.
+### 17.11 Other Fire Detectors.
 Δ 17.11.1 Detectors that operate on principles different from
 those covered by Sections 17.6 through 17.8 shall be classified
 as other fire detectors.
@@ -9542,7 +9661,7 @@ the manufacturer's installation instructions and the following:
 (7) Burning characteristics of the combustible materials
 present
 (8) Configuration of the contents in the area to be protected
-N 17.12 Carbon Monoxide Detectors.
+### N 17.12 Carbon Monoxide Detectors.
 N 17.12.1 Where required by other governing laws, codes, or
 standards, carbon monoxide detectors shall be installed in
 accordance with the following:
@@ -9581,7 +9700,8 @@ FOR INDIVIDUAL USE ONLY
 Copyright 2019 National Fire Protection Association (NFPA®). Licensed by agreement to Carl Weaver FOR INDIVIDUAL USE ONLY and downloaded on 11/05/2019. No reproduction or transmission in any form permitted without
 written permission of NFPA®. For inquiries or access for multiple users, or to report unauthorized use, contact licensing@nfpa.org.
 {C56A4DC7-64F7-4C88-B368-41DE5BD47BC8}
-===PAGE_BREAK===
+<!-- Source PDF page 116 -->
+
 INITIATING DEVICES 72-113
 Shaded text = Revisions. Δ = Text deletions and figure/table revisions. • = Section deletions. N = New material. 2019 Edition
 are to be installed to prevent nuisance and unintentional
@@ -9609,7 +9729,7 @@ N 17.12.9.1 System designers shall consider the spread of carbon
 monoxide through an occupancy through the HVAC system.
 N 17.12.9.2 Interaction with smoke control systems, if such is
 provided, shall be coordinated.
-17.13 Sprinkler Waterflow Alarm-Initiating Devices.
+### 17.13 Sprinkler Waterflow Alarm-Initiating Devices.
 17.13.1* The provisions of Section 17.13 shall apply to devices
 that initiate an alarm indicating a flow of water in a sprinkler
 system.
@@ -9624,7 +9744,7 @@ ing Systems. The operation of fire extinguishing systems or
 suppression systems shall initiate an alarm signal by alarm-
 initiating devices installed in accordance with their individual
 listings.
-17.15 Manually Actuated Alarm-Initiating Devices.
+### 17.15 Manually Actuated Alarm-Initiating Devices.
 17.15.1 Manually actuated alarm-initiating devices shall be
 listed in accordance with applicable standards such as ANSI/
 UL 38, Standard for Manual Signaling Boxes for Fire Alarm Systems.
@@ -9668,7 +9788,7 @@ within 5 ft (1.5 m) of each side of the grouped opening.
 extinguisher electronic monitoring device shall indicate those
 conditions for a specific fire extinguisher required by NFPA 10
 to a fire alarm control unit or other control unit.
-17.17 Supervisory Signal–Initiating Devices.
+### 17.17 Supervisory Signal–Initiating Devices.
 17.17.1 Control Valve Supervisory Signal–Initiating Device.
 17.17.1.1 Two separate and distinct signals shall be initiated:
 one indicating movement of the valve from its normal position
@@ -9693,7 +9813,8 @@ FOR INDIVIDUAL USE ONLY
 Copyright 2019 National Fire Protection Association (NFPA®). Licensed by agreement to Carl Weaver FOR INDIVIDUAL USE ONLY and downloaded on 11/05/2019. No reproduction or transmission in any form permitted without
 written permission of NFPA®. For inquiries or access for multiple users, or to report unauthorized use, contact licensing@nfpa.org.
 {C56A4DC7-64F7-4C88-B368-41DE5BD47BC8}
-===PAGE_BREAK===
+<!-- Source PDF page 117 -->
+
 NATIONAL FIRE ALARM AND SIGNALING CODE	72-114
 2019 Edition Shaded text = Revisions. Δ = Text deletions and figure/table revisions. • = Section deletions. N = New material.
 17.17.2.2 The requirements in 17.17.2.2.1 through 17.17.2.2.4
@@ -9746,8 +9867,8 @@ tion to above 40°F (4.4°C).
 Device. A room temperature supervisory device shall indicate
 a decrease in room temperature to 40°F (4.4°C) and its restora‐
 tion to above 40°F (4.4°C).
-Chapter 18 Notification Appliances
-18.1* Application.
+## Chapter 18 Notification Appliances
+### 18.1* Application.
 18.1.1 The requirements of this chapter shall apply where
 required by the authority having jurisdiction governing laws,
 codes, or standards; or other parts of this Code.
@@ -9779,7 +9900,7 @@ information provided by notification appliances.
 18.2 Purpose. Notification appliances shall provide stimuli
 for initiating emergency action and provide information to
 users, emergency response personnel, and occupants.
-18.3 General.
+### 18.3 General.
 18.3.1 Listing. All notification appliances installed in
 conformity with Chapter 18 shall be listed for the purpose for
 which they are used.
@@ -9803,7 +9924,8 @@ FOR INDIVIDUAL USE ONLY
 Copyright 2019 National Fire Protection Association (NFPA®). Licensed by agreement to Carl Weaver FOR INDIVIDUAL USE ONLY and downloaded on 11/05/2019. No reproduction or transmission in any form permitted without
 written permission of NFPA®. For inquiries or access for multiple users, or to report unauthorized use, contact licensing@nfpa.org.
 {C56A4DC7-64F7-4C88-B368-41DE5BD47BC8}
-===PAGE_BREAK===
+<!-- Source PDF page 118 -->
+
 NOTIFICATION APPLIANCES 72-115
 Shaded text = Revisions. Δ = Text deletions and figure/table revisions. • = Section deletions. N = New material. 2019 Edition
 where subject to tampering, shall be listed for the intended
@@ -9832,7 +9954,7 @@ manufacturer’s published instructions.
 18.3.6* Connections. Terminals, leads, or addressable
 communication, that provide for monitoring the integrity of
 the notification appliance connections shall be provided.
-18.4 Audible Characteristics.
+### 18.4 Audible Characteristics.
 18.4.1 General Requirements.
 18.4.1.1* An average ambient sound level greater than
 105 dBA shall require the use of a visual notification appli‐
@@ -9920,7 +10042,8 @@ FOR INDIVIDUAL USE ONLY
 Copyright 2019 National Fire Protection Association (NFPA®). Licensed by agreement to Carl Weaver FOR INDIVIDUAL USE ONLY and downloaded on 11/05/2019. No reproduction or transmission in any form permitted without
 written permission of NFPA®. For inquiries or access for multiple users, or to report unauthorized use, contact licensing@nfpa.org.
 {C56A4DC7-64F7-4C88-B368-41DE5BD47BC8}
-===PAGE_BREAK===
+<!-- Source PDF page 119 -->
+
 NATIONAL FIRE ALARM AND SIGNALING CODE	72-116
 2019 Edition Shaded text = Revisions. Δ = Text deletions and figure/table revisions. • = Section deletions. N = New material.
 18.4.2.3 The signal shall be repeated for a period appropriate
@@ -10007,7 +10130,8 @@ FOR INDIVIDUAL USE ONLY
 Copyright 2019 National Fire Protection Association (NFPA®). Licensed by agreement to Carl Weaver FOR INDIVIDUAL USE ONLY and downloaded on 11/05/2019. No reproduction or transmission in any form permitted without
 written permission of NFPA®. For inquiries or access for multiple users, or to report unauthorized use, contact licensing@nfpa.org.
 {C56A4DC7-64F7-4C88-B368-41DE5BD47BC8}
-===PAGE_BREAK===
+<!-- Source PDF page 120 -->
+
 NOTIFICATION APPLIANCES 72-117
 Shaded text = Revisions. Δ = Text deletions and figure/table revisions. • = Section deletions. N = New material. 2019 Edition
 reduced average ambient sound level or 5 dB above the maxi‐
@@ -10127,7 +10251,8 @@ FOR INDIVIDUAL USE ONLY
 Copyright 2019 National Fire Protection Association (NFPA®). Licensed by agreement to Carl Weaver FOR INDIVIDUAL USE ONLY and downloaded on 11/05/2019. No reproduction or transmission in any form permitted without
 written permission of NFPA®. For inquiries or access for multiple users, or to report unauthorized use, contact licensing@nfpa.org.
 {C56A4DC7-64F7-4C88-B368-41DE5BD47BC8}
-===PAGE_BREAK===
+<!-- Source PDF page 121 -->
+
 NATIONAL FIRE ALARM AND SIGNALING CODE	72-118
 2019 Edition Shaded text = Revisions. Δ = Text deletions and figure/table revisions. • = Section deletions. N = New material.
 exit marking audible notification appliances shall be installed
@@ -10189,7 +10314,7 @@ approval.
 •
 N 18.4.11.6 Quantitative measurements shall be permitted. (See
 D.2.4.)
-18.5* Visual Characteristics — Public Mode.
+### 18.5* Visual Characteristics — Public Mode.
 18.5.1* Visual Signaling.
 18.5.1.1 Public mode visual signaling shall meet the require‐
 ments of Section 18.5 using visual notification appliances.
@@ -10245,7 +10370,8 @@ FOR INDIVIDUAL USE ONLY
 Copyright 2019 National Fire Protection Association (NFPA®). Licensed by agreement to Carl Weaver FOR INDIVIDUAL USE ONLY and downloaded on 11/05/2019. No reproduction or transmission in any form permitted without
 written permission of NFPA®. For inquiries or access for multiple users, or to report unauthorized use, contact licensing@nfpa.org.
 {C56A4DC7-64F7-4C88-B368-41DE5BD47BC8}
-===PAGE_BREAK===
+<!-- Source PDF page 122 -->
+
 NOTIFICATION APPLIANCES 72-119
 Shaded text = Revisions. Δ = Text deletions and figure/table revisions. • = Section deletions. N = New material. 2019 Edition
 18.5.4* Appliance Photometrics. The light output shall
@@ -10342,7 +10468,8 @@ FOR INDIVIDUAL USE ONLY
 Copyright 2019 National Fire Protection Association (NFPA®). Licensed by agreement to Carl Weaver FOR INDIVIDUAL USE ONLY and downloaded on 11/05/2019. No reproduction or transmission in any form permitted without
 written permission of NFPA®. For inquiries or access for multiple users, or to report unauthorized use, contact licensing@nfpa.org.
 {C56A4DC7-64F7-4C88-B368-41DE5BD47BC8}
-===PAGE_BREAK===
+<!-- Source PDF page 123 -->
+
 NATIONAL FIRE ALARM AND SIGNALING CODE	72-120
 2019 Edition Shaded text = Revisions. Δ = Text deletions and figure/table revisions. • = Section deletions. N = New material.
 Δ 18.5.5.5.7 Table 18.5.5.5.1(b) shall be used if the ceiling-
@@ -10429,7 +10556,8 @@ FOR INDIVIDUAL USE ONLY
 Copyright 2019 National Fire Protection Association (NFPA®). Licensed by agreement to Carl Weaver FOR INDIVIDUAL USE ONLY and downloaded on 11/05/2019. No reproduction or transmission in any form permitted without
 written permission of NFPA®. For inquiries or access for multiple users, or to report unauthorized use, contact licensing@nfpa.org.
 {C56A4DC7-64F7-4C88-B368-41DE5BD47BC8}
-===PAGE_BREAK===
+<!-- Source PDF page 124 -->
+
 NOTIFICATION APPLIANCES 72-121
 Shaded text = Revisions. Δ = Text deletions and figure/table revisions. • = Section deletions. N = New material. 2019 Edition
 18.5.5.7* Performance-Based Alternative.
@@ -10499,7 +10627,7 @@ comply with its marked rated performance.
 18.7.2 Supplementary visual notification appliances shall be
 permitted to be located less than 80 in. (2.03 m) above the
 floor.
-18.8 Textual Audible Appliances.
+### 18.8 Textual Audible Appliances.
 18.8.1 Loudspeaker Appliances.
 18.8.1.1 Loudspeaker appliances shall comply with
 Section 18.4.
@@ -10510,7 +10638,7 @@ requirements in 18.4.4 (public), 18.4.5 (private), or 18.4.6
 requirements of 18.4.7 (narrow band tone signaling).
 18.8.2 Telephone Appliances. Telephone appliances shall be
 in accordance with Section 24.8.
-18.9* Textual and Graphical Visual Appliances.
+### 18.9* Textual and Graphical Visual Appliances.
 18.9.1 Application.
 18.9.1.1 Textual and graphical visual appliances shall be
 permitted to be used to signal information about fire or other
@@ -10543,7 +10671,8 @@ FOR INDIVIDUAL USE ONLY
 Copyright 2019 National Fire Protection Association (NFPA®). Licensed by agreement to Carl Weaver FOR INDIVIDUAL USE ONLY and downloaded on 11/05/2019. No reproduction or transmission in any form permitted without
 written permission of NFPA®. For inquiries or access for multiple users, or to report unauthorized use, contact licensing@nfpa.org.
 {C56A4DC7-64F7-4C88-B368-41DE5BD47BC8}
-===PAGE_BREAK===
+<!-- Source PDF page 125 -->
+
 NATIONAL FIRE ALARM AND SIGNALING CODE	72-122
 2019 Edition Shaded text = Revisions. Δ = Text deletions and figure/table revisions. • = Section deletions. N = New material.
 18.9.4* Character and Symbol Requirements and Viewing
@@ -10587,7 +10716,7 @@ mum 10 percent and maximum 35 percent of character height.
 18.9.4.11 Spacing between the baselines of separate lines of
 characters within a message shall be 135 percent minimum and
 170 percent maximum of the character height.
-18.10 Tactile Appliances.
+### 18.10 Tactile Appliances.
 18.10.1 Application. Tactile appliances shall be permitted if
 used in addition to audible and/or visual notification applian‐
 ces.
@@ -10633,7 +10762,8 @@ FOR INDIVIDUAL USE ONLY
 Copyright 2019 National Fire Protection Association (NFPA®). Licensed by agreement to Carl Weaver FOR INDIVIDUAL USE ONLY and downloaded on 11/05/2019. No reproduction or transmission in any form permitted without
 written permission of NFPA®. For inquiries or access for multiple users, or to report unauthorized use, contact licensing@nfpa.org.
 {C56A4DC7-64F7-4C88-B368-41DE5BD47BC8}
-===PAGE_BREAK===
+<!-- Source PDF page 126 -->
+
 EMERGENCY CONTROL FUNCTION INTERFACES 72-123
 Shaded text = Revisions. Δ = Text deletions and figure/table revisions. • = Section deletions. N = New material. 2019 Edition
 18.10.2* Performance. Tactile appliances shall meet the
@@ -10646,9 +10776,9 @@ tion display systems, and controls for portions of a system provi‐
 ded for use by emergency service personnel shall be designed,
 arranged, and located in accordance with the requirements of
 the organizations intended to use the equipment.
-Chapter 19 Reserved
-Chapter 20 Reserved
-Chapter 21 Emergency Control Function Interfaces
+## Chapter 19 Reserved
+## Chapter 20 Reserved
+## Chapter 21 Emergency Control Function Interfaces
 21.1* Application. The provisions of Chapter 21 shall cover
 the minimum requirements and methods for emergency
 control function interfaces to fire alarm systems and emer‐
@@ -10656,8 +10786,8 @@ gency communications systems in accordance with this chapter.
 21.1.1 The requirements of Chapters 7, 10, 14, 17, 18, 23, 24,
 and 26 shall apply, unless otherwise noted in this chapter.
 • 21.1.2 The requirements of this chapter shall not apply to
-Chapter 29 unless otherwise stated.
-21.2 General.
+## Chapter 29 unless otherwise stated.
+### 21.2 General.
 21.2.1* Emergency control functions shall be permitted to be
 performed automatically.
 21.2.2 The performance of automatic emergency control
@@ -10714,7 +10844,7 @@ query) shall be generated between the fire alarm system
 and the non-fire alarm system. Failure of the fire alarm
 system to receive confirmation of the transmission shall
 cause a trouble signal to indicate within 200 seconds.
-21.3* Elevator Phase I Emergency Recall Operation.
+### 21.3* Elevator Phase I Emergency Recall Operation.
 21.3.1 All fire alarm initiating devices used to initiate elevator
 Phase I Emergency Recall Operation shall be connected to the
 required building fire alarm system.
@@ -10747,7 +10877,8 @@ FOR INDIVIDUAL USE ONLY
 Copyright 2019 National Fire Protection Association (NFPA®). Licensed by agreement to Carl Weaver FOR INDIVIDUAL USE ONLY and downloaded on 11/05/2019. No reproduction or transmission in any form permitted without
 written permission of NFPA®. For inquiries or access for multiple users, or to report unauthorized use, contact licensing@nfpa.org.
 {C56A4DC7-64F7-4C88-B368-41DE5BD47BC8}
-===PAGE_BREAK===
+<!-- Source PDF page 127 -->
+
 NATIONAL FIRE ALARM AND SIGNALING CODE	72-124
 2019 Edition Shaded text = Revisions. Δ = Text deletions and figure/table revisions. • = Section deletions. N = New material.
 initiating the elevator recall function when all other devices on
@@ -10871,7 +11002,8 @@ FOR INDIVIDUAL USE ONLY
 Copyright 2019 National Fire Protection Association (NFPA®). Licensed by agreement to Carl Weaver FOR INDIVIDUAL USE ONLY and downloaded on 11/05/2019. No reproduction or transmission in any form permitted without
 written permission of NFPA®. For inquiries or access for multiple users, or to report unauthorized use, contact licensing@nfpa.org.
 {C56A4DC7-64F7-4C88-B368-41DE5BD47BC8}
-===PAGE_BREAK===
+<!-- Source PDF page 128 -->
+
 EMERGENCY CONTROL FUNCTION INTERFACES 72-125
 Shaded text = Revisions. Δ = Text deletions and figure/table revisions. • = Section deletions. N = New material. 2019 Edition
 supplies used to move the elevator, upon or prior to the activa‐
@@ -10986,7 +11118,8 @@ FOR INDIVIDUAL USE ONLY
 Copyright 2019 National Fire Protection Association (NFPA®). Licensed by agreement to Carl Weaver FOR INDIVIDUAL USE ONLY and downloaded on 11/05/2019. No reproduction or transmission in any form permitted without
 written permission of NFPA®. For inquiries or access for multiple users, or to report unauthorized use, contact licensing@nfpa.org.
 {C56A4DC7-64F7-4C88-B368-41DE5BD47BC8}
-===PAGE_BREAK===
+<!-- Source PDF page 129 -->
+
 NATIONAL FIRE ALARM AND SIGNALING CODE	72-126
 2019 Edition Shaded text = Revisions. Δ = Text deletions and figure/table revisions. • = Section deletions. N = New material.
 N 21.6.2.5.2 Output from the fire alarm system to the elevator
@@ -11096,7 +11229,7 @@ N 21.8 High Volume Low Speed (HVLS) Fans. Where required
 by NFPA 13, all HVLS fans shall be interlocked to shut down
 upon actuation of a sprinkler waterflow switch that indicates
 waterflow in the area served by the fans.
-21.9 Door and Shutter Release.
+### 21.9 Door and Shutter Release.
 21.9.1 The provisions of Section 21.9 shall apply to the meth‐
 ods of connection of door and shutter hold-open release devi‐
 ces and to integral door and shutter hold-open release, closer,
@@ -11105,7 +11238,8 @@ FOR INDIVIDUAL USE ONLY
 Copyright 2019 National Fire Protection Association (NFPA®). Licensed by agreement to Carl Weaver FOR INDIVIDUAL USE ONLY and downloaded on 11/05/2019. No reproduction or transmission in any form permitted without
 written permission of NFPA®. For inquiries or access for multiple users, or to report unauthorized use, contact licensing@nfpa.org.
 {C56A4DC7-64F7-4C88-B368-41DE5BD47BC8}
-===PAGE_BREAK===
+<!-- Source PDF page 130 -->
+
 PROTECTED PREMISES ALARM AND SIGNALING SYSTEMS 72-127
 Shaded text = Revisions. Δ = Text deletions and figure/table revisions. • = Section deletions. N = New material. 2019 Edition
 21.9.2 Other than smoke detectors used only for door and
@@ -11121,7 +11255,7 @@ Section 12.6.
 21.9.4 Magnetic door and shutter holders that allow doors to
 close upon loss of operating power shall not be required to
 have a secondary power source.
-21.10 Electrically Locked Doors.
+### 21.10 Electrically Locked Doors.
 21.10.1* Electrically locked doors in a required means of
 egress shall unlock in the direction of egress where required by
 other laws, codes, and governing standards.
@@ -11146,23 +11280,23 @@ of egress doors.
 21.10.6 All doors that are required to be unlocked by the fire
 alarm system in accordance with 21.10.1 shall remain unlocked
 until the fire alarm condition is manually reset.
-21.11* Exit Marking Audible Notification Systems.
+### 21.11* Exit Marking Audible Notification Systems.
 21.11.1 Where required by other governing laws, codes, stand‐
 ards, or the authority having jurisdiction, exit marking audible
 notification appliances shall be actuated by the building fire
 alarm system.
 21.11.2 Exit marking systems shall meet the requirements of
 Chapter 18.
-Chapter 22 Reserved
-Chapter 23 Protected Premises Alarm and Signaling Systems
-23.1 Application.
+## Chapter 22 Reserved
+## Chapter 23 Protected Premises Alarm and Signaling Systems
+### 23.1 Application.
 Δ 23.1.1* The application, installation, and performance of
 alarm and signaling systems within protected premises shall
 comply with the requirements of this chapter.
 23.1.2 The requirements of Chapters 7, 10, 12, 14, 17, 18, 21,
 24, and 26 shall apply unless otherwise noted in this chapter.
 • 23.1.3 The requirements of this chapter shall not apply to
-Chapter 29 unless otherwise noted.
+## Chapter 29 unless otherwise noted.
 • 23.2 General.
 23.2.1* Purpose. The systems covered in Chapter 23 shall be
 for the protection of life or property, or both, by indicating the
@@ -11217,7 +11351,8 @@ FOR INDIVIDUAL USE ONLY
 Copyright 2019 National Fire Protection Association (NFPA®). Licensed by agreement to Carl Weaver FOR INDIVIDUAL USE ONLY and downloaded on 11/05/2019. No reproduction or transmission in any form permitted without
 written permission of NFPA®. For inquiries or access for multiple users, or to report unauthorized use, contact licensing@nfpa.org.
 {C56A4DC7-64F7-4C88-B368-41DE5BD47BC8}
-===PAGE_BREAK===
+<!-- Source PDF page 131 -->
+
 NATIONAL FIRE ALARM AND SIGNALING CODE	72-128
 2019 Edition Shaded text = Revisions. Δ = Text deletions and figure/table revisions. • = Section deletions. N = New material.
 (7) In-building fire emergency voice/alarm communications
@@ -11236,7 +11371,7 @@ building fire alarm system.
 23.3.3.2.2 Where a dedicated function fire alarm system exists
 and a building fire alarm system is subsequently installed, the
 systems shall be interconnected and comply with 23.8.2.
-23.4 System Performance and Integrity.
+### 23.4 System Performance and Integrity.
 23.4.1 Purpose. Section 23.4 provides information that shall
 be used in the design and installation of protected premises
 fire alarm systems for the protection of life and property.
@@ -11339,7 +11474,8 @@ FOR INDIVIDUAL USE ONLY
 Copyright 2019 National Fire Protection Association (NFPA®). Licensed by agreement to Carl Weaver FOR INDIVIDUAL USE ONLY and downloaded on 11/05/2019. No reproduction or transmission in any form permitted without
 written permission of NFPA®. For inquiries or access for multiple users, or to report unauthorized use, contact licensing@nfpa.org.
 {C56A4DC7-64F7-4C88-B368-41DE5BD47BC8}
-===PAGE_BREAK===
+<!-- Source PDF page 132 -->
+
 PROTECTED PREMISES ALARM AND SIGNALING SYSTEMS 72-129
 Shaded text = Revisions. Δ = Text deletions and figure/table revisions. • = Section deletions. N = New material. 2019 Edition
 N 23.6.2.3* Where a device as referenced by 23.6.2is serviced by
@@ -11453,7 +11589,8 @@ FOR INDIVIDUAL USE ONLY
 Copyright 2019 National Fire Protection Association (NFPA®). Licensed by agreement to Carl Weaver FOR INDIVIDUAL USE ONLY and downloaded on 11/05/2019. No reproduction or transmission in any form permitted without
 written permission of NFPA®. For inquiries or access for multiple users, or to report unauthorized use, contact licensing@nfpa.org.
 {C56A4DC7-64F7-4C88-B368-41DE5BD47BC8}
-===PAGE_BREAK===
+<!-- Source PDF page 133 -->
+
 NATIONAL FIRE ALARM AND SIGNALING CODE	72-130
 2019 Edition Shaded text = Revisions. Δ = Text deletions and figure/table revisions. • = Section deletions. N = New material.
 (7) Maintenance and testing plans to ensure the minimum
@@ -11492,13 +11629,13 @@ general categories that shall be considered in the risk analysis:
 N 23.6.3.8.8 All other identified risks as required by the author‐
 ity having jurisdiction shall be discussed and addressed in the
 analysis and maintenance plans.
-23.7 Performance of Notification Appliance Circuits (NACs).
+### 23.7 Performance of Notification Appliance Circuits (NACs).
 The assignment of class designations to notification appliance
 circuits shall be based on their performance capabilities under
 abnormal (fault) conditions in accordance with the require‐
 ments for Class A, Class B, or Class X pathways specified in
 Chapter 12.
-23.8 System Requirements.
+### 23.8 System Requirements.
 23.8.1 General.
 23.8.1.1* Presignal Feature.
 23.8.1.1.1 Systems that have a presignal feature complying
@@ -11569,7 +11706,8 @@ FOR INDIVIDUAL USE ONLY
 Copyright 2019 National Fire Protection Association (NFPA®). Licensed by agreement to Carl Weaver FOR INDIVIDUAL USE ONLY and downloaded on 11/05/2019. No reproduction or transmission in any form permitted without
 written permission of NFPA®. For inquiries or access for multiple users, or to report unauthorized use, contact licensing@nfpa.org.
 {C56A4DC7-64F7-4C88-B368-41DE5BD47BC8}
-===PAGE_BREAK===
+<!-- Source PDF page 134 -->
+
 PROTECTED PREMISES ALARM AND SIGNALING SYSTEMS 72-131
 Shaded text = Revisions. Δ = Text deletions and figure/table revisions. • = Section deletions. N = New material. 2019 Edition
 23.8.2.4 All component subsystems shall be capable of simulta‐
@@ -11687,7 +11825,8 @@ FOR INDIVIDUAL USE ONLY
 Copyright 2019 National Fire Protection Association (NFPA®). Licensed by agreement to Carl Weaver FOR INDIVIDUAL USE ONLY and downloaded on 11/05/2019. No reproduction or transmission in any form permitted without
 written permission of NFPA®. For inquiries or access for multiple users, or to report unauthorized use, contact licensing@nfpa.org.
 {C56A4DC7-64F7-4C88-B368-41DE5BD47BC8}
-===PAGE_BREAK===
+<!-- Source PDF page 135 -->
+
 NATIONAL FIRE ALARM AND SIGNALING CODE	72-132
 2019 Edition Shaded text = Revisions. Δ = Text deletions and figure/table revisions. • = Section deletions. N = New material.
 N 23.8.4.2.2 Where a BSIU provides control of the fire alarm
@@ -11803,7 +11942,8 @@ FOR INDIVIDUAL USE ONLY
 Copyright 2019 National Fire Protection Association (NFPA®). Licensed by agreement to Carl Weaver FOR INDIVIDUAL USE ONLY and downloaded on 11/05/2019. No reproduction or transmission in any form permitted without
 written permission of NFPA®. For inquiries or access for multiple users, or to report unauthorized use, contact licensing@nfpa.org.
 {C56A4DC7-64F7-4C88-B368-41DE5BD47BC8}
-===PAGE_BREAK===
+<!-- Source PDF page 136 -->
+
 PROTECTED PREMISES ALARM AND SIGNALING SYSTEMS 72-133
 Shaded text = Revisions. Δ = Text deletions and figure/table revisions. • = Section deletions. N = New material. 2019 Edition
 23.8.5 Fire Alarm System Inputs.
@@ -11858,7 +11998,7 @@ delay the system functions of Sections 10.7 through 10.17,
 or 21.2.1 by more than 1 minute.
 (3) Actuation of an alarm-initiating device other than a
 smoke detector causes the system functions of Sections
-10.7 through 10.17, or 21.2.1 without additional delay.
+### 10.7 through 10.17, or 21.2.1 without additional delay.
 (4) The current status of the alarm verification feature is
 shown on the record of completion [see Figure 7.8.2(a),
 item 4.3].
@@ -11919,7 +12059,8 @@ FOR INDIVIDUAL USE ONLY
 Copyright 2019 National Fire Protection Association (NFPA®). Licensed by agreement to Carl Weaver FOR INDIVIDUAL USE ONLY and downloaded on 11/05/2019. No reproduction or transmission in any form permitted without
 written permission of NFPA®. For inquiries or access for multiple users, or to report unauthorized use, contact licensing@nfpa.org.
 {C56A4DC7-64F7-4C88-B368-41DE5BD47BC8}
-===PAGE_BREAK===
+<!-- Source PDF page 137 -->
+
 NATIONAL FIRE ALARM AND SIGNALING CODE	72-134
 2019 Edition Shaded text = Revisions. Δ = Text deletions and figure/table revisions. • = Section deletions. N = New material.
 23.8.5.6* Supervisory Signal Initiation — Sprinkler Systems.
@@ -12035,7 +12176,8 @@ FOR INDIVIDUAL USE ONLY
 Copyright 2019 National Fire Protection Association (NFPA®). Licensed by agreement to Carl Weaver FOR INDIVIDUAL USE ONLY and downloaded on 11/05/2019. No reproduction or transmission in any form permitted without
 written permission of NFPA®. For inquiries or access for multiple users, or to report unauthorized use, contact licensing@nfpa.org.
 {C56A4DC7-64F7-4C88-B368-41DE5BD47BC8}
-===PAGE_BREAK===
+<!-- Source PDF page 138 -->
+
 PROTECTED PREMISES ALARM AND SIGNALING SYSTEMS 72-135
 Shaded text = Revisions. Δ = Text deletions and figure/table revisions. • = Section deletions. N = New material. 2019 Edition
 notification zone encompassing the area where the carbon
@@ -12076,7 +12218,7 @@ tion zone.
 23.8.6.4.3 Riser conductors installed in accordance with
 24.4.8.6.3 that are monitored for integrity shall not be required
 to operate in accordance with 23.8.6.4.2.
-23.9 In-Building Emergency Voice/Alarm Communications.
+### 23.9 In-Building Emergency Voice/Alarm Communications.
 23.9.1 In-building fire emergency voice/alarm communica‐
 tions shall meet the requirements of Chapter 24.
 N 23.9.2 Where a voice/alarm communications system is instal‐
@@ -12087,7 +12229,7 @@ Section 24.4 excluding the requirements of 24.4.8.6.
 requirements of Chapter 24.
 23.9.4 Two-Way Communication Service. Two-way communi‐
 cation service shall meet the requirements of Chapter 24.
-23.10 Fire Alarm Systems Using Tone.
+### 23.10 Fire Alarm Systems Using Tone.
 23.10.1 The requirements of Section 23.10 shall apply to tone
 and visual notification appliance circuits.
 Δ 23.10.2* Fire alarm systems used for partial evacuation and
@@ -12101,7 +12243,7 @@ documentation submitted to the authority having jurisdiction
 with the evaluation required in 23.4.3.1.
 23.10.4 Loudspeakers that transmit tone signals shall be
 permitted to be used as fire alarm notification appliances.
-23.11 Suppression System Actuation.
+### 23.11 Suppression System Actuation.
 23.11.1 Releasing service fire alarm control units used for
 automatic or manual activation of a fire suppression system
 shall be listed for releasing service.
@@ -12148,7 +12290,8 @@ FOR INDIVIDUAL USE ONLY
 Copyright 2019 National Fire Protection Association (NFPA®). Licensed by agreement to Carl Weaver FOR INDIVIDUAL USE ONLY and downloaded on 11/05/2019. No reproduction or transmission in any form permitted without
 written permission of NFPA®. For inquiries or access for multiple users, or to report unauthorized use, contact licensing@nfpa.org.
 {C56A4DC7-64F7-4C88-B368-41DE5BD47BC8}
-===PAGE_BREAK===
+<!-- Source PDF page 139 -->
+
 NATIONAL FIRE ALARM AND SIGNALING CODE	72-136
 2019 Edition Shaded text = Revisions. Δ = Text deletions and figure/table revisions. • = Section deletions. N = New material.
 signals, but shall not be dependent on or affected by the opera‐
@@ -12157,7 +12300,7 @@ tion or failure of the protected premises fire alarm system.
 system releasing functions shall be installed in such a manner
 that they are effectively protected from damage caused by acti‐
 vation of the suppression system(s) they control.
-23.12 Off-Premises Signals.
+### 23.12 Off-Premises Signals.
 23.12.1 Systems requiring transmission of signals to continu‐
 ously attended locations providing supervising station service
 (e.g., central station, proprietary supervising station, remote
@@ -12178,7 +12321,7 @@ equipment.
 affect the operation or response of the fire alarm control unit.
 23.12.4.2 Any data transmitted shall be consistent with the
 data generated by the system.
-23.13 Guard’s Tour Supervisory Service.
+### 23.13 Guard’s Tour Supervisory Service.
 23.13.1 Guard’s tour reporting stations shall be listed for the
 application.
 23.13.2 The number of guard’s tour reporting stations, their
@@ -12196,7 +12339,7 @@ and end of each tour of a guard.
 vals not exceeding 10 intermediate stations.
 23.13.6 Intermediate stations that do not transmit a signal
 shall be capable of operation only in a fixed sequence.
-23.14 Suppressed (Exception Reporting) Signal System.
+### 23.14 Suppressed (Exception Reporting) Signal System.
 23.14.1 The suppressed signal system shall comply with the
 provisions of 23.13.2.
 23.14.2 The system shall transmit a start signal to the signal-
@@ -12214,7 +12357,7 @@ continuously conducted, a start signal shall be transmitted at
 least every 24 hours.
 23.14.7 The start, delinquency, and finish signals shall be
 recorded at the signal-receiving location.
-23.15 Protected Premises Emergency Control Functions.
+### 23.15 Protected Premises Emergency Control Functions.
 23.15.1 Emergency Elevator Operations. Emergency elevator
 operations shall meet the requirements of Sections 21.3, 21.4,
 21.5, and 21.6.
@@ -12263,7 +12406,8 @@ FOR INDIVIDUAL USE ONLY
 Copyright 2019 National Fire Protection Association (NFPA®). Licensed by agreement to Carl Weaver FOR INDIVIDUAL USE ONLY and downloaded on 11/05/2019. No reproduction or transmission in any form permitted without
 written permission of NFPA®. For inquiries or access for multiple users, or to report unauthorized use, contact licensing@nfpa.org.
 {C56A4DC7-64F7-4C88-B368-41DE5BD47BC8}
-===PAGE_BREAK===
+<!-- Source PDF page 140 -->
+
 PROTECTED PREMISES ALARM AND SIGNALING SYSTEMS 72-137
 Shaded text = Revisions. Δ = Text deletions and figure/table revisions. • = Section deletions. N = New material. 2019 Edition
 (5) Catastrophic (open or short) battery failure shall cause a
@@ -12382,11 +12526,12 @@ FOR INDIVIDUAL USE ONLY
 Copyright 2019 National Fire Protection Association (NFPA®). Licensed by agreement to Carl Weaver FOR INDIVIDUAL USE ONLY and downloaded on 11/05/2019. No reproduction or transmission in any form permitted without
 written permission of NFPA®. For inquiries or access for multiple users, or to report unauthorized use, contact licensing@nfpa.org.
 {C56A4DC7-64F7-4C88-B368-41DE5BD47BC8}
-===PAGE_BREAK===
+<!-- Source PDF page 141 -->
+
 NATIONAL FIRE ALARM AND SIGNALING CODE	72-138
 2019 Edition Shaded text = Revisions. Δ = Text deletions and figure/table revisions. • = Section deletions. N = New material.
-Chapter 24 Emergency Communications Systems (ECS)
-24.1 Application.
+## Chapter 24 Emergency Communications Systems (ECS)
+### 24.1 Application.
 24.1.1 The application, installation, and performance of
 emergency communications systems and their components
 shall comply with the requirements of this chapter.
@@ -12400,8 +12545,8 @@ ter.
 performed in accordance with testing frequencies and methods
 in Chapter 14.
 24.1.5 The requirements of this chapter shall not apply to
-Chapter 29 unless specifically indicated.
-24.2 Purpose.
+## Chapter 29 unless specifically indicated.
+### 24.2 Purpose.
 24.2.1 The systems covered under Chapter 24 shall be for the
 protection of life by indicating the existence of an emergency
 situation and communicating information necessary to facili‐
@@ -12415,7 +12560,7 @@ communicate information about emergencies including, but
 not limited to, fire, human-caused events (accidental and inten‐
 tional), other dangerous situations, accidents, and natural
 disasters.
-24.3 General.
+### 24.3 General.
 24.3.1 Intelligible Voice Messages.
 24.3.1.1* Emergency communications systems shall be capa‐
 ble of the reproduction of prerecorded, synthesized, or live
@@ -12496,7 +12641,8 @@ FOR INDIVIDUAL USE ONLY
 Copyright 2019 National Fire Protection Association (NFPA®). Licensed by agreement to Carl Weaver FOR INDIVIDUAL USE ONLY and downloaded on 11/05/2019. No reproduction or transmission in any form permitted without
 written permission of NFPA®. For inquiries or access for multiple users, or to report unauthorized use, contact licensing@nfpa.org.
 {C56A4DC7-64F7-4C88-B368-41DE5BD47BC8}
-===PAGE_BREAK===
+<!-- Source PDF page 142 -->
+
 EMERGENCY COMMUNICATIONS SYSTEMS (ECS) 72-139
 Shaded text = Revisions. Δ = Text deletions and figure/table revisions. • = Section deletions. N = New material. 2019 Edition
 24.3.7* System Classification. Emergency communications
@@ -12615,7 +12761,8 @@ FOR INDIVIDUAL USE ONLY
 Copyright 2019 National Fire Protection Association (NFPA®). Licensed by agreement to Carl Weaver FOR INDIVIDUAL USE ONLY and downloaded on 11/05/2019. No reproduction or transmission in any form permitted without
 written permission of NFPA®. For inquiries or access for multiple users, or to report unauthorized use, contact licensing@nfpa.org.
 {C56A4DC7-64F7-4C88-B368-41DE5BD47BC8}
-===PAGE_BREAK===
+<!-- Source PDF page 143 -->
+
 NATIONAL FIRE ALARM AND SIGNALING CODE	72-140
 2019 Edition Shaded text = Revisions. Δ = Text deletions and figure/table revisions. • = Section deletions. N = New material.
 24.3.14.2 Other component survivability shall comply with the
@@ -12732,7 +12879,8 @@ FOR INDIVIDUAL USE ONLY
 Copyright 2019 National Fire Protection Association (NFPA®). Licensed by agreement to Carl Weaver FOR INDIVIDUAL USE ONLY and downloaded on 11/05/2019. No reproduction or transmission in any form permitted without
 written permission of NFPA®. For inquiries or access for multiple users, or to report unauthorized use, contact licensing@nfpa.org.
 {C56A4DC7-64F7-4C88-B368-41DE5BD47BC8}
-===PAGE_BREAK===
+<!-- Source PDF page 144 -->
+
 EMERGENCY COMMUNICATIONS SYSTEMS (ECS) 72-141
 Shaded text = Revisions. Δ = Text deletions and figure/table revisions. • = Section deletions. N = New material. 2019 Edition
 24.4.4.4 Audible signal tones for alert or evacuation shall meet
@@ -12845,7 +12993,8 @@ FOR INDIVIDUAL USE ONLY
 Copyright 2019 National Fire Protection Association (NFPA®). Licensed by agreement to Carl Weaver FOR INDIVIDUAL USE ONLY and downloaded on 11/05/2019. No reproduction or transmission in any form permitted without
 written permission of NFPA®. For inquiries or access for multiple users, or to report unauthorized use, contact licensing@nfpa.org.
 {C56A4DC7-64F7-4C88-B368-41DE5BD47BC8}
-===PAGE_BREAK===
+<!-- Source PDF page 145 -->
+
 NATIONAL FIRE ALARM AND SIGNALING CODE	72-142
 2019 Edition Shaded text = Revisions. Δ = Text deletions and figure/table revisions. • = Section deletions. N = New material.
 24.4.8.6.3* All circuits necessary for the operation of the noti‐
@@ -12961,7 +13110,8 @@ FOR INDIVIDUAL USE ONLY
 Copyright 2019 National Fire Protection Association (NFPA®). Licensed by agreement to Carl Weaver FOR INDIVIDUAL USE ONLY and downloaded on 11/05/2019. No reproduction or transmission in any form permitted without
 written permission of NFPA®. For inquiries or access for multiple users, or to report unauthorized use, contact licensing@nfpa.org.
 {C56A4DC7-64F7-4C88-B368-41DE5BD47BC8}
-===PAGE_BREAK===
+<!-- Source PDF page 146 -->
+
 EMERGENCY COMMUNICATIONS SYSTEMS (ECS) 72-143
 Shaded text = Revisions. Δ = Text deletions and figure/table revisions. • = Section deletions. N = New material. 2019 Edition
 24.5.2.8 If live voice instructions are provided, they shall
@@ -13076,7 +13226,8 @@ FOR INDIVIDUAL USE ONLY
 Copyright 2019 National Fire Protection Association (NFPA®). Licensed by agreement to Carl Weaver FOR INDIVIDUAL USE ONLY and downloaded on 11/05/2019. No reproduction or transmission in any form permitted without
 written permission of NFPA®. For inquiries or access for multiple users, or to report unauthorized use, contact licensing@nfpa.org.
 {C56A4DC7-64F7-4C88-B368-41DE5BD47BC8}
-===PAGE_BREAK===
+<!-- Source PDF page 147 -->
+
 NATIONAL FIRE ALARM AND SIGNALING CODE	72-144
 2019 Edition Shaded text = Revisions. Δ = Text deletions and figure/table revisions. • = Section deletions. N = New material.
 24.5.12.3 Operating controls shall be clearly identified.
@@ -13188,7 +13339,8 @@ FOR INDIVIDUAL USE ONLY
 Copyright 2019 National Fire Protection Association (NFPA®). Licensed by agreement to Carl Weaver FOR INDIVIDUAL USE ONLY and downloaded on 11/05/2019. No reproduction or transmission in any form permitted without
 written permission of NFPA®. For inquiries or access for multiple users, or to report unauthorized use, contact licensing@nfpa.org.
 {C56A4DC7-64F7-4C88-B368-41DE5BD47BC8}
-===PAGE_BREAK===
+<!-- Source PDF page 148 -->
+
 EMERGENCY COMMUNICATIONS SYSTEMS (ECS) 72-145
 Shaded text = Revisions. Δ = Text deletions and figure/table revisions. • = Section deletions. N = New material. 2019 Edition
 24.5.17.3 Visual notification appliances used in combination
@@ -13306,7 +13458,8 @@ FOR INDIVIDUAL USE ONLY
 Copyright 2019 National Fire Protection Association (NFPA®). Licensed by agreement to Carl Weaver FOR INDIVIDUAL USE ONLY and downloaded on 11/05/2019. No reproduction or transmission in any form permitted without
 written permission of NFPA®. For inquiries or access for multiple users, or to report unauthorized use, contact licensing@nfpa.org.
 {C56A4DC7-64F7-4C88-B368-41DE5BD47BC8}
-===PAGE_BREAK===
+<!-- Source PDF page 149 -->
+
 NATIONAL FIRE ALARM AND SIGNALING CODE	72-146
 2019 Edition Shaded text = Revisions. Δ = Text deletions and figure/table revisions. • = Section deletions. N = New material.
 message or that will deliver conflicting information to
@@ -13390,7 +13543,7 @@ position.
 (4) The required visual notification appliance network (i.e.,
 visual notification appliances and textual signs) must be
 provided where required.
-24.6* Wide-Area Mass Notification Systems.
+### 24.6* Wide-Area Mass Notification Systems.
 24.6.1 Voice Messages.
 24.6.1.1 Voice messages shall comply with the requirements of
 24.3.1.
@@ -13424,7 +13577,8 @@ FOR INDIVIDUAL USE ONLY
 Copyright 2019 National Fire Protection Association (NFPA®). Licensed by agreement to Carl Weaver FOR INDIVIDUAL USE ONLY and downloaded on 11/05/2019. No reproduction or transmission in any form permitted without
 written permission of NFPA®. For inquiries or access for multiple users, or to report unauthorized use, contact licensing@nfpa.org.
 {C56A4DC7-64F7-4C88-B368-41DE5BD47BC8}
-===PAGE_BREAK===
+<!-- Source PDF page 150 -->
+
 EMERGENCY COMMUNICATIONS SYSTEMS (ECS) 72-147
 Shaded text = Revisions. Δ = Text deletions and figure/table revisions. • = Section deletions. N = New material. 2019 Edition
 (B)* HPLAs shall be designed to maintain the intelligibility of
@@ -13539,7 +13693,8 @@ FOR INDIVIDUAL USE ONLY
 Copyright 2019 National Fire Protection Association (NFPA®). Licensed by agreement to Carl Weaver FOR INDIVIDUAL USE ONLY and downloaded on 11/05/2019. No reproduction or transmission in any form permitted without
 written permission of NFPA®. For inquiries or access for multiple users, or to report unauthorized use, contact licensing@nfpa.org.
 {C56A4DC7-64F7-4C88-B368-41DE5BD47BC8}
-===PAGE_BREAK===
+<!-- Source PDF page 151 -->
+
 NATIONAL FIRE ALARM AND SIGNALING CODE	72-148
 2019 Edition Shaded text = Revisions. Δ = Text deletions and figure/table revisions. • = Section deletions. N = New material.
 24.8.2 Two-way telephone communications service, if provi‐
@@ -13621,7 +13776,7 @@ above floor level.
 24.8.19* All circuits necessary for the operation of two-way
 telephone communications systems shall be installed in accord‐
 ance with the pathway survivability requirements in 24.3.14.7.
-24.9 Two-Way Radio Communications Enhancement Systems.
+### 24.9 Two-Way Radio Communications Enhancement Systems.
 24.9.1 Non-interference.
 Δ 24.9.1.1 No amplification system capable of operating on
 frequencies or causing interference on frequencies assigned to
@@ -13657,7 +13812,8 @@ FOR INDIVIDUAL USE ONLY
 Copyright 2019 National Fire Protection Association (NFPA®). Licensed by agreement to Carl Weaver FOR INDIVIDUAL USE ONLY and downloaded on 11/05/2019. No reproduction or transmission in any form permitted without
 written permission of NFPA®. For inquiries or access for multiple users, or to report unauthorized use, contact licensing@nfpa.org.
 {C56A4DC7-64F7-4C88-B368-41DE5BD47BC8}
-===PAGE_BREAK===
+<!-- Source PDF page 152 -->
+
 EMERGENCY COMMUNICATIONS SYSTEMS (ECS) 72-149
 Shaded text = Revisions. Δ = Text deletions and figure/table revisions. • = Section deletions. N = New material. 2019 Edition
 N 24.10.2.3* The constantly attended location shall be located
@@ -13778,7 +13934,8 @@ FOR INDIVIDUAL USE ONLY
 Copyright 2019 National Fire Protection Association (NFPA®). Licensed by agreement to Carl Weaver FOR INDIVIDUAL USE ONLY and downloaded on 11/05/2019. No reproduction or transmission in any form permitted without
 written permission of NFPA®. For inquiries or access for multiple users, or to report unauthorized use, contact licensing@nfpa.org.
 {C56A4DC7-64F7-4C88-B368-41DE5BD47BC8}
-===PAGE_BREAK===
+<!-- Source PDF page 153 -->
+
 NATIONAL FIRE ALARM AND SIGNALING CODE	72-150
 2019 Edition Shaded text = Revisions. Δ = Text deletions and figure/table revisions. • = Section deletions. N = New material.
 24.11.2.2 The system operator shall be able to broadcast live
@@ -13896,7 +14053,8 @@ FOR INDIVIDUAL USE ONLY
 Copyright 2019 National Fire Protection Association (NFPA®). Licensed by agreement to Carl Weaver FOR INDIVIDUAL USE ONLY and downloaded on 11/05/2019. No reproduction or transmission in any form permitted without
 written permission of NFPA®. For inquiries or access for multiple users, or to report unauthorized use, contact licensing@nfpa.org.
 {C56A4DC7-64F7-4C88-B368-41DE5BD47BC8}
-===PAGE_BREAK===
+<!-- Source PDF page 154 -->
+
 SUPERVISING STATION ALARM SYSTEMS 72-151
 Shaded text = Revisions. Δ = Text deletions and figure/table revisions. • = Section deletions. N = New material. 2019 Edition
 prepared utilizing recognized performance-based design prac‐
@@ -13913,8 +14071,8 @@ Systems.
 emergency communications systems shall comply with Sections
 7.3 through 7.8 in addition to the minimum requirements of
 Section 7.2.
-Chapter 25 Reserved
-Chapter 26 Supervising Station Alarm Systems
+## Chapter 25 Reserved
+## Chapter 26 Supervising Station Alarm Systems
 26.1* Application. The performance, installation, and opera‐
 tion of alarm systems at a continuously attended supervising
 station and between the protected premises and the continu‐
@@ -13926,8 +14084,8 @@ vising station alarm system.
 26.1.2 The requirements of Chapters 7, 10, 12, 14, and 23
 shall apply unless otherwise noted in this chapter.
 26.1.3 The requirements of this chapter shall not apply to
-Chapter 29 unless otherwise noted.
-26.2 General.
+## Chapter 29 unless otherwise noted.
+### 26.2 General.
 26.2.1 Alarm Signal Disposition.
 26.2.1.1 Alarm signals initiated by manual fire alarm boxes,
 automatic fire detectors, waterflow from the automatic sprin‐
@@ -14014,7 +14172,8 @@ FOR INDIVIDUAL USE ONLY
 Copyright 2019 National Fire Protection Association (NFPA®). Licensed by agreement to Carl Weaver FOR INDIVIDUAL USE ONLY and downloaded on 11/05/2019. No reproduction or transmission in any form permitted without
 written permission of NFPA®. For inquiries or access for multiple users, or to report unauthorized use, contact licensing@nfpa.org.
 {C56A4DC7-64F7-4C88-B368-41DE5BD47BC8}
-===PAGE_BREAK===
+<!-- Source PDF page 155 -->
+
 NATIONAL FIRE ALARM AND SIGNALING CODE	72-152
 2019 Edition Shaded text = Revisions. Δ = Text deletions and figure/table revisions. • = Section deletions. N = New material.
 iii. Do not re-enter the premises or move away
@@ -14056,7 +14215,7 @@ erty being handled by a new supervising station.
 ices covered by 26.2.7.1 also provides the required testing, the
 new provider shall test zones, points, and signals from each
 affected property in accordance with the requirements of
-Chapter 14 at or prior to the next scheduled periodic test.
+## Chapter 14 at or prior to the next scheduled periodic test.
 26.2.7.3 Where the new provider of supervising station serv‐
 ices covered by 26.2.7.1 does not provide the required testing,
 the new provider shall notify the alarm system owner of the
@@ -14133,7 +14292,8 @@ FOR INDIVIDUAL USE ONLY
 Copyright 2019 National Fire Protection Association (NFPA®). Licensed by agreement to Carl Weaver FOR INDIVIDUAL USE ONLY and downloaded on 11/05/2019. No reproduction or transmission in any form permitted without
 written permission of NFPA®. For inquiries or access for multiple users, or to report unauthorized use, contact licensing@nfpa.org.
 {C56A4DC7-64F7-4C88-B368-41DE5BD47BC8}
-===PAGE_BREAK===
+<!-- Source PDF page 156 -->
+
 SUPERVISING STATION ALARM SYSTEMS 72-153
 Shaded text = Revisions. Δ = Text deletions and figure/table revisions. • = Section deletions. N = New material. 2019 Edition
 26.3.4.4 A central repository of issued documentation, accessi‐
@@ -14243,7 +14403,8 @@ FOR INDIVIDUAL USE ONLY
 Copyright 2019 National Fire Protection Association (NFPA®). Licensed by agreement to Carl Weaver FOR INDIVIDUAL USE ONLY and downloaded on 11/05/2019. No reproduction or transmission in any form permitted without
 written permission of NFPA®. For inquiries or access for multiple users, or to report unauthorized use, contact licensing@nfpa.org.
 {C56A4DC7-64F7-4C88-B368-41DE5BD47BC8}
-===PAGE_BREAK===
+<!-- Source PDF page 157 -->
+
 NATIONAL FIRE ALARM AND SIGNALING CODE	72-154
 2019 Edition Shaded text = Revisions. Δ = Text deletions and figure/table revisions. • = Section deletions. N = New material.
 26.3.8.3 Disposition of Signals.
@@ -14345,7 +14506,7 @@ tion.
 26.3.10 Testing and Maintenance. Testing and maintenance
 for central station service shall be performed in accordance
 with Chapter 14.
-26.4 Proprietary Supervising Station Alarm Systems.
+### 26.4 Proprietary Supervising Station Alarm Systems.
 26.4.1 Application.
 N 26.4.1.1 Supervising facilities of proprietary alarm systems
 shall comply with the operating procedures of Section 26.4.
@@ -14360,7 +14521,8 @@ FOR INDIVIDUAL USE ONLY
 Copyright 2019 National Fire Protection Association (NFPA®). Licensed by agreement to Carl Weaver FOR INDIVIDUAL USE ONLY and downloaded on 11/05/2019. No reproduction or transmission in any form permitted without
 written permission of NFPA®. For inquiries or access for multiple users, or to report unauthorized use, contact licensing@nfpa.org.
 {C56A4DC7-64F7-4C88-B368-41DE5BD47BC8}
-===PAGE_BREAK===
+<!-- Source PDF page 158 -->
+
 SUPERVISING STATION ALARM SYSTEMS 72-155
 Shaded text = Revisions. Δ = Text deletions and figure/table revisions. • = Section deletions. N = New material. 2019 Edition
 26.4.2.2 The protected property shall be either a contiguous
@@ -14470,7 +14632,8 @@ FOR INDIVIDUAL USE ONLY
 Copyright 2019 National Fire Protection Association (NFPA®). Licensed by agreement to Carl Weaver FOR INDIVIDUAL USE ONLY and downloaded on 11/05/2019. No reproduction or transmission in any form permitted without
 written permission of NFPA®. For inquiries or access for multiple users, or to report unauthorized use, contact licensing@nfpa.org.
 {C56A4DC7-64F7-4C88-B368-41DE5BD47BC8}
-===PAGE_BREAK===
+<!-- Source PDF page 159 -->
+
 NATIONAL FIRE ALARM AND SIGNALING CODE	72-156
 2019 Edition Shaded text = Revisions. Δ = Text deletions and figure/table revisions. • = Section deletions. N = New material.
 (B) Each new displayed status change shall be accompanied
@@ -14586,7 +14749,8 @@ FOR INDIVIDUAL USE ONLY
 Copyright 2019 National Fire Protection Association (NFPA®). Licensed by agreement to Carl Weaver FOR INDIVIDUAL USE ONLY and downloaded on 11/05/2019. No reproduction or transmission in any form permitted without
 written permission of NFPA®. For inquiries or access for multiple users, or to report unauthorized use, contact licensing@nfpa.org.
 {C56A4DC7-64F7-4C88-B368-41DE5BD47BC8}
-===PAGE_BREAK===
+<!-- Source PDF page 160 -->
+
 SUPERVISING STATION ALARM SYSTEMS 72-157
 Shaded text = Revisions. Δ = Text deletions and figure/table revisions. • = Section deletions. N = New material. 2019 Edition
 (1) Communicate at once with the protected areas or prem‐
@@ -14642,7 +14806,7 @@ authority having jurisdiction.
 26.4.8 Testing and Maintenance. Testing and maintenance of
 proprietary alarm systems shall be performed in accordance
 with Chapter 14.
-26.5 Remote Supervising Station Alarm Systems.
+### 26.5 Remote Supervising Station Alarm Systems.
 26.5.1 Application and General.
 26.5.1.1 Section 26.5 shall apply where central station service
 is neither required nor elected.
@@ -14706,7 +14870,8 @@ FOR INDIVIDUAL USE ONLY
 Copyright 2019 National Fire Protection Association (NFPA®). Licensed by agreement to Carl Weaver FOR INDIVIDUAL USE ONLY and downloaded on 11/05/2019. No reproduction or transmission in any form permitted without
 written permission of NFPA®. For inquiries or access for multiple users, or to report unauthorized use, contact licensing@nfpa.org.
 {C56A4DC7-64F7-4C88-B368-41DE5BD47BC8}
-===PAGE_BREAK===
+<!-- Source PDF page 161 -->
+
 NATIONAL FIRE ALARM AND SIGNALING CODE	72-158
 2019 Edition Shaded text = Revisions. Δ = Text deletions and figure/table revisions. • = Section deletions. N = New material.
 26.5.3.1.4* Where permitted by the authority having jurisdic‐
@@ -14730,7 +14895,7 @@ the authority having jurisdiction.
 26.5.4.1 Signal-receiving equipment shall indicate receipt of
 each signal both audibly and visibly.
 26.5.4.1.1 Audible signals shall meet the requirements of
-Chapter 18 for the private operating mode.
+## Chapter 18 for the private operating mode.
 26.5.4.1.2 Means for silencing alarm, supervisory, and trouble
 signals shall be provided and shall be arranged so that subse‐
 quent signals shall re-sound.
@@ -14820,7 +14985,8 @@ FOR INDIVIDUAL USE ONLY
 Copyright 2019 National Fire Protection Association (NFPA®). Licensed by agreement to Carl Weaver FOR INDIVIDUAL USE ONLY and downloaded on 11/05/2019. No reproduction or transmission in any form permitted without
 written permission of NFPA®. For inquiries or access for multiple users, or to report unauthorized use, contact licensing@nfpa.org.
 {C56A4DC7-64F7-4C88-B368-41DE5BD47BC8}
-===PAGE_BREAK===
+<!-- Source PDF page 162 -->
+
 SUPERVISING STATION ALARM SYSTEMS 72-159
 Shaded text = Revisions. Δ = Text deletions and figure/table revisions. • = Section deletions. N = New material. 2019 Edition
 26.5.9 Inspection, Testing, and Maintenance.
@@ -14857,7 +15023,7 @@ in accordance with Section 26.5.
 interpreted as prohibiting the use of listed equipment using
 alternate communications methods that provide a level of relia‐
 bility and supervision consistent with the requirements of
-Chapter 10 and the intended level of protection.
+## Chapter 10 and the intended level of protection.
 26.6.2.3* Equipment.
 Δ 26.6.2.3.1 Alarm system equipment and installations shall
 comply with Federal Communications Commission (FCC) rules
@@ -14938,7 +15104,8 @@ FOR INDIVIDUAL USE ONLY
 Copyright 2019 National Fire Protection Association (NFPA®). Licensed by agreement to Carl Weaver FOR INDIVIDUAL USE ONLY and downloaded on 11/05/2019. No reproduction or transmission in any form permitted without
 written permission of NFPA®. For inquiries or access for multiple users, or to report unauthorized use, contact licensing@nfpa.org.
 {C56A4DC7-64F7-4C88-B368-41DE5BD47BC8}
-===PAGE_BREAK===
+<!-- Source PDF page 163 -->
+
 NATIONAL FIRE ALARM AND SIGNALING CODE	72-160
 2019 Edition Shaded text = Revisions. Δ = Text deletions and figure/table revisions. • = Section deletions. N = New material.
 26.6.3.11 Signal Error Detection and Correction.
@@ -15057,7 +15224,8 @@ FOR INDIVIDUAL USE ONLY
 Copyright 2019 National Fire Protection Association (NFPA®). Licensed by agreement to Carl Weaver FOR INDIVIDUAL USE ONLY and downloaded on 11/05/2019. No reproduction or transmission in any form permitted without
 written permission of NFPA®. For inquiries or access for multiple users, or to report unauthorized use, contact licensing@nfpa.org.
 {C56A4DC7-64F7-4C88-B368-41DE5BD47BC8}
-===PAGE_BREAK===
+<!-- Source PDF page 164 -->
+
 SUPERVISING STATION ALARM SYSTEMS 72-161
 Shaded text = Revisions. Δ = Text deletions and figure/table revisions. • = Section deletions. N = New material. 2019 Edition
 (d) The DACT is capable of selecting the operable
@@ -15181,7 +15349,8 @@ FOR INDIVIDUAL USE ONLY
 Copyright 2019 National Fire Protection Association (NFPA®). Licensed by agreement to Carl Weaver FOR INDIVIDUAL USE ONLY and downloaded on 11/05/2019. No reproduction or transmission in any form permitted without
 written permission of NFPA®. For inquiries or access for multiple users, or to report unauthorized use, contact licensing@nfpa.org.
 {C56A4DC7-64F7-4C88-B368-41DE5BD47BC8}
-===PAGE_BREAK===
+<!-- Source PDF page 165 -->
+
 NATIONAL FIRE ALARM AND SIGNALING CODE	72-162
 2019 Edition Shaded text = Revisions. Δ = Text deletions and figure/table revisions. • = Section deletions. N = New material.
 (H) The failure to receive a test signal from the protected
@@ -15306,7 +15475,8 @@ FOR INDIVIDUAL USE ONLY
 Copyright 2019 National Fire Protection Association (NFPA®). Licensed by agreement to Carl Weaver FOR INDIVIDUAL USE ONLY and downloaded on 11/05/2019. No reproduction or transmission in any form permitted without
 written permission of NFPA®. For inquiries or access for multiple users, or to report unauthorized use, contact licensing@nfpa.org.
 {C56A4DC7-64F7-4C88-B368-41DE5BD47BC8}
-===PAGE_BREAK===
+<!-- Source PDF page 166 -->
+
 SUPERVISING STATION ALARM SYSTEMS 72-163
 Shaded text = Revisions. Δ = Text deletions and figure/table revisions. • = Section deletions. N = New material. 2019 Edition
 (C) The capacity of a system unit shall be permitted to be
@@ -15435,7 +15605,8 @@ FOR INDIVIDUAL USE ONLY
 Copyright 2019 National Fire Protection Association (NFPA®). Licensed by agreement to Carl Weaver FOR INDIVIDUAL USE ONLY and downloaded on 11/05/2019. No reproduction or transmission in any form permitted without
 written permission of NFPA®. For inquiries or access for multiple users, or to report unauthorized use, contact licensing@nfpa.org.
 {C56A4DC7-64F7-4C88-B368-41DE5BD47BC8}
-===PAGE_BREAK===
+<!-- Source PDF page 167 -->
+
 NATIONAL FIRE ALARM AND SIGNALING CODE	72-164
 2019 Edition Shaded text = Revisions. Δ = Text deletions and figure/table revisions. • = Section deletions. N = New material.
 (B) Interconnections between elements of transmitting equip‐
@@ -15556,7 +15727,8 @@ FOR INDIVIDUAL USE ONLY
 Copyright 2019 National Fire Protection Association (NFPA®). Licensed by agreement to Carl Weaver FOR INDIVIDUAL USE ONLY and downloaded on 11/05/2019. No reproduction or transmission in any form permitted without
 written permission of NFPA®. For inquiries or access for multiple users, or to report unauthorized use, contact licensing@nfpa.org.
 {C56A4DC7-64F7-4C88-B368-41DE5BD47BC8}
-===PAGE_BREAK===
+<!-- Source PDF page 168 -->
+
 PUBLIC EMERGENCY ALARM REPORTING SYSTEMS 72-165
 Shaded text = Revisions. Δ = Text deletions and figure/table revisions. • = Section deletions. N = New material. 2019 Edition
 26.6.6 Display and Recording Requirements for All Transmis‐
@@ -15613,8 +15785,8 @@ signal that persists until manually acknowledged.
 mission Technologies. Testing and maintenance of communi‐
 cations methods shall be in accordance with the requirements
 of Chapter 14.
-Chapter 27 Public Emergency Alarm Reporting Systems
-27.1 Application.
+## Chapter 27 Public Emergency Alarm Reporting Systems
+### 27.1 Application.
 Δ 27.1.1 The provisions of this chapter shall apply to the proper
 configuration, performance, installation, and operation of
 public emergency alarm reporting systems and auxiliary alarm
@@ -15649,7 +15821,7 @@ emergency system at the protected premises has its signals sent
 to a communications center via public emergency alarm report‐
 ing system, the protected premises system shall become an
 auxiliary alarm system.
-27.2 General.
+### 27.2 General.
 27.2.1* Public emergency alarm reporting systems shall be
 designed, installed, operated, and maintained in accordance
 with this chapter to provide reliable transmission and receipt of
@@ -15667,7 +15839,8 @@ FOR INDIVIDUAL USE ONLY
 Copyright 2019 National Fire Protection Association (NFPA®). Licensed by agreement to Carl Weaver FOR INDIVIDUAL USE ONLY and downloaded on 11/05/2019. No reproduction or transmission in any form permitted without
 written permission of NFPA®. For inquiries or access for multiple users, or to report unauthorized use, contact licensing@nfpa.org.
 {C56A4DC7-64F7-4C88-B368-41DE5BD47BC8}
-===PAGE_BREAK===
+<!-- Source PDF page 169 -->
+
 NATIONAL FIRE ALARM AND SIGNALING CODE	72-166
 2019 Edition Shaded text = Revisions. Δ = Text deletions and figure/table revisions. • = Section deletions. N = New material.
 27.2.3.1 All devices shall be identified as suitable for the loca‐
@@ -15675,7 +15848,7 @@ tion and conditions for which they are installed.
 27.2.4 All circuits, paths, and equipment necessary for the
 receipt of signals from a protected premises shall be monitored
 for integrity.
-27.3 Management and Maintenance.
+### 27.3 Management and Maintenance.
 27.3.1 All systems shall be under the control of a designated
 jurisdictional employee.
 27.3.2 Maintenance by an organization or person other than
@@ -15711,7 +15884,7 @@ installed or modified subsequent to the test required by 27.3.6.
 27.3.7 Personnel Qualification. Personnel shall be qualified
 and experienced in accordance with the requirements of
 10.5.6.
-27.4 Communications Methods.
+### 27.4 Communications Methods.
 27.4.1 Application.
 27.4.1.1 A public emergency alarm reporting system shall
 include wired or wireless network(s), for one-way signaling or
@@ -15784,7 +15957,8 @@ FOR INDIVIDUAL USE ONLY
 Copyright 2019 National Fire Protection Association (NFPA®). Licensed by agreement to Carl Weaver FOR INDIVIDUAL USE ONLY and downloaded on 11/05/2019. No reproduction or transmission in any form permitted without
 written permission of NFPA®. For inquiries or access for multiple users, or to report unauthorized use, contact licensing@nfpa.org.
 {C56A4DC7-64F7-4C88-B368-41DE5BD47BC8}
-===PAGE_BREAK===
+<!-- Source PDF page 170 -->
+
 PUBLIC EMERGENCY ALARM REPORTING SYSTEMS 72-167
 Shaded text = Revisions. Δ = Text deletions and figure/table revisions. • = Section deletions. N = New material. 2019 Edition
 27.4.3.7 Alarm processing equipment at a remote communica‐
@@ -15899,7 +16073,8 @@ FOR INDIVIDUAL USE ONLY
 Copyright 2019 National Fire Protection Association (NFPA®). Licensed by agreement to Carl Weaver FOR INDIVIDUAL USE ONLY and downloaded on 11/05/2019. No reproduction or transmission in any form permitted without
 written permission of NFPA®. For inquiries or access for multiple users, or to report unauthorized use, contact licensing@nfpa.org.
 {C56A4DC7-64F7-4C88-B368-41DE5BD47BC8}
-===PAGE_BREAK===
+<!-- Source PDF page 171 -->
+
 NATIONAL FIRE ALARM AND SIGNALING CODE	72-168
 2019 Edition Shaded text = Revisions. Δ = Text deletions and figure/table revisions. • = Section deletions. N = New material.
 27.5.2.5.3 The capacity of batteries, motor generators, rectifi‐
@@ -16010,7 +16185,8 @@ FOR INDIVIDUAL USE ONLY
 Copyright 2019 National Fire Protection Association (NFPA®). Licensed by agreement to Carl Weaver FOR INDIVIDUAL USE ONLY and downloaded on 11/05/2019. No reproduction or transmission in any form permitted without
 written permission of NFPA®. For inquiries or access for multiple users, or to report unauthorized use, contact licensing@nfpa.org.
 {C56A4DC7-64F7-4C88-B368-41DE5BD47BC8}
-===PAGE_BREAK===
+<!-- Source PDF page 172 -->
+
 PUBLIC EMERGENCY ALARM REPORTING SYSTEMS 72-169
 Shaded text = Revisions. Δ = Text deletions and figure/table revisions. • = Section deletions. N = New material. 2019 Edition
 27.5.3.4.2 If the alarm repeater system is configured with one
@@ -16125,7 +16301,8 @@ FOR INDIVIDUAL USE ONLY
 Copyright 2019 National Fire Protection Association (NFPA®). Licensed by agreement to Carl Weaver FOR INDIVIDUAL USE ONLY and downloaded on 11/05/2019. No reproduction or transmission in any form permitted without
 written permission of NFPA®. For inquiries or access for multiple users, or to report unauthorized use, contact licensing@nfpa.org.
 {C56A4DC7-64F7-4C88-B368-41DE5BD47BC8}
-===PAGE_BREAK===
+<!-- Source PDF page 173 -->
+
 NATIONAL FIRE ALARM AND SIGNALING CODE	72-170
 2019 Edition Shaded text = Revisions. Δ = Text deletions and figure/table revisions. • = Section deletions. N = New material.
 N 27.5.4.2.5.2 Meters used in common for two or more circuits
@@ -16242,7 +16419,8 @@ FOR INDIVIDUAL USE ONLY
 Copyright 2019 National Fire Protection Association (NFPA®). Licensed by agreement to Carl Weaver FOR INDIVIDUAL USE ONLY and downloaded on 11/05/2019. No reproduction or transmission in any form permitted without
 written permission of NFPA®. For inquiries or access for multiple users, or to report unauthorized use, contact licensing@nfpa.org.
 {C56A4DC7-64F7-4C88-B368-41DE5BD47BC8}
-===PAGE_BREAK===
+<!-- Source PDF page 174 -->
+
 PUBLIC EMERGENCY ALARM REPORTING SYSTEMS 72-171
 Shaded text = Revisions. Δ = Text deletions and figure/table revisions. • = Section deletions. N = New material. 2019 Edition
 27.5.5.2 Power. Power shall be provided in accordance with
@@ -16293,7 +16471,7 @@ antenna transmission line between the transmitter and the
 antenna shall be installed in rigid metal, intermediate metal
 conduit, or electrical metallic tubing in accordance with
 NFPA 70.
-27.6 Alarm Boxes.
+### 27.6 Alarm Boxes.
 27.6.1* General. The requirements of 27.6.1.1 through
 27.6.1.6 shall apply to all alarm boxes.
 27.6.1.1 Concurrent operation of at least four boxes shall not
@@ -16352,7 +16530,8 @@ FOR INDIVIDUAL USE ONLY
 Copyright 2019 National Fire Protection Association (NFPA®). Licensed by agreement to Carl Weaver FOR INDIVIDUAL USE ONLY and downloaded on 11/05/2019. No reproduction or transmission in any form permitted without
 written permission of NFPA®. For inquiries or access for multiple users, or to report unauthorized use, contact licensing@nfpa.org.
 {C56A4DC7-64F7-4C88-B368-41DE5BD47BC8}
-===PAGE_BREAK===
+<!-- Source PDF page 175 -->
+
 NATIONAL FIRE ALARM AND SIGNALING CODE	72-172
 2019 Edition Shaded text = Revisions. Δ = Text deletions and figure/table revisions. • = Section deletions. N = New material.
 27.6.2.1.11 Where boxes are installed inside a structure, the
@@ -16467,7 +16646,8 @@ FOR INDIVIDUAL USE ONLY
 Copyright 2019 National Fire Protection Association (NFPA®). Licensed by agreement to Carl Weaver FOR INDIVIDUAL USE ONLY and downloaded on 11/05/2019. No reproduction or transmission in any form permitted without
 written permission of NFPA®. For inquiries or access for multiple users, or to report unauthorized use, contact licensing@nfpa.org.
 {C56A4DC7-64F7-4C88-B368-41DE5BD47BC8}
-===PAGE_BREAK===
+<!-- Source PDF page 176 -->
+
 PUBLIC EMERGENCY ALARM REPORTING SYSTEMS 72-173
 Shaded text = Revisions. Δ = Text deletions and figure/table revisions. • = Section deletions. N = New material. 2019 Edition
 27.6.3.2.3.3 The same box shall be permitted to be used as a
@@ -16587,7 +16767,8 @@ FOR INDIVIDUAL USE ONLY
 Copyright 2019 National Fire Protection Association (NFPA®). Licensed by agreement to Carl Weaver FOR INDIVIDUAL USE ONLY and downloaded on 11/05/2019. No reproduction or transmission in any form permitted without
 written permission of NFPA®. For inquiries or access for multiple users, or to report unauthorized use, contact licensing@nfpa.org.
 {C56A4DC7-64F7-4C88-B368-41DE5BD47BC8}
-===PAGE_BREAK===
+<!-- Source PDF page 177 -->
+
 NATIONAL FIRE ALARM AND SIGNALING CODE	72-174
 2019 Edition Shaded text = Revisions. Δ = Text deletions and figure/table revisions. • = Section deletions. N = New material.
 applicable rules and regulations of the Federal Communica‐
@@ -16696,7 +16877,8 @@ FOR INDIVIDUAL USE ONLY
 Copyright 2019 National Fire Protection Association (NFPA®). Licensed by agreement to Carl Weaver FOR INDIVIDUAL USE ONLY and downloaded on 11/05/2019. No reproduction or transmission in any form permitted without
 written permission of NFPA®. For inquiries or access for multiple users, or to report unauthorized use, contact licensing@nfpa.org.
 {C56A4DC7-64F7-4C88-B368-41DE5BD47BC8}
-===PAGE_BREAK===
+<!-- Source PDF page 178 -->
+
 PUBLIC EMERGENCY ALARM REPORTING SYSTEMS 72-175
 Shaded text = Revisions. Δ = Text deletions and figure/table revisions. • = Section deletions. N = New material. 2019 Edition
 27.7.1 Requirements for Metallic and Fiber-Optic Systems —
@@ -16810,7 +16992,8 @@ FOR INDIVIDUAL USE ONLY
 Copyright 2019 National Fire Protection Association (NFPA®). Licensed by agreement to Carl Weaver FOR INDIVIDUAL USE ONLY and downloaded on 11/05/2019. No reproduction or transmission in any form permitted without
 written permission of NFPA®. For inquiries or access for multiple users, or to report unauthorized use, contact licensing@nfpa.org.
 {C56A4DC7-64F7-4C88-B368-41DE5BD47BC8}
-===PAGE_BREAK===
+<!-- Source PDF page 179 -->
+
 NATIONAL FIRE ALARM AND SIGNALING CODE	72-176
 2019 Edition Shaded text = Revisions. Δ = Text deletions and figure/table revisions. • = Section deletions. N = New material.
 27.7.1.4.1.1 Precautions shall be provided where passing
@@ -16921,7 +17104,8 @@ FOR INDIVIDUAL USE ONLY
 Copyright 2019 National Fire Protection Association (NFPA®). Licensed by agreement to Carl Weaver FOR INDIVIDUAL USE ONLY and downloaded on 11/05/2019. No reproduction or transmission in any form permitted without
 written permission of NFPA®. For inquiries or access for multiple users, or to report unauthorized use, contact licensing@nfpa.org.
 {C56A4DC7-64F7-4C88-B368-41DE5BD47BC8}
-===PAGE_BREAK===
+<!-- Source PDF page 180 -->
+
 SINGLE- AND MULTIPLE-STATION ALARMS AND HOUSEHOLD SIGNALING SYSTEMS 72-177
 Shaded text = Revisions. Δ = Text deletions and figure/table revisions. • = Section deletions. N = New material. 2019 Edition
 Δ 27.7.2.1.5 Circuits shall not pass over, under, or through or be
@@ -16984,7 +17168,7 @@ device, other than of the air-gap or self-restoring types, shall
 not be installed in public emergency alarm reporting circuits.
 27.7.3.12 All protective devices used for aerial construction
 shall be accessible for maintenance and inspection.
-27.8 Emergency Communications Systems (ECS).
+### 27.8 Emergency Communications Systems (ECS).
 27.8.1* Public emergency alarm reporting systems that are
 capable of two-way wired or wireless communications with
 command and control capabilities and/or voice communica‐
@@ -17013,10 +17197,10 @@ shall be monitored for integrity, and faults shall be annunci‐
 ated at the communications center, as well as at the fire
 command center or the emergency command center or both,
 in the protected premises.
-Chapter 28 Reserved
-Chapter 29 Single- and Multiple-Station Alarms and
+## Chapter 28 Reserved
+## Chapter 29 Single- and Multiple-Station Alarms and
 Household Signaling Systems
-29.1 Application.
+### 29.1 Application.
 Δ 29.1.1* The performance, selection, installation, operation,
 and use of single- and multiple-station alarms and household
 alarm systems shall comply with the requirements of this chap‐
@@ -17031,12 +17215,13 @@ FOR INDIVIDUAL USE ONLY
 Copyright 2019 National Fire Protection Association (NFPA®). Licensed by agreement to Carl Weaver FOR INDIVIDUAL USE ONLY and downloaded on 11/05/2019. No reproduction or transmission in any form permitted without
 written permission of NFPA®. For inquiries or access for multiple users, or to report unauthorized use, contact licensing@nfpa.org.
 {C56A4DC7-64F7-4C88-B368-41DE5BD47BC8}
-===PAGE_BREAK===
+<!-- Source PDF page 181 -->
+
 NATIONAL FIRE ALARM AND SIGNALING CODE	72-178
 2019 Edition Shaded text = Revisions. Δ = Text deletions and figure/table revisions. • = Section deletions. N = New material.
 29.1.5 This chapter shall apply to the life safety of occupants
 and not to the protection of property.
-29.2* Purpose.
+### 29.2* Purpose.
 N 29.2.1 Fire-warning equipment for residential occupancies
 shall provide a reliable means to notify the occupants of the
 presence of a threatening fire and the need to escape to a
@@ -17047,7 +17232,7 @@ occupancies shall provide a reliable means to notify the occu‐
 pants of the presence of carbon monoxide levels that constitute
 a potential life safety risk and the need for action as a conse‐
 quence of those levels.
-29.3 Basic Requirements.
+### 29.3 Basic Requirements.
 29.3.1 All devices, combinations of devices, and equipment to
 be installed in conformity with this chapter shall be approved
 or listed for the purposes for which they are intended.
@@ -17080,7 +17265,7 @@ this chapter.
 N 29.4 Remote Annunciation. Remote annunciation from
 single- and multiple-station alarms shall be permitted, provided
 signals at the remote annunciator properly identify the hazard.
-N 29.5 Notification.
+### N 29.5 Notification.
 29.5.1* Unless otherwise permitted by 29.5.2, fire-warning
 equipment to be installed in residential occupancies shall
 produce the audible emergency evacuation signal described in
@@ -17151,7 +17336,8 @@ FOR INDIVIDUAL USE ONLY
 Copyright 2019 National Fire Protection Association (NFPA®). Licensed by agreement to Carl Weaver FOR INDIVIDUAL USE ONLY and downloaded on 11/05/2019. No reproduction or transmission in any form permitted without
 written permission of NFPA®. For inquiries or access for multiple users, or to report unauthorized use, contact licensing@nfpa.org.
 {C56A4DC7-64F7-4C88-B368-41DE5BD47BC8}
-===PAGE_BREAK===
+<!-- Source PDF page 182 -->
+
 SINGLE- AND MULTIPLE-STATION ALARMS AND HOUSEHOLD SIGNALING SYSTEMS 72-179
 Shaded text = Revisions. Δ = Text deletions and figure/table revisions. • = Section deletions. N = New material. 2019 Edition
 29.5.10 Notification appliances provided in sleeping rooms
@@ -17187,7 +17373,7 @@ for people with hearing loss
 (2) Where provided voluntarily for those with hearing loss
 29.5.11 Signals from notification appliances shall not be
 required to be synchronized.
-29.6 Assumptions.
+### 29.6 Assumptions.
 29.6.1* Occupants.
 N 29.6.1.1 The requirements of this chapter shall assume that
 occupants are capable of self-rescue.
@@ -17270,7 +17456,8 @@ FOR INDIVIDUAL USE ONLY
 Copyright 2019 National Fire Protection Association (NFPA®). Licensed by agreement to Carl Weaver FOR INDIVIDUAL USE ONLY and downloaded on 11/05/2019. No reproduction or transmission in any form permitted without
 written permission of NFPA®. For inquiries or access for multiple users, or to report unauthorized use, contact licensing@nfpa.org.
 {C56A4DC7-64F7-4C88-B368-41DE5BD47BC8}
-===PAGE_BREAK===
+<!-- Source PDF page 183 -->
+
 NATIONAL FIRE ALARM AND SIGNALING CODE	72-180
 2019 Edition Shaded text = Revisions. Δ = Text deletions and figure/table revisions. • = Section deletions. N = New material.
 an equivalent of one smoke alarm per 500 ft2 (46 m2) of floor
@@ -17303,7 +17490,7 @@ individual dwelling unit, suite of rooms, or similar area and
 shall not be arranged to operate fire-warning equipment or fire
 alarm systems outside these locations.
 N 29.8.2.3 Remote annunciation shall be permitted.
-29.9 Power Supplies.
+### 29.9 Power Supplies.
 Δ 29.9.1 Smoke and Heat and Carbon Monoxide Alarms.
 Smoke and heat and carbon monoxide alarms shall meet the
 requirements of 29.8.2.1.1 and be powered by one of the
@@ -17394,7 +17581,8 @@ FOR INDIVIDUAL USE ONLY
 Copyright 2019 National Fire Protection Association (NFPA®). Licensed by agreement to Carl Weaver FOR INDIVIDUAL USE ONLY and downloaded on 11/05/2019. No reproduction or transmission in any form permitted without
 written permission of NFPA®. For inquiries or access for multiple users, or to report unauthorized use, contact licensing@nfpa.org.
 {C56A4DC7-64F7-4C88-B368-41DE5BD47BC8}
-===PAGE_BREAK===
+<!-- Source PDF page 184 -->
+
 SINGLE- AND MULTIPLE-STATION ALARMS AND HOUSEHOLD SIGNALING SYSTEMS 72-181
 Shaded text = Revisions. Δ = Text deletions and figure/table revisions. • = Section deletions. N = New material. 2019 Edition
 (5) Low-power wireless systems shall comply with the
@@ -17524,7 +17712,8 @@ FOR INDIVIDUAL USE ONLY
 Copyright 2019 National Fire Protection Association (NFPA®). Licensed by agreement to Carl Weaver FOR INDIVIDUAL USE ONLY and downloaded on 11/05/2019. No reproduction or transmission in any form permitted without
 written permission of NFPA®. For inquiries or access for multiple users, or to report unauthorized use, contact licensing@nfpa.org.
 {C56A4DC7-64F7-4C88-B368-41DE5BD47BC8}
-===PAGE_BREAK===
+<!-- Source PDF page 185 -->
+
 NATIONAL FIRE ALARM AND SIGNALING CODE	72-182
 2019 Edition Shaded text = Revisions. Δ = Text deletions and figure/table revisions. • = Section deletions. N = New material.
 Δ 29.9.9 Secondary (Standby) Non-Battery Power Source.
@@ -17553,7 +17742,7 @@ means other than a circuit breaker or within
 48 hours where power is provided from a circuit
 that cannot be switched on or off by means other
 than a circuit breaker
-29.10 Equipment Performance.
+### 29.10 Equipment Performance.
 29.10.1 Self-Diagnostic. Any failure of any nonreliable or
 short-life component that renders the detector inoperable shall
 result in a trouble signal or otherwise be apparent to the occu‐
@@ -17643,7 +17832,8 @@ FOR INDIVIDUAL USE ONLY
 Copyright 2019 National Fire Protection Association (NFPA®). Licensed by agreement to Carl Weaver FOR INDIVIDUAL USE ONLY and downloaded on 11/05/2019. No reproduction or transmission in any form permitted without
 written permission of NFPA®. For inquiries or access for multiple users, or to report unauthorized use, contact licensing@nfpa.org.
 {C56A4DC7-64F7-4C88-B368-41DE5BD47BC8}
-===PAGE_BREAK===
+<!-- Source PDF page 186 -->
+
 SINGLE- AND MULTIPLE-STATION ALARMS AND HOUSEHOLD SIGNALING SYSTEMS 72-183
 Shaded text = Revisions. Δ = Text deletions and figure/table revisions. • = Section deletions. N = New material. 2019 Edition
 29.10.6.9 Any data exchange between the control unit and
@@ -17764,7 +17954,8 @@ FOR INDIVIDUAL USE ONLY
 Copyright 2019 National Fire Protection Association (NFPA®). Licensed by agreement to Carl Weaver FOR INDIVIDUAL USE ONLY and downloaded on 11/05/2019. No reproduction or transmission in any form permitted without
 written permission of NFPA®. For inquiries or access for multiple users, or to report unauthorized use, contact licensing@nfpa.org.
 {C56A4DC7-64F7-4C88-B368-41DE5BD47BC8}
-===PAGE_BREAK===
+<!-- Source PDF page 187 -->
+
 NATIONAL FIRE ALARM AND SIGNALING CODE	72-184
 2019 Edition Shaded text = Revisions. Δ = Text deletions and figure/table revisions. • = Section deletions. N = New material.
 29.10.8.2.3 The maximum allowable response delay from acti‐
@@ -17838,7 +18029,7 @@ failure.
 29.10.9.10.6 A dedicated cellular telephone connection shall
 be permitted to be used as a single means to transmit alarms to
 a constantly attended remote monitoring location.
-29.11 Installation.
+### 29.11 Installation.
 29.11.1 General.
 29.11.1.1 All equipment shall be installed in accordance with
 the manufacturer’s published instructions and applicable elec‐
@@ -17879,7 +18070,8 @@ FOR INDIVIDUAL USE ONLY
 Copyright 2019 National Fire Protection Association (NFPA®). Licensed by agreement to Carl Weaver FOR INDIVIDUAL USE ONLY and downloaded on 11/05/2019. No reproduction or transmission in any form permitted without
 written permission of NFPA®. For inquiries or access for multiple users, or to report unauthorized use, contact licensing@nfpa.org.
 {C56A4DC7-64F7-4C88-B368-41DE5BD47BC8}
-===PAGE_BREAK===
+<!-- Source PDF page 188 -->
+
 SINGLE- AND MULTIPLE-STATION ALARMS AND HOUSEHOLD SIGNALING SYSTEMS 72-185
 Shaded text = Revisions. Δ = Text deletions and figure/table revisions. • = Section deletions. N = New material. 2019 Edition
 (2) In no case shall more than 18 initiating devices be inter‐
@@ -18007,7 +18199,8 @@ FOR INDIVIDUAL USE ONLY
 Copyright 2019 National Fire Protection Association (NFPA®). Licensed by agreement to Carl Weaver FOR INDIVIDUAL USE ONLY and downloaded on 11/05/2019. No reproduction or transmission in any form permitted without
 written permission of NFPA®. For inquiries or access for multiple users, or to report unauthorized use, contact licensing@nfpa.org.
 {C56A4DC7-64F7-4C88-B368-41DE5BD47BC8}
-===PAGE_BREAK===
+<!-- Source PDF page 189 -->
+
 NATIONAL FIRE ALARM AND SIGNALING CODE	72-186
 2019 Edition Shaded text = Revisions. Δ = Text deletions and figure/table revisions. • = Section deletions. N = New material.
 29.11.4.4* Heat detectors or alarms shall be mounted on the
@@ -18047,14 +18240,14 @@ gases such as carbon monoxide
 intrusion (burglar alarm) sensors
 (5) Any other function, safety related or not, that could share
 components or wiring
-29.13 Inspection, Testing, and Maintenance.
+### 29.13 Inspection, Testing, and Maintenance.
 N 29.13.1 Fire and carbon monoxide alarm equipment shall be
 maintained and tested in accordance with the manufacturer’s
 published instructions and per the requirements of 14.4.5 and
 14.4.6.
 N 29.13.2 All fire and carbon monoxide alarm equipment shall
 be restored to a normal condition after each alarm or test.
-29.14 Markings and Instructions.
+### 29.14 Markings and Instructions.
 29.14.1 Alarms. All alarms shall be plainly marked with the
 following information on the unit:
 (1) Manufacturer’s or listee’s name, address, and model
@@ -18128,15 +18321,16 @@ FOR INDIVIDUAL USE ONLY
 Copyright 2019 National Fire Protection Association (NFPA®). Licensed by agreement to Carl Weaver FOR INDIVIDUAL USE ONLY and downloaded on 11/05/2019. No reproduction or transmission in any form permitted without
 written permission of NFPA®. For inquiries or access for multiple users, or to report unauthorized use, contact licensing@nfpa.org.
 {C56A4DC7-64F7-4C88-B368-41DE5BD47BC8}
-===PAGE_BREAK===
+<!-- Source PDF page 190 -->
+
 ANNEX A 72-187
 Shaded text = Revisions. Δ = Text deletions and figure/table revisions. • = Section deletions. N = New material. 2019 Edition
 (7)* Information on the actions to be taken in case of an
 alarm
 (8) Minimum and recommended distances from fuel-
 burning appliances
-Annex A Explanatory Material
-Annex A is not a part of the requirements of this NFPA document but is
+## Annex A Explanatory Material
+## Annex A is not a part of the requirements of this NFPA document but is
 included for informational purposes only. This annex contains explan‐
 atory material, numbered to correspond with the applicable text para‐
 graphs.
@@ -18253,7 +18447,8 @@ FOR INDIVIDUAL USE ONLY
 Copyright 2019 National Fire Protection Association (NFPA®). Licensed by agreement to Carl Weaver FOR INDIVIDUAL USE ONLY and downloaded on 11/05/2019. No reproduction or transmission in any form permitted without
 written permission of NFPA®. For inquiries or access for multiple users, or to report unauthorized use, contact licensing@nfpa.org.
 {C56A4DC7-64F7-4C88-B368-41DE5BD47BC8}
-===PAGE_BREAK===
+<!-- Source PDF page 191 -->
+
 NATIONAL FIRE ALARM AND SIGNALING CODE	72-188
 2019 Edition Shaded text = Revisions. Δ = Text deletions and figure/table revisions. • = Section deletions. N = New material.
 levels might have different ceiling heights. The ADS with the
@@ -18353,7 +18548,8 @@ FOR INDIVIDUAL USE ONLY
 Copyright 2019 National Fire Protection Association (NFPA®). Licensed by agreement to Carl Weaver FOR INDIVIDUAL USE ONLY and downloaded on 11/05/2019. No reproduction or transmission in any form permitted without
 written permission of NFPA®. For inquiries or access for multiple users, or to report unauthorized use, contact licensing@nfpa.org.
 {C56A4DC7-64F7-4C88-B368-41DE5BD47BC8}
-===PAGE_BREAK===
+<!-- Source PDF page 192 -->
+
 ANNEX A 72-189
 Shaded text = Revisions. Δ = Text deletions and figure/table revisions. • = Section deletions. N = New material. 2019 Edition
 A condition could be detected, resulting in a signal, but there
@@ -18502,7 +18698,8 @@ FOR INDIVIDUAL USE ONLY
 Copyright 2019 National Fire Protection Association (NFPA®). Licensed by agreement to Carl Weaver FOR INDIVIDUAL USE ONLY and downloaded on 11/05/2019. No reproduction or transmission in any form permitted without
 written permission of NFPA®. For inquiries or access for multiple users, or to report unauthorized use, contact licensing@nfpa.org.
 {C56A4DC7-64F7-4C88-B368-41DE5BD47BC8}
-===PAGE_BREAK===
+<!-- Source PDF page 193 -->
+
 NATIONAL FIRE ALARM AND SIGNALING CODE	72-190
 2019 Edition Shaded text = Revisions. Δ = Text deletions and figure/table revisions. • = Section deletions. N = New material.
 N A.3.3.69 Design Professional. An architect/engineer working
@@ -18632,7 +18829,8 @@ FOR INDIVIDUAL USE ONLY
 Copyright 2019 National Fire Protection Association (NFPA®). Licensed by agreement to Carl Weaver FOR INDIVIDUAL USE ONLY and downloaded on 11/05/2019. No reproduction or transmission in any form permitted without
 written permission of NFPA®. For inquiries or access for multiple users, or to report unauthorized use, contact licensing@nfpa.org.
 {C56A4DC7-64F7-4C88-B368-41DE5BD47BC8}
-===PAGE_BREAK===
+<!-- Source PDF page 194 -->
+
 ANNEX A 72-191
 Shaded text = Revisions. Δ = Text deletions and figure/table revisions. • = Section deletions. N = New material. 2019 Edition
 life safety system. This is not to say that this equipment is not
@@ -18757,7 +18955,8 @@ FOR INDIVIDUAL USE ONLY
 Copyright 2019 National Fire Protection Association (NFPA®). Licensed by agreement to Carl Weaver FOR INDIVIDUAL USE ONLY and downloaded on 11/05/2019. No reproduction or transmission in any form permitted without
 written permission of NFPA®. For inquiries or access for multiple users, or to report unauthorized use, contact licensing@nfpa.org.
 {C56A4DC7-64F7-4C88-B368-41DE5BD47BC8}
-===PAGE_BREAK===
+<!-- Source PDF page 195 -->
+
 NATIONAL FIRE ALARM AND SIGNALING CODE	72-192
 2019 Edition Shaded text = Revisions. Δ = Text deletions and figure/table revisions. • = Section deletions. N = New material.
 (13) Worktable
@@ -18870,7 +19069,8 @@ FOR INDIVIDUAL USE ONLY
 Copyright 2019 National Fire Protection Association (NFPA®). Licensed by agreement to Carl Weaver FOR INDIVIDUAL USE ONLY and downloaded on 11/05/2019. No reproduction or transmission in any form permitted without
 written permission of NFPA®. For inquiries or access for multiple users, or to report unauthorized use, contact licensing@nfpa.org.
 {C56A4DC7-64F7-4C88-B368-41DE5BD47BC8}
-===PAGE_BREAK===
+<!-- Source PDF page 196 -->
+
 ANNEX A 72-193
 Shaded text = Revisions. Δ = Text deletions and figure/table revisions. • = Section deletions. N = New material. 2019 Edition
 A.3.3.146.1.1 Emergency Control Function Interface. See
@@ -18985,7 +19185,8 @@ FOR INDIVIDUAL USE ONLY
 Copyright 2019 National Fire Protection Association (NFPA®). Licensed by agreement to Carl Weaver FOR INDIVIDUAL USE ONLY and downloaded on 11/05/2019. No reproduction or transmission in any form permitted without
 written permission of NFPA®. For inquiries or access for multiple users, or to report unauthorized use, contact licensing@nfpa.org.
 {C56A4DC7-64F7-4C88-B368-41DE5BD47BC8}
-===PAGE_BREAK===
+<!-- Source PDF page 197 -->
+
 NATIONAL FIRE ALARM AND SIGNALING CODE	72-194
 2019 Edition Shaded text = Revisions. Δ = Text deletions and figure/table revisions. • = Section deletions. N = New material.
 The Code intends to only recognize the use of the telephone
@@ -19103,7 +19304,8 @@ FOR INDIVIDUAL USE ONLY
 Copyright 2019 National Fire Protection Association (NFPA®). Licensed by agreement to Carl Weaver FOR INDIVIDUAL USE ONLY and downloaded on 11/05/2019. No reproduction or transmission in any form permitted without
 written permission of NFPA®. For inquiries or access for multiple users, or to report unauthorized use, contact licensing@nfpa.org.
 {C56A4DC7-64F7-4C88-B368-41DE5BD47BC8}
-===PAGE_BREAK===
+<!-- Source PDF page 198 -->
+
 ANNEX A 72-195
 Shaded text = Revisions. Δ = Text deletions and figure/table revisions. • = Section deletions. N = New material. 2019 Edition
 A.3.3.250 Response. Responses can be effected manually or
@@ -19226,7 +19428,8 @@ FOR INDIVIDUAL USE ONLY
 Copyright 2019 National Fire Protection Association (NFPA®). Licensed by agreement to Carl Weaver FOR INDIVIDUAL USE ONLY and downloaded on 11/05/2019. No reproduction or transmission in any form permitted without
 written permission of NFPA®. For inquiries or access for multiple users, or to report unauthorized use, contact licensing@nfpa.org.
 {C56A4DC7-64F7-4C88-B368-41DE5BD47BC8}
-===PAGE_BREAK===
+<!-- Source PDF page 199 -->
+
 NATIONAL FIRE ALARM AND SIGNALING CODE	72-196
 2019 Edition Shaded text = Revisions. Δ = Text deletions and figure/table revisions. • = Section deletions. N = New material.
 types of alarms. Unwanted alarms might be intentional, unin‐
@@ -19351,7 +19554,8 @@ FOR INDIVIDUAL USE ONLY
 Copyright 2019 National Fire Protection Association (NFPA®). Licensed by agreement to Carl Weaver FOR INDIVIDUAL USE ONLY and downloaded on 11/05/2019. No reproduction or transmission in any form permitted without
 written permission of NFPA®. For inquiries or access for multiple users, or to report unauthorized use, contact licensing@nfpa.org.
 {C56A4DC7-64F7-4C88-B368-41DE5BD47BC8}
-===PAGE_BREAK===
+<!-- Source PDF page 200 -->
+
 ANNEX A 72-197
 Shaded text = Revisions. Δ = Text deletions and figure/table revisions. • = Section deletions. N = New material. 2019 Edition
 N A.7.2.1(12) Paragraph 26.6.2.4 allows for the following three
@@ -19361,7 +19565,7 @@ fire alarm system is provided:
 (2) Digital alarm communicator systems
 (3) Radio systems, which includes one-way private and two-
 way RF systems
-Chapter 26 includes several requirements specific to each of
+## Chapter 26 includes several requirements specific to each of
 these communications pathway alternatives. In order to verify
 the provided communication path(s), and any shared equip‐
 ment, comply with Code requirements, the following are exam‐
@@ -19468,7 +19672,8 @@ FOR INDIVIDUAL USE ONLY
 Copyright 2019 National Fire Protection Association (NFPA®). Licensed by agreement to Carl Weaver FOR INDIVIDUAL USE ONLY and downloaded on 11/05/2019. No reproduction or transmission in any form permitted without
 written permission of NFPA®. For inquiries or access for multiple users, or to report unauthorized use, contact licensing@nfpa.org.
 {C56A4DC7-64F7-4C88-B368-41DE5BD47BC8}
-===PAGE_BREAK===
+<!-- Source PDF page 201 -->
+
 NATIONAL FIRE ALARM AND SIGNALING CODE	72-198
 2019 Edition Shaded text = Revisions. Δ = Text deletions and figure/table revisions. • = Section deletions. N = New material.
 NFPA 72 (p. 1 of 2)	© 2018 National Fire Protection Association
@@ -19519,7 +19724,8 @@ FOR INDIVIDUAL USE ONLY
 Copyright 2019 National Fire Protection Association (NFPA®). Licensed by agreement to Carl Weaver FOR INDIVIDUAL USE ONLY and downloaded on 11/05/2019. No reproduction or transmission in any form permitted without
 written permission of NFPA®. For inquiries or access for multiple users, or to report unauthorized use, contact licensing@nfpa.org.
 {C56A4DC7-64F7-4C88-B368-41DE5BD47BC8}
-===PAGE_BREAK===
+<!-- Source PDF page 202 -->
+
 ANNEX A 72-199
 Shaded text = Revisions. Δ = Text deletions and figure/table revisions. • = Section deletions. N = New material. 2019 Edition
 NFPA 72 (p. 2 of 2)	© 2018 National Fire Protection Association
@@ -19600,7 +19806,8 @@ FOR INDIVIDUAL USE ONLY
 Copyright 2019 National Fire Protection Association (NFPA®). Licensed by agreement to Carl Weaver FOR INDIVIDUAL USE ONLY and downloaded on 11/05/2019. No reproduction or transmission in any form permitted without
 written permission of NFPA®. For inquiries or access for multiple users, or to report unauthorized use, contact licensing@nfpa.org.
 {C56A4DC7-64F7-4C88-B368-41DE5BD47BC8}
-===PAGE_BREAK===
+<!-- Source PDF page 203 -->
+
 NATIONAL FIRE ALARM AND SIGNALING CODE	72-200
 2019 Edition Shaded text = Revisions. Δ = Text deletions and figure/table revisions. • = Section deletions. N = New material.
 Due to unique design and construction challenges, fire
@@ -19725,7 +19932,8 @@ FOR INDIVIDUAL USE ONLY
 Copyright 2019 National Fire Protection Association (NFPA®). Licensed by agreement to Carl Weaver FOR INDIVIDUAL USE ONLY and downloaded on 11/05/2019. No reproduction or transmission in any form permitted without
 written permission of NFPA®. For inquiries or access for multiple users, or to report unauthorized use, contact licensing@nfpa.org.
 {C56A4DC7-64F7-4C88-B368-41DE5BD47BC8}
-===PAGE_BREAK===
+<!-- Source PDF page 204 -->
+
 ANNEX A 72-201
 Shaded text = Revisions. Δ = Text deletions and figure/table revisions. • = Section deletions. N = New material. 2019 Edition
 (7) Evaluation documentation in accordance with 7.3.9
@@ -19847,7 +20055,8 @@ FOR INDIVIDUAL USE ONLY
 Copyright 2019 National Fire Protection Association (NFPA®). Licensed by agreement to Carl Weaver FOR INDIVIDUAL USE ONLY and downloaded on 11/05/2019. No reproduction or transmission in any form permitted without
 written permission of NFPA®. For inquiries or access for multiple users, or to report unauthorized use, contact licensing@nfpa.org.
 {C56A4DC7-64F7-4C88-B368-41DE5BD47BC8}
-===PAGE_BREAK===
+<!-- Source PDF page 205 -->
+
 NATIONAL FIRE ALARM AND SIGNALING CODE	72-202
 2019 Edition Shaded text = Revisions. Δ = Text deletions and figure/table revisions. • = Section deletions. N = New material.
 NFPA 72 (p. 1 of 3)	© 2018 National Fire Protection Association
@@ -19933,7 +20142,8 @@ FOR INDIVIDUAL USE ONLY
 Copyright 2019 National Fire Protection Association (NFPA®). Licensed by agreement to Carl Weaver FOR INDIVIDUAL USE ONLY and downloaded on 11/05/2019. No reproduction or transmission in any form permitted without
 written permission of NFPA®. For inquiries or access for multiple users, or to report unauthorized use, contact licensing@nfpa.org.
 {C56A4DC7-64F7-4C88-B368-41DE5BD47BC8}
-===PAGE_BREAK===
+<!-- Source PDF page 206 -->
+
 ANNEX A 72-203
 Shaded text = Revisions. Δ = Text deletions and figure/table revisions. • = Section deletions. N = New material. 2019 Edition
 NFPA 72 (p. 2 of 3)	© 2018 National Fire Protection Association
@@ -20020,7 +20230,8 @@ FOR INDIVIDUAL USE ONLY
 Copyright 2019 National Fire Protection Association (NFPA®). Licensed by agreement to Carl Weaver FOR INDIVIDUAL USE ONLY and downloaded on 11/05/2019. No reproduction or transmission in any form permitted without
 written permission of NFPA®. For inquiries or access for multiple users, or to report unauthorized use, contact licensing@nfpa.org.
 {C56A4DC7-64F7-4C88-B368-41DE5BD47BC8}
-===PAGE_BREAK===
+<!-- Source PDF page 207 -->
+
 NATIONAL FIRE ALARM AND SIGNALING CODE	72-204
 2019 Edition Shaded text = Revisions. Δ = Text deletions and figure/table revisions. • = Section deletions. N = New material.
 NFPA 72 (p. 3 of 3)	© 2018 National Fire Protection Association
@@ -20078,7 +20289,8 @@ FOR INDIVIDUAL USE ONLY
 Copyright 2019 National Fire Protection Association (NFPA®). Licensed by agreement to Carl Weaver FOR INDIVIDUAL USE ONLY and downloaded on 11/05/2019. No reproduction or transmission in any form permitted without
 written permission of NFPA®. For inquiries or access for multiple users, or to report unauthorized use, contact licensing@nfpa.org.
 {C56A4DC7-64F7-4C88-B368-41DE5BD47BC8}
-===PAGE_BREAK===
+<!-- Source PDF page 208 -->
+
 ANNEX A 72-205
 Shaded text = Revisions. Δ = Text deletions and figure/table revisions. • = Section deletions. N = New material. 2019 Edition
 NFPA 72 (p. 1 of 3)	© 2018 National Fire Protection Association
@@ -20133,7 +20345,8 @@ FOR INDIVIDUAL USE ONLY
 Copyright 2019 National Fire Protection Association (NFPA®). Licensed by agreement to Carl Weaver FOR INDIVIDUAL USE ONLY and downloaded on 11/05/2019. No reproduction or transmission in any form permitted without
 written permission of NFPA®. For inquiries or access for multiple users, or to report unauthorized use, contact licensing@nfpa.org.
 {C56A4DC7-64F7-4C88-B368-41DE5BD47BC8}
-===PAGE_BREAK===
+<!-- Source PDF page 209 -->
+
 NATIONAL FIRE ALARM AND SIGNALING CODE	72-206
 2019 Edition Shaded text = Revisions. Δ = Text deletions and figure/table revisions. • = Section deletions. N = New material.
 NFPA 72 (p. 2 of 3)	© 2018 National Fire Protection Association
@@ -20187,7 +20400,8 @@ FOR INDIVIDUAL USE ONLY
 Copyright 2019 National Fire Protection Association (NFPA®). Licensed by agreement to Carl Weaver FOR INDIVIDUAL USE ONLY and downloaded on 11/05/2019. No reproduction or transmission in any form permitted without
 written permission of NFPA®. For inquiries or access for multiple users, or to report unauthorized use, contact licensing@nfpa.org.
 {C56A4DC7-64F7-4C88-B368-41DE5BD47BC8}
-===PAGE_BREAK===
+<!-- Source PDF page 210 -->
+
 ANNEX A 72-207
 Shaded text = Revisions. Δ = Text deletions and figure/table revisions. • = Section deletions. N = New material. 2019 Edition
 NFPA 72 (p. 3 of 3)	© 2018 National Fire Protection Association
@@ -20217,7 +20431,8 @@ FOR INDIVIDUAL USE ONLY
 Copyright 2019 National Fire Protection Association (NFPA®). Licensed by agreement to Carl Weaver FOR INDIVIDUAL USE ONLY and downloaded on 11/05/2019. No reproduction or transmission in any form permitted without
 written permission of NFPA®. For inquiries or access for multiple users, or to report unauthorized use, contact licensing@nfpa.org.
 {C56A4DC7-64F7-4C88-B368-41DE5BD47BC8}
-===PAGE_BREAK===
+<!-- Source PDF page 211 -->
+
 NATIONAL FIRE ALARM AND SIGNALING CODE	72-208
 2019 Edition Shaded text = Revisions. Δ = Text deletions and figure/table revisions. • = Section deletions. N = New material.
 NFPA 72 (p. 1 of 3)	© 2018 National Fire Protection Association
@@ -20282,7 +20497,8 @@ FOR INDIVIDUAL USE ONLY
 Copyright 2019 National Fire Protection Association (NFPA®). Licensed by agreement to Carl Weaver FOR INDIVIDUAL USE ONLY and downloaded on 11/05/2019. No reproduction or transmission in any form permitted without
 written permission of NFPA®. For inquiries or access for multiple users, or to report unauthorized use, contact licensing@nfpa.org.
 {C56A4DC7-64F7-4C88-B368-41DE5BD47BC8}
-===PAGE_BREAK===
+<!-- Source PDF page 212 -->
+
 ANNEX A 72-209
 Shaded text = Revisions. Δ = Text deletions and figure/table revisions. • = Section deletions. N = New material. 2019 Edition
 NFPA 72 (p. 2 of 3)	© 2018 National Fire Protection Association
@@ -20341,7 +20557,8 @@ FOR INDIVIDUAL USE ONLY
 Copyright 2019 National Fire Protection Association (NFPA®). Licensed by agreement to Carl Weaver FOR INDIVIDUAL USE ONLY and downloaded on 11/05/2019. No reproduction or transmission in any form permitted without
 written permission of NFPA®. For inquiries or access for multiple users, or to report unauthorized use, contact licensing@nfpa.org.
 {C56A4DC7-64F7-4C88-B368-41DE5BD47BC8}
-===PAGE_BREAK===
+<!-- Source PDF page 213 -->
+
 NATIONAL FIRE ALARM AND SIGNALING CODE	72-210
 2019 Edition Shaded text = Revisions. Δ = Text deletions and figure/table revisions. • = Section deletions. N = New material.
 Once a system or a change to a system has been accepted,
@@ -20415,7 +20632,8 @@ FOR INDIVIDUAL USE ONLY
 Copyright 2019 National Fire Protection Association (NFPA®). Licensed by agreement to Carl Weaver FOR INDIVIDUAL USE ONLY and downloaded on 11/05/2019. No reproduction or transmission in any form permitted without
 written permission of NFPA®. For inquiries or access for multiple users, or to report unauthorized use, contact licensing@nfpa.org.
 {C56A4DC7-64F7-4C88-B368-41DE5BD47BC8}
-===PAGE_BREAK===
+<!-- Source PDF page 214 -->
+
 ANNEX A 72-211
 Shaded text = Revisions. Δ = Text deletions and figure/table revisions. • = Section deletions. N = New material. 2019 Edition
 NFPA 72	© 2018 National Fire Protection Association
@@ -20450,7 +20668,8 @@ FOR INDIVIDUAL USE ONLY
 Copyright 2019 National Fire Protection Association (NFPA®). Licensed by agreement to Carl Weaver FOR INDIVIDUAL USE ONLY and downloaded on 11/05/2019. No reproduction or transmission in any form permitted without
 written permission of NFPA®. For inquiries or access for multiple users, or to report unauthorized use, contact licensing@nfpa.org.
 {C56A4DC7-64F7-4C88-B368-41DE5BD47BC8}
-===PAGE_BREAK===
+<!-- Source PDF page 215 -->
+
 NATIONAL FIRE ALARM AND SIGNALING CODE	72-212
 2019 Edition Shaded text = Revisions. Δ = Text deletions and figure/table revisions. • = Section deletions. N = New material.
 NFPA 72	© 2018 National Fire Protection Association
@@ -20480,7 +20699,8 @@ FOR INDIVIDUAL USE ONLY
 Copyright 2019 National Fire Protection Association (NFPA®). Licensed by agreement to Carl Weaver FOR INDIVIDUAL USE ONLY and downloaded on 11/05/2019. No reproduction or transmission in any form permitted without
 written permission of NFPA®. For inquiries or access for multiple users, or to report unauthorized use, contact licensing@nfpa.org.
 {C56A4DC7-64F7-4C88-B368-41DE5BD47BC8}
-===PAGE_BREAK===
+<!-- Source PDF page 216 -->
+
 ANNEX A 72-213
 Shaded text = Revisions. Δ = Text deletions and figure/table revisions. • = Section deletions. N = New material. 2019 Edition
 NFPA 72	© 2018 National Fire Protection Association
@@ -20509,7 +20729,8 @@ FOR INDIVIDUAL USE ONLY
 Copyright 2019 National Fire Protection Association (NFPA®). Licensed by agreement to Carl Weaver FOR INDIVIDUAL USE ONLY and downloaded on 11/05/2019. No reproduction or transmission in any form permitted without
 written permission of NFPA®. For inquiries or access for multiple users, or to report unauthorized use, contact licensing@nfpa.org.
 {C56A4DC7-64F7-4C88-B368-41DE5BD47BC8}
-===PAGE_BREAK===
+<!-- Source PDF page 217 -->
+
 NATIONAL FIRE ALARM AND SIGNALING CODE	72-214
 2019 Edition Shaded text = Revisions. Δ = Text deletions and figure/table revisions. • = Section deletions. N = New material.
 A.10.5.5.1(2) An example of an organization providing alarm
@@ -20633,7 +20854,8 @@ FOR INDIVIDUAL USE ONLY
 Copyright 2019 National Fire Protection Association (NFPA®). Licensed by agreement to Carl Weaver FOR INDIVIDUAL USE ONLY and downloaded on 11/05/2019. No reproduction or transmission in any form permitted without
 written permission of NFPA®. For inquiries or access for multiple users, or to report unauthorized use, contact licensing@nfpa.org.
 {C56A4DC7-64F7-4C88-B368-41DE5BD47BC8}
-===PAGE_BREAK===
+<!-- Source PDF page 218 -->
+
 ANNEX A 72-215
 Shaded text = Revisions. Δ = Text deletions and figure/table revisions. • = Section deletions. N = New material. 2019 Edition
 (4) Power over ethernet (PoE), where provided for control
@@ -20754,7 +20976,8 @@ FOR INDIVIDUAL USE ONLY
 Copyright 2019 National Fire Protection Association (NFPA®). Licensed by agreement to Carl Weaver FOR INDIVIDUAL USE ONLY and downloaded on 11/05/2019. No reproduction or transmission in any form permitted without
 written permission of NFPA®. For inquiries or access for multiple users, or to report unauthorized use, contact licensing@nfpa.org.
 {C56A4DC7-64F7-4C88-B368-41DE5BD47BC8}
-===PAGE_BREAK===
+<!-- Source PDF page 219 -->
+
 NATIONAL FIRE ALARM AND SIGNALING CODE	72-216
 2019 Edition Shaded text = Revisions. Δ = Text deletions and figure/table revisions. • = Section deletions. N = New material.
 A.10.11.4 The recommended coded signal designations for
@@ -20878,7 +21101,8 @@ FOR INDIVIDUAL USE ONLY
 Copyright 2019 National Fire Protection Association (NFPA®). Licensed by agreement to Carl Weaver FOR INDIVIDUAL USE ONLY and downloaded on 11/05/2019. No reproduction or transmission in any form permitted without
 written permission of NFPA®. For inquiries or access for multiple users, or to report unauthorized use, contact licensing@nfpa.org.
 {C56A4DC7-64F7-4C88-B368-41DE5BD47BC8}
-===PAGE_BREAK===
+<!-- Source PDF page 220 -->
+
 ANNEX A 72-217
 Shaded text = Revisions. Δ = Text deletions and figure/table revisions. • = Section deletions. N = New material. 2019 Edition
 A.10.21.4 It is important for the authority having jurisdiction,
@@ -20989,7 +21213,8 @@ FOR INDIVIDUAL USE ONLY
 Copyright 2019 National Fire Protection Association (NFPA®). Licensed by agreement to Carl Weaver FOR INDIVIDUAL USE ONLY and downloaded on 11/05/2019. No reproduction or transmission in any form permitted without
 written permission of NFPA®. For inquiries or access for multiple users, or to report unauthorized use, contact licensing@nfpa.org.
 {C56A4DC7-64F7-4C88-B368-41DE5BD47BC8}
-===PAGE_BREAK===
+<!-- Source PDF page 221 -->
+
 NATIONAL FIRE ALARM AND SIGNALING CODE	72-218
 2019 Edition Shaded text = Revisions. Δ = Text deletions and figure/table revisions. • = Section deletions. N = New material.
 Class N uses redundant paths as a means to compensate for
@@ -21112,7 +21337,8 @@ FOR INDIVIDUAL USE ONLY
 Copyright 2019 National Fire Protection Association (NFPA®). Licensed by agreement to Carl Weaver FOR INDIVIDUAL USE ONLY and downloaded on 11/05/2019. No reproduction or transmission in any form permitted without
 written permission of NFPA®. For inquiries or access for multiple users, or to report unauthorized use, contact licensing@nfpa.org.
 {C56A4DC7-64F7-4C88-B368-41DE5BD47BC8}
-===PAGE_BREAK===
+<!-- Source PDF page 222 -->
+
 ANNEX A 72-219
 Shaded text = Revisions. Δ = Text deletions and figure/table revisions. • = Section deletions. N = New material. 2019 Edition
 Switch
@@ -21158,7 +21384,8 @@ FOR INDIVIDUAL USE ONLY
 Copyright 2019 National Fire Protection Association (NFPA®). Licensed by agreement to Carl Weaver FOR INDIVIDUAL USE ONLY and downloaded on 11/05/2019. No reproduction or transmission in any form permitted without
 written permission of NFPA®. For inquiries or access for multiple users, or to report unauthorized use, contact licensing@nfpa.org.
 {C56A4DC7-64F7-4C88-B368-41DE5BD47BC8}
-===PAGE_BREAK===
+<!-- Source PDF page 223 -->
+
 NATIONAL FIRE ALARM AND SIGNALING CODE	72-220
 2019 Edition Shaded text = Revisions. Δ = Text deletions and figure/table revisions. • = Section deletions. N = New material.
 A.12.3.6(4) Operational conditions of the pathway include
@@ -21272,7 +21499,8 @@ FOR INDIVIDUAL USE ONLY
 Copyright 2019 National Fire Protection Association (NFPA®). Licensed by agreement to Carl Weaver FOR INDIVIDUAL USE ONLY and downloaded on 11/05/2019. No reproduction or transmission in any form permitted without
 written permission of NFPA®. For inquiries or access for multiple users, or to report unauthorized use, contact licensing@nfpa.org.
 {C56A4DC7-64F7-4C88-B368-41DE5BD47BC8}
-===PAGE_BREAK===
+<!-- Source PDF page 224 -->
+
 ANNEX A 72-221
 Shaded text = Revisions. Δ = Text deletions and figure/table revisions. • = Section deletions. N = New material. 2019 Edition
 Type V(000) building that employs relocation or partial evacua‐
@@ -21395,7 +21623,8 @@ FOR INDIVIDUAL USE ONLY
 Copyright 2019 National Fire Protection Association (NFPA®). Licensed by agreement to Carl Weaver FOR INDIVIDUAL USE ONLY and downloaded on 11/05/2019. No reproduction or transmission in any form permitted without
 written permission of NFPA®. For inquiries or access for multiple users, or to report unauthorized use, contact licensing@nfpa.org.
 {C56A4DC7-64F7-4C88-B368-41DE5BD47BC8}
-===PAGE_BREAK===
+<!-- Source PDF page 225 -->
+
 NATIONAL FIRE ALARM AND SIGNALING CODE	72-222
 2019 Edition Shaded text = Revisions. Δ = Text deletions and figure/table revisions. • = Section deletions. N = New material.
 tion, evacuation procedures, accommodation for evacuees, and
@@ -21525,7 +21754,8 @@ FOR INDIVIDUAL USE ONLY
 Copyright 2019 National Fire Protection Association (NFPA®). Licensed by agreement to Carl Weaver FOR INDIVIDUAL USE ONLY and downloaded on 11/05/2019. No reproduction or transmission in any form permitted without
 written permission of NFPA®. For inquiries or access for multiple users, or to report unauthorized use, contact licensing@nfpa.org.
 {C56A4DC7-64F7-4C88-B368-41DE5BD47BC8}
-===PAGE_BREAK===
+<!-- Source PDF page 226 -->
+
 ANNEX A 72-223
 Shaded text = Revisions. Δ = Text deletions and figure/table revisions. • = Section deletions. N = New material. 2019 Edition
 test all these initiating devices whenever a smoke detector is
@@ -21655,7 +21885,8 @@ FOR INDIVIDUAL USE ONLY
 Copyright 2019 National Fire Protection Association (NFPA®). Licensed by agreement to Carl Weaver FOR INDIVIDUAL USE ONLY and downloaded on 11/05/2019. No reproduction or transmission in any form permitted without
 written permission of NFPA®. For inquiries or access for multiple users, or to report unauthorized use, contact licensing@nfpa.org.
 {C56A4DC7-64F7-4C88-B368-41DE5BD47BC8}
-===PAGE_BREAK===
+<!-- Source PDF page 227 -->
+
 NATIONAL FIRE ALARM AND SIGNALING CODE	72-224
 2019 Edition Shaded text = Revisions. Δ = Text deletions and figure/table revisions. • = Section deletions. N = New material.
 is important to note that the use of generic reference
@@ -21788,7 +22019,8 @@ FOR INDIVIDUAL USE ONLY
 Copyright 2019 National Fire Protection Association (NFPA®). Licensed by agreement to Carl Weaver FOR INDIVIDUAL USE ONLY and downloaded on 11/05/2019. No reproduction or transmission in any form permitted without
 written permission of NFPA®. For inquiries or access for multiple users, or to report unauthorized use, contact licensing@nfpa.org.
 {C56A4DC7-64F7-4C88-B368-41DE5BD47BC8}
-===PAGE_BREAK===
+<!-- Source PDF page 228 -->
+
 ANNEX A 72-225
 Shaded text = Revisions. Δ = Text deletions and figure/table revisions. • = Section deletions. N = New material. 2019 Edition
 capacity due to aging, charge and discharge cycles, tempera‐
@@ -21915,7 +22147,8 @@ FOR INDIVIDUAL USE ONLY
 Copyright 2019 National Fire Protection Association (NFPA®). Licensed by agreement to Carl Weaver FOR INDIVIDUAL USE ONLY and downloaded on 11/05/2019. No reproduction or transmission in any form permitted without
 written permission of NFPA®. For inquiries or access for multiple users, or to report unauthorized use, contact licensing@nfpa.org.
 {C56A4DC7-64F7-4C88-B368-41DE5BD47BC8}
-===PAGE_BREAK===
+<!-- Source PDF page 229 -->
+
 NATIONAL FIRE ALARM AND SIGNALING CODE	72-226
 2019 Edition Shaded text = Revisions. Δ = Text deletions and figure/table revisions. • = Section deletions. N = New material.
 required performance and testing of the emergency function
@@ -22038,7 +22271,8 @@ FOR INDIVIDUAL USE ONLY
 Copyright 2019 National Fire Protection Association (NFPA®). Licensed by agreement to Carl Weaver FOR INDIVIDUAL USE ONLY and downloaded on 11/05/2019. No reproduction or transmission in any form permitted without
 written permission of NFPA®. For inquiries or access for multiple users, or to report unauthorized use, contact licensing@nfpa.org.
 {C56A4DC7-64F7-4C88-B368-41DE5BD47BC8}
-===PAGE_BREAK===
+<!-- Source PDF page 230 -->
+
 72-227	ANNEX A
 Shaded text = Revisions. Δ = Text deletions and figure/table revisions. • = Section deletions. N = New material. 2019 Edition
 tain their own alarm systems. The training should cover basic
@@ -22135,7 +22369,8 @@ FOR INDIVIDUAL USE ONLY
 Copyright 2019 National Fire Protection Association (NFPA®). Licensed by agreement to Carl Weaver FOR INDIVIDUAL USE ONLY and downloaded on 11/05/2019. No reproduction or transmission in any form permitted without
 written permission of NFPA®. For inquiries or access for multiple users, or to report unauthorized use, contact licensing@nfpa.org.
 {C56A4DC7-64F7-4C88-B368-41DE5BD47BC8}
-===PAGE_BREAK===
+<!-- Source PDF page 231 -->
+
 NATIONAL FIRE ALARM AND SIGNALING CODE	72-228
 2019 Edition Shaded text = Revisions. Δ = Text deletions and figure/table revisions. • = Section deletions. N = New material.
 ments to initiating device sensitivity or range of operation are
@@ -22321,7 +22556,8 @@ FOR INDIVIDUAL USE ONLY
 Copyright 2019 National Fire Protection Association (NFPA®). Licensed by agreement to Carl Weaver FOR INDIVIDUAL USE ONLY and downloaded on 11/05/2019. No reproduction or transmission in any form permitted without
 written permission of NFPA®. For inquiries or access for multiple users, or to report unauthorized use, contact licensing@nfpa.org.
 {C56A4DC7-64F7-4C88-B368-41DE5BD47BC8}
-===PAGE_BREAK===
+<!-- Source PDF page 232 -->
+
 ANNEX A 72-229
 Shaded text = Revisions. Δ = Text deletions and figure/table revisions. • = Section deletions. N = New material. 2019 Edition
 Incorrect
@@ -22411,7 +22647,8 @@ FOR INDIVIDUAL USE ONLY
 Copyright 2019 National Fire Protection Association (NFPA®). Licensed by agreement to Carl Weaver FOR INDIVIDUAL USE ONLY and downloaded on 11/05/2019. No reproduction or transmission in any form permitted without
 written permission of NFPA®. For inquiries or access for multiple users, or to report unauthorized use, contact licensing@nfpa.org.
 {C56A4DC7-64F7-4C88-B368-41DE5BD47BC8}
-===PAGE_BREAK===
+<!-- Source PDF page 233 -->
+
 NATIONAL FIRE ALARM AND SIGNALING CODE	72-230
 2019 Edition Shaded text = Revisions. Δ = Text deletions and figure/table revisions. • = Section deletions. N = New material.
 A.17.5.3.2 If there are no detectors in the room or area of fire
@@ -22537,7 +22774,8 @@ FOR INDIVIDUAL USE ONLY
 Copyright 2019 National Fire Protection Association (NFPA®). Licensed by agreement to Carl Weaver FOR INDIVIDUAL USE ONLY and downloaded on 11/05/2019. No reproduction or transmission in any form permitted without
 written permission of NFPA®. For inquiries or access for multiple users, or to report unauthorized use, contact licensing@nfpa.org.
 {C56A4DC7-64F7-4C88-B368-41DE5BD47BC8}
-===PAGE_BREAK===
+<!-- Source PDF page 234 -->
+
 ANNEX A 72-231
 Shaded text = Revisions. Δ = Text deletions and figure/table revisions. • = Section deletions. N = New material. 2019 Edition
 This is graphically illustrated in Figure A.17.6.3.1.1(d). With
@@ -22637,7 +22875,8 @@ FOR INDIVIDUAL USE ONLY
 Copyright 2019 National Fire Protection Association (NFPA®). Licensed by agreement to Carl Weaver FOR INDIVIDUAL USE ONLY and downloaded on 11/05/2019. No reproduction or transmission in any form permitted without
 written permission of NFPA®. For inquiries or access for multiple users, or to report unauthorized use, contact licensing@nfpa.org.
 {C56A4DC7-64F7-4C88-B368-41DE5BD47BC8}
-===PAGE_BREAK===
+<!-- Source PDF page 235 -->
+
 NATIONAL FIRE ALARM AND SIGNALING CODE	72-232
 2019 Edition Shaded text = Revisions. Δ = Text deletions and figure/table revisions. • = Section deletions. N = New material.
 A.17.6.3.2 In addition to the special requirements for heat
@@ -22783,7 +23022,8 @@ FOR INDIVIDUAL USE ONLY
 Copyright 2019 National Fire Protection Association (NFPA®). Licensed by agreement to Carl Weaver FOR INDIVIDUAL USE ONLY and downloaded on 11/05/2019. No reproduction or transmission in any form permitted without
 written permission of NFPA®. For inquiries or access for multiple users, or to report unauthorized use, contact licensing@nfpa.org.
 {C56A4DC7-64F7-4C88-B368-41DE5BD47BC8}
-===PAGE_BREAK===
+<!-- Source PDF page 236 -->
+
 ANNEX A 72-233
 Shaded text = Revisions. Δ = Text deletions and figure/table revisions. • = Section deletions. N = New material. 2019 Edition
 Table 17.6.3.5.1 provides for spacing modification to take
@@ -22946,7 +23186,8 @@ FOR INDIVIDUAL USE ONLY
 Copyright 2019 National Fire Protection Association (NFPA®). Licensed by agreement to Carl Weaver FOR INDIVIDUAL USE ONLY and downloaded on 11/05/2019. No reproduction or transmission in any form permitted without
 written permission of NFPA®. For inquiries or access for multiple users, or to report unauthorized use, contact licensing@nfpa.org.
 {C56A4DC7-64F7-4C88-B368-41DE5BD47BC8}
-===PAGE_BREAK===
+<!-- Source PDF page 237 -->
+
 NATIONAL FIRE ALARM AND SIGNALING CODE	72-234
 2019 Edition Shaded text = Revisions. Δ = Text deletions and figure/table revisions. • = Section deletions. N = New material.
 A.17.7.1.1 The performance objective statement should
@@ -23043,7 +23284,8 @@ FOR INDIVIDUAL USE ONLY
 Copyright 2019 National Fire Protection Association (NFPA®). Licensed by agreement to Carl Weaver FOR INDIVIDUAL USE ONLY and downloaded on 11/05/2019. No reproduction or transmission in any form permitted without
 written permission of NFPA®. For inquiries or access for multiple users, or to report unauthorized use, contact licensing@nfpa.org.
 {C56A4DC7-64F7-4C88-B368-41DE5BD47BC8}
-===PAGE_BREAK===
+<!-- Source PDF page 238 -->
+
 ANNEX A 72-235
 Shaded text = Revisions. Δ = Text deletions and figure/table revisions. • = Section deletions. N = New material. 2019 Edition
 objectives for each fire protection system being employed in
@@ -23171,7 +23413,8 @@ FOR INDIVIDUAL USE ONLY
 Copyright 2019 National Fire Protection Association (NFPA®). Licensed by agreement to Carl Weaver FOR INDIVIDUAL USE ONLY and downloaded on 11/05/2019. No reproduction or transmission in any form permitted without
 written permission of NFPA®. For inquiries or access for multiple users, or to report unauthorized use, contact licensing@nfpa.org.
 {C56A4DC7-64F7-4C88-B368-41DE5BD47BC8}
-===PAGE_BREAK===
+<!-- Source PDF page 239 -->
+
 NATIONAL FIRE ALARM AND SIGNALING CODE	72-236
 2019 Edition Shaded text = Revisions. Δ = Text deletions and figure/table revisions. • = Section deletions. N = New material.
 A.17.7.1.12 Construction debris, dust (especially gypsum dust
@@ -23270,7 +23513,8 @@ FOR INDIVIDUAL USE ONLY
 Copyright 2019 National Fire Protection Association (NFPA®). Licensed by agreement to Carl Weaver FOR INDIVIDUAL USE ONLY and downloaded on 11/05/2019. No reproduction or transmission in any form permitted without
 written permission of NFPA®. For inquiries or access for multiple users, or to report unauthorized use, contact licensing@nfpa.org.
 {C56A4DC7-64F7-4C88-B368-41DE5BD47BC8}
-===PAGE_BREAK===
+<!-- Source PDF page 240 -->
+
 ANNEX A 72-237
 Shaded text = Revisions. Δ = Text deletions and figure/table revisions. • = Section deletions. N = New material. 2019 Edition
 Where there are explicit performance objectives for the
@@ -23364,7 +23608,8 @@ FOR INDIVIDUAL USE ONLY
 Copyright 2019 National Fire Protection Association (NFPA®). Licensed by agreement to Carl Weaver FOR INDIVIDUAL USE ONLY and downloaded on 11/05/2019. No reproduction or transmission in any form permitted without
 written permission of NFPA®. For inquiries or access for multiple users, or to report unauthorized use, contact licensing@nfpa.org.
 {C56A4DC7-64F7-4C88-B368-41DE5BD47BC8}
-===PAGE_BREAK===
+<!-- Source PDF page 241 -->
+
 NATIONAL FIRE ALARM AND SIGNALING CODE	72-238
 2019 Edition Shaded text = Revisions. Δ = Text deletions and figure/table revisions. • = Section deletions. N = New material.
 represents the worst case scenario for smoke to reach the
@@ -23448,7 +23693,8 @@ FOR INDIVIDUAL USE ONLY
 Copyright 2019 National Fire Protection Association (NFPA®). Licensed by agreement to Carl Weaver FOR INDIVIDUAL USE ONLY and downloaded on 11/05/2019. No reproduction or transmission in any form permitted without
 written permission of NFPA®. For inquiries or access for multiple users, or to report unauthorized use, contact licensing@nfpa.org.
 {C56A4DC7-64F7-4C88-B368-41DE5BD47BC8}
-===PAGE_BREAK===
+<!-- Source PDF page 242 -->
+
 ANNEX A 72-239
 Shaded text = Revisions. Δ = Text deletions and figure/table revisions. • = Section deletions. N = New material. 2019 Edition
 sampling–type smoke detector apparatus. This remote test
@@ -23563,7 +23809,8 @@ FOR INDIVIDUAL USE ONLY
 Copyright 2019 National Fire Protection Association (NFPA®). Licensed by agreement to Carl Weaver FOR INDIVIDUAL USE ONLY and downloaded on 11/05/2019. No reproduction or transmission in any form permitted without
 written permission of NFPA®. For inquiries or access for multiple users, or to report unauthorized use, contact licensing@nfpa.org.
 {C56A4DC7-64F7-4C88-B368-41DE5BD47BC8}
-===PAGE_BREAK===
+<!-- Source PDF page 243 -->
+
 NATIONAL FIRE ALARM AND SIGNALING CODE	72-240
 2019 Edition Shaded text = Revisions. Δ = Text deletions and figure/table revisions. • = Section deletions. N = New material.
 supply and fire–gas discharge, and other ambient conditions,
@@ -23695,7 +23942,8 @@ FOR INDIVIDUAL USE ONLY
 Copyright 2019 National Fire Protection Association (NFPA®). Licensed by agreement to Carl Weaver FOR INDIVIDUAL USE ONLY and downloaded on 11/05/2019. No reproduction or transmission in any form permitted without
 written permission of NFPA®. For inquiries or access for multiple users, or to report unauthorized use, contact licensing@nfpa.org.
 {C56A4DC7-64F7-4C88-B368-41DE5BD47BC8}
-===PAGE_BREAK===
+<!-- Source PDF page 244 -->
+
 ANNEX A 72-241
 Shaded text = Revisions. Δ = Text deletions and figure/table revisions. • = Section deletions. N = New material. 2019 Edition
 a fire in the HVAC unit (filters, belts, heat exchangers, etc.).
@@ -23808,7 +24056,8 @@ FOR INDIVIDUAL USE ONLY
 Copyright 2019 National Fire Protection Association (NFPA®). Licensed by agreement to Carl Weaver FOR INDIVIDUAL USE ONLY and downloaded on 11/05/2019. No reproduction or transmission in any form permitted without
 written permission of NFPA®. For inquiries or access for multiple users, or to report unauthorized use, contact licensing@nfpa.org.
 {C56A4DC7-64F7-4C88-B368-41DE5BD47BC8}
-===PAGE_BREAK===
+<!-- Source PDF page 245 -->
+
 NATIONAL FIRE ALARM AND SIGNALING CODE	72-242
 2019 Edition Shaded text = Revisions. Δ = Text deletions and figure/table revisions. • = Section deletions. N = New material.
 A.17.7.7.4 Video image smoke detection control and software
@@ -23877,7 +24126,8 @@ FOR INDIVIDUAL USE ONLY
 Copyright 2019 National Fire Protection Association (NFPA®). Licensed by agreement to Carl Weaver FOR INDIVIDUAL USE ONLY and downloaded on 11/05/2019. No reproduction or transmission in any form permitted without
 written permission of NFPA®. For inquiries or access for multiple users, or to report unauthorized use, contact licensing@nfpa.org.
 {C56A4DC7-64F7-4C88-B368-41DE5BD47BC8}
-===PAGE_BREAK===
+<!-- Source PDF page 246 -->
+
 ANNEX A 72-243
 Shaded text = Revisions. Δ = Text deletions and figure/table revisions. • = Section deletions. N = New material. 2019 Edition
 and uses the combined signal to indicate a fire. These
@@ -23997,7 +24247,8 @@ FOR INDIVIDUAL USE ONLY
 Copyright 2019 National Fire Protection Association (NFPA®). Licensed by agreement to Carl Weaver FOR INDIVIDUAL USE ONLY and downloaded on 11/05/2019. No reproduction or transmission in any form permitted without
 written permission of NFPA®. For inquiries or access for multiple users, or to report unauthorized use, contact licensing@nfpa.org.
 {C56A4DC7-64F7-4C88-B368-41DE5BD47BC8}
-===PAGE_BREAK===
+<!-- Source PDF page 247 -->
+
 NATIONAL FIRE ALARM AND SIGNALING CODE	72-244
 2019 Edition Shaded text = Revisions. Δ = Text deletions and figure/table revisions. • = Section deletions. N = New material.
 The sensitivity (S) typically is measured in nanowatts. This
@@ -24119,7 +24370,8 @@ FOR INDIVIDUAL USE ONLY
 Copyright 2019 National Fire Protection Association (NFPA®). Licensed by agreement to Carl Weaver FOR INDIVIDUAL USE ONLY and downloaded on 11/05/2019. No reproduction or transmission in any form permitted without
 written permission of NFPA®. For inquiries or access for multiple users, or to report unauthorized use, contact licensing@nfpa.org.
 {C56A4DC7-64F7-4C88-B368-41DE5BD47BC8}
-===PAGE_BREAK===
+<!-- Source PDF page 248 -->
+
 ANNEX A 72-245
 Shaded text = Revisions. Δ = Text deletions and figure/table revisions. • = Section deletions. N = New material. 2019 Edition
 A.17.8.3.3.1 Spark/ember detectors are installed primarily to
@@ -24242,7 +24494,8 @@ FOR INDIVIDUAL USE ONLY
 Copyright 2019 National Fire Protection Association (NFPA®). Licensed by agreement to Carl Weaver FOR INDIVIDUAL USE ONLY and downloaded on 11/05/2019. No reproduction or transmission in any form permitted without
 written permission of NFPA®. For inquiries or access for multiple users, or to report unauthorized use, contact licensing@nfpa.org.
 {C56A4DC7-64F7-4C88-B368-41DE5BD47BC8}
-===PAGE_BREAK===
+<!-- Source PDF page 249 -->
+
 NATIONAL FIRE ALARM AND SIGNALING CODE	72-246
 2019 Edition Shaded text = Revisions. Δ = Text deletions and figure/table revisions. • = Section deletions. N = New material.
 Care should be used when choosing waterflow alarm-
@@ -24369,7 +24622,8 @@ FOR INDIVIDUAL USE ONLY
 Copyright 2019 National Fire Protection Association (NFPA®). Licensed by agreement to Carl Weaver FOR INDIVIDUAL USE ONLY and downloaded on 11/05/2019. No reproduction or transmission in any form permitted without
 written permission of NFPA®. For inquiries or access for multiple users, or to report unauthorized use, contact licensing@nfpa.org.
 {C56A4DC7-64F7-4C88-B368-41DE5BD47BC8}
-===PAGE_BREAK===
+<!-- Source PDF page 250 -->
+
 ANNEX A 72-247
 Shaded text = Revisions. Δ = Text deletions and figure/table revisions. • = Section deletions. N = New material. 2019 Edition
 A.18.3.4 Situations exist where supplemental enclosures are
@@ -24490,7 +24744,8 @@ FOR INDIVIDUAL USE ONLY
 Copyright 2019 National Fire Protection Association (NFPA®). Licensed by agreement to Carl Weaver FOR INDIVIDUAL USE ONLY and downloaded on 11/05/2019. No reproduction or transmission in any form permitted without
 written permission of NFPA®. For inquiries or access for multiple users, or to report unauthorized use, contact licensing@nfpa.org.
 {C56A4DC7-64F7-4C88-B368-41DE5BD47BC8}
-===PAGE_BREAK===
+<!-- Source PDF page 251 -->
+
 NATIONAL FIRE ALARM AND SIGNALING CODE	72-248
 2019 Edition Shaded text = Revisions. Δ = Text deletions and figure/table revisions. • = Section deletions. N = New material.
 A.18.4.1.5.1 Audibility of a fire or emergency signal might not
@@ -24604,7 +24859,8 @@ FOR INDIVIDUAL USE ONLY
 Copyright 2019 National Fire Protection Association (NFPA®). Licensed by agreement to Carl Weaver FOR INDIVIDUAL USE ONLY and downloaded on 11/05/2019. No reproduction or transmission in any form permitted without
 written permission of NFPA®. For inquiries or access for multiple users, or to report unauthorized use, contact licensing@nfpa.org.
 {C56A4DC7-64F7-4C88-B368-41DE5BD47BC8}
-===PAGE_BREAK===
+<!-- Source PDF page 252 -->
+
 ANNEX A 72-249
 Shaded text = Revisions. Δ = Text deletions and figure/table revisions. • = Section deletions. N = New material. 2019 Edition
 Δ A.18.4.4.1 Audio levels are commonly measured using units of
@@ -24734,7 +24990,8 @@ FOR INDIVIDUAL USE ONLY
 Copyright 2019 National Fire Protection Association (NFPA®). Licensed by agreement to Carl Weaver FOR INDIVIDUAL USE ONLY and downloaded on 11/05/2019. No reproduction or transmission in any form permitted without
 written permission of NFPA®. For inquiries or access for multiple users, or to report unauthorized use, contact licensing@nfpa.org.
 {C56A4DC7-64F7-4C88-B368-41DE5BD47BC8}
-===PAGE_BREAK===
+<!-- Source PDF page 253 -->
+
 NATIONAL FIRE ALARM AND SIGNALING CODE	72-250
 2019 Edition Shaded text = Revisions. Δ = Text deletions and figure/table revisions. • = Section deletions. N = New material.
 rooms would require use of the low frequency signals, but
@@ -24830,7 +25087,8 @@ FOR INDIVIDUAL USE ONLY
 Copyright 2019 National Fire Protection Association (NFPA®). Licensed by agreement to Carl Weaver FOR INDIVIDUAL USE ONLY and downloaded on 11/05/2019. No reproduction or transmission in any form permitted without
 written permission of NFPA®. For inquiries or access for multiple users, or to report unauthorized use, contact licensing@nfpa.org.
 {C56A4DC7-64F7-4C88-B368-41DE5BD47BC8}
-===PAGE_BREAK===
+<!-- Source PDF page 254 -->
+
 ANNEX A 72-251
 Shaded text = Revisions. Δ = Text deletions and figure/table revisions. • = Section deletions. N = New material. 2019 Edition
 intensity differences). Refer to Figure A.18.4.8.1(b). For single
@@ -24950,7 +25208,8 @@ FOR INDIVIDUAL USE ONLY
 Copyright 2019 National Fire Protection Association (NFPA®). Licensed by agreement to Carl Weaver FOR INDIVIDUAL USE ONLY and downloaded on 11/05/2019. No reproduction or transmission in any form permitted without
 written permission of NFPA®. For inquiries or access for multiple users, or to report unauthorized use, contact licensing@nfpa.org.
 {C56A4DC7-64F7-4C88-B368-41DE5BD47BC8}
-===PAGE_BREAK===
+<!-- Source PDF page 255 -->
+
 NATIONAL FIRE ALARM AND SIGNALING CODE	72-252
 2019 Edition Shaded text = Revisions. Δ = Text deletions and figure/table revisions. • = Section deletions. N = New material.
 arriving sound signals is detectable. ITD is most evident in
@@ -25066,7 +25325,8 @@ FOR INDIVIDUAL USE ONLY
 Copyright 2019 National Fire Protection Association (NFPA®). Licensed by agreement to Carl Weaver FOR INDIVIDUAL USE ONLY and downloaded on 11/05/2019. No reproduction or transmission in any form permitted without
 written permission of NFPA®. For inquiries or access for multiple users, or to report unauthorized use, contact licensing@nfpa.org.
 {C56A4DC7-64F7-4C88-B368-41DE5BD47BC8}
-===PAGE_BREAK===
+<!-- Source PDF page 256 -->
+
 ANNEX A 72-253
 Shaded text = Revisions. Δ = Text deletions and figure/table revisions. • = Section deletions. N = New material. 2019 Edition
 A.18.4.11.3 For example, based on the system design the
@@ -25190,7 +25450,8 @@ FOR INDIVIDUAL USE ONLY
 Copyright 2019 National Fire Protection Association (NFPA®). Licensed by agreement to Carl Weaver FOR INDIVIDUAL USE ONLY and downloaded on 11/05/2019. No reproduction or transmission in any form permitted without
 written permission of NFPA®. For inquiries or access for multiple users, or to report unauthorized use, contact licensing@nfpa.org.
 {C56A4DC7-64F7-4C88-B368-41DE5BD47BC8}
-===PAGE_BREAK===
+<!-- Source PDF page 257 -->
+
 NATIONAL FIRE ALARM AND SIGNALING CODE	72-254
 2019 Edition Shaded text = Revisions. Δ = Text deletions and figure/table revisions. • = Section deletions. N = New material.
 candela or flash energy, do not correlate directly to effective
@@ -25320,7 +25581,8 @@ FOR INDIVIDUAL USE ONLY
 Copyright 2019 National Fire Protection Association (NFPA®). Licensed by agreement to Carl Weaver FOR INDIVIDUAL USE ONLY and downloaded on 11/05/2019. No reproduction or transmission in any form permitted without
 written permission of NFPA®. For inquiries or access for multiple users, or to report unauthorized use, contact licensing@nfpa.org.
 {C56A4DC7-64F7-4C88-B368-41DE5BD47BC8}
-===PAGE_BREAK===
+<!-- Source PDF page 258 -->
+
 ANNEX A 72-255
 Shaded text = Revisions. Δ = Text deletions and figure/table revisions. • = Section deletions. N = New material. 2019 Edition
 not typically produce the same light intensity when measured
@@ -25401,7 +25663,8 @@ FOR INDIVIDUAL USE ONLY
 Copyright 2019 National Fire Protection Association (NFPA®). Licensed by agreement to Carl Weaver FOR INDIVIDUAL USE ONLY and downloaded on 11/05/2019. No reproduction or transmission in any form permitted without
 written permission of NFPA®. For inquiries or access for multiple users, or to report unauthorized use, contact licensing@nfpa.org.
 {C56A4DC7-64F7-4C88-B368-41DE5BD47BC8}
-===PAGE_BREAK===
+<!-- Source PDF page 259 -->
+
 NATIONAL FIRE ALARM AND SIGNALING CODE	72-256
 2019 Edition Shaded text = Revisions. Δ = Text deletions and figure/table revisions. • = Section deletions. N = New material.
 tion appliance can only cover a 16.5 ft (5.0 m) square space:
@@ -25501,7 +25764,8 @@ FOR INDIVIDUAL USE ONLY
 Copyright 2019 National Fire Protection Association (NFPA®). Licensed by agreement to Carl Weaver FOR INDIVIDUAL USE ONLY and downloaded on 11/05/2019. No reproduction or transmission in any form permitted without
 written permission of NFPA®. For inquiries or access for multiple users, or to report unauthorized use, contact licensing@nfpa.org.
 {C56A4DC7-64F7-4C88-B368-41DE5BD47BC8}
-===PAGE_BREAK===
+<!-- Source PDF page 260 -->
+
 ANNEX A 72-257
 Shaded text = Revisions. Δ = Text deletions and figure/table revisions. • = Section deletions. N = New material. 2019 Edition
 A.18.5.5.6 Because the occupants are usually alert and
@@ -25604,7 +25868,8 @@ FOR INDIVIDUAL USE ONLY
 Copyright 2019 National Fire Protection Association (NFPA®). Licensed by agreement to Carl Weaver FOR INDIVIDUAL USE ONLY and downloaded on 11/05/2019. No reproduction or transmission in any form permitted without
 written permission of NFPA®. For inquiries or access for multiple users, or to report unauthorized use, contact licensing@nfpa.org.
 {C56A4DC7-64F7-4C88-B368-41DE5BD47BC8}
-===PAGE_BREAK===
+<!-- Source PDF page 261 -->
+
 NATIONAL FIRE ALARM AND SIGNALING CODE	72-258
 2019 Edition Shaded text = Revisions. Δ = Text deletions and figure/table revisions. • = Section deletions. N = New material.
 applying the inverse square law to provide an illumination of at
@@ -25723,7 +25988,8 @@ FOR INDIVIDUAL USE ONLY
 Copyright 2019 National Fire Protection Association (NFPA®). Licensed by agreement to Carl Weaver FOR INDIVIDUAL USE ONLY and downloaded on 11/05/2019. No reproduction or transmission in any form permitted without
 written permission of NFPA®. For inquiries or access for multiple users, or to report unauthorized use, contact licensing@nfpa.org.
 {C56A4DC7-64F7-4C88-B368-41DE5BD47BC8}
-===PAGE_BREAK===
+<!-- Source PDF page 262 -->
+
 ANNEX A 72-259
 Shaded text = Revisions. Δ = Text deletions and figure/table revisions. • = Section deletions. N = New material. 2019 Edition
 ground. Additional factors affecting the ease with which the
@@ -25871,7 +26137,8 @@ FOR INDIVIDUAL USE ONLY
 Copyright 2019 National Fire Protection Association (NFPA®). Licensed by agreement to Carl Weaver FOR INDIVIDUAL USE ONLY and downloaded on 11/05/2019. No reproduction or transmission in any form permitted without
 written permission of NFPA®. For inquiries or access for multiple users, or to report unauthorized use, contact licensing@nfpa.org.
 {C56A4DC7-64F7-4C88-B368-41DE5BD47BC8}
-===PAGE_BREAK===
+<!-- Source PDF page 263 -->
+
 NATIONAL FIRE ALARM AND SIGNALING CODE	72-260
 2019 Edition Shaded text = Revisions. Δ = Text deletions and figure/table revisions. • = Section deletions. N = New material.
 Where Class D circuits are utilized to actuate emergency
@@ -25999,7 +26266,8 @@ FOR INDIVIDUAL USE ONLY
 Copyright 2019 National Fire Protection Association (NFPA®). Licensed by agreement to Carl Weaver FOR INDIVIDUAL USE ONLY and downloaded on 11/05/2019. No reproduction or transmission in any form permitted without
 written permission of NFPA®. For inquiries or access for multiple users, or to report unauthorized use, contact licensing@nfpa.org.
 {C56A4DC7-64F7-4C88-B368-41DE5BD47BC8}
-===PAGE_BREAK===
+<!-- Source PDF page 264 -->
+
 ANNEX A 72-261
 Shaded text = Revisions. Δ = Text deletions and figure/table revisions. • = Section deletions. N = New material. 2019 Edition
 Δ A.21.4.2 The purpose of spacing heat detectors in close prox‐
@@ -26124,7 +26392,8 @@ FOR INDIVIDUAL USE ONLY
 Copyright 2019 National Fire Protection Association (NFPA®). Licensed by agreement to Carl Weaver FOR INDIVIDUAL USE ONLY and downloaded on 11/05/2019. No reproduction or transmission in any form permitted without
 written permission of NFPA®. For inquiries or access for multiple users, or to report unauthorized use, contact licensing@nfpa.org.
 {C56A4DC7-64F7-4C88-B368-41DE5BD47BC8}
-===PAGE_BREAK===
+<!-- Source PDF page 265 -->
+
 NATIONAL FIRE ALARM AND SIGNALING CODE	72-262
 2019 Edition Shaded text = Revisions. Δ = Text deletions and figure/table revisions. • = Section deletions. N = New material.
 N A.21.6.2.1.1 The term groupautomatic operation is defined in
@@ -26272,7 +26541,8 @@ FOR INDIVIDUAL USE ONLY
 Copyright 2019 National Fire Protection Association (NFPA®). Licensed by agreement to Carl Weaver FOR INDIVIDUAL USE ONLY and downloaded on 11/05/2019. No reproduction or transmission in any form permitted without
 written permission of NFPA®. For inquiries or access for multiple users, or to report unauthorized use, contact licensing@nfpa.org.
 {C56A4DC7-64F7-4C88-B368-41DE5BD47BC8}
-===PAGE_BREAK===
+<!-- Source PDF page 266 -->
+
 ANNEX A 72-263
 Shaded text = Revisions. Δ = Text deletions and figure/table revisions. • = Section deletions. N = New material. 2019 Edition
 discharge level, the fire alarm system should send signals to the
@@ -26409,7 +26679,8 @@ FOR INDIVIDUAL USE ONLY
 Copyright 2019 National Fire Protection Association (NFPA®). Licensed by agreement to Carl Weaver FOR INDIVIDUAL USE ONLY and downloaded on 11/05/2019. No reproduction or transmission in any form permitted without
 written permission of NFPA®. For inquiries or access for multiple users, or to report unauthorized use, contact licensing@nfpa.org.
 {C56A4DC7-64F7-4C88-B368-41DE5BD47BC8}
-===PAGE_BREAK===
+<!-- Source PDF page 267 -->
+
 NATIONAL FIRE ALARM AND SIGNALING CODE	72-264
 2019 Edition Shaded text = Revisions. Δ = Text deletions and figure/table revisions. • = Section deletions. N = New material.
 cannot provide the intended operation. In this case the fire
@@ -26536,7 +26807,8 @@ FOR INDIVIDUAL USE ONLY
 Copyright 2019 National Fire Protection Association (NFPA®). Licensed by agreement to Carl Weaver FOR INDIVIDUAL USE ONLY and downloaded on 11/05/2019. No reproduction or transmission in any form permitted without
 written permission of NFPA®. For inquiries or access for multiple users, or to report unauthorized use, contact licensing@nfpa.org.
 {C56A4DC7-64F7-4C88-B368-41DE5BD47BC8}
-===PAGE_BREAK===
+<!-- Source PDF page 268 -->
+
 ANNEX A 72-265
 Shaded text = Revisions. Δ = Text deletions and figure/table revisions. • = Section deletions. N = New material. 2019 Edition
 building or system owner or the owner’s designated representa‐
@@ -26662,7 +26934,8 @@ FOR INDIVIDUAL USE ONLY
 Copyright 2019 National Fire Protection Association (NFPA®). Licensed by agreement to Carl Weaver FOR INDIVIDUAL USE ONLY and downloaded on 11/05/2019. No reproduction or transmission in any form permitted without
 written permission of NFPA®. For inquiries or access for multiple users, or to report unauthorized use, contact licensing@nfpa.org.
 {C56A4DC7-64F7-4C88-B368-41DE5BD47BC8}
-===PAGE_BREAK===
+<!-- Source PDF page 269 -->
+
 NATIONAL FIRE ALARM AND SIGNALING CODE	72-266
 2019 Edition Shaded text = Revisions. Δ = Text deletions and figure/table revisions. • = Section deletions. N = New material.
 separate component. If a single short or open occurs, only one
@@ -26751,7 +27024,8 @@ FOR INDIVIDUAL USE ONLY
 Copyright 2019 National Fire Protection Association (NFPA®). Licensed by agreement to Carl Weaver FOR INDIVIDUAL USE ONLY and downloaded on 11/05/2019. No reproduction or transmission in any form permitted without
 written permission of NFPA®. For inquiries or access for multiple users, or to report unauthorized use, contact licensing@nfpa.org.
 {C56A4DC7-64F7-4C88-B368-41DE5BD47BC8}
-===PAGE_BREAK===
+<!-- Source PDF page 270 -->
+
 ANNEX A 72-267
 Shaded text = Revisions. Δ = Text deletions and figure/table revisions. • = Section deletions. N = New material. 2019 Edition
 devices). In this scenario, the designer might choose to include
@@ -26864,7 +27138,8 @@ FOR INDIVIDUAL USE ONLY
 Copyright 2019 National Fire Protection Association (NFPA®). Licensed by agreement to Carl Weaver FOR INDIVIDUAL USE ONLY and downloaded on 11/05/2019. No reproduction or transmission in any form permitted without
 written permission of NFPA®. For inquiries or access for multiple users, or to report unauthorized use, contact licensing@nfpa.org.
 {C56A4DC7-64F7-4C88-B368-41DE5BD47BC8}
-===PAGE_BREAK===
+<!-- Source PDF page 271 -->
+
 NATIONAL FIRE ALARM AND SIGNALING CODE	72-268
 2019 Edition Shaded text = Revisions. Δ = Text deletions and figure/table revisions. • = Section deletions. N = New material.
 The term “device” in this context should be understood in
@@ -26992,7 +27267,8 @@ FOR INDIVIDUAL USE ONLY
 Copyright 2019 National Fire Protection Association (NFPA®). Licensed by agreement to Carl Weaver FOR INDIVIDUAL USE ONLY and downloaded on 11/05/2019. No reproduction or transmission in any form permitted without
 written permission of NFPA®. For inquiries or access for multiple users, or to report unauthorized use, contact licensing@nfpa.org.
 {C56A4DC7-64F7-4C88-B368-41DE5BD47BC8}
-===PAGE_BREAK===
+<!-- Source PDF page 272 -->
+
 ANNEX A 72-269
 Shaded text = Revisions. Δ = Text deletions and figure/table revisions. • = Section deletions. N = New material. 2019 Edition
 N A.23.6.3.7.1 Maintenance is a critical aspect of fire alarm
@@ -27122,7 +27398,8 @@ FOR INDIVIDUAL USE ONLY
 Copyright 2019 National Fire Protection Association (NFPA®). Licensed by agreement to Carl Weaver FOR INDIVIDUAL USE ONLY and downloaded on 11/05/2019. No reproduction or transmission in any form permitted without
 written permission of NFPA®. For inquiries or access for multiple users, or to report unauthorized use, contact licensing@nfpa.org.
 {C56A4DC7-64F7-4C88-B368-41DE5BD47BC8}
-===PAGE_BREAK===
+<!-- Source PDF page 273 -->
+
 NATIONAL FIRE ALARM AND SIGNALING CODE	72-270
 2019 Edition Shaded text = Revisions. Δ = Text deletions and figure/table revisions. • = Section deletions. N = New material.
 The questions suggested in items (1) through (7) are
@@ -27230,7 +27507,8 @@ FOR INDIVIDUAL USE ONLY
 Copyright 2019 National Fire Protection Association (NFPA®). Licensed by agreement to Carl Weaver FOR INDIVIDUAL USE ONLY and downloaded on 11/05/2019. No reproduction or transmission in any form permitted without
 written permission of NFPA®. For inquiries or access for multiple users, or to report unauthorized use, contact licensing@nfpa.org.
 {C56A4DC7-64F7-4C88-B368-41DE5BD47BC8}
-===PAGE_BREAK===
+<!-- Source PDF page 274 -->
+
 ANNEX A 72-271
 Shaded text = Revisions. Δ = Text deletions and figure/table revisions. • = Section deletions. N = New material. 2019 Edition
 ing, or where human discovery of the fire precedes automatic
@@ -27352,7 +27630,8 @@ FOR INDIVIDUAL USE ONLY
 Copyright 2019 National Fire Protection Association (NFPA®). Licensed by agreement to Carl Weaver FOR INDIVIDUAL USE ONLY and downloaded on 11/05/2019. No reproduction or transmission in any form permitted without
 written permission of NFPA®. For inquiries or access for multiple users, or to report unauthorized use, contact licensing@nfpa.org.
 {C56A4DC7-64F7-4C88-B368-41DE5BD47BC8}
-===PAGE_BREAK===
+<!-- Source PDF page 275 -->
+
 NATIONAL FIRE ALARM AND SIGNALING CODE	72-272
 2019 Edition Shaded text = Revisions. Δ = Text deletions and figure/table revisions. • = Section deletions. N = New material.
 beneficial to send data off-premises to incident command
@@ -27443,7 +27722,8 @@ FOR INDIVIDUAL USE ONLY
 Copyright 2019 National Fire Protection Association (NFPA®). Licensed by agreement to Carl Weaver FOR INDIVIDUAL USE ONLY and downloaded on 11/05/2019. No reproduction or transmission in any form permitted without
 written permission of NFPA®. For inquiries or access for multiple users, or to report unauthorized use, contact licensing@nfpa.org.
 {C56A4DC7-64F7-4C88-B368-41DE5BD47BC8}
-===PAGE_BREAK===
+<!-- Source PDF page 276 -->
+
 ANNEX A 72-273
 Shaded text = Revisions. Δ = Text deletions and figure/table revisions. • = Section deletions. N = New material. 2019 Edition
 A.24.3.1.2 In certain acoustically challenging areas, listed fire
@@ -27571,7 +27851,8 @@ FOR INDIVIDUAL USE ONLY
 Copyright 2019 National Fire Protection Association (NFPA®). Licensed by agreement to Carl Weaver FOR INDIVIDUAL USE ONLY and downloaded on 11/05/2019. No reproduction or transmission in any form permitted without
 written permission of NFPA®. For inquiries or access for multiple users, or to report unauthorized use, contact licensing@nfpa.org.
 {C56A4DC7-64F7-4C88-B368-41DE5BD47BC8}
-===PAGE_BREAK===
+<!-- Source PDF page 277 -->
+
 NATIONAL FIRE ALARM AND SIGNALING CODE	72-274
 2019 Edition Shaded text = Revisions. Δ = Text deletions and figure/table revisions. • = Section deletions. N = New material.
 to fire that might also require additional emergency communi‐
@@ -27685,7 +27966,8 @@ FOR INDIVIDUAL USE ONLY
 Copyright 2019 National Fire Protection Association (NFPA®). Licensed by agreement to Carl Weaver FOR INDIVIDUAL USE ONLY and downloaded on 11/05/2019. No reproduction or transmission in any form permitted without
 written permission of NFPA®. For inquiries or access for multiple users, or to report unauthorized use, contact licensing@nfpa.org.
 {C56A4DC7-64F7-4C88-B368-41DE5BD47BC8}
-===PAGE_BREAK===
+<!-- Source PDF page 278 -->
+
 ANNEX A 72-275
 Shaded text = Revisions. Δ = Text deletions and figure/table revisions. • = Section deletions. N = New material. 2019 Edition
 Systems, can be used for MNS. A control unit only listed in
@@ -27813,7 +28095,8 @@ FOR INDIVIDUAL USE ONLY
 Copyright 2019 National Fire Protection Association (NFPA®). Licensed by agreement to Carl Weaver FOR INDIVIDUAL USE ONLY and downloaded on 11/05/2019. No reproduction or transmission in any form permitted without
 written permission of NFPA®. For inquiries or access for multiple users, or to report unauthorized use, contact licensing@nfpa.org.
 {C56A4DC7-64F7-4C88-B368-41DE5BD47BC8}
-===PAGE_BREAK===
+<!-- Source PDF page 279 -->
+
 NATIONAL FIRE ALARM AND SIGNALING CODE	72-276
 2019 Edition Shaded text = Revisions. Δ = Text deletions and figure/table revisions. • = Section deletions. N = New material.
 evacuation as part of their fire safety plan where relocation or
@@ -27942,7 +28225,8 @@ FOR INDIVIDUAL USE ONLY
 Copyright 2019 National Fire Protection Association (NFPA®). Licensed by agreement to Carl Weaver FOR INDIVIDUAL USE ONLY and downloaded on 11/05/2019. No reproduction or transmission in any form permitted without
 written permission of NFPA®. For inquiries or access for multiple users, or to report unauthorized use, contact licensing@nfpa.org.
 {C56A4DC7-64F7-4C88-B368-41DE5BD47BC8}
-===PAGE_BREAK===
+<!-- Source PDF page 280 -->
+
 ANNEX A 72-277
 Shaded text = Revisions. Δ = Text deletions and figure/table revisions. • = Section deletions. N = New material. 2019 Edition
 stations should be arranged so that the sound pressure level
@@ -28068,7 +28352,8 @@ FOR INDIVIDUAL USE ONLY
 Copyright 2019 National Fire Protection Association (NFPA®). Licensed by agreement to Carl Weaver FOR INDIVIDUAL USE ONLY and downloaded on 11/05/2019. No reproduction or transmission in any form permitted without
 written permission of NFPA®. For inquiries or access for multiple users, or to report unauthorized use, contact licensing@nfpa.org.
 {C56A4DC7-64F7-4C88-B368-41DE5BD47BC8}
-===PAGE_BREAK===
+<!-- Source PDF page 281 -->
+
 NATIONAL FIRE ALARM AND SIGNALING CODE	72-278
 2019 Edition Shaded text = Revisions. Δ = Text deletions and figure/table revisions. • = Section deletions. N = New material.
 rendering the notification appliances serving more than one
@@ -28189,7 +28474,8 @@ FOR INDIVIDUAL USE ONLY
 Copyright 2019 National Fire Protection Association (NFPA®). Licensed by agreement to Carl Weaver FOR INDIVIDUAL USE ONLY and downloaded on 11/05/2019. No reproduction or transmission in any form permitted without
 written permission of NFPA®. For inquiries or access for multiple users, or to report unauthorized use, contact licensing@nfpa.org.
 {C56A4DC7-64F7-4C88-B368-41DE5BD47BC8}
-===PAGE_BREAK===
+<!-- Source PDF page 282 -->
+
 ANNEX A 72-279
 Shaded text = Revisions. Δ = Text deletions and figure/table revisions. • = Section deletions. N = New material. 2019 Edition
 such features can be enabled or disabled by authorized person‐
@@ -28316,7 +28602,8 @@ FOR INDIVIDUAL USE ONLY
 Copyright 2019 National Fire Protection Association (NFPA®). Licensed by agreement to Carl Weaver FOR INDIVIDUAL USE ONLY and downloaded on 11/05/2019. No reproduction or transmission in any form permitted without
 written permission of NFPA®. For inquiries or access for multiple users, or to report unauthorized use, contact licensing@nfpa.org.
 {C56A4DC7-64F7-4C88-B368-41DE5BD47BC8}
-===PAGE_BREAK===
+<!-- Source PDF page 283 -->
+
 NATIONAL FIRE ALARM AND SIGNALING CODE	72-280
 2019 Edition Shaded text = Revisions. Δ = Text deletions and figure/table revisions. • = Section deletions. N = New material.
 other items the user will need to have within reach and view.
@@ -28420,7 +28707,8 @@ FOR INDIVIDUAL USE ONLY
 Copyright 2019 National Fire Protection Association (NFPA®). Licensed by agreement to Carl Weaver FOR INDIVIDUAL USE ONLY and downloaded on 11/05/2019. No reproduction or transmission in any form permitted without
 written permission of NFPA®. For inquiries or access for multiple users, or to report unauthorized use, contact licensing@nfpa.org.
 {C56A4DC7-64F7-4C88-B368-41DE5BD47BC8}
-===PAGE_BREAK===
+<!-- Source PDF page 284 -->
+
 ANNEX A 72-281
 Shaded text = Revisions. Δ = Text deletions and figure/table revisions. • = Section deletions. N = New material. 2019 Edition
 applications or situations. Dynamic text elements can be
@@ -28548,7 +28836,8 @@ FOR INDIVIDUAL USE ONLY
 Copyright 2019 National Fire Protection Association (NFPA®). Licensed by agreement to Carl Weaver FOR INDIVIDUAL USE ONLY and downloaded on 11/05/2019. No reproduction or transmission in any form permitted without
 written permission of NFPA®. For inquiries or access for multiple users, or to report unauthorized use, contact licensing@nfpa.org.
 {C56A4DC7-64F7-4C88-B368-41DE5BD47BC8}
-===PAGE_BREAK===
+<!-- Source PDF page 285 -->
+
 NATIONAL FIRE ALARM AND SIGNALING CODE	72-282
 2019 Edition Shaded text = Revisions. Δ = Text deletions and figure/table revisions. • = Section deletions. N = New material.
 At some sites, it could be necessary to control the amount of
@@ -28674,7 +28963,8 @@ FOR INDIVIDUAL USE ONLY
 Copyright 2019 National Fire Protection Association (NFPA®). Licensed by agreement to Carl Weaver FOR INDIVIDUAL USE ONLY and downloaded on 11/05/2019. No reproduction or transmission in any form permitted without
 written permission of NFPA®. For inquiries or access for multiple users, or to report unauthorized use, contact licensing@nfpa.org.
 {C56A4DC7-64F7-4C88-B368-41DE5BD47BC8}
-===PAGE_BREAK===
+<!-- Source PDF page 286 -->
+
 ANNEX A 72-283
 Shaded text = Revisions. Δ = Text deletions and figure/table revisions. • = Section deletions. N = New material. 2019 Edition
 ations center. Using management tools, designated operators
@@ -28800,7 +29090,8 @@ FOR INDIVIDUAL USE ONLY
 Copyright 2019 National Fire Protection Association (NFPA®). Licensed by agreement to Carl Weaver FOR INDIVIDUAL USE ONLY and downloaded on 11/05/2019. No reproduction or transmission in any form permitted without
 written permission of NFPA®. For inquiries or access for multiple users, or to report unauthorized use, contact licensing@nfpa.org.
 {C56A4DC7-64F7-4C88-B368-41DE5BD47BC8}
-===PAGE_BREAK===
+<!-- Source PDF page 287 -->
+
 NATIONAL FIRE ALARM AND SIGNALING CODE	72-284
 2019 Edition Shaded text = Revisions. Δ = Text deletions and figure/table revisions. • = Section deletions. N = New material.
 it is appropriate that they are mandated by a common set of
@@ -28930,7 +29221,8 @@ FOR INDIVIDUAL USE ONLY
 Copyright 2019 National Fire Protection Association (NFPA®). Licensed by agreement to Carl Weaver FOR INDIVIDUAL USE ONLY and downloaded on 11/05/2019. No reproduction or transmission in any form permitted without
 written permission of NFPA®. For inquiries or access for multiple users, or to report unauthorized use, contact licensing@nfpa.org.
 {C56A4DC7-64F7-4C88-B368-41DE5BD47BC8}
-===PAGE_BREAK===
+<!-- Source PDF page 288 -->
+
 ANNEX A 72-285
 Shaded text = Revisions. Δ = Text deletions and figure/table revisions. • = Section deletions. N = New material. 2019 Edition
 A.24.11.1.1 The location of the emergency command center
@@ -29050,7 +29342,8 @@ FOR INDIVIDUAL USE ONLY
 Copyright 2019 National Fire Protection Association (NFPA®). Licensed by agreement to Carl Weaver FOR INDIVIDUAL USE ONLY and downloaded on 11/05/2019. No reproduction or transmission in any form permitted without
 written permission of NFPA®. For inquiries or access for multiple users, or to report unauthorized use, contact licensing@nfpa.org.
 {C56A4DC7-64F7-4C88-B368-41DE5BD47BC8}
-===PAGE_BREAK===
+<!-- Source PDF page 289 -->
+
 NATIONAL FIRE ALARM AND SIGNALING CODE	72-286
 2019 Edition Shaded text = Revisions. Δ = Text deletions and figure/table revisions. • = Section deletions. N = New material.
 A.24.12.2 The design professional(s) as part of the design
@@ -29137,7 +29430,8 @@ FOR INDIVIDUAL USE ONLY
 Copyright 2019 National Fire Protection Association (NFPA®). Licensed by agreement to Carl Weaver FOR INDIVIDUAL USE ONLY and downloaded on 11/05/2019. No reproduction or transmission in any form permitted without
 written permission of NFPA®. For inquiries or access for multiple users, or to report unauthorized use, contact licensing@nfpa.org.
 {C56A4DC7-64F7-4C88-B368-41DE5BD47BC8}
-===PAGE_BREAK===
+<!-- Source PDF page 290 -->
+
 ANNEX A 72-287
 Shaded text = Revisions. Δ = Text deletions and figure/table revisions. • = Section deletions. N = New material. 2019 Edition
 Δ Table A.26.1 Alarm System Performance Criteria
@@ -29335,7 +29629,8 @@ FOR INDIVIDUAL USE ONLY
 Copyright 2019 National Fire Protection Association (NFPA®). Licensed by agreement to Carl Weaver FOR INDIVIDUAL USE ONLY and downloaded on 11/05/2019. No reproduction or transmission in any form permitted without
 written permission of NFPA®. For inquiries or access for multiple users, or to report unauthorized use, contact licensing@nfpa.org.
 {C56A4DC7-64F7-4C88-B368-41DE5BD47BC8}
-===PAGE_BREAK===
+<!-- Source PDF page 291 -->
+
 NATIONAL FIRE ALARM AND SIGNALING CODE	72-288
 2019 Edition Shaded text = Revisions. Δ = Text deletions and figure/table revisions. • = Section deletions. N = New material.
 Δ Table A.26.1 Continued
@@ -29353,11 +29648,11 @@ Supervising Station
 Alarm System
 Testing and
 maintenance
-Chapter 14 Chapter 14. Pass code
+## Chapter 14 Chapter 14. Pass code
 must be provided to
 place system into test
 mode (26.3.8.3.5.6).
-Chapter 14 Chapter 14
+## Chapter 14 Chapter 14
 Runner service No Yes
 Alarm –– arrive at the
 protected premises
@@ -29494,7 +29789,8 @@ FOR INDIVIDUAL USE ONLY
 Copyright 2019 National Fire Protection Association (NFPA®). Licensed by agreement to Carl Weaver FOR INDIVIDUAL USE ONLY and downloaded on 11/05/2019. No reproduction or transmission in any form permitted without
 written permission of NFPA®. For inquiries or access for multiple users, or to report unauthorized use, contact licensing@nfpa.org.
 {C56A4DC7-64F7-4C88-B368-41DE5BD47BC8}
-===PAGE_BREAK===
+<!-- Source PDF page 292 -->
+
 ANNEX A 72-289
 Shaded text = Revisions. Δ = Text deletions and figure/table revisions. • = Section deletions. N = New material. 2019 Edition
 Transmitter
@@ -29523,7 +29819,7 @@ control
 unit
 Communications
 channel
-Chapter 23 Chapter 26
+## Chapter 23 Chapter 26
 Master
 control
 unit
@@ -29548,13 +29844,14 @@ Control
 unit
 Signaling line
 circuit
-Chapter 23 Chapter 26
+## Chapter 23 Chapter 26
 FIGURE A.26.1.1 Supervising Station Alarm System.
 FOR INDIVIDUAL USE ONLY
 Copyright 2019 National Fire Protection Association (NFPA®). Licensed by agreement to Carl Weaver FOR INDIVIDUAL USE ONLY and downloaded on 11/05/2019. No reproduction or transmission in any form permitted without
 written permission of NFPA®. For inquiries or access for multiple users, or to report unauthorized use, contact licensing@nfpa.org.
 {C56A4DC7-64F7-4C88-B368-41DE5BD47BC8}
-===PAGE_BREAK===
+<!-- Source PDF page 293 -->
+
 NATIONAL FIRE ALARM AND SIGNALING CODE	72-290
 2019 Edition Shaded text = Revisions. Δ = Text deletions and figure/table revisions. • = Section deletions. N = New material.
 N A.26.2.4.1.3 If a carbon monoxide detector cannot be reset in
@@ -29680,7 +29977,8 @@ FOR INDIVIDUAL USE ONLY
 Copyright 2019 National Fire Protection Association (NFPA®). Licensed by agreement to Carl Weaver FOR INDIVIDUAL USE ONLY and downloaded on 11/05/2019. No reproduction or transmission in any form permitted without
 written permission of NFPA®. For inquiries or access for multiple users, or to report unauthorized use, contact licensing@nfpa.org.
 {C56A4DC7-64F7-4C88-B368-41DE5BD47BC8}
-===PAGE_BREAK===
+<!-- Source PDF page 294 -->
+
 ANNEX A 72-291
 Shaded text = Revisions. Δ = Text deletions and figure/table revisions. • = Section deletions. N = New material. 2019 Edition
 The phrase “in writing” can include any form of correspond‐
@@ -29802,7 +30100,8 @@ FOR INDIVIDUAL USE ONLY
 Copyright 2019 National Fire Protection Association (NFPA®). Licensed by agreement to Carl Weaver FOR INDIVIDUAL USE ONLY and downloaded on 11/05/2019. No reproduction or transmission in any form permitted without
 written permission of NFPA®. For inquiries or access for multiple users, or to report unauthorized use, contact licensing@nfpa.org.
 {C56A4DC7-64F7-4C88-B368-41DE5BD47BC8}
-===PAGE_BREAK===
+<!-- Source PDF page 295 -->
+
 NATIONAL FIRE ALARM AND SIGNALING CODE	72-292
 2019 Edition Shaded text = Revisions. Δ = Text deletions and figure/table revisions. • = Section deletions. N = New material.
 Δ Table A.26.6.1 Communications Methods for Supervising Stations
@@ -30014,7 +30313,8 @@ FOR INDIVIDUAL USE ONLY
 Copyright 2019 National Fire Protection Association (NFPA®). Licensed by agreement to Carl Weaver FOR INDIVIDUAL USE ONLY and downloaded on 11/05/2019. No reproduction or transmission in any form permitted without
 written permission of NFPA®. For inquiries or access for multiple users, or to report unauthorized use, contact licensing@nfpa.org.
 {C56A4DC7-64F7-4C88-B368-41DE5BD47BC8}
-===PAGE_BREAK===
+<!-- Source PDF page 296 -->
+
 ANNEX A 72-293
 Shaded text = Revisions. Δ = Text deletions and figure/table revisions. • = Section deletions. N = New material. 2019 Edition
 A.26.6.2.2 It is not the intent of Section 26.6 to limit the use of
@@ -30110,7 +30410,7 @@ precedence over any other
 usage. Alarm signals take
 precedence over
 supervisory signals.
-Chapter 1 on fundamentals
+## Chapter 1 on fundamentals
 requires that alarm signals
 take priority over
 supervisory signals unless
@@ -30118,7 +30418,7 @@ there is sufficient repetition
 of the alarm signal to
 prevent the loss of an alarm
 signal.
-Chapter 1 on fundamentals
+## Chapter 1 on fundamentals
 requires that alarm
 signals take priority over
 supervisory signals
@@ -30126,7 +30426,7 @@ unless there is sufficient
 repetition of the alarm
 signal to prevent the loss
 of an alarm signal.
-Chapter 1 on
+## Chapter 1 on
 fundamentals requires
 that alarm signals take
 priority over supervisory
@@ -30157,7 +30457,8 @@ FOR INDIVIDUAL USE ONLY
 Copyright 2019 National Fire Protection Association (NFPA®). Licensed by agreement to Carl Weaver FOR INDIVIDUAL USE ONLY and downloaded on 11/05/2019. No reproduction or transmission in any form permitted without
 written permission of NFPA®. For inquiries or access for multiple users, or to report unauthorized use, contact licensing@nfpa.org.
 {C56A4DC7-64F7-4C88-B368-41DE5BD47BC8}
-===PAGE_BREAK===
+<!-- Source PDF page 297 -->
+
 NATIONAL FIRE ALARM AND SIGNALING CODE	72-294
 2019 Edition Shaded text = Revisions. Δ = Text deletions and figure/table revisions. • = Section deletions. N = New material.
 these circumstances, the requirements of Chapters 10 and 14,
@@ -30285,7 +30586,8 @@ FOR INDIVIDUAL USE ONLY
 Copyright 2019 National Fire Protection Association (NFPA®). Licensed by agreement to Carl Weaver FOR INDIVIDUAL USE ONLY and downloaded on 11/05/2019. No reproduction or transmission in any form permitted without
 written permission of NFPA®. For inquiries or access for multiple users, or to report unauthorized use, contact licensing@nfpa.org.
 {C56A4DC7-64F7-4C88-B368-41DE5BD47BC8}
-===PAGE_BREAK===
+<!-- Source PDF page 298 -->
+
 ANNEX A 72-295
 Shaded text = Revisions. Δ = Text deletions and figure/table revisions. • = Section deletions. N = New material. 2019 Edition
 nect. In some telephone systems (step-by-step offices), timed-
@@ -30410,7 +30712,8 @@ FOR INDIVIDUAL USE ONLY
 Copyright 2019 National Fire Protection Association (NFPA®). Licensed by agreement to Carl Weaver FOR INDIVIDUAL USE ONLY and downloaded on 11/05/2019. No reproduction or transmission in any form permitted without
 written permission of NFPA®. For inquiries or access for multiple users, or to report unauthorized use, contact licensing@nfpa.org.
 {C56A4DC7-64F7-4C88-B368-41DE5BD47BC8}
-===PAGE_BREAK===
+<!-- Source PDF page 299 -->
+
 NATIONAL FIRE ALARM AND SIGNALING CODE	72-296
 2019 Edition Shaded text = Revisions. Δ = Text deletions and figure/table revisions. • = Section deletions. N = New material.
 A.26.6.6.1 The signal information can be permitted to be
@@ -30547,7 +30850,8 @@ FOR INDIVIDUAL USE ONLY
 Copyright 2019 National Fire Protection Association (NFPA®). Licensed by agreement to Carl Weaver FOR INDIVIDUAL USE ONLY and downloaded on 11/05/2019. No reproduction or transmission in any form permitted without
 written permission of NFPA®. For inquiries or access for multiple users, or to report unauthorized use, contact licensing@nfpa.org.
 {C56A4DC7-64F7-4C88-B368-41DE5BD47BC8}
-===PAGE_BREAK===
+<!-- Source PDF page 300 -->
+
 ANNEX A 72-297
 Shaded text = Revisions. Δ = Text deletions and figure/table revisions. • = Section deletions. N = New material. 2019 Edition
 A.27.5.5.1.4 Figure A.27.5.5.1.4 illustrates the separate func‐
@@ -30707,7 +31011,8 @@ FOR INDIVIDUAL USE ONLY
 Copyright 2019 National Fire Protection Association (NFPA®). Licensed by agreement to Carl Weaver FOR INDIVIDUAL USE ONLY and downloaded on 11/05/2019. No reproduction or transmission in any form permitted without
 written permission of NFPA®. For inquiries or access for multiple users, or to report unauthorized use, contact licensing@nfpa.org.
 {C56A4DC7-64F7-4C88-B368-41DE5BD47BC8}
-===PAGE_BREAK===
+<!-- Source PDF page 301 -->
+
 NATIONAL FIRE ALARM AND SIGNALING CODE	72-298
 2019 Edition Shaded text = Revisions. Δ = Text deletions and figure/table revisions. • = Section deletions. N = New material.
 A.27.6.1.4 If the operating mechanism of a box creates suffi‐
@@ -30834,7 +31139,8 @@ FOR INDIVIDUAL USE ONLY
 Copyright 2019 National Fire Protection Association (NFPA®). Licensed by agreement to Carl Weaver FOR INDIVIDUAL USE ONLY and downloaded on 11/05/2019. No reproduction or transmission in any form permitted without
 written permission of NFPA®. For inquiries or access for multiple users, or to report unauthorized use, contact licensing@nfpa.org.
 {C56A4DC7-64F7-4C88-B368-41DE5BD47BC8}
-===PAGE_BREAK===
+<!-- Source PDF page 302 -->
+
 ANNEX A 72-299
 Shaded text = Revisions. Δ = Text deletions and figure/table revisions. • = Section deletions. N = New material. 2019 Edition
 A.27.6.6.2 The transmission of an actual emergency-related
@@ -30962,7 +31268,8 @@ FOR INDIVIDUAL USE ONLY
 Copyright 2019 National Fire Protection Association (NFPA®). Licensed by agreement to Carl Weaver FOR INDIVIDUAL USE ONLY and downloaded on 11/05/2019. No reproduction or transmission in any form permitted without
 written permission of NFPA®. For inquiries or access for multiple users, or to report unauthorized use, contact licensing@nfpa.org.
 {C56A4DC7-64F7-4C88-B368-41DE5BD47BC8}
-===PAGE_BREAK===
+<!-- Source PDF page 303 -->
+
 NATIONAL FIRE ALARM AND SIGNALING CODE	72-300
 2019 Edition Shaded text = Revisions. Δ = Text deletions and figure/table revisions. • = Section deletions. N = New material.
 designed for nuisance alarm immunity, additional locations
@@ -31087,7 +31394,8 @@ FOR INDIVIDUAL USE ONLY
 Copyright 2019 National Fire Protection Association (NFPA®). Licensed by agreement to Carl Weaver FOR INDIVIDUAL USE ONLY and downloaded on 11/05/2019. No reproduction or transmission in any form permitted without
 written permission of NFPA®. For inquiries or access for multiple users, or to report unauthorized use, contact licensing@nfpa.org.
 {C56A4DC7-64F7-4C88-B368-41DE5BD47BC8}
-===PAGE_BREAK===
+<!-- Source PDF page 304 -->
+
 ANNEX A 72-301
 Shaded text = Revisions. Δ = Text deletions and figure/table revisions. • = Section deletions. N = New material. 2019 Edition
 (1) Single-station alarms
@@ -31197,7 +31505,8 @@ FOR INDIVIDUAL USE ONLY
 Copyright 2019 National Fire Protection Association (NFPA®). Licensed by agreement to Carl Weaver FOR INDIVIDUAL USE ONLY and downloaded on 11/05/2019. No reproduction or transmission in any form permitted without
 written permission of NFPA®. For inquiries or access for multiple users, or to report unauthorized use, contact licensing@nfpa.org.
 {C56A4DC7-64F7-4C88-B368-41DE5BD47BC8}
-===PAGE_BREAK===
+<!-- Source PDF page 305 -->
+
 NATIONAL FIRE ALARM AND SIGNALING CODE	72-302
 2019 Edition Shaded text = Revisions. Δ = Text deletions and figure/table revisions. • = Section deletions. N = New material.
 hearing to profound hearing loss [Ashley et al., 2005, UL 1971,
@@ -31270,7 +31579,8 @@ FOR INDIVIDUAL USE ONLY
 Copyright 2019 National Fire Protection Association (NFPA®). Licensed by agreement to Carl Weaver FOR INDIVIDUAL USE ONLY and downloaded on 11/05/2019. No reproduction or transmission in any form permitted without
 written permission of NFPA®. For inquiries or access for multiple users, or to report unauthorized use, contact licensing@nfpa.org.
 {C56A4DC7-64F7-4C88-B368-41DE5BD47BC8}
-===PAGE_BREAK===
+<!-- Source PDF page 306 -->
+
 ANNEX A 72-303
 Shaded text = Revisions. Δ = Text deletions and figure/table revisions. • = Section deletions. N = New material. 2019 Edition
 fire-warning equipment, this Code requires exit plan informa‐
@@ -31354,7 +31664,8 @@ FOR INDIVIDUAL USE ONLY
 Copyright 2019 National Fire Protection Association (NFPA®). Licensed by agreement to Carl Weaver FOR INDIVIDUAL USE ONLY and downloaded on 11/05/2019. No reproduction or transmission in any form permitted without
 written permission of NFPA®. For inquiries or access for multiple users, or to report unauthorized use, contact licensing@nfpa.org.
 {C56A4DC7-64F7-4C88-B368-41DE5BD47BC8}
-===PAGE_BREAK===
+<!-- Source PDF page 307 -->
+
 NATIONAL FIRE ALARM AND SIGNALING CODE	72-304
 2019 Edition Shaded text = Revisions. Δ = Text deletions and figure/table revisions. • = Section deletions. N = New material.
 (1) Maintenance. Good fire protection requires that the
@@ -31483,7 +31794,8 @@ FOR INDIVIDUAL USE ONLY
 Copyright 2019 National Fire Protection Association (NFPA®). Licensed by agreement to Carl Weaver FOR INDIVIDUAL USE ONLY and downloaded on 11/05/2019. No reproduction or transmission in any form permitted without
 written permission of NFPA®. For inquiries or access for multiple users, or to report unauthorized use, contact licensing@nfpa.org.
 {C56A4DC7-64F7-4C88-B368-41DE5BD47BC8}
-===PAGE_BREAK===
+<!-- Source PDF page 308 -->
+
 ANNEX A 72-305
 Shaded text = Revisions. Δ = Text deletions and figure/table revisions. • = Section deletions. N = New material. 2019 Edition
 For the preceding reasons, the required protection in this
@@ -31607,7 +31919,8 @@ FOR INDIVIDUAL USE ONLY
 Copyright 2019 National Fire Protection Association (NFPA®). Licensed by agreement to Carl Weaver FOR INDIVIDUAL USE ONLY and downloaded on 11/05/2019. No reproduction or transmission in any form permitted without
 written permission of NFPA®. For inquiries or access for multiple users, or to report unauthorized use, contact licensing@nfpa.org.
 {C56A4DC7-64F7-4C88-B368-41DE5BD47BC8}
-===PAGE_BREAK===
+<!-- Source PDF page 309 -->
+
 NATIONAL FIRE ALARM AND SIGNALING CODE	72-306
 2019 Edition Shaded text = Revisions. Δ = Text deletions and figure/table revisions. • = Section deletions. N = New material.
 rooms and open foyers or great rooms, dictate that alarms be
@@ -31732,7 +32045,8 @@ FOR INDIVIDUAL USE ONLY
 Copyright 2019 National Fire Protection Association (NFPA®). Licensed by agreement to Carl Weaver FOR INDIVIDUAL USE ONLY and downloaded on 11/05/2019. No reproduction or transmission in any form permitted without
 written permission of NFPA®. For inquiries or access for multiple users, or to report unauthorized use, contact licensing@nfpa.org.
 {C56A4DC7-64F7-4C88-B368-41DE5BD47BC8}
-===PAGE_BREAK===
+<!-- Source PDF page 310 -->
+
 ANNEX A 72-307
 Shaded text = Revisions. Δ = Text deletions and figure/table revisions. • = Section deletions. N = New material. 2019 Edition
 L D
@@ -31881,7 +32195,8 @@ FOR INDIVIDUAL USE ONLY
 Copyright 2019 National Fire Protection Association (NFPA®). Licensed by agreement to Carl Weaver FOR INDIVIDUAL USE ONLY and downloaded on 11/05/2019. No reproduction or transmission in any form permitted without
 written permission of NFPA®. For inquiries or access for multiple users, or to report unauthorized use, contact licensing@nfpa.org.
 {C56A4DC7-64F7-4C88-B368-41DE5BD47BC8}
-===PAGE_BREAK===
+<!-- Source PDF page 311 -->
+
 NATIONAL FIRE ALARM AND SIGNALING CODE	72-308
 2019 Edition Shaded text = Revisions. Δ = Text deletions and figure/table revisions. • = Section deletions. N = New material.
 (c) Do not reenter the premises or move away from an
@@ -31984,7 +32299,8 @@ FOR INDIVIDUAL USE ONLY
 Copyright 2019 National Fire Protection Association (NFPA®). Licensed by agreement to Carl Weaver FOR INDIVIDUAL USE ONLY and downloaded on 11/05/2019. No reproduction or transmission in any form permitted without
 written permission of NFPA®. For inquiries or access for multiple users, or to report unauthorized use, contact licensing@nfpa.org.
 {C56A4DC7-64F7-4C88-B368-41DE5BD47BC8}
-===PAGE_BREAK===
+<!-- Source PDF page 312 -->
+
 ANNEX A 72-309
 Shaded text = Revisions. Δ = Text deletions and figure/table revisions. • = Section deletions. N = New material. 2019 Edition
 temperature from the air space below, smoke and heat have
@@ -32114,7 +32430,8 @@ FOR INDIVIDUAL USE ONLY
 Copyright 2019 National Fire Protection Association (NFPA®). Licensed by agreement to Carl Weaver FOR INDIVIDUAL USE ONLY and downloaded on 11/05/2019. No reproduction or transmission in any form permitted without
 written permission of NFPA®. For inquiries or access for multiple users, or to report unauthorized use, contact licensing@nfpa.org.
 {C56A4DC7-64F7-4C88-B368-41DE5BD47BC8}
-===PAGE_BREAK===
+<!-- Source PDF page 313 -->
+
 NATIONAL FIRE ALARM AND SIGNALING CODE	72-310
 2019 Edition Shaded text = Revisions. Δ = Text deletions and figure/table revisions. • = Section deletions. N = New material.
 Figure A.29.11.3.4(4)(d) provides an example of this situation
@@ -32212,7 +32529,8 @@ FOR INDIVIDUAL USE ONLY
 Copyright 2019 National Fire Protection Association (NFPA®). Licensed by agreement to Carl Weaver FOR INDIVIDUAL USE ONLY and downloaded on 11/05/2019. No reproduction or transmission in any form permitted without
 written permission of NFPA®. For inquiries or access for multiple users, or to report unauthorized use, contact licensing@nfpa.org.
 {C56A4DC7-64F7-4C88-B368-41DE5BD47BC8}
-===PAGE_BREAK===
+<!-- Source PDF page 314 -->
+
 ANNEX A 72-311
 Shaded text = Revisions. Δ = Text deletions and figure/table revisions. • = Section deletions. N = New material. 2019 Edition
 A.29.11.4.2 Figure A.29.11.3.2 illustrates acceptable heat
@@ -32278,7 +32596,8 @@ FOR INDIVIDUAL USE ONLY
 Copyright 2019 National Fire Protection Association (NFPA®). Licensed by agreement to Carl Weaver FOR INDIVIDUAL USE ONLY and downloaded on 11/05/2019. No reproduction or transmission in any form permitted without
 written permission of NFPA®. For inquiries or access for multiple users, or to report unauthorized use, contact licensing@nfpa.org.
 {C56A4DC7-64F7-4C88-B368-41DE5BD47BC8}
-===PAGE_BREAK===
+<!-- Source PDF page 315 -->
+
 NATIONAL FIRE ALARM AND SIGNALING CODE	72-312
 2019 Edition Shaded text = Revisions. Δ = Text deletions and figure/table revisions. • = Section deletions. N = New material.
 A.29.11.4.7 Refer to Figure A.29.11.4.7, where the distance
@@ -32320,7 +32639,7 @@ assistance.
 FIGURE A.29.11.4.7 Open Joists, Attics, and Extra-High
 Ceilings are Some Areas that Require Special Knowledge for
 Installation.
-Annex B Engineering Guide for Automatic Fire Detector
+## Annex B Engineering Guide for Automatic Fire Detector
 Spacing
 This annex is not a part of the requirements of this NFPA document
 but is included for informational purposes only.
@@ -32337,7 +32656,7 @@ tee on Initiating Devices for Fire Alarm Systems gratefully acknowledge
 the technical contributions of the Society of Fire Protection Engineers,
 Richard Custer, and Brian Meacham to performance-based design and
 this annex.
-B.1 Introduction.
+### B.1 Introduction.
 B.1.1 Scope. Annex B provides information intended to
 supplement Chapter 17. It includes a procedure for determin‐
 ing detector spacing based on the objectives set for the system,
@@ -32374,7 +32693,8 @@ FOR INDIVIDUAL USE ONLY
 Copyright 2019 National Fire Protection Association (NFPA®). Licensed by agreement to Carl Weaver FOR INDIVIDUAL USE ONLY and downloaded on 11/05/2019. No reproduction or transmission in any form permitted without
 written permission of NFPA®. For inquiries or access for multiple users, or to report unauthorized use, contact licensing@nfpa.org.
 {C56A4DC7-64F7-4C88-B368-41DE5BD47BC8}
-===PAGE_BREAK===
+<!-- Source PDF page 316 -->
+
 ANNEX B 72-313
 Shaded text = Revisions. Δ = Text deletions and figure/table revisions. • = Section deletions. N = New material. 2019 Edition
 B.1.2.3 For the purposes of this annex, the heat produced by
@@ -32500,7 +32820,8 @@ FOR INDIVIDUAL USE ONLY
 Copyright 2019 National Fire Protection Association (NFPA®). Licensed by agreement to Carl Weaver FOR INDIVIDUAL USE ONLY and downloaded on 11/05/2019. No reproduction or transmission in any form permitted without
 written permission of NFPA®. For inquiries or access for multiple users, or to report unauthorized use, contact licensing@nfpa.org.
 {C56A4DC7-64F7-4C88-B368-41DE5BD47BC8}
-===PAGE_BREAK===
+<!-- Source PDF page 317 -->
+
 NATIONAL FIRE ALARM AND SIGNALING CODE	72-314
 2019 Edition Shaded text = Revisions. Δ = Text deletions and figure/table revisions. • = Section deletions. N = New material.
 B.2.2.1.2 While defining the project’s scope, the designer will
@@ -32593,7 +32914,8 @@ FOR INDIVIDUAL USE ONLY
 Copyright 2019 National Fire Protection Association (NFPA®). Licensed by agreement to Carl Weaver FOR INDIVIDUAL USE ONLY and downloaded on 11/05/2019. No reproduction or transmission in any form permitted without
 written permission of NFPA®. For inquiries or access for multiple users, or to report unauthorized use, contact licensing@nfpa.org.
 {C56A4DC7-64F7-4C88-B368-41DE5BD47BC8}
-===PAGE_BREAK===
+<!-- Source PDF page 318 -->
+
 ANNEX B 72-315
 Shaded text = Revisions. Δ = Text deletions and figure/table revisions. • = Section deletions. N = New material. 2019 Edition
 tion might have an equally high priority in a large warehouse
@@ -32705,7 +33027,8 @@ FOR INDIVIDUAL USE ONLY
 Copyright 2019 National Fire Protection Association (NFPA®). Licensed by agreement to Carl Weaver FOR INDIVIDUAL USE ONLY and downloaded on 11/05/2019. No reproduction or transmission in any form permitted without
 written permission of NFPA®. For inquiries or access for multiple users, or to report unauthorized use, contact licensing@nfpa.org.
 {C56A4DC7-64F7-4C88-B368-41DE5BD47BC8}
-===PAGE_BREAK===
+<!-- Source PDF page 319 -->
+
 NATIONAL FIRE ALARM AND SIGNALING CODE	72-316
 2019 Edition Shaded text = Revisions. Δ = Text deletions and figure/table revisions. • = Section deletions. N = New material.
 B.2.3 Phase II — System Design and Evaluation.
@@ -32830,7 +33153,8 @@ FOR INDIVIDUAL USE ONLY
 Copyright 2019 National Fire Protection Association (NFPA®). Licensed by agreement to Carl Weaver FOR INDIVIDUAL USE ONLY and downloaded on 11/05/2019. No reproduction or transmission in any form permitted without
 written permission of NFPA®. For inquiries or access for multiple users, or to report unauthorized use, contact licensing@nfpa.org.
 {C56A4DC7-64F7-4C88-B368-41DE5BD47BC8}
-===PAGE_BREAK===
+<!-- Source PDF page 320 -->
+
 ANNEX B 72-317
 Shaded text = Revisions. Δ = Text deletions and figure/table revisions. • = Section deletions. N = New material. 2019 Edition
 The computer room is 9.1 m × 6 m (30 ft × 20 ft) and 2.8 m
@@ -32948,7 +33272,8 @@ FOR INDIVIDUAL USE ONLY
 Copyright 2019 National Fire Protection Association (NFPA®). Licensed by agreement to Carl Weaver FOR INDIVIDUAL USE ONLY and downloaded on 11/05/2019. No reproduction or transmission in any form permitted without
 written permission of NFPA®. For inquiries or access for multiple users, or to report unauthorized use, contact licensing@nfpa.org.
 {C56A4DC7-64F7-4C88-B368-41DE5BD47BC8}
-===PAGE_BREAK===
+<!-- Source PDF page 321 -->
+
 NATIONAL FIRE ALARM AND SIGNALING CODE	72-318
 2019 Edition Shaded text = Revisions. Δ = Text deletions and figure/table revisions. • = Section deletions. N = New material.
 As indicated in the Table B.2.3.2.6.2(a), this fire generally
@@ -33084,7 +33409,8 @@ FOR INDIVIDUAL USE ONLY
 Copyright 2019 National Fire Protection Association (NFPA®). Licensed by agreement to Carl Weaver FOR INDIVIDUAL USE ONLY and downloaded on 11/05/2019. No reproduction or transmission in any form permitted without
 written permission of NFPA®. For inquiries or access for multiple users, or to report unauthorized use, contact licensing@nfpa.org.
 {C56A4DC7-64F7-4C88-B368-41DE5BD47BC8}
-===PAGE_BREAK===
+<!-- Source PDF page 322 -->
+
 ANNEX B 72-319
 Shaded text = Revisions. Δ = Text deletions and figure/table revisions. • = Section deletions. N = New material. 2019 Edition
 methods used by the researchers. One such correlation is
@@ -33208,7 +33534,8 @@ FOR INDIVIDUAL USE ONLY
 Copyright 2019 National Fire Protection Association (NFPA®). Licensed by agreement to Carl Weaver FOR INDIVIDUAL USE ONLY and downloaded on 11/05/2019. No reproduction or transmission in any form permitted without
 written permission of NFPA®. For inquiries or access for multiple users, or to report unauthorized use, contact licensing@nfpa.org.
 {C56A4DC7-64F7-4C88-B368-41DE5BD47BC8}
-===PAGE_BREAK===
+<!-- Source PDF page 323 -->
+
 NATIONAL FIRE ALARM AND SIGNALING CODE	72-320
 2019 Edition Shaded text = Revisions. Δ = Text deletions and figure/table revisions. • = Section deletions. N = New material.
 B.2.3.2.5 Selection of Critical Fire Size. Because all fire
@@ -33328,7 +33655,8 @@ FOR INDIVIDUAL USE ONLY
 Copyright 2019 National Fire Protection Association (NFPA®). Licensed by agreement to Carl Weaver FOR INDIVIDUAL USE ONLY and downloaded on 11/05/2019. No reproduction or transmission in any form permitted without
 written permission of NFPA®. For inquiries or access for multiple users, or to report unauthorized use, contact licensing@nfpa.org.
 {C56A4DC7-64F7-4C88-B368-41DE5BD47BC8}
-===PAGE_BREAK===
+<!-- Source PDF page 324 -->
+
 ANNEX B 72-321
 Shaded text = Revisions. Δ = Text deletions and figure/table revisions. • = Section deletions. N = New material. 2019 Edition
 similar items burning under a flat ceiling. Table B.2.3.2.6.2(e)
@@ -33419,7 +33747,8 @@ FOR INDIVIDUAL USE ONLY
 Copyright 2019 National Fire Protection Association (NFPA®). Licensed by agreement to Carl Weaver FOR INDIVIDUAL USE ONLY and downloaded on 11/05/2019. No reproduction or transmission in any form permitted without
 written permission of NFPA®. For inquiries or access for multiple users, or to report unauthorized use, contact licensing@nfpa.org.
 {C56A4DC7-64F7-4C88-B368-41DE5BD47BC8}
-===PAGE_BREAK===
+<!-- Source PDF page 325 -->
+
 NATIONAL FIRE ALARM AND SIGNALING CODE	72-322
 2019 Edition Shaded text = Revisions. Δ = Text deletions and figure/table revisions. • = Section deletions. N = New material.
 B.2.3.2.6.7 A series of design fire curves are included as part
@@ -33536,7 +33865,8 @@ FOR INDIVIDUAL USE ONLY
 Copyright 2019 National Fire Protection Association (NFPA®). Licensed by agreement to Carl Weaver FOR INDIVIDUAL USE ONLY and downloaded on 11/05/2019. No reproduction or transmission in any form permitted without
 written permission of NFPA®. For inquiries or access for multiple users, or to report unauthorized use, contact licensing@nfpa.org.
 {C56A4DC7-64F7-4C88-B368-41DE5BD47BC8}
-===PAGE_BREAK===
+<!-- Source PDF page 326 -->
+
 ANNEX B 72-323
 Shaded text = Revisions. Δ = Text deletions and figure/table revisions. • = Section deletions. N = New material. 2019 Edition
 Δ B.2.3.4.2 These documents should encompass the following
@@ -33639,7 +33969,8 @@ FOR INDIVIDUAL USE ONLY
 Copyright 2019 National Fire Protection Association (NFPA®). Licensed by agreement to Carl Weaver FOR INDIVIDUAL USE ONLY and downloaded on 11/05/2019. No reproduction or transmission in any form permitted without
 written permission of NFPA®. For inquiries or access for multiple users, or to report unauthorized use, contact licensing@nfpa.org.
 {C56A4DC7-64F7-4C88-B368-41DE5BD47BC8}
-===PAGE_BREAK===
+<!-- Source PDF page 327 -->
+
 NATIONAL FIRE ALARM AND SIGNALING CODE	72-324
 2019 Edition Shaded text = Revisions. Δ = Text deletions and figure/table revisions. • = Section deletions. N = New material.
 Δ Table B.2.3.2.6.2(e) Furniture Heat Release Rates [3, 14, 16]
@@ -33738,7 +34069,8 @@ FOR INDIVIDUAL USE ONLY
 Copyright 2019 National Fire Protection Association (NFPA®). Licensed by agreement to Carl Weaver FOR INDIVIDUAL USE ONLY and downloaded on 11/05/2019. No reproduction or transmission in any form permitted without
 written permission of NFPA®. For inquiries or access for multiple users, or to report unauthorized use, contact licensing@nfpa.org.
 {C56A4DC7-64F7-4C88-B368-41DE5BD47BC8}
-===PAGE_BREAK===
+<!-- Source PDF page 328 -->
+
 ANNEX B 72-325
 Shaded text = Revisions. Δ = Text deletions and figure/table revisions. • = Section deletions. N = New material. 2019 Edition
 (14) Critical design assumptions — should include all
@@ -33864,10 +34196,11 @@ FOR INDIVIDUAL USE ONLY
 Copyright 2019 National Fire Protection Association (NFPA®). Licensed by agreement to Carl Weaver FOR INDIVIDUAL USE ONLY and downloaded on 11/05/2019. No reproduction or transmission in any form permitted without
 written permission of NFPA®. For inquiries or access for multiple users, or to report unauthorized use, contact licensing@nfpa.org.
 {C56A4DC7-64F7-4C88-B368-41DE5BD47BC8}
-===PAGE_BREAK===
+<!-- Source PDF page 329 -->
+
 NATIONAL FIRE ALARM AND SIGNALING CODE	72-326
 2019 Edition Shaded text = Revisions. Δ = Text deletions and figure/table revisions. • = Section deletions. N = New material.
-B.3 Evaluation of Heat Detection System Performance.
+### B.3 Evaluation of Heat Detection System Performance.
 B.3.1 General. Section B.3 provides a method for determin‐
 ing the application spacing for both fixed-temperature heat
 detectors (including sprinklers) and rate-of-rise heat detectors.
@@ -33987,7 +34320,8 @@ FOR INDIVIDUAL USE ONLY
 Copyright 2019 National Fire Protection Association (NFPA®). Licensed by agreement to Carl Weaver FOR INDIVIDUAL USE ONLY and downloaded on 11/05/2019. No reproduction or transmission in any form permitted without
 written permission of NFPA®. For inquiries or access for multiple users, or to report unauthorized use, contact licensing@nfpa.org.
 {C56A4DC7-64F7-4C88-B368-41DE5BD47BC8}
-===PAGE_BREAK===
+<!-- Source PDF page 330 -->
+
 ANNEX B 72-327
 Shaded text = Revisions. Δ = Text deletions and figure/table revisions. • = Section deletions. N = New material. 2019 Edition
 B.3.2.3 Ceiling Height Considerations.
@@ -34101,7 +34435,8 @@ FOR INDIVIDUAL USE ONLY
 Copyright 2019 National Fire Protection Association (NFPA®). Licensed by agreement to Carl Weaver FOR INDIVIDUAL USE ONLY and downloaded on 11/05/2019. No reproduction or transmission in any form permitted without
 written permission of NFPA®. For inquiries or access for multiple users, or to report unauthorized use, contact licensing@nfpa.org.
 {C56A4DC7-64F7-4C88-B368-41DE5BD47BC8}
-===PAGE_BREAK===
+<!-- Source PDF page 331 -->
+
 NATIONAL FIRE ALARM AND SIGNALING CODE	72-328
 2019 Edition Shaded text = Revisions. Δ = Text deletions and figure/table revisions. • = Section deletions. N = New material.
 B.3.2.6.2 If the heat release history for a particular fire is
@@ -34207,7 +34542,8 @@ FOR INDIVIDUAL USE ONLY
 Copyright 2019 National Fire Protection Association (NFPA®). Licensed by agreement to Carl Weaver FOR INDIVIDUAL USE ONLY and downloaded on 11/05/2019. No reproduction or transmission in any form permitted without
 written permission of NFPA®. For inquiries or access for multiple users, or to report unauthorized use, contact licensing@nfpa.org.
 {C56A4DC7-64F7-4C88-B368-41DE5BD47BC8}
-===PAGE_BREAK===
+<!-- Source PDF page 332 -->
+
 ANNEX B 72-329
 Shaded text = Revisions. Δ = Text deletions and figure/table revisions. • = Section deletions. N = New material. 2019 Edition
 B.3.3.3.4 The use of a time constant (τ) was proposed by
@@ -34348,7 +34684,8 @@ FOR INDIVIDUAL USE ONLY
 Copyright 2019 National Fire Protection Association (NFPA®). Licensed by agreement to Carl Weaver FOR INDIVIDUAL USE ONLY and downloaded on 11/05/2019. No reproduction or transmission in any form permitted without
 written permission of NFPA®. For inquiries or access for multiple users, or to report unauthorized use, contact licensing@nfpa.org.
 {C56A4DC7-64F7-4C88-B368-41DE5BD47BC8}
-===PAGE_BREAK===
+<!-- Source PDF page 333 -->
+
 72-330 NATIONAL FIRE ALARM AND SIGNALING CODE
 2019 Edition Shaded text = Revisions. Δ = Text deletions and figure/table revisions. • = Section deletions. N = New material.
 where:
@@ -34580,7 +34917,8 @@ FOR INDIVIDUAL USE ONLY
 Copyright 2019 National Fire Protection Association (NFPA®). Licensed by agreement to Carl Weaver FOR INDIVIDUAL USE ONLY and downloaded on 11/05/2019. No reproduction or transmission in any form permitted without
 written permission of NFPA®. For inquiries or access for multiple users, or to report unauthorized use, contact licensing@nfpa.org.
 {C56A4DC7-64F7-4C88-B368-41DE5BD47BC8}
-===PAGE_BREAK===
+<!-- Source PDF page 334 -->
+
 ANNEX B 72-331
 Shaded text = Revisions. Δ = Text deletions and figure/table revisions. • = Section deletions. N = New material. 2019 Edition
 Ts = °C + 273 = K RTI = m1/2sec1/2
@@ -34772,7 +35110,8 @@ FOR INDIVIDUAL USE ONLY
 Copyright 2019 National Fire Protection Association (NFPA®). Licensed by agreement to Carl Weaver FOR INDIVIDUAL USE ONLY and downloaded on 11/05/2019. No reproduction or transmission in any form permitted without
 written permission of NFPA®. For inquiries or access for multiple users, or to report unauthorized use, contact licensing@nfpa.org.
 {C56A4DC7-64F7-4C88-B368-41DE5BD47BC8}
-===PAGE_BREAK===
+<!-- Source PDF page 335 -->
+
 NATIONAL FIRE ALARM AND SIGNALING CODE	72-332
 2019 Edition Shaded text = Revisions. Δ = Text deletions and figure/table revisions. • = Section deletions. N = New material.
 Based on the discussion in this section, errors in predicted
@@ -34913,7 +35252,8 @@ FOR INDIVIDUAL USE ONLY
 Copyright 2019 National Fire Protection Association (NFPA®). Licensed by agreement to Carl Weaver FOR INDIVIDUAL USE ONLY and downloaded on 11/05/2019. No reproduction or transmission in any form permitted without
 written permission of NFPA®. For inquiries or access for multiple users, or to report unauthorized use, contact licensing@nfpa.org.
 {C56A4DC7-64F7-4C88-B368-41DE5BD47BC8}
-===PAGE_BREAK===
+<!-- Source PDF page 336 -->
+
 ANNEX B 72-333
 Shaded text = Revisions. Δ = Text deletions and figure/table revisions. • = Section deletions. N = New material. 2019 Edition
 B.3.3.7.2 To begin calculations, it will be necessary to make a
@@ -35018,7 +35358,8 @@ FOR INDIVIDUAL USE ONLY
 Copyright 2019 National Fire Protection Association (NFPA®). Licensed by agreement to Carl Weaver FOR INDIVIDUAL USE ONLY and downloaded on 11/05/2019. No reproduction or transmission in any form permitted without
 written permission of NFPA®. For inquiries or access for multiple users, or to report unauthorized use, contact licensing@nfpa.org.
 {C56A4DC7-64F7-4C88-B368-41DE5BD47BC8}
-===PAGE_BREAK===
+<!-- Source PDF page 337 -->
+
 NATIONAL FIRE ALARM AND SIGNALING CODE	72-334
 2019 Edition Shaded text = Revisions. Δ = Text deletions and figure/table revisions. • = Section deletions. N = New material.
 = °C/min τ0 = sec
@@ -35231,7 +35572,8 @@ FOR INDIVIDUAL USE ONLY
 Copyright 2019 National Fire Protection Association (NFPA®). Licensed by agreement to Carl Weaver FOR INDIVIDUAL USE ONLY and downloaded on 11/05/2019. No reproduction or transmission in any form permitted without
 written permission of NFPA®. For inquiries or access for multiple users, or to report unauthorized use, contact licensing@nfpa.org.
 {C56A4DC7-64F7-4C88-B368-41DE5BD47BC8}
-===PAGE_BREAK===
+<!-- Source PDF page 338 -->
+
 ANNEX B 72-335
 Shaded text = Revisions. Δ = Text deletions and figure/table revisions. • = Section deletions. N = New material. 2019 Edition
 Use the relationship for in equation B.3.3.4.2c to
@@ -35442,7 +35784,8 @@ FOR INDIVIDUAL USE ONLY
 Copyright 2019 National Fire Protection Association (NFPA®). Licensed by agreement to Carl Weaver FOR INDIVIDUAL USE ONLY and downloaded on 11/05/2019. No reproduction or transmission in any form permitted without
 written permission of NFPA®. For inquiries or access for multiple users, or to report unauthorized use, contact licensing@nfpa.org.
 {C56A4DC7-64F7-4C88-B368-41DE5BD47BC8}
-===PAGE_BREAK===
+<!-- Source PDF page 339 -->
+
 NATIONAL FIRE ALARM AND SIGNALING CODE	72-336
 2019 Edition Shaded text = Revisions. Δ = Text deletions and figure/table revisions. • = Section deletions. N = New material.
 Δ Table B.3.3.8.5(a) Operating Temperature Versus Heat
@@ -35534,7 +35877,8 @@ FOR INDIVIDUAL USE ONLY
 Copyright 2019 National Fire Protection Association (NFPA®). Licensed by agreement to Carl Weaver FOR INDIVIDUAL USE ONLY and downloaded on 11/05/2019. No reproduction or transmission in any form permitted without
 written permission of NFPA®. For inquiries or access for multiple users, or to report unauthorized use, contact licensing@nfpa.org.
 {C56A4DC7-64F7-4C88-B368-41DE5BD47BC8}
-===PAGE_BREAK===
+<!-- Source PDF page 340 -->
+
 ANNEX B 72-337
 Shaded text = Revisions. Δ = Text deletions and figure/table revisions. • = Section deletions. N = New material. 2019 Edition
 B.3.3.9 Rate-of-Rise Heat Detector Spacing.
@@ -35568,7 +35912,7 @@ compensated detectors are not specifically covered by Annex B.
 However, a conservative approach to predicting their perform‐
 ance is to use the fixed-temperature heat detector guidance
 contained herein.
-B.4 Smoke Detector Spacing for Flaming Fires.
+### B.4 Smoke Detector Spacing for Flaming Fires.
 B.4.1 Introduction.
 B.4.1.1 The listing investigation for smoke detectors does not
 yield a “listed spacing” as it does for heat detectors. Instead, the
@@ -35657,7 +36001,8 @@ FOR INDIVIDUAL USE ONLY
 Copyright 2019 National Fire Protection Association (NFPA®). Licensed by agreement to Carl Weaver FOR INDIVIDUAL USE ONLY and downloaded on 11/05/2019. No reproduction or transmission in any form permitted without
 written permission of NFPA®. For inquiries or access for multiple users, or to report unauthorized use, contact licensing@nfpa.org.
 {C56A4DC7-64F7-4C88-B368-41DE5BD47BC8}
-===PAGE_BREAK===
+<!-- Source PDF page 341 -->
+
 NATIONAL FIRE ALARM AND SIGNALING CODE	72-338
 2019 Edition Shaded text = Revisions. Δ = Text deletions and figure/table revisions. • = Section deletions. N = New material.
 smoke that occur with time and distance from the source, and
@@ -35785,7 +36130,8 @@ FOR INDIVIDUAL USE ONLY
 Copyright 2019 National Fire Protection Association (NFPA®). Licensed by agreement to Carl Weaver FOR INDIVIDUAL USE ONLY and downloaded on 11/05/2019. No reproduction or transmission in any form permitted without
 written permission of NFPA®. For inquiries or access for multiple users, or to report unauthorized use, contact licensing@nfpa.org.
 {C56A4DC7-64F7-4C88-B368-41DE5BD47BC8}
-===PAGE_BREAK===
+<!-- Source PDF page 342 -->
+
 ANNEX B 72-339
 Shaded text = Revisions. Δ = Text deletions and figure/table revisions. • = Section deletions. N = New material. 2019 Edition
 tion. If the plume centerline temperature is equal to the ambi‐
@@ -35933,7 +36279,8 @@ FOR INDIVIDUAL USE ONLY
 Copyright 2019 National Fire Protection Association (NFPA®). Licensed by agreement to Carl Weaver FOR INDIVIDUAL USE ONLY and downloaded on 11/05/2019. No reproduction or transmission in any form permitted without
 written permission of NFPA®. For inquiries or access for multiple users, or to report unauthorized use, contact licensing@nfpa.org.
 {C56A4DC7-64F7-4C88-B368-41DE5BD47BC8}
-===PAGE_BREAK===
+<!-- Source PDF page 343 -->
+
 NATIONAL FIRE ALARM AND SIGNALING CODE	72-340
 2019 Edition Shaded text = Revisions. Δ = Text deletions and figure/table revisions. • = Section deletions. N = New material.
 or
@@ -36061,7 +36408,8 @@ FOR INDIVIDUAL USE ONLY
 Copyright 2019 National Fire Protection Association (NFPA®). Licensed by agreement to Carl Weaver FOR INDIVIDUAL USE ONLY and downloaded on 11/05/2019. No reproduction or transmission in any form permitted without
 written permission of NFPA®. For inquiries or access for multiple users, or to report unauthorized use, contact licensing@nfpa.org.
 {C56A4DC7-64F7-4C88-B368-41DE5BD47BC8}
-===PAGE_BREAK===
+<!-- Source PDF page 344 -->
+
 ANNEX B 72-341
 Shaded text = Revisions. Δ = Text deletions and figure/table revisions. • = Section deletions. N = New material. 2019 Edition
 density at response recommended by Heskestad and Delichat‐
@@ -36162,7 +36510,8 @@ FOR INDIVIDUAL USE ONLY
 Copyright 2019 National Fire Protection Association (NFPA®). Licensed by agreement to Carl Weaver FOR INDIVIDUAL USE ONLY and downloaded on 11/05/2019. No reproduction or transmission in any form permitted without
 written permission of NFPA®. For inquiries or access for multiple users, or to report unauthorized use, contact licensing@nfpa.org.
 {C56A4DC7-64F7-4C88-B368-41DE5BD47BC8}
-===PAGE_BREAK===
+<!-- Source PDF page 345 -->
+
 NATIONAL FIRE ALARM AND SIGNALING CODE	72-342
 2019 Edition Shaded text = Revisions. Δ = Text deletions and figure/table revisions. • = Section deletions. N = New material.
 Several experimental studies have cited temperature rises at
@@ -36281,7 +36630,8 @@ FOR INDIVIDUAL USE ONLY
 Copyright 2019 National Fire Protection Association (NFPA®). Licensed by agreement to Carl Weaver FOR INDIVIDUAL USE ONLY and downloaded on 11/05/2019. No reproduction or transmission in any form permitted without
 written permission of NFPA®. For inquiries or access for multiple users, or to report unauthorized use, contact licensing@nfpa.org.
 {C56A4DC7-64F7-4C88-B368-41DE5BD47BC8}
-===PAGE_BREAK===
+<!-- Source PDF page 346 -->
+
 ANNEX B 72-343
 Shaded text = Revisions. Δ = Text deletions and figure/table revisions. • = Section deletions. N = New material. 2019 Edition
 B.4.8.2.3 The total mass loss of the cushion due to combus‐
@@ -36389,7 +36739,8 @@ FOR INDIVIDUAL USE ONLY
 Copyright 2019 National Fire Protection Association (NFPA®). Licensed by agreement to Carl Weaver FOR INDIVIDUAL USE ONLY and downloaded on 11/05/2019. No reproduction or transmission in any form permitted without
 written permission of NFPA®. For inquiries or access for multiple users, or to report unauthorized use, contact licensing@nfpa.org.
 {C56A4DC7-64F7-4C88-B368-41DE5BD47BC8}
-===PAGE_BREAK===
+<!-- Source PDF page 347 -->
+
 NATIONAL FIRE ALARM AND SIGNALING CODE	72-344
 2019 Edition Shaded text = Revisions. Δ = Text deletions and figure/table revisions. • = Section deletions. N = New material.
 Substituting, this leads to the relation
@@ -36540,7 +36891,8 @@ FOR INDIVIDUAL USE ONLY
 Copyright 2019 National Fire Protection Association (NFPA®). Licensed by agreement to Carl Weaver FOR INDIVIDUAL USE ONLY and downloaded on 11/05/2019. No reproduction or transmission in any form permitted without
 written permission of NFPA®. For inquiries or access for multiple users, or to report unauthorized use, contact licensing@nfpa.org.
 {C56A4DC7-64F7-4C88-B368-41DE5BD47BC8}
-===PAGE_BREAK===
+<!-- Source PDF page 348 -->
+
 ANNEX B 72-345
 Shaded text = Revisions. Δ = Text deletions and figure/table revisions. • = Section deletions. N = New material. 2019 Edition
 Theoretically, the effect of HVAC flows on the performance
@@ -36657,7 +37009,8 @@ FOR INDIVIDUAL USE ONLY
 Copyright 2019 National Fire Protection Association (NFPA®). Licensed by agreement to Carl Weaver FOR INDIVIDUAL USE ONLY and downloaded on 11/05/2019. No reproduction or transmission in any form permitted without
 written permission of NFPA®. For inquiries or access for multiple users, or to report unauthorized use, contact licensing@nfpa.org.
 {C56A4DC7-64F7-4C88-B368-41DE5BD47BC8}
-===PAGE_BREAK===
+<!-- Source PDF page 349 -->
+
 NATIONAL FIRE ALARM AND SIGNALING CODE	72-346
 2019 Edition Shaded text = Revisions. Δ = Text deletions and figure/table revisions. • = Section deletions. N = New material.
 The velocity from the ceiling jet is derived from Alpert’s
@@ -36732,7 +37085,7 @@ These calculations do NOT replace CFD modeling. They are
 limited only for level ceilings of heights normally encountered
 in commercial construction. In that limited context they can be
 used to predict smoke detector performance.
-B.5 Radiant Energy Detection.
+### B.5 Radiant Energy Detection.
 B.5.1 General.
 B.5.1.1 Electromagnetic Radiation. Electromagnetic radiation
 is emitted over a broad range of the spectrum during the
@@ -36746,7 +37099,8 @@ FOR INDIVIDUAL USE ONLY
 Copyright 2019 National Fire Protection Association (NFPA®). Licensed by agreement to Carl Weaver FOR INDIVIDUAL USE ONLY and downloaded on 11/05/2019. No reproduction or transmission in any form permitted without
 written permission of NFPA®. For inquiries or access for multiple users, or to report unauthorized use, contact licensing@nfpa.org.
 {C56A4DC7-64F7-4C88-B368-41DE5BD47BC8}
-===PAGE_BREAK===
+<!-- Source PDF page 350 -->
+
 ANNEX B 72-347
 Shaded text = Revisions. Δ = Text deletions and figure/table revisions. • = Section deletions. N = New material. 2019 Edition
 radiant energy–sensing detectors operate has been divided into
@@ -36867,7 +37221,8 @@ FOR INDIVIDUAL USE ONLY
 Copyright 2019 National Fire Protection Association (NFPA®). Licensed by agreement to Carl Weaver FOR INDIVIDUAL USE ONLY and downloaded on 11/05/2019. No reproduction or transmission in any form permitted without
 written permission of NFPA®. For inquiries or access for multiple users, or to report unauthorized use, contact licensing@nfpa.org.
 {C56A4DC7-64F7-4C88-B368-41DE5BD47BC8}
-===PAGE_BREAK===
+<!-- Source PDF page 351 -->
+
 NATIONAL FIRE ALARM AND SIGNALING CODE	72-348
 2019 Edition Shaded text = Revisions. Δ = Text deletions and figure/table revisions. • = Section deletions. N = New material.
 S kPe
@@ -36987,7 +37342,8 @@ FOR INDIVIDUAL USE ONLY
 Copyright 2019 National Fire Protection Association (NFPA®). Licensed by agreement to Carl Weaver FOR INDIVIDUAL USE ONLY and downloaded on 11/05/2019. No reproduction or transmission in any form permitted without
 written permission of NFPA®. For inquiries or access for multiple users, or to report unauthorized use, contact licensing@nfpa.org.
 {C56A4DC7-64F7-4C88-B368-41DE5BD47BC8}
-===PAGE_BREAK===
+<!-- Source PDF page 352 -->
+
 ANNEX B 72-349
 Shaded text = Revisions. Δ = Text deletions and figure/table revisions. • = Section deletions. N = New material. 2019 Edition
 S kcA e
@@ -37138,7 +37494,8 @@ FOR INDIVIDUAL USE ONLY
 Copyright 2019 National Fire Protection Association (NFPA®). Licensed by agreement to Carl Weaver FOR INDIVIDUAL USE ONLY and downloaded on 11/05/2019. No reproduction or transmission in any form permitted without
 written permission of NFPA®. For inquiries or access for multiple users, or to report unauthorized use, contact licensing@nfpa.org.
 {C56A4DC7-64F7-4C88-B368-41DE5BD47BC8}
-===PAGE_BREAK===
+<!-- Source PDF page 353 -->
+
 NATIONAL FIRE ALARM AND SIGNALING CODE	72-350
 2019 Edition Shaded text = Revisions. Δ = Text deletions and figure/table revisions. • = Section deletions. N = New material.
 B.5.3 Design of Spark/Ember Detection Systems.
@@ -37266,7 +37623,8 @@ FOR INDIVIDUAL USE ONLY
 Copyright 2019 National Fire Protection Association (NFPA®). Licensed by agreement to Carl Weaver FOR INDIVIDUAL USE ONLY and downloaded on 11/05/2019. No reproduction or transmission in any form permitted without
 written permission of NFPA®. For inquiries or access for multiple users, or to report unauthorized use, contact licensing@nfpa.org.
 {C56A4DC7-64F7-4C88-B368-41DE5BD47BC8}
-===PAGE_BREAK===
+<!-- Source PDF page 354 -->
+
 ANNEX B 72-351
 Shaded text = Revisions. Δ = Text deletions and figure/table revisions. • = Section deletions. N = New material. 2019 Edition
 B.6.1 DETACT — T2. DETACT — T2 (DETector ACTuation
@@ -37384,7 +37742,8 @@ FOR INDIVIDUAL USE ONLY
 Copyright 2019 National Fire Protection Association (NFPA®). Licensed by agreement to Carl Weaver FOR INDIVIDUAL USE ONLY and downloaded on 11/05/2019. No reproduction or transmission in any form permitted without
 written permission of NFPA®. For inquiries or access for multiple users, or to report unauthorized use, contact licensing@nfpa.org.
 {C56A4DC7-64F7-4C88-B368-41DE5BD47BC8}
-===PAGE_BREAK===
+<!-- Source PDF page 355 -->
+
 NATIONAL FIRE ALARM AND SIGNALING CODE	72-352
 2019 Edition Shaded text = Revisions. Δ = Text deletions and figure/table revisions. • = Section deletions. N = New material.
 (19) Forney, G., Bukowski, R., Davis, W. “Field Modelling:
@@ -37498,7 +37857,8 @@ FOR INDIVIDUAL USE ONLY
 Copyright 2019 National Fire Protection Association (NFPA®). Licensed by agreement to Carl Weaver FOR INDIVIDUAL USE ONLY and downloaded on 11/05/2019. No reproduction or transmission in any form permitted without
 written permission of NFPA®. For inquiries or access for multiple users, or to report unauthorized use, contact licensing@nfpa.org.
 {C56A4DC7-64F7-4C88-B368-41DE5BD47BC8}
-===PAGE_BREAK===
+<!-- Source PDF page 356 -->
+
 ANNEX B 72-353
 Shaded text = Revisions. Δ = Text deletions and figure/table revisions. • = Section deletions. N = New material. 2019 Edition
 (50) NFPA 101, Life Safety Code, National Fire Protection
@@ -37622,7 +37982,8 @@ FOR INDIVIDUAL USE ONLY
 Copyright 2019 National Fire Protection Association (NFPA®). Licensed by agreement to Carl Weaver FOR INDIVIDUAL USE ONLY and downloaded on 11/05/2019. No reproduction or transmission in any form permitted without
 written permission of NFPA®. For inquiries or access for multiple users, or to report unauthorized use, contact licensing@nfpa.org.
 {C56A4DC7-64F7-4C88-B368-41DE5BD47BC8}
-===PAGE_BREAK===
+<!-- Source PDF page 357 -->
+
 NATIONAL FIRE ALARM AND SIGNALING CODE	72-354
 2019 Edition Shaded text = Revisions. Δ = Text deletions and figure/table revisions. • = Section deletions. N = New material.
 Δ Table B.7 Continued
@@ -37666,10 +38027,11 @@ FOR INDIVIDUAL USE ONLY
 Copyright 2019 National Fire Protection Association (NFPA®). Licensed by agreement to Carl Weaver FOR INDIVIDUAL USE ONLY and downloaded on 11/05/2019. No reproduction or transmission in any form permitted without
 written permission of NFPA®. For inquiries or access for multiple users, or to report unauthorized use, contact licensing@nfpa.org.
 {C56A4DC7-64F7-4C88-B368-41DE5BD47BC8}
-===PAGE_BREAK===
+<!-- Source PDF page 358 -->
+
 ANNEX C 72-355
 Shaded text = Revisions. Δ = Text deletions and figure/table revisions. • = Section deletions. N = New material. 2019 Edition
-Annex C System Performance and Design Guide
+## Annex C System Performance and Design Guide
 This annex is not a part of the requirements of this NFPA document
 but is included for informational purposes only.
 C.1 Scope. The requirements of the protected premises chap‐
@@ -37785,7 +38147,8 @@ FOR INDIVIDUAL USE ONLY
 Copyright 2019 National Fire Protection Association (NFPA®). Licensed by agreement to Carl Weaver FOR INDIVIDUAL USE ONLY and downloaded on 11/05/2019. No reproduction or transmission in any form permitted without
 written permission of NFPA®. For inquiries or access for multiple users, or to report unauthorized use, contact licensing@nfpa.org.
 {C56A4DC7-64F7-4C88-B368-41DE5BD47BC8}
-===PAGE_BREAK===
+<!-- Source PDF page 359 -->
+
 NATIONAL FIRE ALARM AND SIGNALING CODE	72-356
 2019 Edition Shaded text = Revisions. Δ = Text deletions and figure/table revisions. • = Section deletions. N = New material.
 C.2.2.2.6 Communications and Control. Provide for fire-
@@ -37840,7 +38203,7 @@ emergency response and fire suppression.
 separate locations might reduce the need for sensi‐
 tivity of fire detection or other property protection
 system capabilities.
-C.4 Protected Premises Signaling System Features.
+### C.4 Protected Premises Signaling System Features.
 C.4.1 Event Logs. Computer processor–based systems are
 capable of assembling logs of system events by date and time,
 including alarm history. Such logs are an important resource in
@@ -37863,14 +38226,14 @@ control units provide redundant monitoring and control points
 on a system that can enhance the reliability of the system and
 the operation of the system during emergency or degraded
 conditions.
-Annex D Speech Intelligibility
+## Annex D Speech Intelligibility
 This annex is not a part of the requirements of this NFPA document
 but is included for informational purposes only.
 Users of Annex D should refer back to the text of NFPA 72
 to familiarize themselves with the specific requirements for the
 planning, design, installation, and testing of voice communica‐
 tion systems.
-D.1 Introduction.
+### D.1 Introduction.
 D.1.1 This annex is intended to provide guidance on the plan‐
 ning, design, installation, and testing of voice communication
 systems. The majority of this annex contains recommendations
@@ -37909,7 +38272,8 @@ FOR INDIVIDUAL USE ONLY
 Copyright 2019 National Fire Protection Association (NFPA®). Licensed by agreement to Carl Weaver FOR INDIVIDUAL USE ONLY and downloaded on 11/05/2019. No reproduction or transmission in any form permitted without
 written permission of NFPA®. For inquiries or access for multiple users, or to report unauthorized use, contact licensing@nfpa.org.
 {C56A4DC7-64F7-4C88-B368-41DE5BD47BC8}
-===PAGE_BREAK===
+<!-- Source PDF page 360 -->
+
 ANNEX D 72-357
 Shaded text = Revisions. Δ = Text deletions and figure/table revisions. • = Section deletions. N = New material. 2019 Edition
 cannot, by itself, be used to determine the adequacy of the
@@ -37917,7 +38281,7 @@ design. Sometimes, the acoustic problems of certain placement
 constraints can be satisfactorily overcome through the careful
 selection of loudspeakers with the requisite performance char‐
 acteristics, rather than by increasing their number.
-D.2 Fundamentals of Test Protocol.
+### D.2 Fundamentals of Test Protocol.
 D.2.1 Measurement Method.
 D.2.1.1 STI/STIPA.
 D.2.1.1.1 Where the method for measuring speech intelligibil‐
@@ -38032,7 +38396,8 @@ FOR INDIVIDUAL USE ONLY
 Copyright 2019 National Fire Protection Association (NFPA®). Licensed by agreement to Carl Weaver FOR INDIVIDUAL USE ONLY and downloaded on 11/05/2019. No reproduction or transmission in any form permitted without
 written permission of NFPA®. For inquiries or access for multiple users, or to report unauthorized use, contact licensing@nfpa.org.
 {C56A4DC7-64F7-4C88-B368-41DE5BD47BC8}
-===PAGE_BREAK===
+<!-- Source PDF page 361 -->
+
 NATIONAL FIRE ALARM AND SIGNALING CODE	72-358
 2019 Edition Shaded text = Revisions. Δ = Text deletions and figure/table revisions. • = Section deletions. N = New material.
 loudspeaker. If one or two are satisfactorily tested, there is no
@@ -38134,7 +38499,8 @@ FOR INDIVIDUAL USE ONLY
 Copyright 2019 National Fire Protection Association (NFPA®). Licensed by agreement to Carl Weaver FOR INDIVIDUAL USE ONLY and downloaded on 11/05/2019. No reproduction or transmission in any form permitted without
 written permission of NFPA®. For inquiries or access for multiple users, or to report unauthorized use, contact licensing@nfpa.org.
 {C56A4DC7-64F7-4C88-B368-41DE5BD47BC8}
-===PAGE_BREAK===
+<!-- Source PDF page 362 -->
+
 ANNEX D 72-359
 Shaded text = Revisions. Δ = Text deletions and figure/table revisions. • = Section deletions. N = New material. 2019 Edition
 though an instrument is used, the results are subjective in that
@@ -38264,7 +38630,8 @@ FOR INDIVIDUAL USE ONLY
 Copyright 2019 National Fire Protection Association (NFPA®). Licensed by agreement to Carl Weaver FOR INDIVIDUAL USE ONLY and downloaded on 11/05/2019. No reproduction or transmission in any form permitted without
 written permission of NFPA®. For inquiries or access for multiple users, or to report unauthorized use, contact licensing@nfpa.org.
 {C56A4DC7-64F7-4C88-B368-41DE5BD47BC8}
-===PAGE_BREAK===
+<!-- Source PDF page 363 -->
+
 NATIONAL FIRE ALARM AND SIGNALING CODE	72-360
 2019 Edition Shaded text = Revisions. Δ = Text deletions and figure/table revisions. • = Section deletions. N = New material.
 desired. This does not imply that all systems should use equip‐
@@ -38325,7 +38692,7 @@ representatives of the following: building owners, the organiza‐
 tions responsible for the fire alarm or emergency communica‐
 tions system design and installation, system equipment supplier
 and/or manufacturer, and the authority having jurisdiction.
-D.3 Pre-Planning.
+### D.3 Pre-Planning.
 D.3.1 Facility Occupancy and Use.
 D.3.1.1 Occupancy/Use Types. Prior to testing, the pre-
 planning effort should identify the occupancy or use type to
@@ -38384,7 +38751,8 @@ FOR INDIVIDUAL USE ONLY
 Copyright 2019 National Fire Protection Association (NFPA®). Licensed by agreement to Carl Weaver FOR INDIVIDUAL USE ONLY and downloaded on 11/05/2019. No reproduction or transmission in any form permitted without
 written permission of NFPA®. For inquiries or access for multiple users, or to report unauthorized use, contact licensing@nfpa.org.
 {C56A4DC7-64F7-4C88-B368-41DE5BD47BC8}
-===PAGE_BREAK===
+<!-- Source PDF page 364 -->
+
 ANNEX D 72-361
 Shaded text = Revisions. Δ = Text deletions and figure/table revisions. • = Section deletions. N = New material. 2019 Edition
 D.3.2.2 There might be applications where not all spaces will
@@ -38502,7 +38870,8 @@ FOR INDIVIDUAL USE ONLY
 Copyright 2019 National Fire Protection Association (NFPA®). Licensed by agreement to Carl Weaver FOR INDIVIDUAL USE ONLY and downloaded on 11/05/2019. No reproduction or transmission in any form permitted without
 written permission of NFPA®. For inquiries or access for multiple users, or to report unauthorized use, contact licensing@nfpa.org.
 {C56A4DC7-64F7-4C88-B368-41DE5BD47BC8}
-===PAGE_BREAK===
+<!-- Source PDF page 365 -->
+
 NATIONAL FIRE ALARM AND SIGNALING CODE	72-362
 2019 Edition Shaded text = Revisions. Δ = Text deletions and figure/table revisions. • = Section deletions. N = New material.
 As point of reference, DC is the critical distance.
@@ -38621,7 +38990,8 @@ FOR INDIVIDUAL USE ONLY
 Copyright 2019 National Fire Protection Association (NFPA®). Licensed by agreement to Carl Weaver FOR INDIVIDUAL USE ONLY and downloaded on 11/05/2019. No reproduction or transmission in any form permitted without
 written permission of NFPA®. For inquiries or access for multiple users, or to report unauthorized use, contact licensing@nfpa.org.
 {C56A4DC7-64F7-4C88-B368-41DE5BD47BC8}
-===PAGE_BREAK===
+<!-- Source PDF page 366 -->
+
 ANNEX D 72-363
 Shaded text = Revisions. Δ = Text deletions and figure/table revisions. • = Section deletions. N = New material. 2019 Edition
 lenging and that meet the audibility requirements of NFPA 72.
@@ -38743,7 +39113,8 @@ FOR INDIVIDUAL USE ONLY
 Copyright 2019 National Fire Protection Association (NFPA®). Licensed by agreement to Carl Weaver FOR INDIVIDUAL USE ONLY and downloaded on 11/05/2019. No reproduction or transmission in any form permitted without
 written permission of NFPA®. For inquiries or access for multiple users, or to report unauthorized use, contact licensing@nfpa.org.
 {C56A4DC7-64F7-4C88-B368-41DE5BD47BC8}
-===PAGE_BREAK===
+<!-- Source PDF page 367 -->
+
 NATIONAL FIRE ALARM AND SIGNALING CODE	72-364
 2019 Edition Shaded text = Revisions. Δ = Text deletions and figure/table revisions. • = Section deletions. N = New material.
 D.4.2.6 Place the analyzer’s microphone approximately 1 in.,
@@ -38762,7 +39133,7 @@ greater than 0.91 STI or 0.96 CIS. Up to three tests can be
 performed. If the system does not pass after three tests, it
 should be returned to the manufacturer for repair or recalibra‐
 tion.
-D.5 Talkbox Set-up.
+### D.5 Talkbox Set-up.
 D.5.1 Input Test Signal.
 D.5.1.1 The input test signal should be configured to produce
 the proper level by utilizing either the microphone input
@@ -38860,7 +39231,8 @@ FOR INDIVIDUAL USE ONLY
 Copyright 2019 National Fire Protection Association (NFPA®). Licensed by agreement to Carl Weaver FOR INDIVIDUAL USE ONLY and downloaded on 11/05/2019. No reproduction or transmission in any form permitted without
 written permission of NFPA®. For inquiries or access for multiple users, or to report unauthorized use, contact licensing@nfpa.org.
 {C56A4DC7-64F7-4C88-B368-41DE5BD47BC8}
-===PAGE_BREAK===
+<!-- Source PDF page 368 -->
+
 ANNEX D 72-365
 Shaded text = Revisions. Δ = Text deletions and figure/table revisions. • = Section deletions. N = New material. 2019 Edition
 D.5.2.4.5 Set the analyzer (meter) to measure sound pressure
@@ -38924,7 +39296,7 @@ box level achieves 65 + 6 = 71 dBA at a distance of 19.7 in.
 (0.50 m). Table D.5.2.5.8 shows different dB levels at distances
 that would be equivalent to 65 dBA at 39.4 in. (1.0 m).
 D.5.2.5.9 Begin field testing in accordance with Section D.6.
-D.6 STI/STIPA Test Procedure.
+### D.6 STI/STIPA Test Procedure.
 D.6.1 General. This test procedure permits testing during
 either occupied conditions or during unoccupied conditions.
 See D.3.8.
@@ -38989,7 +39361,8 @@ FOR INDIVIDUAL USE ONLY
 Copyright 2019 National Fire Protection Association (NFPA®). Licensed by agreement to Carl Weaver FOR INDIVIDUAL USE ONLY and downloaded on 11/05/2019. No reproduction or transmission in any form permitted without
 written permission of NFPA®. For inquiries or access for multiple users, or to report unauthorized use, contact licensing@nfpa.org.
 {C56A4DC7-64F7-4C88-B368-41DE5BD47BC8}
-===PAGE_BREAK===
+<!-- Source PDF page 369 -->
+
 NATIONAL FIRE ALARM AND SIGNALING CODE	72-366
 2019 Edition Shaded text = Revisions. Δ = Text deletions and figure/table revisions. • = Section deletions. N = New material.
 the STI or STIPA test signal during unoccupied or less occu‐
@@ -39048,7 +39421,7 @@ D.6.5.6.4 Documentation of the final results for each point
 should include the results of all three measurements and the
 final corrected STI value. The manufacturer’s software revision
 should also be included in the results documentation.
-D.7 Post Test Procedures.
+### D.7 Post Test Procedures.
 D.7.1 Test Closure. Upon completion of all testing, the emer‐
 gency communications system should be returned to its normal
 operating condition.
@@ -39106,10 +39479,11 @@ FOR INDIVIDUAL USE ONLY
 Copyright 2019 National Fire Protection Association (NFPA®). Licensed by agreement to Carl Weaver FOR INDIVIDUAL USE ONLY and downloaded on 11/05/2019. No reproduction or transmission in any form permitted without
 written permission of NFPA®. For inquiries or access for multiple users, or to report unauthorized use, contact licensing@nfpa.org.
 {C56A4DC7-64F7-4C88-B368-41DE5BD47BC8}
-===PAGE_BREAK===
+<!-- Source PDF page 370 -->
+
 ANNEX F 72-367
 Shaded text = Revisions. Δ = Text deletions and figure/table revisions. • = Section deletions. N = New material. 2019 Edition
-Annex E Sample Ordinance Adopting NFPA 72
+## Annex E Sample Ordinance Adopting NFPA 72
 This annex is not a part of the requirements of this NFPA document
 but is included for informational purposes only.
 E.1 The following sample ordinance is provided to assist a
@@ -39191,11 +39565,11 @@ provisions, requirements, orders, and matters established and
 adopted hereby shall take effect and be in full force and effect
 [time period] from and after the date of its final passage and
 adoption.
-Annex F Wiring Diagrams and Guide for Testing Fire Alarm
+## Annex F Wiring Diagrams and Guide for Testing Fire Alarm
 Circuits
 This annex is not a part of the requirements of this NFPA document
 but is included for informational purposes only.
-Annex F provides guidance for testing of the various classes of
+## Annex F provides guidance for testing of the various classes of
 circuits identified in Chapter 12 of this edition of NFPA 72. Earlier
 editions of NFPA 72 have used different designations for these circuits.
 Designations found in previous editions (located in Annex C of
@@ -39227,7 +39601,8 @@ FOR INDIVIDUAL USE ONLY
 Copyright 2019 National Fire Protection Association (NFPA®). Licensed by agreement to Carl Weaver FOR INDIVIDUAL USE ONLY and downloaded on 11/05/2019. No reproduction or transmission in any form permitted without
 written permission of NFPA®. For inquiries or access for multiple users, or to report unauthorized use, contact licensing@nfpa.org.
 {C56A4DC7-64F7-4C88-B368-41DE5BD47BC8}
-===PAGE_BREAK===
+<!-- Source PDF page 371 -->
+
 NATIONAL FIRE ALARM AND SIGNALING CODE	72-368
 2019 Edition Shaded text = Revisions. Δ = Text deletions and figure/table revisions. • = Section deletions. N = New material.
 Directly connected system smoke detectors, commonly refer‐
@@ -39347,7 +39722,8 @@ FOR INDIVIDUAL USE ONLY
 Copyright 2019 National Fire Protection Association (NFPA®). Licensed by agreement to Carl Weaver FOR INDIVIDUAL USE ONLY and downloaded on 11/05/2019. No reproduction or transmission in any form permitted without
 written permission of NFPA®. For inquiries or access for multiple users, or to report unauthorized use, contact licensing@nfpa.org.
 {C56A4DC7-64F7-4C88-B368-41DE5BD47BC8}
-===PAGE_BREAK===
+<!-- Source PDF page 372 -->
+
 ANNEX F 72-369
 Shaded text = Revisions. Δ = Text deletions and figure/table revisions. • = Section deletions. N = New material. 2019 Edition
 F.2.7 Class A or B Circuits with Four-Wire Smoke Detectors
@@ -39439,7 +39815,8 @@ FOR INDIVIDUAL USE ONLY
 Copyright 2019 National Fire Protection Association (NFPA®). Licensed by agreement to Carl Weaver FOR INDIVIDUAL USE ONLY and downloaded on 11/05/2019. No reproduction or transmission in any form permitted without
 written permission of NFPA®. For inquiries or access for multiple users, or to report unauthorized use, contact licensing@nfpa.org.
 {C56A4DC7-64F7-4C88-B368-41DE5BD47BC8}
-===PAGE_BREAK===
+<!-- Source PDF page 373 -->
+
 NATIONAL FIRE ALARM AND SIGNALING CODE	72-370
 2019 Edition Shaded text = Revisions. Δ = Text deletions and figure/table revisions. • = Section deletions. N = New material.
 F.2.12 System with Supervised Audible and Visual Notification
@@ -39541,7 +39918,8 @@ FOR INDIVIDUAL USE ONLY
 Copyright 2019 National Fire Protection Association (NFPA®). Licensed by agreement to Carl Weaver FOR INDIVIDUAL USE ONLY and downloaded on 11/05/2019. No reproduction or transmission in any form permitted without
 written permission of NFPA®. For inquiries or access for multiple users, or to report unauthorized use, contact licensing@nfpa.org.
 {C56A4DC7-64F7-4C88-B368-41DE5BD47BC8}
-===PAGE_BREAK===
+<!-- Source PDF page 374 -->
+
 ANNEX F 72-371
 Shaded text = Revisions. Δ = Text deletions and figure/table revisions. • = Section deletions. N = New material. 2019 Edition
 F.3.1 Style 0.5. This signaling circuit operates as a series
@@ -39634,7 +40012,8 @@ FOR INDIVIDUAL USE ONLY
 Copyright 2019 National Fire Protection Association (NFPA®). Licensed by agreement to Carl Weaver FOR INDIVIDUAL USE ONLY and downloaded on 11/05/2019. No reproduction or transmission in any form permitted without
 written permission of NFPA®. For inquiries or access for multiple users, or to report unauthorized use, contact licensing@nfpa.org.
 {C56A4DC7-64F7-4C88-B368-41DE5BD47BC8}
-===PAGE_BREAK===
+<!-- Source PDF page 375 -->
+
 NATIONAL FIRE ALARM AND SIGNALING CODE	72-372
 2019 Edition Shaded text = Revisions. Δ = Text deletions and figure/table revisions. • = Section deletions. N = New material.
 F.3.7 Class B (Formerly Style 3.0). This is a parallel circuit in
@@ -39721,7 +40100,8 @@ FOR INDIVIDUAL USE ONLY
 Copyright 2019 National Fire Protection Association (NFPA®). Licensed by agreement to Carl Weaver FOR INDIVIDUAL USE ONLY and downloaded on 11/05/2019. No reproduction or transmission in any form permitted without
 written permission of NFPA®. For inquiries or access for multiple users, or to report unauthorized use, contact licensing@nfpa.org.
 {C56A4DC7-64F7-4C88-B368-41DE5BD47BC8}
-===PAGE_BREAK===
+<!-- Source PDF page 376 -->
+
 ANNEX F 72-373
 Shaded text = Revisions. Δ = Text deletions and figure/table revisions. • = Section deletions. N = New material. 2019 Edition
 F.3.14 Class X (Formerly Style 7.0). Follow the instructions
@@ -39802,7 +40182,8 @@ FOR INDIVIDUAL USE ONLY
 Copyright 2019 National Fire Protection Association (NFPA®). Licensed by agreement to Carl Weaver FOR INDIVIDUAL USE ONLY and downloaded on 11/05/2019. No reproduction or transmission in any form permitted without
 written permission of NFPA®. For inquiries or access for multiple users, or to report unauthorized use, contact licensing@nfpa.org.
 {C56A4DC7-64F7-4C88-B368-41DE5BD47BC8}
-===PAGE_BREAK===
+<!-- Source PDF page 377 -->
+
 NATIONAL FIRE ALARM AND SIGNALING CODE	72-374
 2019 Edition Shaded text = Revisions. Δ = Text deletions and figure/table revisions. • = Section deletions. N = New material.
 Style 4 fiber network where
@@ -39904,10 +40285,11 @@ FOR INDIVIDUAL USE ONLY
 Copyright 2019 National Fire Protection Association (NFPA®). Licensed by agreement to Carl Weaver FOR INDIVIDUAL USE ONLY and downloaded on 11/05/2019. No reproduction or transmission in any form permitted without
 written permission of NFPA®. For inquiries or access for multiple users, or to report unauthorized use, contact licensing@nfpa.org.
 {C56A4DC7-64F7-4C88-B368-41DE5BD47BC8}
-===PAGE_BREAK===
+<!-- Source PDF page 378 -->
+
 ANNEX G 72-375
 Shaded text = Revisions. Δ = Text deletions and figure/table revisions. • = Section deletions. N = New material. 2019 Edition
-Annex G Guidelines for Emergency Communication
+## Annex G Guidelines for Emergency Communication
 Strategies for Buildings and Campuses
 This annex is not part of the requirements of this NFPA document but
 is included for informational purposes only.
@@ -40031,7 +40413,8 @@ FOR INDIVIDUAL USE ONLY
 Copyright 2019 National Fire Protection Association (NFPA®). Licensed by agreement to Carl Weaver FOR INDIVIDUAL USE ONLY and downloaded on 11/05/2019. No reproduction or transmission in any form permitted without
 written permission of NFPA®. For inquiries or access for multiple users, or to report unauthorized use, contact licensing@nfpa.org.
 {C56A4DC7-64F7-4C88-B368-41DE5BD47BC8}
-===PAGE_BREAK===
+<!-- Source PDF page 379 -->
+
 NATIONAL FIRE ALARM AND SIGNALING CODE	72-376
 2019 Edition Shaded text = Revisions. Δ = Text deletions and figure/table revisions. • = Section deletions. N = New material.
 (c) Numbered lists can help to chronologically organ‐
@@ -40164,7 +40547,8 @@ FOR INDIVIDUAL USE ONLY
 Copyright 2019 National Fire Protection Association (NFPA®). Licensed by agreement to Carl Weaver FOR INDIVIDUAL USE ONLY and downloaded on 11/05/2019. No reproduction or transmission in any form permitted without
 written permission of NFPA®. For inquiries or access for multiple users, or to report unauthorized use, contact licensing@nfpa.org.
 {C56A4DC7-64F7-4C88-B368-41DE5BD47BC8}
-===PAGE_BREAK===
+<!-- Source PDF page 380 -->
+
 ANNEX G 72-377
 Shaded text = Revisions. Δ = Text deletions and figure/table revisions. • = Section deletions. N = New material. 2019 Edition
 can limit message length, audible warnings are
@@ -40295,7 +40679,8 @@ FOR INDIVIDUAL USE ONLY
 Copyright 2019 National Fire Protection Association (NFPA®). Licensed by agreement to Carl Weaver FOR INDIVIDUAL USE ONLY and downloaded on 11/05/2019. No reproduction or transmission in any form permitted without
 written permission of NFPA®. For inquiries or access for multiple users, or to report unauthorized use, contact licensing@nfpa.org.
 {C56A4DC7-64F7-4C88-B368-41DE5BD47BC8}
-===PAGE_BREAK===
+<!-- Source PDF page 381 -->
+
 NATIONAL FIRE ALARM AND SIGNALING CODE	72-378
 2019 Edition Shaded text = Revisions. Δ = Text deletions and figure/table revisions. • = Section deletions. N = New material.
 locally or to the 10th floor only]. Do not use the elevators
@@ -40419,7 +40804,8 @@ FOR INDIVIDUAL USE ONLY
 Copyright 2019 National Fire Protection Association (NFPA®). Licensed by agreement to Carl Weaver FOR INDIVIDUAL USE ONLY and downloaded on 11/05/2019. No reproduction or transmission in any form permitted without
 written permission of NFPA®. For inquiries or access for multiple users, or to report unauthorized use, contact licensing@nfpa.org.
 {C56A4DC7-64F7-4C88-B368-41DE5BD47BC8}
-===PAGE_BREAK===
+<!-- Source PDF page 382 -->
+
 ANNEX G 72-379
 Shaded text = Revisions. Δ = Text deletions and figure/table revisions. • = Section deletions. N = New material. 2019 Edition
 system) should be disseminated to employees on floors 2
@@ -40502,7 +40888,7 @@ visual symbols that could be used instead of, or in addition to,
 textual emergency messages. In the future, as research gaps are
 addressed, additional editions of this document would be
 useful to enhance the findings and guidance provided here.
-G.5 References. Kuligowski, E.D., S.M.V. Gwynne, K.M.
+### G.5 References. Kuligowski, E.D., S.M.V. Gwynne, K.M.
 Butler, B.L. Hoskins, and C.R. Sandler, 2012. Developing Emer‐
 gency Communication Strategies for Buildings. Technical Note 1733,
 National Institute of Standards and Technology: Gaithersburg,
@@ -40542,7 +40928,8 @@ FOR INDIVIDUAL USE ONLY
 Copyright 2019 National Fire Protection Association (NFPA®). Licensed by agreement to Carl Weaver FOR INDIVIDUAL USE ONLY and downloaded on 11/05/2019. No reproduction or transmission in any form permitted without
 written permission of NFPA®. For inquiries or access for multiple users, or to report unauthorized use, contact licensing@nfpa.org.
 {C56A4DC7-64F7-4C88-B368-41DE5BD47BC8}
-===PAGE_BREAK===
+<!-- Source PDF page 383 -->
+
 NATIONAL FIRE ALARM AND SIGNALING CODE	72-380
 2019 Edition Shaded text = Revisions. Δ = Text deletions and figure/table revisions. • = Section deletions. N = New material.
 N Annex H Carbon Monoxide
@@ -40653,10 +41040,11 @@ FOR INDIVIDUAL USE ONLY
 Copyright 2019 National Fire Protection Association (NFPA®). Licensed by agreement to Carl Weaver FOR INDIVIDUAL USE ONLY and downloaded on 11/05/2019. No reproduction or transmission in any form permitted without
 written permission of NFPA®. For inquiries or access for multiple users, or to report unauthorized use, contact licensing@nfpa.org.
 {C56A4DC7-64F7-4C88-B368-41DE5BD47BC8}
-===PAGE_BREAK===
+<!-- Source PDF page 384 -->
+
 ANNEX I 72-381
 Shaded text = Revisions. Δ = Text deletions and figure/table revisions. • = Section deletions. N = New material. 2019 Edition
-Annex I Informational References
+## Annex I Informational References
 I.1 Referenced Publications. The documents or portions
 thereof listed in this annex are referenced within the informa‐
 tional sections of this Code and are not part of the require‐
@@ -40747,7 +41135,8 @@ FOR INDIVIDUAL USE ONLY
 Copyright 2019 National Fire Protection Association (NFPA®). Licensed by agreement to Carl Weaver FOR INDIVIDUAL USE ONLY and downloaded on 11/05/2019. No reproduction or transmission in any form permitted without
 written permission of NFPA®. For inquiries or access for multiple users, or to report unauthorized use, contact licensing@nfpa.org.
 {C56A4DC7-64F7-4C88-B368-41DE5BD47BC8}
-===PAGE_BREAK===
+<!-- Source PDF page 385 -->
+
 NATIONAL FIRE ALARM AND SIGNALING CODE	72-382
 2019 Edition Shaded text = Revisions. Δ = Text deletions and figure/table revisions. • = Section deletions. N = New material.
 NFPA 750, Standard on Water Mist Fire Protection Systems, 2019
@@ -40855,7 +41244,8 @@ FOR INDIVIDUAL USE ONLY
 Copyright 2019 National Fire Protection Association (NFPA®). Licensed by agreement to Carl Weaver FOR INDIVIDUAL USE ONLY and downloaded on 11/05/2019. No reproduction or transmission in any form permitted without
 written permission of NFPA®. For inquiries or access for multiple users, or to report unauthorized use, contact licensing@nfpa.org.
 {C56A4DC7-64F7-4C88-B368-41DE5BD47BC8}
-===PAGE_BREAK===
+<!-- Source PDF page 386 -->
+
 ANNEX I 72-383
 Shaded text = Revisions. Δ = Text deletions and figure/table revisions. • = Section deletions. N = New material. 2019 Edition
 I.1.2.11 OASIS Publications. Organization for the Advance‐
@@ -40965,7 +41355,8 @@ FOR INDIVIDUAL USE ONLY
 Copyright 2019 National Fire Protection Association (NFPA®). Licensed by agreement to Carl Weaver FOR INDIVIDUAL USE ONLY and downloaded on 11/05/2019. No reproduction or transmission in any form permitted without
 written permission of NFPA®. For inquiries or access for multiple users, or to report unauthorized use, contact licensing@nfpa.org.
 {C56A4DC7-64F7-4C88-B368-41DE5BD47BC8}
-===PAGE_BREAK===
+<!-- Source PDF page 387 -->
+
 NATIONAL FIRE ALARM AND SIGNALING CODE	72-384
 2019 Edition Shaded text = Revisions. Δ = Text deletions and figure/table revisions. • = Section deletions. N = New material.
 Ahrens, M., “Home Structure Fires,” NFPA Fire Analysis and
@@ -41074,7 +41465,8 @@ FOR INDIVIDUAL USE ONLY
 Copyright 2019 National Fire Protection Association (NFPA®). Licensed by agreement to Carl Weaver FOR INDIVIDUAL USE ONLY and downloaded on 11/05/2019. No reproduction or transmission in any form permitted without
 written permission of NFPA®. For inquiries or access for multiple users, or to report unauthorized use, contact licensing@nfpa.org.
 {C56A4DC7-64F7-4C88-B368-41DE5BD47BC8}
-===PAGE_BREAK===
+<!-- Source PDF page 388 -->
+
 ANNEX I 72-385
 Shaded text = Revisions. Δ = Text deletions and figure/table revisions. • = Section deletions. N = New material. 2019 Edition
 (9) Heskestad, G. and Delichatsios, M. A. “The Initial
@@ -41189,7 +41581,8 @@ FOR INDIVIDUAL USE ONLY
 Copyright 2019 National Fire Protection Association (NFPA®). Licensed by agreement to Carl Weaver FOR INDIVIDUAL USE ONLY and downloaded on 11/05/2019. No reproduction or transmission in any form permitted without
 written permission of NFPA®. For inquiries or access for multiple users, or to report unauthorized use, contact licensing@nfpa.org.
 {C56A4DC7-64F7-4C88-B368-41DE5BD47BC8}
-===PAGE_BREAK===
+<!-- Source PDF page 389 -->
+
 NATIONAL FIRE ALARM AND SIGNALING CODE	72-386
 2019 Edition Shaded text = Revisions. Δ = Text deletions and figure/table revisions. • = Section deletions. N = New material.
 (39) Custer, R., Meacham, B., Wood, C. “Performance Based
@@ -41299,7 +41692,8 @@ FOR INDIVIDUAL USE ONLY
 Copyright 2019 National Fire Protection Association (NFPA®). Licensed by agreement to Carl Weaver FOR INDIVIDUAL USE ONLY and downloaded on 11/05/2019. No reproduction or transmission in any form permitted without
 written permission of NFPA®. For inquiries or access for multiple users, or to report unauthorized use, contact licensing@nfpa.org.
 {C56A4DC7-64F7-4C88-B368-41DE5BD47BC8}
-===PAGE_BREAK===
+<!-- Source PDF page 390 -->
+
 ANNEX I 72-387
 Shaded text = Revisions. Δ = Text deletions and figure/table revisions. • = Section deletions. N = New material. 2019 Edition
 Technical Report TR-10067577, Stationary Battery Guide;
@@ -41319,7 +41713,7 @@ edition, 2004, revised 2011.
 ANSI/UL 2075, Gas and Vapor Detectors and Sensors, 2004.
 UL 9540, Outline of Investigation for Energy Storage Systems and
 Equipment, 1st edition, 2016.
-I.3 References for Extracts in Informational Sections.
+### I.3 References for Extracts in Informational Sections.
 NFPA 70®, National Electrical Code®, 2017 edition.
 NFPA 92, Standard for Smoke Control Systems, 2018 edition.
 NFPA 92B, Smoke Management Systems in Malls, Atria, and
@@ -41331,7 +41725,8 @@ FOR INDIVIDUAL USE ONLY
 Copyright 2019 National Fire Protection Association (NFPA®). Licensed by agreement to Carl Weaver FOR INDIVIDUAL USE ONLY and downloaded on 11/05/2019. No reproduction or transmission in any form permitted without
 written permission of NFPA®. For inquiries or access for multiple users, or to report unauthorized use, contact licensing@nfpa.org.
 {C56A4DC7-64F7-4C88-B368-41DE5BD47BC8}
-===PAGE_BREAK===
+<!-- Source PDF page 391 -->
+
 NATIONAL FIRE ALARM AND SIGNALING CODE	72-388
 2019 Edition
 Index
@@ -41445,7 +41840,8 @@ FOR INDIVIDUAL USE ONLY
 Copyright 2019 National Fire Protection Association (NFPA®). Licensed by agreement to Carl Weaver FOR INDIVIDUAL USE ONLY and downloaded on 11/05/2019. No reproduction or transmission in any form permitted without
 written permission of NFPA®. For inquiries or access for multiple users, or to report unauthorized use, contact licensing@nfpa.org.
 {C56A4DC7-64F7-4C88-B368-41DE5BD47BC8}
-===PAGE_BREAK===
+<!-- Source PDF page 392 -->
+
 INDEX 72-389
 2019 Edition
 Emergency communications systems, 24.11.3, A.24.11.3
@@ -41570,7 +41966,8 @@ FOR INDIVIDUAL USE ONLY
 Copyright 2019 National Fire Protection Association (NFPA®). Licensed by agreement to Carl Weaver FOR INDIVIDUAL USE ONLY and downloaded on 11/05/2019. No reproduction or transmission in any form permitted without
 written permission of NFPA®. For inquiries or access for multiple users, or to report unauthorized use, contact licensing@nfpa.org.
 {C56A4DC7-64F7-4C88-B368-41DE5BD47BC8}
-===PAGE_BREAK===
+<!-- Source PDF page 393 -->
+
 NATIONAL FIRE ALARM AND SIGNALING CODE	72-390
 2019 Edition
 Combination, B.3.2.4.3
@@ -41691,7 +42088,8 @@ FOR INDIVIDUAL USE ONLY
 Copyright 2019 National Fire Protection Association (NFPA®). Licensed by agreement to Carl Weaver FOR INDIVIDUAL USE ONLY and downloaded on 11/05/2019. No reproduction or transmission in any form permitted without
 written permission of NFPA®. For inquiries or access for multiple users, or to report unauthorized use, contact licensing@nfpa.org.
 {C56A4DC7-64F7-4C88-B368-41DE5BD47BC8}
-===PAGE_BREAK===
+<!-- Source PDF page 394 -->
+
 INDEX 72-391
 2019 Edition
 Carbon monoxide detection systems, 1.3.1(2), 14.4.5.7, 14.4.6.5,
@@ -41815,7 +42213,8 @@ FOR INDIVIDUAL USE ONLY
 Copyright 2019 National Fire Protection Association (NFPA®). Licensed by agreement to Carl Weaver FOR INDIVIDUAL USE ONLY and downloaded on 11/05/2019. No reproduction or transmission in any form permitted without
 written permission of NFPA®. For inquiries or access for multiple users, or to report unauthorized use, contact licensing@nfpa.org.
 {C56A4DC7-64F7-4C88-B368-41DE5BD47BC8}
-===PAGE_BREAK===
+<!-- Source PDF page 395 -->
+
 NATIONAL FIRE ALARM AND SIGNALING CODE	72-392
 2019 Edition
 Identification nomenclature, 12.7, A.12.7
@@ -41940,7 +42339,8 @@ FOR INDIVIDUAL USE ONLY
 Copyright 2019 National Fire Protection Association (NFPA®). Licensed by agreement to Carl Weaver FOR INDIVIDUAL USE ONLY and downloaded on 11/05/2019. No reproduction or transmission in any form permitted without
 written permission of NFPA®. For inquiries or access for multiple users, or to report unauthorized use, contact licensing@nfpa.org.
 {C56A4DC7-64F7-4C88-B368-41DE5BD47BC8}
-===PAGE_BREAK===
+<!-- Source PDF page 396 -->
+
 INDEX 72-393
 2019 Edition
 Emergency communications control unit (ECCU), 24.3.10,
@@ -41976,7 +42376,7 @@ Definitions, Chap. 3
 Delinquency signal, 23.14.4, 23.14.7, 26.6.6.2, A.26.6.6.2(4)
 Definition, 3.3.263.3
 Design, fire alarm systems, 10.4, A.10.4.1 to A.10.4.5, Table A.26.1,
-Annex B
+## Annex B
 Documentation, 7.3, A.7.3.1 to A.7.3.9.1
 Emergency communications systems, 24.3.9, 24.4.2.2.1,
 24.4.8.6.1, 24.5.3.2, 24.5.22.3.2, 24.6.9, 24.9.2,
@@ -42064,7 +42464,8 @@ FOR INDIVIDUAL USE ONLY
 Copyright 2019 National Fire Protection Association (NFPA®). Licensed by agreement to Carl Weaver FOR INDIVIDUAL USE ONLY and downloaded on 11/05/2019. No reproduction or transmission in any form permitted without
 written permission of NFPA®. For inquiries or access for multiple users, or to report unauthorized use, contact licensing@nfpa.org.
 {C56A4DC7-64F7-4C88-B368-41DE5BD47BC8}
-===PAGE_BREAK===
+<!-- Source PDF page 397 -->
+
 NATIONAL FIRE ALARM AND SIGNALING CODE	72-394
 2019 Edition
 Emergency communications systems, 24.4.8.1, 24.5.24.2, 24.13,
@@ -42188,7 +42589,8 @@ FOR INDIVIDUAL USE ONLY
 Copyright 2019 National Fire Protection Association (NFPA®). Licensed by agreement to Carl Weaver FOR INDIVIDUAL USE ONLY and downloaded on 11/05/2019. No reproduction or transmission in any form permitted without
 written permission of NFPA®. For inquiries or access for multiple users, or to report unauthorized use, contact licensing@nfpa.org.
 {C56A4DC7-64F7-4C88-B368-41DE5BD47BC8}
-===PAGE_BREAK===
+<!-- Source PDF page 398 -->
+
 INDEX 72-395
 2019 Edition
 Definition, 3.3.146.1.1, A.3.3.146.1.1
@@ -42314,7 +42716,8 @@ FOR INDIVIDUAL USE ONLY
 Copyright 2019 National Fire Protection Association (NFPA®). Licensed by agreement to Carl Weaver FOR INDIVIDUAL USE ONLY and downloaded on 11/05/2019. No reproduction or transmission in any form permitted without
 written permission of NFPA®. For inquiries or access for multiple users, or to report unauthorized use, contact licensing@nfpa.org.
 {C56A4DC7-64F7-4C88-B368-41DE5BD47BC8}
-===PAGE_BREAK===
+<!-- Source PDF page 399 -->
+
 NATIONAL FIRE ALARM AND SIGNALING CODE	72-396
 2019 Edition
 False alarms, see Unwanted alarms
@@ -42438,7 +42841,8 @@ FOR INDIVIDUAL USE ONLY
 Copyright 2019 National Fire Protection Association (NFPA®). Licensed by agreement to Carl Weaver FOR INDIVIDUAL USE ONLY and downloaded on 11/05/2019. No reproduction or transmission in any form permitted without
 written permission of NFPA®. For inquiries or access for multiple users, or to report unauthorized use, contact licensing@nfpa.org.
 {C56A4DC7-64F7-4C88-B368-41DE5BD47BC8}
-===PAGE_BREAK===
+<!-- Source PDF page 400 -->
+
 INDEX 72-397
 2019 Edition
 Flame detectors, 17.8, A.17.8.1 to A.17.8.5.4
@@ -42560,7 +42964,8 @@ FOR INDIVIDUAL USE ONLY
 Copyright 2019 National Fire Protection Association (NFPA®). Licensed by agreement to Carl Weaver FOR INDIVIDUAL USE ONLY and downloaded on 11/05/2019. No reproduction or transmission in any form permitted without
 written permission of NFPA®. For inquiries or access for multiple users, or to report unauthorized use, contact licensing@nfpa.org.
 {C56A4DC7-64F7-4C88-B368-41DE5BD47BC8}
-===PAGE_BREAK===
+<!-- Source PDF page 401 -->
+
 NATIONAL FIRE ALARM AND SIGNALING CODE	72-398
 2019 Edition
 Notification appliances, see Notification appliances
@@ -42684,7 +43089,8 @@ FOR INDIVIDUAL USE ONLY
 Copyright 2019 National Fire Protection Association (NFPA®). Licensed by agreement to Carl Weaver FOR INDIVIDUAL USE ONLY and downloaded on 11/05/2019. No reproduction or transmission in any form permitted without
 written permission of NFPA®. For inquiries or access for multiple users, or to report unauthorized use, contact licensing@nfpa.org.
 {C56A4DC7-64F7-4C88-B368-41DE5BD47BC8}
-===PAGE_BREAK===
+<!-- Source PDF page 402 -->
+
 INDEX 72-399
 2019 Edition
 Initiating devices, 17.4.3 to 17.4.7, A.17.4.5 to A.17.4.7
@@ -42808,7 +43214,8 @@ FOR INDIVIDUAL USE ONLY
 Copyright 2019 National Fire Protection Association (NFPA®). Licensed by agreement to Carl Weaver FOR INDIVIDUAL USE ONLY and downloaded on 11/05/2019. No reproduction or transmission in any form permitted without
 written permission of NFPA®. For inquiries or access for multiple users, or to report unauthorized use, contact licensing@nfpa.org.
 {C56A4DC7-64F7-4C88-B368-41DE5BD47BC8}
-===PAGE_BREAK===
+<!-- Source PDF page 403 -->
+
 NATIONAL FIRE ALARM AND SIGNALING CODE	72-400
 2019 Edition
 Supervising station communication methods, Table A.26.6.1
@@ -42932,7 +43339,8 @@ FOR INDIVIDUAL USE ONLY
 Copyright 2019 National Fire Protection Association (NFPA®). Licensed by agreement to Carl Weaver FOR INDIVIDUAL USE ONLY and downloaded on 11/05/2019. No reproduction or transmission in any form permitted without
 written permission of NFPA®. For inquiries or access for multiple users, or to report unauthorized use, contact licensing@nfpa.org.
 {C56A4DC7-64F7-4C88-B368-41DE5BD47BC8}
-===PAGE_BREAK===
+<!-- Source PDF page 404 -->
+
 INDEX 72-401
 2019 Edition
 Circuits, 12.6, 24.5.4.1, 24.5.25.2(3), A.12.6, A.24.5.4.1
@@ -43056,7 +43464,8 @@ FOR INDIVIDUAL USE ONLY
 Copyright 2019 National Fire Protection Association (NFPA®). Licensed by agreement to Carl Weaver FOR INDIVIDUAL USE ONLY and downloaded on 11/05/2019. No reproduction or transmission in any form permitted without
 written permission of NFPA®. For inquiries or access for multiple users, or to report unauthorized use, contact licensing@nfpa.org.
 {C56A4DC7-64F7-4C88-B368-41DE5BD47BC8}
-===PAGE_BREAK===
+<!-- Source PDF page 405 -->
+
 NATIONAL FIRE ALARM AND SIGNALING CODE	72-402
 2019 Edition
 Trouble, 10.15.10, A.10.15.10.7
@@ -43179,7 +43588,8 @@ FOR INDIVIDUAL USE ONLY
 Copyright 2019 National Fire Protection Association (NFPA®). Licensed by agreement to Carl Weaver FOR INDIVIDUAL USE ONLY and downloaded on 11/05/2019. No reproduction or transmission in any form permitted without
 written permission of NFPA®. For inquiries or access for multiple users, or to report unauthorized use, contact licensing@nfpa.org.
 {C56A4DC7-64F7-4C88-B368-41DE5BD47BC8}
-===PAGE_BREAK===
+<!-- Source PDF page 406 -->
+
 INDEX 72-403
 2019 Edition
 Plans examiners and inspectors, 10.5.4
@@ -43304,7 +43714,8 @@ FOR INDIVIDUAL USE ONLY
 Copyright 2019 National Fire Protection Association (NFPA®). Licensed by agreement to Carl Weaver FOR INDIVIDUAL USE ONLY and downloaded on 11/05/2019. No reproduction or transmission in any form permitted without
 written permission of NFPA®. For inquiries or access for multiple users, or to report unauthorized use, contact licensing@nfpa.org.
 {C56A4DC7-64F7-4C88-B368-41DE5BD47BC8}
-===PAGE_BREAK===
+<!-- Source PDF page 407 -->
+
 NATIONAL FIRE ALARM AND SIGNALING CODE	72-404
 2019 Edition
 Testing and maintenance, 26.4.7.2, 26.4.8
@@ -43429,7 +43840,8 @@ FOR INDIVIDUAL USE ONLY
 Copyright 2019 National Fire Protection Association (NFPA®). Licensed by agreement to Carl Weaver FOR INDIVIDUAL USE ONLY and downloaded on 11/05/2019. No reproduction or transmission in any form permitted without
 written permission of NFPA®. For inquiries or access for multiple users, or to report unauthorized use, contact licensing@nfpa.org.
 {C56A4DC7-64F7-4C88-B368-41DE5BD47BC8}
-===PAGE_BREAK===
+<!-- Source PDF page 408 -->
+
 INDEX 72-405
 2019 Edition
 Supervising station operators, 10.5.5, 26.2.9, A.10.5.5.1(2)
@@ -43553,7 +43965,8 @@ FOR INDIVIDUAL USE ONLY
 Copyright 2019 National Fire Protection Association (NFPA®). Licensed by agreement to Carl Weaver FOR INDIVIDUAL USE ONLY and downloaded on 11/05/2019. No reproduction or transmission in any form permitted without
 written permission of NFPA®. For inquiries or access for multiple users, or to report unauthorized use, contact licensing@nfpa.org.
 {C56A4DC7-64F7-4C88-B368-41DE5BD47BC8}
-===PAGE_BREAK===
+<!-- Source PDF page 409 -->
+
 NATIONAL FIRE ALARM AND SIGNALING CODE	72-406
 2019 Edition
 Remote supervising station alarm systems, 23.12.1, 26.5,
@@ -43675,7 +44088,8 @@ FOR INDIVIDUAL USE ONLY
 Copyright 2019 National Fire Protection Association (NFPA®). Licensed by agreement to Carl Weaver FOR INDIVIDUAL USE ONLY and downloaded on 11/05/2019. No reproduction or transmission in any form permitted without
 written permission of NFPA®. For inquiries or access for multiple users, or to report unauthorized use, contact licensing@nfpa.org.
 {C56A4DC7-64F7-4C88-B368-41DE5BD47BC8}
-===PAGE_BREAK===
+<!-- Source PDF page 410 -->
+
 INDEX 72-407
 2019 Edition
 Signal priority, 10.7, 10.10.1, 24.4.7, 24.5.1.7, 24.5.2.8, 24.5.7,
@@ -43802,7 +44216,8 @@ FOR INDIVIDUAL USE ONLY
 Copyright 2019 National Fire Protection Association (NFPA®). Licensed by agreement to Carl Weaver FOR INDIVIDUAL USE ONLY and downloaded on 11/05/2019. No reproduction or transmission in any form permitted without
 written permission of NFPA®. For inquiries or access for multiple users, or to report unauthorized use, contact licensing@nfpa.org.
 {C56A4DC7-64F7-4C88-B368-41DE5BD47BC8}
-===PAGE_BREAK===
+<!-- Source PDF page 411 -->
+
 NATIONAL FIRE ALARM AND SIGNALING CODE	72-408
 2019 Edition
 Site-specific, 7.2.1(14), 7.5.3(4), 7.5.7, 14.2.5.1, 14.2.5.2,
@@ -43926,7 +44341,8 @@ FOR INDIVIDUAL USE ONLY
 Copyright 2019 National Fire Protection Association (NFPA®). Licensed by agreement to Carl Weaver FOR INDIVIDUAL USE ONLY and downloaded on 11/05/2019. No reproduction or transmission in any form permitted without
 written permission of NFPA®. For inquiries or access for multiple users, or to report unauthorized use, contact licensing@nfpa.org.
 {C56A4DC7-64F7-4C88-B368-41DE5BD47BC8}
-===PAGE_BREAK===
+<!-- Source PDF page 412 -->
+
 INDEX 72-409
 2019 Edition
 One-way private radio alarm systems, 26.6.5.2.3
@@ -44048,7 +44464,8 @@ FOR INDIVIDUAL USE ONLY
 Copyright 2019 National Fire Protection Association (NFPA®). Licensed by agreement to Carl Weaver FOR INDIVIDUAL USE ONLY and downloaded on 11/05/2019. No reproduction or transmission in any form permitted without
 written permission of NFPA®. For inquiries or access for multiple users, or to report unauthorized use, contact licensing@nfpa.org.
 {C56A4DC7-64F7-4C88-B368-41DE5BD47BC8}
-===PAGE_BREAK===
+<!-- Source PDF page 413 -->
+
 NATIONAL FIRE ALARM AND SIGNALING CODE	72-410
 2019 Edition
 Smoke alarms/detectors, 14.4.5.1 to 14.4.5.4, 29.10.5, 29.13,
@@ -44176,7 +44593,8 @@ FOR INDIVIDUAL USE ONLY
 Copyright 2019 National Fire Protection Association (NFPA®). Licensed by agreement to Carl Weaver FOR INDIVIDUAL USE ONLY and downloaded on 11/05/2019. No reproduction or transmission in any form permitted without
 written permission of NFPA®. For inquiries or access for multiple users, or to report unauthorized use, contact licensing@nfpa.org.
 {C56A4DC7-64F7-4C88-B368-41DE5BD47BC8}
-===PAGE_BREAK===
+<!-- Source PDF page 414 -->
+
 INDEX 72-411
 2019 Edition
 In-building
@@ -44299,7 +44717,8 @@ FOR INDIVIDUAL USE ONLY
 Copyright 2019 National Fire Protection Association (NFPA®). Licensed by agreement to Carl Weaver FOR INDIVIDUAL USE ONLY and downloaded on 11/05/2019. No reproduction or transmission in any form permitted without
 written permission of NFPA®. For inquiries or access for multiple users, or to report unauthorized use, contact licensing@nfpa.org.
 {C56A4DC7-64F7-4C88-B368-41DE5BD47BC8}
-===PAGE_BREAK===
+<!-- Source PDF page 415 -->
+
 NATIONAL FIRE ALARM AND SIGNALING CODE	72-412
 2019 Edition
 Definition, 3.3.319
@@ -44374,7 +44793,8 @@ FOR INDIVIDUAL USE ONLY
 Copyright 2019 National Fire Protection Association (NFPA®). Licensed by agreement to Carl Weaver FOR INDIVIDUAL USE ONLY and downloaded on 11/05/2019. No reproduction or transmission in any form permitted without
 written permission of NFPA®. For inquiries or access for multiple users, or to report unauthorized use, contact licensing@nfpa.org.
 {C56A4DC7-64F7-4C88-B368-41DE5BD47BC8}
-===PAGE_BREAK===
+<!-- Source PDF page 416 -->
+
 Sequence of Events for the Standards
 Development Process
 Once the current edition is published, a Standard is opened for
@@ -44487,7 +44907,8 @@ FOR INDIVIDUAL USE ONLY
 Copyright 2019 National Fire Protection Association (NFPA®). Licensed by agreement to Carl Weaver FOR INDIVIDUAL USE ONLY and downloaded on 11/05/2019. No reproduction or transmission in any form permitted without
 written permission of NFPA®. For inquiries or access for multiple users, or to report unauthorized use, contact licensing@nfpa.org.
 {C56A4DC7-64F7-4C88-B368-41DE5BD47BC8}
-===PAGE_BREAK===
+<!-- Source PDF page 417 -->
+
 Submitting Public Input / Public Comment Through the Online Submission System
 Soon after the current edition is published, a Standard is open for Public Input.
 Before accessing the Online Submission System, you must first sign in at www.nfpa.org. Note: You will be asked to
@@ -44529,7 +44950,8 @@ FOR INDIVIDUAL USE ONLY
 Copyright 2019 National Fire Protection Association (NFPA®). Licensed by agreement to Carl Weaver FOR INDIVIDUAL USE ONLY and downloaded on 11/05/2019. No reproduction or transmission in any form permitted without
 written permission of NFPA®. For inquiries or access for multiple users, or to report unauthorized use, contact licensing@nfpa.org.
 {C56A4DC7-64F7-4C88-B368-41DE5BD47BC8}
-===PAGE_BREAK===
+<!-- Source PDF page 418 -->
+
 Information on the NFPA Standards Development Process
 I. Applicable Regulations. The primary rules governing the processing of NFPA standards (codes, standards,
 recommended practices, and guides) are the NFPA Regulations Governing the Development of NFPA Standards (Regs). Other
@@ -44595,7 +45017,8 @@ FOR INDIVIDUAL USE ONLY
 Copyright 2019 National Fire Protection Association (NFPA®). Licensed by agreement to Carl Weaver FOR INDIVIDUAL USE ONLY and downloaded on 11/05/2019. No reproduction or transmission in any form permitted without
 written permission of NFPA®. For inquiries or access for multiple users, or to report unauthorized use, contact licensing@nfpa.org.
 {C56A4DC7-64F7-4C88-B368-41DE5BD47BC8}
-===PAGE_BREAK===
+<!-- Source PDF page 419 -->
+
 Have a question about the code or standard you’re reading now?
 NFPA Xchange™ can help!
 NFPA Xchange™ brings together over 30,000 professionals worldwide, asking and answering each

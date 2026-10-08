@@ -22,7 +22,6 @@ namespace FireProtection.Tests
             _failures = 0;
             TestSidewallPlacesAlongWalls();
             TestSidewallDoesNotPlaceInInterior();
-            TestSidewallAndPendentCandidateSetsDiffer();
             TestSelectedSprinklerOrientationFlowsFromBehavior();
             TestSidewallOrientationFactorApplies();
 

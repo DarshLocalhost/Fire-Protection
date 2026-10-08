@@ -29,11 +29,27 @@ namespace FireProtection.Backend.Services.Placement.Devices
         private readonly CeilingHostResolver _ceilingHostResolver;
         private readonly IReadOnlyList<IFamilyPlacementStrategy> _strategies;
 
+        /// <summary>Public constructor used by notification-appliance placement: no fallback strategy.</summary>
         public FireAlarmDevicePlacementCore(
             Document document,
             string deviceNoun,
             string transactionGroupName,
             Func<IReadOnlyList<DeviceRoomInputItem>, SmokeDetectorCalculationResult> calculate)
+            : this(document, deviceNoun, transactionGroupName, calculate, null)
+        {
+        }
+
+        /// <param name="fallbackStrategy">Optional catch-all strategy appended LAST in the strategy list.
+        /// Only reached for a <c>FamilyPlacementType</c> that none of the four built-in strategies handle
+        /// (e.g. <c>OneLevelBasedHosted</c>), so passing one cannot change any placement that already
+        /// works. Null (the public constructor) leaves notification-appliance behaviour byte-identical.
+        /// The smoke-detector executor passes one so hosted ceiling families still place.</param>
+        internal FireAlarmDevicePlacementCore(
+            Document document,
+            string deviceNoun,
+            string transactionGroupName,
+            Func<IReadOnlyList<DeviceRoomInputItem>, SmokeDetectorCalculationResult> calculate,
+            IFamilyPlacementStrategy fallbackStrategy)
         {
             _document = document ?? throw new ArgumentNullException(nameof(document));
             _deviceNoun = string.IsNullOrWhiteSpace(deviceNoun) ? "device" : deviceNoun.Trim();
@@ -43,13 +59,15 @@ namespace FireProtection.Backend.Services.Placement.Devices
             _calculate = calculate ?? throw new ArgumentNullException(nameof(calculate));
             _ceilingHostResolver = new CeilingHostResolver();
 
-            _strategies = new IFamilyPlacementStrategy[]
+            var strategies = new List<IFamilyPlacementStrategy>
             {
                 new FaceBasedPlacementStrategy(),
                 new WorkPlaneBasedPlacementStrategy(),
                 new LevelBasedPlacementStrategy(),
                 new WallSidewallPlacementStrategy()
             };
+            if (fallbackStrategy != null) strategies.Add(fallbackStrategy);
+            _strategies = strategies;
         }
 
         private string DeviceNounCap =>
@@ -437,10 +455,11 @@ namespace FireProtection.Backend.Services.Placement.Devices
                         int invalid = 0;
                         int failed = 0;
                         string lastFailureReason = null;
+                        var diagLines = new List<string>();
 
                         foreach (CalculatedSmokeDetectorPoint point in room.Points)
                         {
-                            PointResult pr = PlaceSinglePoint(symbol, placementType, point, room.Polygon, existingPoints, out string pointError);
+                            PointResult pr = PlaceSinglePoint(symbol, placementType, point, room.Polygon, existingPoints, out string pointError, diagLines);
                             if (pr == PointResult.Placed) placed++;
                             else if (pr == PointResult.PlacedInvalid) { placed++; invalid++; }
                             else
@@ -451,6 +470,7 @@ namespace FireProtection.Backend.Services.Placement.Devices
                         }
 
                         roomReport.PointsPlaced = placed;
+                        roomReport.PlacementDiagnostics = diagLines;
                         bool calcReview = room.Status == CalculationStatus.ReviewRequired;
                         if (placed == 0)
                         {
@@ -510,12 +530,14 @@ namespace FireProtection.Backend.Services.Placement.Devices
     CalculatedSmokeDetectorPoint point,
     List<double[]> roomPolygon,
     List<XYZ> existingPoints,
-    out string failureReason)
+    out string failureReason,
+    List<string> diagSink)
         {
             failureReason = null;
             if (point == null || !IsFinite(point.X, point.Y, point.Z))
             {
                 failureReason = "Non-finite point coordinates.";
+                diagSink?.Add("point: non-finite coordinates -> Failed");
                 return PointResult.Failed;
             }
 
@@ -531,12 +553,14 @@ namespace FireProtection.Backend.Services.Placement.Devices
                 && !GeometryMath.PointInPolygon(point.X, point.Y, hostPolygon, InRoomToleranceFt))
             {
                 failureReason = "Point falls outside host room boundary.";
+                diagSink?.Add(FormatReq(xyz) + " -> Failed: outside host room boundary");
                 return PointResult.Failed;
             }
 
             if (existingPoints.Any(p => p != null && p.DistanceTo(xyz) <= DuplicateProximityFt))
             {
                 failureReason = "Point skipped (duplicate existing device nearby).";
+                diagSink?.Add(FormatReq(xyz) + " -> Failed: duplicate device nearby");
                 return PointResult.Failed;
             }
 
@@ -544,6 +568,7 @@ namespace FireProtection.Backend.Services.Placement.Devices
             if (level == null)
             {
                 failureReason = levelError ?? "Host level unresolved.";
+                diagSink?.Add(FormatReq(xyz) + " -> Failed: host level unresolved");
                 return PointResult.Failed;
             }
 
@@ -559,6 +584,7 @@ namespace FireProtection.Backend.Services.Placement.Devices
             if (strategy == null)
             {
                 failureReason = "No strategy supports placement type '" + familyPlacementType + "'.";
+                diagSink?.Add(FormatReq(xyz) + " type=" + familyPlacementType + " -> Failed: no strategy");
                 return PointResult.Failed;
             }
 
@@ -580,6 +606,8 @@ namespace FireProtection.Backend.Services.Placement.Devices
                 if (!outcome.Created || outcome.Instance == null)
                 {
                     failureReason = outcome.Message ?? outcome.ErrorCode ?? "Placement strategy returned failure.";
+                    diagSink?.Add(FormatReq(xyz) + " type=" + familyPlacementType
+                        + " strategy=" + strategy.Name + " -> Failed: " + failureReason);
                     return PointResult.Failed;
                 }
 
@@ -587,17 +615,47 @@ namespace FireProtection.Backend.Services.Placement.Devices
 
                 existingPoints.Add(xyz);
 
+                // Robust read-back of the placed location. WorkPlane/face/hosted fire-alarm families
+                // frequently report LocationPoint.Point with Z (sometimes XY) collapsed to ~0 even when the
+                // instance sits correctly at the ceiling, which used to flag every such head PlacedInvalid.
+                // Prefer the bounding-box centre (its Z tracks the real deflector height); fall back to the
+                // LocationPoint. This changes classification only - it never moves an instance - and a head
+                // genuinely collapsed to the floor still reads bbox Z ~ 0 and stays flagged.
                 var placedLocation = outcome.Instance.Location as LocationPoint;
-                XYZ actual = placedLocation?.Point;
-                bool valid = false;
+                XYZ locPt = placedLocation?.Point;
 
-                if (actual != null)
+                BoundingBoxXYZ bb = null;
+                try { bb = outcome.Instance.get_BoundingBox(null); } catch { /* geometry not ready */ }
+                XYZ bbCenter = bb != null ? (bb.Min + bb.Max).Multiply(0.5) : null;
+
+                double? ax = locPt?.X ?? bbCenter?.X;
+                double? ay = locPt?.Y ?? bbCenter?.Y;
+                double? az = bbCenter?.Z ?? locPt?.Z;   // bbox Z is authoritative for work-plane families
+
+                bool valid = false;
+                double xyDeviationFt = double.NaN;
+                double zDeviationFt = double.NaN;
+                if (ax.HasValue && ay.HasValue && az.HasValue)
                 {
-                    double xyDeviationFt = Math.Sqrt(Math.Pow(actual.X - xyz.X, 2) + Math.Pow(actual.Y - xyz.Y, 2));
-                    double zDeviationFt = Math.Abs(actual.Z - xyz.Z);
+                    xyDeviationFt = Math.Sqrt(Math.Pow(ax.Value - xyz.X, 2) + Math.Pow(ay.Value - xyz.Y, 2));
+                    zDeviationFt = Math.Abs(az.Value - xyz.Z);
 
                     valid = xyDeviationFt <= PlacementValidationToleranceFt && zDeviationFt <= ExistingDeviceZWindowFt;
                 }
+
+                // Definitive per-head evidence: requested vs actual location, which hosting branch ran,
+                // the ceiling source, and the tolerance verdict. This is how a live run proves whether a
+                // head landed on the ceiling or collapsed to the floor (elevation offset not applied).
+                diagSink?.Add(FormatReq(xyz)
+                    + " type=" + familyPlacementType
+                    + " strategy=" + strategy.Name
+                    + " host=" + (outcome.HostingStrategy ?? "?")
+                    + " src=" + (outcome.CeilingSource ?? "?")
+                    + " loc=" + FormatXyz(locPt)
+                    + " bbox=" + FormatXyz(bbCenter)
+                    + " dXY=" + (double.IsNaN(xyDeviationFt) ? "?" : xyDeviationFt.ToString("0.00"))
+                    + " dZ=" + (double.IsNaN(zDeviationFt) ? "?" : zDeviationFt.ToString("0.00"))
+                    + " -> " + (valid ? "Placed" : "PlacedInvalid (outside tolerance)"));
 
                 if (!valid)
                 {
@@ -609,9 +667,16 @@ namespace FireProtection.Backend.Services.Placement.Devices
             catch (Exception ex)
             {
                 failureReason = "Revit creation exception: " + ex.Message;
+                diagSink?.Add(FormatReq(xyz) + " type=" + familyPlacementType + " -> Failed: exception " + ex.Message);
                 return PointResult.Failed;
             }
         }
+
+        private static string FormatReq(XYZ p) =>
+            "req=(" + p.X.ToString("0.00") + "," + p.Y.ToString("0.00") + "," + p.Z.ToString("0.00") + ")";
+
+        private static string FormatXyz(XYZ p) =>
+            p == null ? "null" : "(" + p.X.ToString("0.00") + "," + p.Y.ToString("0.00") + "," + p.Z.ToString("0.00") + ")";
 
         private FamilySymbol ResolveCachedSymbol(
             string familyName, string typeName,

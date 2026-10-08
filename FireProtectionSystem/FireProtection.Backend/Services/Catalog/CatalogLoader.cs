@@ -140,7 +140,20 @@ namespace FireProtection.Backend.Services.Catalog
                     TypeName = GetCellString(row, 3),
                     HazardClass = GetCellString(row, 4),
                     Mount = GetCellString(row, 5),
-                    Notes = GetCellString(row, 6)
+                    Notes = GetCellString(row, 6),
+                    // Optional per-type columns (7+). Blank -> null -> engine falls back to hazard default.
+                    SprinklerClass = GetCellString(row, 7),
+                    MaxCoverageAreaSqFt = GetCellNullableDouble(row, 8),
+                    MaxSpacingFt = GetCellNullableDouble(row, 9),
+                    MinSpacingFt = GetCellNullableDouble(row, 10),
+                    CoverageRadiusFt = GetCellNullableDouble(row, 11),
+                    KFactor = GetCellNullableDouble(row, 12),
+                    ResponseType = GetCellString(row, 13),
+                    TempRatingF = GetCellNullableInt(row, 14),
+                    DeflectorToCeilingIn = GetCellNullableDouble(row, 15),
+                    SidewallMaxAlongWallSpacingFt = GetCellNullableDouble(row, 16),
+                    SidewallMaxThrowFt = GetCellNullableDouble(row, 17),
+                    SidewallEndWallClearanceFt = GetCellNullableDouble(row, 18)
                 };
                 if (string.IsNullOrWhiteSpace(entry.FamilyName) && string.IsNullOrWhiteSpace(entry.TypeName)
                     && string.IsNullOrWhiteSpace(entry.HazardClass) && string.IsNullOrWhiteSpace(entry.Mount)
@@ -248,6 +261,35 @@ namespace FireProtection.Backend.Services.Catalog
             {
             }
             return 0;
+        }
+
+        /// <summary>
+        /// Reads an optional numeric cell. Returns null for a blank/unparseable cell so the caller
+        /// can fall back to a default rather than misreading a blank as 0.
+        /// </summary>
+        private static double? GetCellNullableDouble(IXLRow row, int column)
+        {
+            try
+            {
+                IXLCell cell = row.Cell(column);
+                if (cell == null) return null;
+                if (cell.TryGetValue<double>(out double d)) return d;
+                string s = (cell.GetString() ?? string.Empty).Trim();
+                if (string.IsNullOrEmpty(s)) return null;
+                if (double.TryParse(s, NumberStyles.Float, CultureInfo.InvariantCulture, out double dd)) return dd;
+            }
+            catch
+            {
+            }
+            return null;
+        }
+
+        /// <summary>Optional integer cell; null when blank/unparseable (see <see cref="GetCellNullableDouble"/>).</summary>
+        private static int? GetCellNullableInt(IXLRow row, int column)
+        {
+            double? d = GetCellNullableDouble(row, column);
+            if (!d.HasValue) return null;
+            return (int)Math.Round(d.Value, MidpointRounding.AwayFromZero);
         }
     }
 }

@@ -87,6 +87,11 @@ namespace FireProtection.Backend.Services.Placement.Sprinklers.Final
                 + result.CalculatedSprinklerCount + " calculated point(s), family '" + selectedFamilyName
                 + "' / type '" + selectedTypeName + "', existing-device policy " + existingDevicePolicy + ".");
 
+            // One-run grid probe: surfaces, per room, whether ceiling tile-center snapping was ACTIVE
+            // or OFF (and why). This is the definitive runtime evidence for the "not centered" report —
+            // static builds cannot prove it. Shown once, before any model write.
+            ShowGridProbe(calcResult);
+
             // Decision 017: per-row family/type comes from RoomCalculationResult; the universal selection is
             // only a fallback for rooms that did not override it. Per-row resolution is done in the loop below.
             // Existing sprinklers are collected once, with element ids, because they drive three things: the
@@ -135,6 +140,40 @@ namespace FireProtection.Backend.Services.Placement.Sprinklers.Final
                 + (result.WasCancelled ? ", CANCELLED (rolled back)" : string.Empty) + ".");
 
             return result;
+        }
+
+        /// <summary>
+        /// Shows a single dialog summarising, per room, the ceiling tile-grid status ("GRID: ACTIVE …"
+        /// or "GRID: OFF …") the calculation recorded. This is the runtime evidence for whether heads
+        /// were snapped to tile centers — it cannot be proven by a static build. Best-effort; never
+        /// blocks placement.
+        /// </summary>
+        private static void ShowGridProbe(BruteForceCalculationResult calcResult)
+        {
+            try
+            {
+                var lines = new List<string>();
+                foreach (RoomCalculationResult room in calcResult.Rooms)
+                {
+                    if (room?.Diagnostics == null) continue;
+                    string grid = room.Diagnostics.FirstOrDefault(d => d != null && d.StartsWith("GRID:"));
+                    string name = string.IsNullOrWhiteSpace(room.RoomName) ? room.RoomId : room.RoomName;
+                    lines.Add((name ?? "?") + "  —  " + (grid ?? "GRID: (not evaluated)"));
+                }
+
+                if (lines.Count == 0) return;
+
+                var dlg = new Autodesk.Revit.UI.TaskDialog("Ceiling Grid Snap — diagnostic")
+                {
+                    MainInstruction = "Tile-center snapping status per room",
+                    MainContent =
+                        "ACTIVE = heads snapped to tile centers. OFF = free/centered array (no grid read).\n\n"
+                        + string.Join("\n", lines),
+                    CommonButtons = Autodesk.Revit.UI.TaskDialogCommonButtons.Ok
+                };
+                dlg.Show();
+            }
+            catch { /* diagnostic only — never break a placement run */ }
         }
 
         /// <summary>
@@ -228,11 +267,16 @@ namespace FireProtection.Backend.Services.Placement.Sprinklers.Final
                             if (symbol == null)
                             {
                                 result.SkippedMissingFamilyCount++;
+                                // Name the remedy, not just the fault. This warning is what a user reads
+                                // in the run report, and previously it named the family but gave no
+                                // indication of what to do about it.
                                 result.Warnings.Add(
                                     "Skipped room '" + (room.RoomName ?? room.RoomId)
                                     + "': family '" + family + "' / type '" + type
                                     + "' is not loaded in the active Revit document ("
-                                    + (symbolError ?? "not found") + ").");
+                                    + (symbolError ?? "not found")
+                                    + "). Load the .rfa with \"Load families...\" in the header, then "
+                                    + "press Reload in the catalog bar to make it available.");
                                 result.Rooms.Add(roomResult);
                                 continue;
                             }
@@ -365,13 +409,23 @@ namespace FireProtection.Backend.Services.Placement.Sprinklers.Final
                 var (symbol, placementType, strategy, error) = ResolveFamily(selectedFamilyName, selectedTypeName);
                 result.FamilyPlacementType = placementType;
 
-                if (symbol == null)
+if (symbol == null)
                 {
-                    // Family/type not resolved is a CONFIGURATION error, not proof the room is unplaceable.
-                    // Per master prompt §19 it must NOT be converted into "every room is non-eligible" -> UNDETERMINED.
+                    // An unresolved symbol means exactly one thing: the family/type the user picked is
+                    // not present in this document. Report it as FamilyNotLoaded, the SAME status the
+                    // smoke/notification tabs already use (FireAlarmDevicePlacementCore), so the room
+                    // row reads "Family not loaded" on every tab instead of "Unsupported family
+                    // placement", which describes a different problem entirely (a family that IS loaded
+                    // but whose placement type has no strategy - handled by the branch below).
+                    //
+                    // The room-level state stays Undetermined: this is a configuration error on the
+                    // selection, not proof that the room itself cannot be served, so it must not
+                    // disqualify the room or every other room sharing that selection.
                     return CacheAndReturn(cacheKey, PlacementEligibilityResult.Undetermined(
-                        error ?? $"Sprinkler family/type '{selectedFamilyName}:{selectedTypeName}' was not found.",
-                        PlacementEligibilityStatusCodes.UnsupportedFamilyPlacement));
+                        error ?? $"Sprinkler family/type '{selectedFamilyName}:{selectedTypeName}' is not "
+                                + "loaded in the active Revit document. Use \"Load families...\" in the "
+                                + "header, then Reload, to add it.",
+                        PlacementEligibilityStatusCodes.FamilyNotLoaded));
                 }
 
                 if (strategy == null)
@@ -537,6 +591,24 @@ namespace FireProtection.Backend.Services.Placement.Sprinklers.Final
         public void ClearEligibilityCache()
         {
             _eligibilityCache.Clear();
+        }
+
+        /// <inheritdoc />
+        public void BeginHostResolutionPass()
+        {
+            _ceilingHostResolver.BeginPass();
+        }
+
+        /// <inheritdoc />
+        public void EndHostResolutionPass()
+        {
+            _ceilingHostResolver.EndPass();
+        }
+
+        /// <inheritdoc />
+        public long HostCollectorCallsSaved
+        {
+            get { return _ceilingHostResolver.CollectorCallsSaved; }
         }
 
         /// <inheritdoc />
@@ -782,7 +854,11 @@ namespace FireProtection.Backend.Services.Placement.Sprinklers.Final
                 XYZ actualLocation = placedLocation != null ? placedLocation.Point : null;
 
                 bool locationKnown = actualLocation != null;
-                double deviationFt = locationKnown ? actualLocation.DistanceTo(xyz) : 0.0;
+                // A sidewall candidate is intentionally generated inboard, then projected to the
+                // host wall face. Validate against that host-plane target, not the inboard sweep
+                // point; otherwise every legitimate sidewall placement is falsely marked invalid.
+                XYZ validationTarget = outcome.ExpectedLocation ?? xyz;
+                double deviationFt = locationKnown ? actualLocation.DistanceTo(validationTarget) : 0.0;
                 bool spatiallyValid = locationKnown && deviationFt <= _config.PlacementValidationToleranceFt;
                 string statusCode = spatiallyValid
                     ? PlacementStatusCodes.PlacedAndValid
@@ -822,8 +898,8 @@ namespace FireProtection.Backend.Services.Placement.Sprinklers.Final
                 if (!spatiallyValid)
                 {
                     string detail = locationKnown
-                        ? $"actual ({actualLocation.X:F2},{actualLocation.Y:F2},{actualLocation.Z:F2}) is {deviationFt:F2} ft from requested " +
-                          $"({point.X:F2},{point.Y:F2},{point.Z:F2}); tolerance {_config.PlacementValidationToleranceFt:F2} ft"
+                        ? $"actual ({actualLocation.X:F2},{actualLocation.Y:F2},{actualLocation.Z:F2}) is {deviationFt:F2} ft from expected host target " +
+                          $"({validationTarget.X:F2},{validationTarget.Y:F2},{validationTarget.Z:F2}); tolerance {_config.PlacementValidationToleranceFt:F2} ft"
                         : "the created instance exposes no LocationPoint, so its placed position cannot be verified";
                     result.Warnings.Add(
                         $"[REVIEW] Instance {instance.Id} (room {point.RoomId}, strategy {outcome.HostingStrategy}) " +

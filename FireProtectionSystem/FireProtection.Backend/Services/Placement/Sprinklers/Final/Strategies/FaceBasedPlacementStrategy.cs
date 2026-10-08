@@ -37,16 +37,16 @@ namespace FireProtection.Backend.Services.Placement.Sprinklers.Final.Strategies
 
             try
             {
+                XYZ placeAt = host.ProjectedPointOnFace ?? context.RequestedPoint;
                 XYZ refDir = ComputeInPlaneReferenceDirection(doc, host.HostFace);
 
                 FamilyInstance instance = doc.Create.NewFamilyInstance(
-                    host.HostFace, context.RequestedPoint, refDir, context.Symbol);
+                    host.HostFace, placeAt, refDir, context.Symbol);
 
-                // FIX: Enforce level association and offset
-                LevelAssociation.EnforceAndVerify(doc, instance, context.Level, context.RequestedPoint.Z);
+                LevelAssociation.EnforceAndVerify(doc, instance, context.Level, placeAt.Z);
 
                 return PlacementOutcome.CreatedInstance(
-                    instance, "FaceBasedHost", host.Source, host.LinkInstanceName, host.CeilingElementId);
+                    instance, "FaceBasedHost", host.Source, host.LinkInstanceName, host.CeilingElementId, expectedLocation: placeAt);
             }
             catch (Exception ex)
             {

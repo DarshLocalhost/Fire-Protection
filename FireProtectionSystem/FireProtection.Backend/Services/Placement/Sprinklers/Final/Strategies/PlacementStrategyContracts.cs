@@ -78,6 +78,12 @@ namespace FireProtection.Backend.Services.Placement.Sprinklers.Final.Strategies
         public string CeilingSource;      // "host" / "link:<name>" / "none"
         public string LinkInstanceName;
         public string HostCeilingElementId;
+        /// <summary>
+        /// The geometric target after strategy-specific hosting transforms. For a sidewall
+        /// family the engine candidate is intentionally inboard, while Revit must place the
+        /// insertion point on the wall face; post-placement validation compares to this value.
+        /// </summary>
+        public XYZ ExpectedLocation;
 
         public bool Created => Instance != null && Instance.Id != ElementId.InvalidElementId;
 
@@ -106,7 +112,8 @@ namespace FireProtection.Backend.Services.Placement.Sprinklers.Final.Strategies
             string hostingStrategy,
             string ceilingSource,
             string linkInstanceName = null,
-            string hostCeilingElementId = null)
+            string hostCeilingElementId = null,
+            XYZ expectedLocation = null)
         {
             return new PlacementOutcome
             {
@@ -116,7 +123,8 @@ namespace FireProtection.Backend.Services.Placement.Sprinklers.Final.Strategies
                 HostingStrategy = hostingStrategy,
                 CeilingSource = ceilingSource ?? "none",
                 LinkInstanceName = linkInstanceName,
-                HostCeilingElementId = hostCeilingElementId
+                HostCeilingElementId = hostCeilingElementId,
+                ExpectedLocation = expectedLocation
             };
         }
     }

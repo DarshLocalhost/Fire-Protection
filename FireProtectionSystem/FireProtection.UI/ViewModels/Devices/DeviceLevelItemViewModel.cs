@@ -21,6 +21,9 @@ namespace FireProtection.UI.ViewModels.Devices
         private string _candelaDba;
         private string _deviceFamily;
         private string _deviceType;
+        private string _maxDistanceToWall;
+        private string _tileU;
+        private string _tileV;
 
         public DeviceLevelItemViewModel(LevelUiData level)
         {
@@ -110,6 +113,24 @@ namespace FireProtection.UI.ViewModels.Devices
             set { if (SetProperty(ref _candelaDba, value)) { PropagateToRooms("CandelaDba"); } }
         }
 
+        public string MaxDistanceToWall
+        {
+            get => _maxDistanceToWall;
+            set { if (SetProperty(ref _maxDistanceToWall, value)) { PropagateToRooms("MaxDistanceToWall"); } }
+        }
+
+        public string TileU
+        {
+            get => _tileU;
+            set { if (SetProperty(ref _tileU, value)) { PropagateToRooms("TileU"); } }
+        }
+
+        public string TileV
+        {
+            get => _tileV;
+            set { if (SetProperty(ref _tileV, value)) { PropagateToRooms("TileV"); } }
+        }
+
         /// <summary>
         /// Level default for the device family. Propagates into every room on this level that is
         /// still on the previous default; rows the user overrode keep their own selection.
@@ -137,6 +158,9 @@ namespace FireProtection.UI.ViewModels.Devices
                 case "CeilingSlope": return _ceilingSlope;
                 case "ApplianceType": return _applianceType;
                 case "CandelaDba": return _candelaDba;
+                case "MaxDistanceToWall": return _maxDistanceToWall;
+                case "TileU": return _tileU;
+                case "TileV": return _tileV;
                 case "DeviceFamily": return _deviceFamily;
                 case "DeviceType": return _deviceType;
                 default: return null;
@@ -153,6 +177,9 @@ namespace FireProtection.UI.ViewModels.Devices
                 case "CeilingSlope": CeilingSlope = value; break;
                 case "ApplianceType": ApplianceType = value; break;
                 case "CandelaDba": CandelaDba = value; break;
+                case "MaxDistanceToWall": MaxDistanceToWall = value; break;
+                case "TileU": TileU = value; break;
+                case "TileV": TileV = value; break;
                 case "DeviceFamily": DeviceFamily = value; break;
                 case "DeviceType": DeviceType = value; break;
             }

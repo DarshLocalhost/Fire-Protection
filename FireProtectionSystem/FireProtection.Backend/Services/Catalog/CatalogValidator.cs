@@ -23,6 +23,22 @@ namespace FireProtection.Backend.Services.Catalog
             "Recessed"
         };
 
+        public static readonly IReadOnlyList<string> SprinklerClasses = new List<string>
+        {
+            "StandardSpray",
+            "ExtendedCoverage",
+            "Residential",
+            "Sidewall",
+            "ESFR",
+            "CMSA"
+        };
+
+        public static readonly IReadOnlyList<string> ResponseTypes = new List<string>
+        {
+            "QR",
+            "SR"
+        };
+
         public static readonly IReadOnlyList<string> DetectorTypes = new List<string>
         {
             "Ionization",
@@ -145,6 +161,38 @@ namespace FireProtection.Backend.Services.Catalog
                     {
                         result.Issues.Add(new CatalogIssue(SheetSprinklers, sheetRow, "Mount", SeverityWarning,
                             "Mount '" + row.Mount + "' is not in the known list."));
+                    }
+                    // Optional per-type columns: unknown class / non-positive numbers are WARNINGS,
+                    // never errors — a blank cell is fully legal (engine falls back to hazard defaults).
+                    if (!string.IsNullOrWhiteSpace(row.SprinklerClass) && !IsKnown(CatalogOptions.SprinklerClasses, row.SprinklerClass))
+                    {
+                        result.Issues.Add(new CatalogIssue(SheetSprinklers, sheetRow, "SprinklerClass", SeverityWarning,
+                            "SprinklerClass '" + row.SprinklerClass + "' is not in the known list."));
+                    }
+                    if (!string.IsNullOrWhiteSpace(row.ResponseType) && !IsKnown(CatalogOptions.ResponseTypes, row.ResponseType))
+                    {
+                        result.Issues.Add(new CatalogIssue(SheetSprinklers, sheetRow, "ResponseType", SeverityWarning,
+                            "ResponseType '" + row.ResponseType + "' is not in the known list (QR / SR)."));
+                    }
+                    CheckPositive(result, sheetRow, "MaxCoverageAreaSqFt", row.MaxCoverageAreaSqFt);
+                    CheckPositive(result, sheetRow, "MaxSpacingFt", row.MaxSpacingFt);
+                    CheckPositive(result, sheetRow, "MinSpacingFt", row.MinSpacingFt);
+                    CheckPositive(result, sheetRow, "CoverageRadiusFt", row.CoverageRadiusFt);
+                    CheckPositive(result, sheetRow, "KFactor", row.KFactor);
+                    CheckPositive(result, sheetRow, "DeflectorToCeilingIn", row.DeflectorToCeilingIn);
+                    CheckPositive(result, sheetRow, "SidewallMaxAlongWallSpacingFt", row.SidewallMaxAlongWallSpacingFt);
+                    CheckPositive(result, sheetRow, "SidewallMaxThrowFt", row.SidewallMaxThrowFt);
+                    CheckPositive(result, sheetRow, "SidewallEndWallClearanceFt", row.SidewallEndWallClearanceFt);
+                    if (row.TempRatingF.HasValue && row.TempRatingF.Value <= 0)
+                    {
+                        result.Issues.Add(new CatalogIssue(SheetSprinklers, sheetRow, "TempRatingF", SeverityWarning,
+                            "TempRatingF must be a positive value when present; blank was treated as 'not listed'."));
+                    }
+                    if (row.MaxSpacingFt.HasValue && row.MinSpacingFt.HasValue
+                        && row.MinSpacingFt.Value > row.MaxSpacingFt.Value)
+                    {
+                        result.Issues.Add(new CatalogIssue(SheetSprinklers, sheetRow, "MinSpacingFt/MaxSpacingFt", SeverityWarning,
+                            "MinSpacingFt (" + row.MinSpacingFt.Value + ") exceeds MaxSpacingFt (" + row.MaxSpacingFt.Value + ")."));
                     }
                     if (!string.IsNullOrWhiteSpace(row.FamilyName) && !string.IsNullOrWhiteSpace(row.TypeName))
                     {
@@ -273,6 +321,15 @@ namespace FireProtection.Backend.Services.Catalog
             HazardClassOptions.EH1,
             HazardClassOptions.EH2
         };
+
+        private static void CheckPositive(CatalogValidationResult result, int sheetRow, string column, double? value)
+        {
+            if (value.HasValue && value.Value <= 0)
+            {
+                result.Issues.Add(new CatalogIssue(SheetSprinklers, sheetRow, column, SeverityWarning,
+                    column + " must be a positive value when present; blank was treated as 'not listed'."));
+            }
+        }
 
         private static bool IsKnown(IReadOnlyList<string> allowed, string value)
         {

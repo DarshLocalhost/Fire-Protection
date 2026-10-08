@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using FireProtection.Backend.Models.DTOs;
@@ -228,6 +228,24 @@ namespace FireProtection.Backend.Services.Placement.SmokeDetectors.Final.BruteFo
             List<ObstacleBox> obstacleBoxes = BuildObstacleBoxes(room, ruleSet, result);
             List<double[]> existingDetectorXy = BuildExistingDetectorXy(room);
 
+            // Ceiling tile grid (acoustic RCP). Readable pattern first, else user tile-size
+            // fallback, else invalid (free lattice — byte-identical to pre-grid behavior).
+            // Only ceiling-mount candidates snap; wall-mount is unaffected.
+            CeilingGridMath.CeilingGrid tileGrid = CeilingGridMath.TryResolveRoomGrid(
+                bestCeiling,
+                room.OverrideCeilingTileUFt,
+                room.OverrideCeilingTileVFt,
+                geometry.MinX,
+                geometry.MinY);
+            if (tileGrid.IsValid)
+            {
+                result.Diagnostics.Add(
+                    "Ceiling tile grid active: U=" + tileGrid.UFt.ToString("F2") + " ft, V=" + tileGrid.VFt.ToString("F2")
+                    + " ft, angle=" + tileGrid.AngleRad.ToString("F3") + " rad, source="
+                    + ((bestCeiling != null && bestCeiling.HasReadableGrid) ? "readable-pattern" : "user-tile-size")
+                    + ". Ceiling devices snap to tile centers (RCP origin/phase provisional).");
+            }
+
             bool isWallMount =
                 string.Equals(ruleSet.Mount, "Wall", StringComparison.OrdinalIgnoreCase)
                 || room.SelectedPlacementBehavior == DevicePlacementBehavior.WallSidewall;
@@ -275,7 +293,7 @@ namespace FireProtection.Backend.Services.Placement.SmokeDetectors.Final.BruteFo
                     "Notification appliance branch selected: visible/audible coverage spacing is used instead of smoke-detector coverage geometry.");
                 candidates = GenerateNotificationApplianceCandidates(
                     room, geometry, ruleSet, obstacleBoxes, existingDetectorXy,
-                    placementZ, config, result, isWallMount, locationProfile);
+                    placementZ, config, result, isWallMount, locationProfile, tileGrid);
             }
             else if (isWallMount)
             {
@@ -291,8 +309,8 @@ namespace FireProtection.Backend.Services.Placement.SmokeDetectors.Final.BruteFo
                 result.Diagnostics.Add(
                     "Smoke detector branch selected: ceiling-grid detection is used with smoke-detector spacing and boundary checks.");
                 candidates = GenerateCeilingCandidates(
-                    geometry, ruleSet, obstacleBoxes, existingDetectorXy, placementZ, config, result);
-
+                    geometry, ruleSet, obstacleBoxes, existingDetectorXy, placementZ, config, result, tileGrid);
+                
                 List<CandidatePoint> peakRowCandidates = GenerateSlopedCeilingPeakRowCandidates(
                     room, geometry, ruleSet, obstacleBoxes, existingDetectorXy, placementZ, config, result);
                 if (peakRowCandidates.Count > 0)
@@ -327,7 +345,8 @@ namespace FireProtection.Backend.Services.Placement.SmokeDetectors.Final.BruteFo
             BruteForceCalculationConfig config,
             SmokeDetectorRoomCalculationResult result,
             bool isWallMount,
-            DeviceLocationPointProfile locationProfile)
+            DeviceLocationPointProfile locationProfile,
+            CeilingGridMath.CeilingGrid tileGrid)
         {
             List<CandidatePoint> validCandidates = new List<CandidatePoint>();
             double baseGridRes = ComputeGridResolution(geometry, ruleSet, config);
@@ -350,46 +369,68 @@ namespace FireProtection.Backend.Services.Placement.SmokeDetectors.Final.BruteFo
                     room, geometry, ruleSet, obstacleBoxes, existingDetectorXy, wallZ, config, result);
             }
 
+            // Per-point filter shared by the lattice scan and the tile-center enumeration.
+            bool TryAccept(double x, double y)
+            {
+                if (!geometry.IsPointInsideRoom(x, y, config.ToleranceFt)) return false;
+                if (geometry.DistanceToOuterBoundary(x, y) < Math.Max(ruleSet.MinBoundaryClearanceFt, 0.333) - config.ToleranceFt)
+                    return false;
+
+                foreach (ObstacleBox box in obstacleBoxes)
+                {
+                    if (GeometryMath.InsideExpandedBox(
+                        x, y, box.MinX, box.MinY, box.MaxX, box.MaxY, Math.Max(box.ClearanceFt, ruleSet.ObstacleClearanceFt)))
+                    {
+                        if (!box.SpansZ(placementZ, config.ToleranceFt)) continue;
+                        return false;
+                    }
+                }
+
+                foreach (double[] es in existingDetectorXy)
+                {
+                    if (GeometryMath.Distance(x, y, es[0], es[1]) <= Math.Max(ruleSet.ExistingDetectorSeparationFt, ruleSet.MinSpacingFt) - config.ToleranceFt)
+                        return false;
+                }
+
+                validCandidates.Add(new CandidatePoint
+                {
+                    X = x,
+                    Y = y,
+                    Z = placementZ,
+                    IsValid = true,
+                    Score = 1.0
+                });
+                return true;
+            }
+
+            if (tileGrid.IsValid)
+            {
+                // Preferred: a tile-anchored X-2X-X pattern with balanced wall gaps, at a whole-tile
+                // pitch derived from the rule set. Falls back to every tile centre when no balanced
+                // start exists for this pitch, so the room is still served on the grid.
+                int tiledAccepted = AddTileCentricCandidates(
+                    geometry, in tileGrid, ruleSet.MaxSpacingFt, ruleSet.MinSpacingFt,
+                    config.ToleranceFt, placementZ, validCandidates, TryAccept, result,
+                    "Notification-appliance");
+                if (tiledAccepted > 0) return validCandidates;
+
+                List<double[]> tileCenters = CeilingGridMath.EnumerateTileCenters(
+                    in tileGrid, geometry.MinX, geometry.MinY, geometry.MaxX, geometry.MaxY, config.ToleranceFt);
+                foreach (double[] c in tileCenters)
+                {
+                    TryAccept(c[0], c[1]);
+                }
+                result.Diagnostics.Add(
+                    "Notification-appliance candidates (tile-center grid, unbalanced fallback): tiles="
+                    + tileCenters.Count + ", valid=" + validCandidates.Count + ".");
+                return validCandidates;
+            }
+
             for (double y = geometry.MinY; y <= geometry.MaxY + config.ToleranceFt; y += notificationGridRes)
             {
                 for (double x = geometry.MinX; x <= geometry.MaxX + config.ToleranceFt; x += notificationGridRes)
                 {
-                    if (!geometry.IsPointInsideRoom(x, y, config.ToleranceFt)) continue;
-                    if (geometry.DistanceToOuterBoundary(x, y) < Math.Max(ruleSet.MinBoundaryClearanceFt, 0.333) - config.ToleranceFt)
-                        continue;
-
-                    bool hitObstacle = false;
-                    foreach (ObstacleBox box in obstacleBoxes)
-                    {
-                        if (GeometryMath.InsideExpandedBox(
-                            x, y, box.MinX, box.MinY, box.MaxX, box.MaxY, Math.Max(box.ClearanceFt, ruleSet.ObstacleClearanceFt)))
-                        {
-                            if (!box.SpansZ(placementZ, config.ToleranceFt)) continue;
-                            hitObstacle = true;
-                            break;
-                        }
-                    }
-                    if (hitObstacle) continue;
-
-                    bool hitExisting = false;
-                    foreach (double[] es in existingDetectorXy)
-                    {
-                        if (GeometryMath.Distance(x, y, es[0], es[1]) <= Math.Max(ruleSet.ExistingDetectorSeparationFt, ruleSet.MinSpacingFt) - config.ToleranceFt)
-                        {
-                            hitExisting = true;
-                            break;
-                        }
-                    }
-                    if (hitExisting) continue;
-
-                    validCandidates.Add(new CandidatePoint
-                    {
-                        X = x,
-                        Y = y,
-                        Z = placementZ,
-                        IsValid = true,
-                        Score = 1.0
-                    });
+                    TryAccept(x, y);
                 }
             }
 
@@ -400,6 +441,87 @@ namespace FireProtection.Backend.Services.Placement.SmokeDetectors.Final.BruteFo
             return validCandidates;
         }
 
+        /// <summary>
+        /// Emits device candidates on a tile-anchored X-2X-X pattern instead of on every tile centre.
+        /// </summary>
+        /// <remarks>
+        /// Previously both device tabs enumerated EVERY tile centre in the room and let the greedy
+        /// selector choose. That put devices on tile centres, but nothing constrained the SPACING to a
+        /// whole number of tiles or the wall gaps to be balanced, so a detector row could land a third
+        /// of a tile off the wall and still report as tile-aligned.
+        ///
+        /// Here the pitch is derived from the rule set exactly as the sprinkler engine does (largest
+        /// whole number of tiles that fits inside max spacing, raised if min spacing demands it), and
+        /// the START TILE is solved so the two wall gaps mirror each other and sit closest to half the
+        /// pitch. Each resulting position still goes through the caller's <c>TryAccept</c>, so boundary
+        /// clearance, obstructions and existing-device separation are unchanged.
+        ///
+        /// Returns how many candidates were accepted. Zero means the caller should fall back.
+        /// </remarks>
+        private static int AddTileCentricCandidates(
+            RoomGeometry geometry,
+            in CeilingGridMath.CeilingGrid tileGrid,
+            double maxSpacingFt,
+            double minSpacingFt,
+            double toleranceFt,
+            double placementZ,
+            List<CandidatePoint> validCandidates,
+            Func<double, double, bool> tryAccept,
+            SmokeDetectorRoomCalculationResult result,
+            string label)
+        {
+            if (!tileGrid.IsValid || !tileGrid.IsPlausible) return 0;
+            if (maxSpacingFt <= 0) return 0;
+
+            // Whole-tile pitch from the rule, floored so it never exceeds max spacing, and raised if
+            // min spacing needs more. Identical convention to the sprinkler tile path.
+            int stepA = Math.Max(1, (int)Math.Floor((maxSpacingFt + toleranceFt) / tileGrid.UFt));
+            int stepB = Math.Max(1, (int)Math.Floor((maxSpacingFt + toleranceFt) / tileGrid.VFt));
+            if (minSpacingFt > 0)
+            {
+                int minA = Math.Max(1, (int)Math.Ceiling((minSpacingFt - toleranceFt) / tileGrid.UFt));
+                int minB = Math.Max(1, (int)Math.Ceiling((minSpacingFt - toleranceFt) / tileGrid.VFt));
+                if (minA > stepA) stepA = minA;
+                if (minB > stepB) stepB = minB;
+            }
+
+            TileCentricPatternGenerator.AxisLayout a;
+            TileCentricPatternGenerator.AxisLayout b;
+            double toleranceTiles;
+            if (!TileCentricPatternGenerator.TrySolveBalancedLayout(
+                    in tileGrid,
+                    geometry.MinX, geometry.MinY, geometry.MaxX, geometry.MaxY,
+                    stepA, stepB, out a, out b, out toleranceTiles))
+            {
+                return 0;
+            }
+
+            int accepted = 0;
+            for (int j = 0; j < b.Count; j++)
+                for (int i = 0; i < a.Count; i++)
+                {
+                    CeilingGridMath.IndexToWorld(
+                        a.Start + i * a.Pitch,
+                        b.Start + j * b.Pitch,
+                        in tileGrid, out double wx, out double wy);
+                    if (tryAccept(wx, wy)) accepted++;
+                }
+
+            if (result != null)
+            {
+                result.Diagnostics.Add(
+                    label + " candidates (tile-centric X-2X-X): " + a.Count + "x" + b.Count
+                    + " on a " + stepA + "x" + stepB + "-tile pitch ("
+                    + (a.PitchFt).ToString("F2") + "x" + (b.PitchFt).ToString("F2") + " ft), "
+                    + "wall gaps " + a.Gap1Ft.ToString("F2") + "/" + a.Gap2Ft.ToString("F2")
+                    + " and " + b.Gap1Ft.ToString("F2") + "/" + b.Gap2Ft.ToString("F2")
+                    + " ft, tolerance " + toleranceTiles.ToString("0.0") + " tile, accepted="
+                    + accepted + ".");
+            }
+
+            return accepted;
+        }
+
         private static List<CandidatePoint> GenerateCeilingCandidates(
             RoomGeometry geometry,
             SmokeDetectorPlacementRuleSet ruleSet,
@@ -407,7 +529,8 @@ namespace FireProtection.Backend.Services.Placement.SmokeDetectors.Final.BruteFo
             List<double[]> existingDetectorXy,
             double placementZ,
             BruteForceCalculationConfig config,
-            SmokeDetectorRoomCalculationResult result)
+            SmokeDetectorRoomCalculationResult result,
+            CeilingGridMath.CeilingGrid tileGrid)
         {
             List<CandidatePoint> validCandidates = new List<CandidatePoint>();
 
@@ -419,6 +542,93 @@ namespace FireProtection.Backend.Services.Placement.SmokeDetectors.Final.BruteFo
             int rejectedExisting = 0;
             int rejectedBoundary = 0;
 
+            // Per-point filter shared by the lattice scan and the tile-center enumeration, so a
+            // grid-snapped candidate obeys exactly the same inside/boundary/obstacle/existing
+            // rules as the free lattice. Returns true when the point was accepted.
+            bool TryAccept(double x, double y)
+            {
+                if (!geometry.IsPointInsideRoom(x, y, config.ToleranceFt))
+                {
+                    rejectedOutside++;
+                    return false;
+                }
+                if (geometry.DistanceToOuterBoundary(x, y) < ruleSet.MinBoundaryClearanceFt - config.ToleranceFt)
+                {
+                    rejectedBoundary++;
+                    return false;
+                }
+                foreach (ObstacleBox box in obstacleBoxes)
+                {
+                    if (GeometryMath.InsideExpandedBox(
+                        x, y, box.MinX, box.MinY, box.MaxX, box.MaxY, box.ClearanceFt))
+                    {
+                        if (!box.SpansZ(placementZ, config.ToleranceFt)) continue;
+                        rejectedObstacle++;
+                        return false;
+                    }
+                }
+                foreach (double[] es in existingDetectorXy)
+                {
+                    if (GeometryMath.Distance(x, y, es[0], es[1])
+                        <= ruleSet.ExistingDetectorSeparationFt - config.ToleranceFt)
+                    {
+                        rejectedExisting++;
+                        return false;
+                    }
+                }
+                validCandidates.Add(new CandidatePoint
+                {
+                    X = x,
+                    Y = y,
+                    Z = placementZ,
+                    IsValid = true,
+                    Score = 1.0
+                });
+                return true;
+            }
+
+            if (tileGrid.IsValid)
+            {
+                // Preferred: a tile-anchored X-2X-X pattern with balanced wall gaps at a whole-tile
+                // pitch from the rule set. Each position still goes through TryAccept, so coverage,
+                // min-spacing and clearance logic downstream is unchanged. Falls back to every tile
+                // centre when no balanced start exists for this pitch.
+                int tiledAccepted = AddTileCentricCandidates(
+                    geometry, in tileGrid, ruleSet.MaxSpacingFt, ruleSet.MinSpacingFt,
+                    config.ToleranceFt, placementZ, validCandidates, TryAccept, result,
+                    "Ceiling");
+                if (tiledAccepted > 0)
+                {
+                    result.Diagnostics.Add(
+                        "Ceiling candidates (tile-centric): accepted=" + tiledAccepted
+                        + ", rejected(outside=" + rejectedOutside
+                        + ", boundary=" + rejectedBoundary
+                        + ", obstacle=" + rejectedObstacle
+                        + ", existing=" + rejectedExisting + ").");
+                    return validCandidates;
+                }
+
+                // Tile-center candidates: enumerate every acoustic-tile center in the bbox and
+                // filter it. The greedy selector then picks among tile centers so detectors land
+                // on the RCP grid. Coverage/min-spacing logic downstream is unchanged.
+                List<double[]> tileCenters = CeilingGridMath.EnumerateTileCenters(
+                    in tileGrid, geometry.MinX, geometry.MinY, geometry.MaxX, geometry.MaxY, config.ToleranceFt);
+                foreach (double[] c in tileCenters)
+                {
+                    if (generated >= config.MaxCandidatePoints) break;
+                    generated++;
+                    TryAccept(c[0], c[1]);
+                }
+                result.Diagnostics.Add(
+                    "Ceiling candidates (tile-center grid): tiles=" + tileCenters.Count
+                    + ", valid=" + validCandidates.Count
+                    + ", rejected(outside=" + rejectedOutside
+                    + ", boundary=" + rejectedBoundary
+                    + ", obstacle=" + rejectedObstacle
+                    + ", existing=" + rejectedExisting + ").");
+                return validCandidates;
+            }
+
             for (double y = geometry.MinY; y <= geometry.MaxY + config.ToleranceFt; y += gridRes)
             {
                 if (generated >= config.MaxCandidatePoints) break;
@@ -426,54 +636,7 @@ namespace FireProtection.Backend.Services.Placement.SmokeDetectors.Final.BruteFo
                 {
                     if (generated >= config.MaxCandidatePoints) break;
                     generated++;
-
-                    if (!geometry.IsPointInsideRoom(x, y, config.ToleranceFt))
-                    {
-                        rejectedOutside++;
-                        continue;
-                    }
-
-                    if (geometry.DistanceToOuterBoundary(x, y) < ruleSet.MinBoundaryClearanceFt - config.ToleranceFt)
-                    {
-                        rejectedBoundary++;
-                        continue;
-                    }
-
-                    bool hitObstacle = false;
-                    foreach (ObstacleBox box in obstacleBoxes)
-                    {
-                        if (GeometryMath.InsideExpandedBox(
-                            x, y, box.MinX, box.MinY, box.MaxX, box.MaxY, box.ClearanceFt))
-                        {
-                            if (!box.SpansZ(placementZ, config.ToleranceFt)) continue;
-                            rejectedObstacle++;
-                            hitObstacle = true;
-                            break;
-                        }
-                    }
-                    if (hitObstacle) continue;
-
-                    bool hitExisting = false;
-                    foreach (double[] es in existingDetectorXy)
-                    {
-                        if (GeometryMath.Distance(x, y, es[0], es[1])
-                            <= ruleSet.ExistingDetectorSeparationFt - config.ToleranceFt)
-                        {
-                            rejectedExisting++;
-                            hitExisting = true;
-                            break;
-                        }
-                    }
-                    if (hitExisting) continue;
-
-                    validCandidates.Add(new CandidatePoint
-                    {
-                        X = x,
-                        Y = y,
-                        Z = placementZ,
-                        IsValid = true,
-                        Score = 1.0
-                    });
+                    TryAccept(x, y);
                 }
             }
 
@@ -788,6 +951,7 @@ namespace FireProtection.Backend.Services.Placement.SmokeDetectors.Final.BruteFo
                     result.CalculatedCount = 1;
                     result.RequiredCount = 1;
                     result.Status = CalculationStatus.Success;
+                    VerifyMaxWallDistance(result.Points, geometry, ruleSet, config, isWallMount, result);
                     return result;
                 }
             }
@@ -861,7 +1025,58 @@ namespace FireProtection.Backend.Services.Placement.SmokeDetectors.Final.BruteFo
             result.CalculatedCount = selected.Count;
             result.RequiredCount = maxCoverageArea > 0 ? (int)Math.Ceiling(room.AreaSqFt / maxCoverageArea) : selected.Count;
 
+            VerifyMaxWallDistance(result.Points, geometry, ruleSet, config, isWallMount, result);
+
             return result;
+        }
+
+        /// <summary>
+        /// Post-selection S->W (device->wall MAXIMUM) verification. Mirrors the sprinkler
+        /// <c>BruteForceCalculationService.FinalizeSelection</c> check: for each ceiling-mount
+        /// device, if its distance to the nearest room boundary exceeds
+        /// <see cref="SmokeDetectorPlacementRuleSet.MaxDistanceFromWallsFt"/> (plus tolerance),
+        /// warn and downgrade the result to <see cref="CalculationStatus.ReviewRequired"/>.
+        /// Skipped for wall-mount devices (they sit on the wall by definition) and when the
+        /// rule set carries no positive max distance. Does NOT move points and does NOT touch
+        /// the independent MINIMUM boundary clearance enforced at candidate filtering.
+        /// </summary>
+        private static void VerifyMaxWallDistance(
+            List<CalculatedSmokeDetectorPoint> points,
+            RoomGeometry geometry,
+            SmokeDetectorPlacementRuleSet ruleSet,
+            BruteForceCalculationConfig config,
+            bool isWallMount,
+            SmokeDetectorRoomCalculationResult result)
+        {
+            if (isWallMount) return;
+            if (points == null || points.Count == 0) return;
+            if (ruleSet == null || ruleSet.MaxDistanceFromWallsFt <= 0.0) return;
+
+            double limit = ruleSet.MaxDistanceFromWallsFt;
+            double tol = config != null ? config.ToleranceFt : 0.01;
+            int violations = 0;
+            double worst = 0.0;
+
+            foreach (CalculatedSmokeDetectorPoint pt in points)
+            {
+                if (pt == null) continue;
+                double d = geometry.DistanceToOuterBoundary(pt.X, pt.Y);
+                if (d > limit + tol)
+                {
+                    violations++;
+                    if (d > worst) worst = d;
+                }
+            }
+
+            if (violations > 0)
+            {
+                result.Warnings.Add(
+                    violations + " device(s) exceed the maximum distance-to-wall (S->W) of "
+                    + limit.ToString("F2") + " ft (worst=" + worst.ToString("F2")
+                    + " ft). Engineering review required.");
+                if (result.Status == CalculationStatus.Success)
+                    result.Status = CalculationStatus.ReviewRequired;
+            }
         }
 
         private static void ComputePolygonCentroid(IReadOnlyList<double[]> polygon, ref double cx, ref double cy)
@@ -1377,7 +1592,8 @@ namespace FireProtection.Backend.Services.Placement.SmokeDetectors.Final.BruteFo
         {
             if (baseRuleSet == null) return new SmokeDetectorPlacementRuleSet();
             if (room == null) return baseRuleSet;
-            if (!room.OverrideMaxSpacingFt.HasValue && !room.OverrideBoundaryClearanceFt.HasValue)
+            if (!room.OverrideMaxSpacingFt.HasValue && !room.OverrideBoundaryClearanceFt.HasValue
+                && !room.OverrideMaxDistanceToWallFt.HasValue)
                 return baseRuleSet;
 
             SmokeDetectorPlacementRuleSet effective = baseRuleSet.Clone();
@@ -1403,6 +1619,20 @@ namespace FireProtection.Backend.Services.Placement.SmokeDetectors.Final.BruteFo
                 effective.MinBoundaryClearanceFt = clamped;
                 result.Diagnostics.Add(
                     "Override applied: MinBoundaryClearanceFt=" + clamped.ToString("F2") + " ft.");
+            }
+
+            // S->W (device->wall MAXIMUM) override. Independent of the MINIMUM clearance above.
+            // Honored verbatim (NOT NFPA-clamped) so it takes precedence over the derived 1/2-spacing;
+            // enforced post-selection below. Flagged provisional (review required).
+            if (room.OverrideMaxDistanceToWallFt.HasValue)
+            {
+                double requested = room.OverrideMaxDistanceToWallFt.Value;
+                double applied = Math.Max(0.0, requested);
+                effective.MaxDistanceFromWallsFt = applied;
+                result.Diagnostics.Add(
+                    "Override applied: MaxDistanceFromWallsFt (S->W)=" + applied.ToString("F2")
+                    + " ft (requested=" + requested.ToString("F2")
+                    + " ft; user value not NFPA-clamped, overrides derived 1/2-spacing).");
             }
 
             if (result.Status == CalculationStatus.Success)

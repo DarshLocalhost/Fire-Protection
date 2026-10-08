@@ -108,9 +108,25 @@ See [[SPRINKLER_POINT_CALCULATION_EXPLAINED]] for the exact X/Y/Z algorithm.
 ## 11. Hazard Classification
 
 `HazardClassifier.ClassifyByName(roomName)` produces a `HazardResult` (e.g., `Light`, `OH1`, `OH2`,
-`EH1`, `EH2`). This classification is **tagging only** in the current code — the provisional placement
-rules use the **same 15 ft placeholder for every hazard class** (`DefaultHazardPlacementRules`);
-`HasApprovedRules == false`. NFPA13-2022 approved, hazard-specific spacing is **not** implemented.
+`EH1`, `EH2`). This classification is **tagging only** in the current code — the placement rules use
+per-class provisional values (`DefaultHazardPlacementRules`).
+
+**Design basis (decided 2026-10-07):** the two supplied rulebooks are the declared design basis for this
+tool, and it is to be developed against them even though they are older editions (NFPA 13 2002 via the
+NFSA textbook; NFPA 72 2019 for detectors/appliances). Every implemented rule value is transcribed with
+its chapter, page and a verbatim quote into
+`FireProtection.Backend/Services/Placement/Sprinklers/Final/BruteForce/Nfpa13RulebookRules.cs`.
+Where the rulebook only *references* an NFPA table without reproducing it (notably the Beam rule,
+Table 8.6.5.1.2) **no value is invented** — the gap is recorded in
+`Nfpa13RulebookRules.KnownGaps` and the affected room is flagged for engineering review instead.
+
+Rules implemented from the rulebook include: min/max spacing, wall distances (4 in min, ½ S max, 0.75 S
+corner), deflector drop bands, unobstructed/obstructed construction classification, the sloped peak
+rule, S × L per-head coverage, the Small Room Rule, and the Chapter 20 obstruction framework (18 in
+zone plane, the "Three Times" rule and its exception, and the >4 ft permanent-fixture rule).
+
+`HasApprovedRules == false` remains: the values are real and traceable, but they are from a superseded
+edition and carry no FPE/AHJ sign-off, so every room is still flagged for review.
 
 ## 12. Snowdon Integration
 
@@ -127,9 +143,12 @@ Treat any such names in generic prompts as template artifacts, not project reali
 - ✅ Model extraction (levels, rooms, ceilings, obstacles, existing sprinklers) — implemented (static).
 - ✅ BruteForce sprinkler calculation + actual Revit placement — implemented (static); runtime
   placement requires Revit to verify.
-- 🟡 Collision workflow — UI tab exists (`SprinklerCollisionViewModel`) but is an empty shell.
-- 🟡 Smoke detector / Notification appliance workflows — UI tabs exist as empty-shell ViewModels;
-  no extraction or placement logic is implemented for them.
+- Collision workflow — UI tab exists (`SprinklerCollisionViewModel`) but is an empty shell: no detection
+  engine, no conflict model, no reporting, no resolution. The tab is labelled "Final" and renders blank.
+- Smoke detector / Notification appliance workflows — UI tabs exist and are wired end-to-end for
+  calculation **and** Revit placement (transactions, `FamilyInstance` creation, per-room report). Their
+  rule values are provisional, and several inputs never reach the calculation (obstacles, existing
+  devices, airflow) — see the "Parked" list in [[TODO]].
 - ✅ WPF UI, ribbon, JSON exports.
 
 ## 14. Important Domain Concepts
@@ -154,12 +173,20 @@ Treat any such names in generic prompts as template artifacts, not project reali
 
 ## 16. Known Limitations
 
+- Nested link traversal is implemented statically, but linked-model extraction has not yet been runtime
+  validated with a representative Revit host and linked project model.
+- Family loading and sprinkler-family listing fixes compile across supported Revit configurations but
+  have not yet been exercised with actual RFA files inside Revit.
+- Older-family upgrade now uses the running Revit application's family-document open/import flow; actual
+  conversion of a 2019 RFA into the active Revit version remains unverified without that RFA in Revit.
 - Provisional 15 ft spacing is **not** NFPA13-2022 compliant.
 - Sloped / unsupported ceilings fall back to `LevelElevationFt + CeilingHeightFt` and are flagged.
 - Linked ceilings may not be found by `FindCeilingHost` (host-document only); falls back to level-based
   placement.
 - Obstacles are axis-aligned bounding boxes + 1 ft clearance; curved/diagonal obstacles are approximated.
-- Collision, Smoke Detector, and Notification Appliance tabs are placeholders (no logic).
+- Collision tab is a placeholders (no logic). Smoke and Notification tabs ARE wired for placement, but
+  their rule values are provisional and several calculation inputs (obstacles, existing devices,
+  airflow) are never populated.
 - Runtime Revit placement has **not** been verified in this environment (no live Revit host).
 
 ## 17. Current Project State
@@ -168,6 +195,20 @@ Treat any such names in generic prompts as template artifacts, not project reali
 - BruteForce calculation + Revit placement: implemented; static verification only.
 - A code cleanup pass removed dead exporters/overloads and unused `using`s (see [[SESSION_NOTES]]).
 - 14 Revit-free calculation tests pass.
+
+> **CORRECTED 2026-10-07.** The two lines above were stale. Current truth:
+> - **335 checks across 16 Revit-free test suites**, all passing on Revit2024 / 2025 / 2026. The test
+>   project is now IN `FireProtectionSystem.slnx` (previously the solution built no tests at all), and
+>   `Program.ReportSuiteCoverage()` fails loud if any suite exists but is not registered.
+> - The **Revit2024 solution build was broken** and is now fixed: `.slnx` mapped `Revit2024|Any CPU` to
+>   `Debug` for the UI project, rebuilding UI as `net8.0-windows` while Backend built `net48`. That is an
+>   unsatisfiable project reference. All three configurations now build 0 errors.
+>
+> Also stale and corrected elsewhere in this file: the Smoke and Notification tabs are **not** empty
+> shells (both are wired end-to-end through `DevicePlacementViewModelBase` → `FireAlarmDevicePlacementCore`);
+> only **Collision** is a genuine shell. And hazard rules are **no longer** a single 15 ft placeholder —
+> they differ per class (Light 15/225, OH1 15/130, OH2 15/130, EH1 12/100, EH2 12/100) while remaining
+> provisional and unapproved.
 
 ## 18. Important Files to Read First
 

@@ -5,17 +5,18 @@ using Autodesk.Revit.DB.Structure;
 
 namespace FireProtection.Backend.Services.Placement.Sprinklers.Final.Strategies
 {
-    /// <summary>
-    /// Professional Wall-Hosted / Sidewall Placement Strategy.
-    /// Strictly anchors devices to the room's boundary edge line (segment A->B) and ensures
-    /// correct Level association and positive elevation offsets.
-    /// </summary>
     internal sealed class WallSidewallPlacementStrategy : IFamilyPlacementStrategy
     {
         public string Name => "WallSidewall";
 
-        public bool CanHandle(string familyPlacementType) =>
-            string.Equals(familyPlacementType, "WallSidewall", StringComparison.OrdinalIgnoreCase);
+        public bool CanHandle(string familyPlacementType)
+        {
+            if (string.IsNullOrWhiteSpace(familyPlacementType)) return false;
+            return string.Equals(familyPlacementType, "WallSidewall", StringComparison.OrdinalIgnoreCase) ||
+                   string.Equals(familyPlacementType, "FaceBased", StringComparison.OrdinalIgnoreCase) ||
+                   string.Equals(familyPlacementType, "WorkPlaneBased", StringComparison.OrdinalIgnoreCase) ||
+                   string.Equals(familyPlacementType, "OneLevelBased", StringComparison.OrdinalIgnoreCase);
+        }
 
         public PlacementOutcome Place(PlacementContext context)
         {
@@ -58,7 +59,6 @@ namespace FireProtection.Backend.Services.Placement.Sprinklers.Final.Strategies
             }
             edgeDir = edgeDir.Normalize();
 
-            // Inward horizontal unit vector pointing into the room interior
             XYZ roomInward2D = ComputeRoomInwardHorizontal(polygon, midPt2D);
 
             if (!context.Symbol.IsActive)
@@ -67,7 +67,6 @@ namespace FireProtection.Backend.Services.Placement.Sprinklers.Final.Strategies
                 doc.Regenerate();
             }
 
-            // Tight 1.5 ft search along the specific edge segment A->B
             WallFaceHost host = FindWallFaceHostForEdge(doc, a, b, edgeDir, xyz, roomInward2D);
 
             Plane wallPlane = host?.HostPlane;
@@ -76,7 +75,6 @@ namespace FireProtection.Backend.Services.Placement.Sprinklers.Final.Strategies
             string wallElemId = host?.WallElementId ?? ("wall-edge-" + edgeIdx);
             string ceilingSourceTag = host?.LinkInstance != null ? ("link-wall-edge-" + edgeIdx) : ("wall-edge-" + edgeIdx);
 
-            // Precision Fallback: Construct plane directly on room boundary line A->B
             if (wallPlane == null)
             {
                 XYZ wallNormal = new XYZ(-edgeDir.Y, edgeDir.X, 0);
@@ -87,21 +85,18 @@ namespace FireProtection.Backend.Services.Placement.Sprinklers.Final.Strategies
 
             XYZ pointOnWall = ProjectPointOntoPlane(xyz, wallPlane);
 
-            // --- Attempt 1: Physical Face Reference (FaceBased wall families) ---
             if (faceRef != null)
             {
                 FamilyInstance faceInst = null;
                 try
                 {
                     faceInst = doc.Create.NewFamilyInstance(faceRef, pointOnWall, XYZ.BasisZ, context.Symbol);
-
-                    // FIX: Enforce level AND offset BEFORE checking spatial sanity
                     LevelAssociation.EnforceAndVerify(doc, faceInst, context.Level, xyz.Z);
 
                     if (IsSpatiallySane(faceInst, xyz, maxDeviationFt: 2.0))
                     {
                         return PlacementOutcome.CreatedInstance(
-                            faceInst, "WallSidewallFace", ceilingSourceTag, linkName, wallElemId);
+                            faceInst, "WallSidewallFace", ceilingSourceTag, linkName, wallElemId, pointOnWall);
                     }
 
                     try { doc.Delete(faceInst.Id); } catch { }
@@ -112,27 +107,24 @@ namespace FireProtection.Backend.Services.Placement.Sprinklers.Final.Strategies
                 }
             }
 
-            // --- Attempt 2: Level-Hosted Family Placement (OneLevelBased wall-strobe families) ---
             try
             {
                 FamilyInstance lvlInst = doc.Create.NewFamilyInstance(
                     pointOnWall, context.Symbol, context.Level, StructuralType.NonStructural);
 
-                // FIX: Enforce level AND offset BEFORE checking spatial sanity
                 LevelAssociation.EnforceAndVerify(doc, lvlInst, context.Level, xyz.Z);
                 OrientTowardRoomInterior(doc, lvlInst, pointOnWall, roomInward2D);
 
                 if (IsSpatiallySane(lvlInst, xyz, maxDeviationFt: 2.0))
                 {
                     return PlacementOutcome.CreatedInstance(
-                        lvlInst, "WallSidewallLevelHosted", ceilingSourceTag, linkName, wallElemId);
+                        lvlInst, "WallSidewallLevelHosted", ceilingSourceTag, linkName, wallElemId, pointOnWall);
                 }
 
                 try { doc.Delete(lvlInst.Id); } catch { }
             }
             catch { }
 
-            // --- Attempt 3: SketchPlane Work-Plane Fallback ---
             try
             {
                 Plane plane = Plane.CreateByNormalAndOrigin(wallPlane.Normal, pointOnWall);
@@ -141,13 +133,12 @@ namespace FireProtection.Backend.Services.Placement.Sprinklers.Final.Strategies
                 FamilyInstance instance = doc.Create.NewFamilyInstance(
                     sketchPlane.GetPlaneReference(), pointOnWall, edgeDir, context.Symbol);
 
-                // FIX: Enforce level AND offset BEFORE checking spatial sanity
                 LevelAssociation.EnforceAndVerify(doc, instance, context.Level, xyz.Z);
 
                 if (IsSpatiallySane(instance, xyz, maxDeviationFt: 2.0))
                 {
                     return PlacementOutcome.CreatedInstance(
-                        instance, "WallSidewallSketchPlane", ceilingSourceTag, linkName, wallElemId);
+                        instance, "WallSidewallSketchPlane", ceilingSourceTag, linkName, wallElemId, pointOnWall);
                 }
 
                 try { doc.Delete(instance.Id); } catch { }
@@ -182,7 +173,6 @@ namespace FireProtection.Backend.Services.Placement.Sprinklers.Final.Strategies
             if (lp == null || lp.Point == null) return false;
             XYZ p = lp.Point;
 
-            // Reject origin (0,0,0) snaps
             if (p.GetLength() < 0.5 && requested.GetLength() > 2.0) return false;
 
             double xyDev = Math.Sqrt(Math.Pow(p.X - requested.X, 2) + Math.Pow(p.Y - requested.Y, 2));
@@ -207,11 +197,10 @@ namespace FireProtection.Backend.Services.Placement.Sprinklers.Final.Strategies
                 cx += v[0]; cy += v[1]; n++;
             }
             if (n == 0) return XYZ.BasisX;
-            cx /= n; cy /= n;
+            cx /= n; cy /= n; 
             XYZ inward = new XYZ(cx - edgeMid2D.X, cy - edgeMid2D.Y, 0);
             return inward.GetLength() > 1e-9 ? inward.Normalize() : XYZ.BasisX;
         }
-
         private sealed class WallFaceHost
         {
             public Reference FaceReference;

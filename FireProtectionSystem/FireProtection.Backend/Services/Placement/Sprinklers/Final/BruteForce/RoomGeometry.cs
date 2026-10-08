@@ -5,7 +5,6 @@ namespace FireProtection.Backend.Services.Placement.Sprinklers.Final.BruteForce
     /// <summary>
     /// Room boundary abstraction supporting outer loops and inner loops (openings),
     /// independent of room shape (rectangle, L-shape, concave, irregular).
-    /// A point is "inside the room" when it is inside the outer loop and outside every inner loop.
     /// </summary>
     internal sealed class RoomGeometry
     {
@@ -19,8 +18,18 @@ namespace FireProtection.Backend.Services.Placement.Sprinklers.Final.BruteForce
 
         public RoomGeometry(List<double[]> outerPolygon, List<List<double[]>> innerLoops)
         {
-            _outer = outerPolygon ?? new List<double[]>();
-            _innerLoops = innerLoops ?? new List<List<double[]>>();
+            _outer = CleanPolygon(outerPolygon);
+            _innerLoops = new List<List<double[]>>();
+
+            if (innerLoops != null)
+            {
+                foreach (List<double[]> inner in innerLoops)
+                {
+                    List<double[]> cleaned = CleanPolygon(inner);
+                    if (cleaned.Count >= 3)
+                        _innerLoops.Add(cleaned);
+                }
+            }
 
             foreach (double[] p in _outer)
             {
@@ -39,11 +48,6 @@ namespace FireProtection.Backend.Services.Placement.Sprinklers.Final.BruteForce
         public double MinY => _minY;
         public double MaxY => _maxY;
 
-        /// <summary>
-        /// Read-only view of the outer boundary vertices ([x,y] pairs, feet). Exposed so the
-        /// notification-appliance audible-coverage audit can count wall crossings along a
-        /// sample→appliance line. Pure projection of existing data — no behaviour change.
-        /// </summary>
         public IReadOnlyList<double[]> OuterPolygon => _outer;
 
         public bool IsPointInsideRoom(double x, double y, double tolerance)
@@ -67,9 +71,6 @@ namespace FireProtection.Backend.Services.Placement.Sprinklers.Final.BruteForce
             return true;
         }
 
-        /// <summary>
-        /// Minimum distance from the point to the outer boundary segments. Used for boundary-clearance checks.
-        /// </summary>
         public double DistanceToOuterBoundary(double x, double y)
         {
             if (IsDegenerate || _outer.Count < 2) return double.MaxValue;
@@ -87,6 +88,39 @@ namespace FireProtection.Backend.Services.Placement.Sprinklers.Final.BruteForce
             }
 
             return System.Math.Sqrt(best);
+        }
+
+        /// <summary>
+        /// Removes duplicate consecutive vertices and closes loop endpoints.
+        /// </summary>
+        private static List<double[]> CleanPolygon(List<double[]> raw)
+        {
+            List<double[]> cleaned = new List<double[]>();
+            if (raw == null || raw.Count == 0) return cleaned;
+
+            foreach (double[] pt in raw)
+            {
+                if (pt == null || pt.Length < 2) continue;
+                if (cleaned.Count > 0)
+                {
+                    double[] prev = cleaned[cleaned.Count - 1];
+                    if (System.Math.Abs(pt[0] - prev[0]) < 1e-6 && System.Math.Abs(pt[1] - prev[1]) < 1e-6)
+                        continue;
+                }
+                cleaned.Add(new double[] { pt[0], pt[1] });
+            }
+
+            if (cleaned.Count >= 3)
+            {
+                double[] first = cleaned[0];
+                double[] last = cleaned[cleaned.Count - 1];
+                if (System.Math.Abs(first[0] - last[0]) < 1e-6 && System.Math.Abs(first[1] - last[1]) < 1e-6)
+                {
+                    cleaned.RemoveAt(cleaned.Count - 1);
+                }
+            }
+
+            return cleaned;
         }
     }
 }

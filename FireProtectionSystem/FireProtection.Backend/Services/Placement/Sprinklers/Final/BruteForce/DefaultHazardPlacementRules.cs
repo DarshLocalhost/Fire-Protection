@@ -4,10 +4,14 @@ using FireProtection.Backend.Models.Hazard;
 namespace FireProtection.Backend.Services.Placement.Sprinklers.Final.BruteForce
 {
     /// <summary>
-    /// Default hazard placement rule provider. The spacing values match commonly published NFPA 13
-    /// hazard tables, but they are NOT verified against the actual standard text or signed off by an
-    /// FPE — so HasApprovedRules stays false and every rule set is flagged IsProvisional until a
-    /// qualified fire protection engineer confirms the design basis (see STANDARDS_MEMORY.md).
+    /// Default hazard placement rule provider. Spacing/coverage/separation values are traced to
+    /// NFPA 13 (2002) as reproduced in the NFSA textbook "Layout, Detail and Calculation of Fire
+    /// Sprinkler Systems" (the client-supplied source): max spacing 15 ft light/ordinary &amp; 12 ft
+    /// extra (p.218), min spacing 6 ft cold-soldering (p.218), max wall distance = ½ max spacing
+    /// (p.219), coverage areas Table 19-1 (p.221). They are NOT independently verified against the
+    /// standard text or signed off by an FPE — and the 2002 edition itself is superseded — so
+    /// HasApprovedRules stays false and every rule set is flagged IsProvisional until a qualified
+    /// fire protection engineer confirms the design basis (see STANDARDS_MEMORY.md).
     /// Flip HasApprovedRules to true ONLY after that sign-off, with sourced values.
     /// </summary>
     public class DefaultHazardPlacementRules : IHazardPlacementRules
@@ -28,7 +32,7 @@ namespace FireProtection.Backend.Services.Placement.Sprinklers.Final.BruteForce
                         CoverageRadiusFt = 7.5,
                         ObstacleClearanceFt = 1.0,
                         BoundaryClearanceFt = 1.0,
-                        ExistingSprinklerSeparationFt = 7.5,
+                        ExistingSprinklerSeparationFt = 6.0,
                         MaxDistanceFromWallsFt = 7.5,
                         MinKFactor = 5.6,
                         CeilingHeightAdjustmentFactor = 1.0,
@@ -39,21 +43,21 @@ namespace FireProtection.Backend.Services.Placement.Sprinklers.Final.BruteForce
                             { "duct", 1.5 }
                         },
                         IsProvisional = true,
-                        Notes = "Provisional Light Hazard spacing (15 ft max, 225 sq ft max coverage). Values match NFPA 13 hazard tables but are NOT yet AHJ/FPE-verified — engineering review required."
+                        Notes = "Provisional Light Hazard: max spacing 15 ft, min 6 ft (p.218), max wall distance 7.5 ft = ½ spacing (p.219), max coverage 225 sq ft (Table 19-1, p.221). NFPA 13 (2002) via NFSA textbook — NOT AHJ/FPE-verified, engineering review required."
                     };
 
                 case HazardClass.OH1:
                     return new HazardPlacementRuleSet
                     {
                         HazardClass = HazardClass.OH1,
-                        MaxSpacingFt = 12.0,
+                        MaxSpacingFt = 15.0,
                         MinSpacingFt = 6.0,
                         MaxCoverageAreaSqFt = 130.0,
-                        CoverageRadiusFt = 6.0,
+                        CoverageRadiusFt = 7.5,
                         ObstacleClearanceFt = 1.0,
                         BoundaryClearanceFt = 1.0,
                         ExistingSprinklerSeparationFt = 6.0,
-                        MaxDistanceFromWallsFt = 6.0,
+                        MaxDistanceFromWallsFt = 7.5,
                         MinKFactor = 5.6,
                         CeilingHeightAdjustmentFactor = 0.9,
                         ObstacleSpecificClearances = new Dictionary<string, double>
@@ -63,21 +67,21 @@ namespace FireProtection.Backend.Services.Placement.Sprinklers.Final.BruteForce
                             { "duct", 1.5 }
                         },
                         IsProvisional = true,
-                        Notes = "Provisional OH1 spacing (12 ft max, 130 sq ft max coverage). NOT yet AHJ/FPE-verified - engineering review required."
+                        Notes = "Provisional OH1: max spacing 15 ft, min 6 ft (p.218), max wall distance 7.5 ft = ½ spacing (p.219), max coverage 130 sq ft (Table 19-1 ordinary, p.221). NFPA 13 (2002) via NFSA textbook — NOT AHJ/FPE-verified, engineering review required."
                     };
 
                 case HazardClass.OH2:
                     return new HazardPlacementRuleSet
                     {
                         HazardClass = HazardClass.OH2,
-                        MaxSpacingFt = 12.0,
-                        MinSpacingFt = 5.0,
-                        MaxCoverageAreaSqFt = 100.0,
-                        CoverageRadiusFt = 5.0,
+                        MaxSpacingFt = 15.0,
+                        MinSpacingFt = 6.0,
+                        MaxCoverageAreaSqFt = 130.0,
+                        CoverageRadiusFt = 7.5,
                         ObstacleClearanceFt = 1.0,
                         BoundaryClearanceFt = 1.0,
-                        ExistingSprinklerSeparationFt = 5.0,
-                        MaxDistanceFromWallsFt = 5.0,
+                        ExistingSprinklerSeparationFt = 6.0,
+                        MaxDistanceFromWallsFt = 7.5,
                         MinKFactor = 8.0,
                         CeilingHeightAdjustmentFactor = 0.85,
                         ObstacleSpecificClearances = new Dictionary<string, double>
@@ -87,21 +91,21 @@ namespace FireProtection.Backend.Services.Placement.Sprinklers.Final.BruteForce
                             { "duct", 2.0 }
                         },
                         IsProvisional = true,
-                        Notes = "Provisional OH2 spacing (12 ft max, 100 sq ft max coverage). NOT yet AHJ/FPE-verified - engineering review required."
+                        Notes = "Provisional OH2: max spacing 15 ft, min 6 ft (p.218), max wall distance 7.5 ft = ½ spacing (p.219), max coverage 130 sq ft (Table 19-1 ordinary, p.221; 168 noncombustible-obstructed not applied). NFPA 13 (2002) via NFSA textbook — NOT AHJ/FPE-verified, engineering review required."
                     };
 
                 case HazardClass.EH1:
                     return new HazardPlacementRuleSet
                     {
                         HazardClass = HazardClass.EH1,
-                        MaxSpacingFt = 10.0,
-                        MinSpacingFt = 4.5,
-                        MaxCoverageAreaSqFt = 90.0,
-                        CoverageRadiusFt = 4.5,
+                        MaxSpacingFt = 12.0,
+                        MinSpacingFt = 6.0,
+                        MaxCoverageAreaSqFt = 100.0,
+                        CoverageRadiusFt = 6.0,
                         ObstacleClearanceFt = 1.5,
                         BoundaryClearanceFt = 1.5,
-                        ExistingSprinklerSeparationFt = 4.5,
-                        MaxDistanceFromWallsFt = 4.5,
+                        ExistingSprinklerSeparationFt = 6.0,
+                        MaxDistanceFromWallsFt = 6.0,
                         MinKFactor = 8.0,
                         CeilingHeightAdjustmentFactor = 0.8,
                         ObstacleSpecificClearances = new Dictionary<string, double>
@@ -111,21 +115,21 @@ namespace FireProtection.Backend.Services.Placement.Sprinklers.Final.BruteForce
                             { "duct", 2.5 }
                         },
                         IsProvisional = true,
-                        Notes = "Provisional EH1 spacing (10 ft max, 90 sq ft max coverage). NOT yet AHJ/FPE-verified - engineering review required."
+                        Notes = "Provisional EH1: max spacing 12 ft, min 6 ft (p.218), max wall distance 6 ft = ½ spacing (p.219), max coverage 100 sq ft (Table 19-1, density ≥0.25 gpm/ft²; 130 applies below that — density is hydraulic, out of scope). NFPA 13 (2002) via NFSA textbook — NOT AHJ/FPE-verified, engineering review required."
                     };
 
                 case HazardClass.EH2:
                     return new HazardPlacementRuleSet
                     {
                         HazardClass = HazardClass.EH2,
-                        MaxSpacingFt = 10.0,
-                        MinSpacingFt = 4.5,
-                        MaxCoverageAreaSqFt = 90.0,
-                        CoverageRadiusFt = 4.5,
+                        MaxSpacingFt = 12.0,
+                        MinSpacingFt = 6.0,
+                        MaxCoverageAreaSqFt = 100.0,
+                        CoverageRadiusFt = 6.0,
                         ObstacleClearanceFt = 2.0,
                         BoundaryClearanceFt = 2.0,
-                        ExistingSprinklerSeparationFt = 4.5,
-                        MaxDistanceFromWallsFt = 4.5,
+                        ExistingSprinklerSeparationFt = 6.0,
+                        MaxDistanceFromWallsFt = 6.0,
                         MinKFactor = 11.2,
                         CeilingHeightAdjustmentFactor = 0.75,
                         ObstacleSpecificClearances = new Dictionary<string, double>
@@ -135,7 +139,7 @@ namespace FireProtection.Backend.Services.Placement.Sprinklers.Final.BruteForce
                             { "duct", 3.0 }
                         },
                         IsProvisional = true,
-                        Notes = "Provisional EH2 spacing (10 ft max, 90 sq ft max coverage). NOT yet AHJ/FPE-verified - engineering review required."
+                        Notes = "Provisional EH2: max spacing 12 ft, min 6 ft (p.218), max wall distance 6 ft = ½ spacing (p.219), max coverage 100 sq ft (Table 19-1, density ≥0.25 gpm/ft²; 130 applies below that — density is hydraulic, out of scope). NFPA 13 (2002) via NFSA textbook — NOT AHJ/FPE-verified, engineering review required."
                     };
 
                 default:
@@ -148,7 +152,7 @@ namespace FireProtection.Backend.Services.Placement.Sprinklers.Final.BruteForce
                         CoverageRadiusFt = 7.5,
                         ObstacleClearanceFt = 1.0,
                         BoundaryClearanceFt = 1.0,
-                        ExistingSprinklerSeparationFt = 7.5,
+                        ExistingSprinklerSeparationFt = 6.0,
                         MaxDistanceFromWallsFt = 7.5,
                         MinKFactor = 5.6,
                         CeilingHeightAdjustmentFactor = 1.0,
@@ -159,7 +163,7 @@ namespace FireProtection.Backend.Services.Placement.Sprinklers.Final.BruteForce
                             { "duct", 1.5 }
                         },
                         IsProvisional = true,
-                        Notes = "Default Light Hazard spacing applied (provisional). Engineering review required."
+                        Notes = "Default Light Hazard applied (provisional): max spacing 15 ft, min 6 ft, wall 7.5 ft, coverage 225 sq ft. NFPA 13 (2002) via NFSA textbook — engineering review required."
                     };
             }
         }

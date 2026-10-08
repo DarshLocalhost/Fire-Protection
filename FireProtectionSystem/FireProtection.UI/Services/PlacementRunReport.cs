@@ -54,5 +54,14 @@ namespace FireProtection.UI.Services
         public bool ReviewRequired { get; set; }
         public int PointsRequested { get; set; }
         public int PointsPlaced { get; set; }
+
+        /// <summary>
+        /// Per-point placement diagnostics (one line per calculated point): requested vs actual
+        /// placed location, which strategy/hosting branch executed, the ceiling source, and the
+        /// tolerance verdict. Read-only instrumentation surfaced in the exported JSON so a live run
+        /// can prove exactly where each head landed (e.g. collapsed to floor Z when a hosted family's
+        /// elevation offset does not apply). Never affects placement behavior.
+        /// </summary>
+        public List<string> PlacementDiagnostics { get; set; }
     }
 }

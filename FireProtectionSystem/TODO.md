@@ -119,4 +119,114 @@ Priority order: P0 = critical, P1 = high, P2 = medium, P3 = low.
 - Device rule separation: improved and now device-specific for smoke detectors and notification appliances instead of a shared sprinkler-style pattern.
 - Smoke detector and notification logic: implemented at the calculation layer with room-by-room candidate generation, spacing, and selection logic separated by device; production runtime validation remains pending.
 - Reporting UI: planned and required before production deployment.
-- Runtime validation: blocked by missing Autodesk Revit references in this environment; backend build continues to fail with CS0246 until the Revit assemblies are restored.
+- Runtime validation: **still blocked** — requires a user session in a live Revit host.
+
+## 2026-10-07 update — sprinklers focused, test gate now real
+
+Scope decision: **sprinklers only for now**, internal team first, external sale later if the internal team
+is satisfied. Pipe / hydraulics / fire alarm circuits / extra device types are explicitly out of scope.
+
+### Done
+
+- [x] `FireProtection.Tests` added to the solution (previously the solution built **no tests at all**).
+- [x] Three orphan suites registered — `HazardRuleValuesTests`, `SidewallDirectionalSolverTests`,
+      `PerTypeCatalogMergeTests` — they had never run while the harness printed `ALL TESTS PASSED`.
+- [x] `ReportSuiteCoverage()` fails loud when a suite exists but is not registered (verified negatively).
+- [x] 2 failing tests fixed; `CatalogLoaderTests` moved under `RunGuarded`.
+- [x] Pre-existing solution bug: `-c Revit2024` failed to build (UI mapped to `Debug` while Backend built
+      `net48`). Fixed. All 3 Revit configurations now build 0 errors and all tests pass.
+- [x] Sprinkler point identification: bounded tile snapping, array extent, corrected coverage radius
+      (`S/sqrt2`), advisory-only coverage, nearest-neighbour max-spacing check, single grid-maths owner,
+      split skip counters, corrected mounting-plane (Z) selection. See `PROGRESS.md` for detail.
+- [x] Dead code removed / made honest: coverage-pattern table (zero callers), `MinKFactor` documented as
+      not enforced.
+
+**Baseline: 388 checks, 17 suites, green on Revit2024 / 2025 / 2026; 0 build errors on all three.**
+
+### 2026-10-07 (later) — rulebook-driven sprinkler rules
+
+The two supplied rulebooks are now the **declared design basis**. Sprinkler rules were implemented from
+them and every value is cited in
+`FireProtection.Backend/Services/Placement/Sprinklers/Final/BruteForce/Nfpa13RulebookRules.cs`.
+Added `Nfpa13RulebookRulesTests` (16 tests / 59 checks).
+
+Implemented: min wall distance 4 in · non-90° corner 0.75 S · deflector drop 1–12 in unobstructed /
+1–6 in obstructed · unobstructed-vs-obstructed classification (3.7.2) · sloped peak rule 3 ft · S × L
+per-head coverage · Small Room Rule (4 conditions, 9 ft, averaging) · Ch.20 18 in zone plane ·
+Three Times rule (3 × **maximum** dimension, capped 24 in) + opposing-sprinkler exception ·
+permanent fixture > 4 ft wide below the zone plane.
+
+**Known gaps — rulebook does not contain the values, nothing was invented:**
+- [ ] **Beam rule (NFPA 13 Table 8.6.5.1.2)** — the rulebook references this table but does not
+      reproduce it. Obstruction clear distance vs. deflector height is therefore unimplemented and
+      recorded as `BeamRuleTableAvailable = false`. This is the single most significant missing rule.
+- [ ] Sprinklers in every beam pocket (Ch.19 p.226) and the concrete-tee exception.
+- [ ] Composite wood joist firestopping (Ch.19 p.228); concealed-space / attic rules (Ch.19 p.230).
+- [ ] High-piled storage / rack storage commodity tables (Ch.37, Ch.38).
+- [ ] Extended-coverage (Ch.21) and ESFR geometry — ESFR is still a review-only flag.
+- [ ] Non-90° corner limit is transcribed but corner *detection* is still advisory (polygon-shape
+      dependent).
+- [ ] Obstruction geometry is still axis-aligned bounding boxes; curved/diagonal members are approximated.
+
+### 2026-10-07 (latest) — catalog source switch (Model | Catalog file)
+
+- [x] **SOURCE radio group** in the top bar, one group for all three device tabs. Model is the
+      default; the choice persists between sessions along with the last workbook path.
+- [x] `ModelBackedCatalog` takes family/type **names** from the model and per-type **values** from the
+      workbook overlay, because the two sources are complementary, not interchangeable.
+- [x] **Shared device list** across the Smoke and Notification tabs (single Revit category
+      `OST_FireAlarmDevices`), with `DeviceCatalogOverlay` searching **both** workbook sheets so a
+      family catalogued on one sheet still resolves on the other.
+- [x] Persistent `InfoBanner` stating the active source and whether values are provisional — so a
+      missing per-type value is never silent.
+- [x] `FireProtectionConfig.UseRevitFamilyListing` retired; the radio is now the single source switch.
+- [x] `CatalogSourceModeTests` (12 tests / 53 checks).
+
+**Not verified:** the Revit-document reading half (`ModelFamilyEnumerator`, `FamilySymbol`
+enumeration) needs one live run in Revit.
+
+- [ ] Verify in Revit: switch Model → Catalog file → Model; confirm the dropdowns change source and
+      the banner text updates.
+- [ ] Confirm the shared device list looks right on both alarm tabs for a real project.
+- [ ] Consider persisting the *remembered workbook* separately from the mode, so a user who works
+      mostly from the model can still keep a workbook one click away.
+
+### Next — P0, blocked on the user
+
+- [ ] **Phase 3: live Revit verification.** Nothing is runtime-proven. The historical (0,0,0) origin-snap
+      defect must be re-checked. Checklist in `PROGRESS.md`.
+- [ ] Confirm placed Z lands on the intended ceiling and not the slab above (new mounting-plane ranking
+      is static-only until observed in Revit).
+
+### Still open (unchanged priorities)
+
+- [ ] NFPA13-2022 compliant spacing — needs approved values from a fire protection engineer. The rule
+      values are NFPA 13 **2002** via a client textbook and are **not** FPE-signed-off. Do not invent them.
+      A rules-from-file mechanism (Phase 8) is the planned route.
+- [ ] Collision tab ("Final") is an empty shell — build it or hide it.
+- [ ] Report must surface reason codes (`StatusCode`) and populate `PlacementDiagnostics`.
+- [ ] Cancelled run returns before `RoomReports` is populated.
+- [ ] Tag placed elements with a run ID; then add "remove devices I placed" and safe re-runs.
+- [ ] 2D plan preview before placing.
+- [ ] 6 hard-coded Revit `HintPath`s — build only works on this machine. No `Revit2027` configuration.
+- [ ] Spatial index for the free-grid candidate search — needs a real large model to validate.
+- [ ] Catalog provenance: record the source/page for each value (values currently also come from
+      "memory", which is a correctness risk for a life-safety tool).
+
+### Parked — known-wrong code that must not be used until fixed
+
+Sprinklers are the focus for now, so these are parked rather than fixed. They are small, well-understood
+fixes; leaving them is only safe while the features stay off.
+
+- [ ] Smoke/notification obstacles never reach the device calculation (`SmokeDetectorRoomInput.Obstacles`
+      is never assigned; `RoomData` has no `Obstacles`). Beam clearance, obstacle spacing and the whole
+      ACH branch are dead in production.
+- [ ] ACH airflow table is wrong: `Nfpa72SmokeDetectorRules.cs` thresholds are roughly an order of
+      magnitude off NFPA 72 Table 17.7.6.3.3.2 (actual: 2→125, 3→250, 4→375, 5→500, 6→625, 7→875,
+      8+→900 ft²) and invent a 750 ft² row that does not exist.
+- [ ] `AudibleCoverageEngine` has exactly one caller in the repo and it is a test — audible coverage is
+      never computed. Visible coverage has no implementation at all.
+- [ ] Wall-mounted strobes place nothing: `RevitNotificationAppliancePlacementExecutor` passes
+      `fallbackStrategy = null`, so `OneLevelBasedHosted` families fail with
+      "No strategy supports placement type".
+- [ ] Provisional rules do not flag device rooms — a clean room reports `Success` on unapproved values.

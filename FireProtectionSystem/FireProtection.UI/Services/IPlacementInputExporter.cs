@@ -37,11 +37,26 @@ namespace FireProtection.UI.Services
         /// <summary>Per-row boundary (wall) clearance override in feet (Decision 018). null = use rule-set default.</summary>
         public double? OverrideBoundaryClearanceFt { get; set; }
 
+        /// <summary>Per-row S→W maximum device-to-wall distance override in feet. null = use rule-set NFPA half-spacing default.</summary>
+        public double? OverrideMaxDistanceToWallFt { get; set; }
+
+        /// <summary>Per-row acoustic-tile fallback size (feet) used to center devices when Revit has no readable ceiling grid. null = use the Revit-read grid / free array.</summary>
+        public double? OverrideCeilingTileUFt { get; set; }
+        public double? OverrideCeilingTileVFt { get; set; }
+
         /// <summary>Per-room placement behavior override as string ("WallSidewall", "CeilingOverhead", etc.). null = use the universal/default behavior.</summary>
         public string SelectedSprinklerPlacementBehavior { get; set; }
 
         /// <summary>Per-room sprinkler orientation override ("pendent", "upright", "sidewall"). null = use default.</summary>
         public string SelectedSprinklerOrientation { get; set; }
+
+        // Catalog-derived, read-only type data. Null is meaningful: it requests the
+        // provisional hazard baseline rather than a fabricated zero.
+        public double? TypeMaxCoverageAreaSqFt { get; set; }
+        public double? TypeMaxSpacingFt { get; set; }
+        public double? TypeMinSpacingFt { get; set; }
+        public double? TypeCoverageRadiusFt { get; set; }
+        public string SprinklerClass { get; set; }
 
         // Full room payload (ceilings, obstacles, existingSprinklers, source, etc.) captured
         // from the ModelSnapshot JSON and forwarded to the exporter. The Backend rehydrates

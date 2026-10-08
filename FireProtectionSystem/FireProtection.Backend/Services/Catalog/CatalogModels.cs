@@ -17,6 +17,34 @@ namespace FireProtection.Backend.Services.Catalog
         public string HazardClass { get; set; }
         public string Mount { get; set; }
         public string Notes { get; set; }
+
+        // Optional per-type listed data (columns 7+). All nullable: a blank cell means
+        // "no listed value — fall back to the provisional hazard-class default in the engine".
+        // These are the client's listing/manufacturer numbers, NOT hardcoded in code.
+        /// <summary>StandardSpray / ExtendedCoverage / Residential / Sidewall / ESFR / CMSA.</summary>
+        public string SprinklerClass { get; set; }
+        /// <summary>Listed maximum coverage area per sprinkler (sq ft).</summary>
+        public double? MaxCoverageAreaSqFt { get; set; }
+        /// <summary>Listed maximum center-to-center spacing (ft).</summary>
+        public double? MaxSpacingFt { get; set; }
+        /// <summary>Listed minimum center-to-center spacing (ft).</summary>
+        public double? MinSpacingFt { get; set; }
+        /// <summary>Listed coverage radius attributed to one sprinkler (ft).</summary>
+        public double? CoverageRadiusFt { get; set; }
+        /// <summary>Nominal K-factor.</summary>
+        public double? KFactor { get; set; }
+        /// <summary>Response type (QR / SR). Display metadata.</summary>
+        public string ResponseType { get; set; }
+        /// <summary>Temperature rating (deg F). Display metadata.</summary>
+        public int? TempRatingF { get; set; }
+        /// <summary>Deflector-to-ceiling distance (inches). Display metadata.</summary>
+        public double? DeflectorToCeilingIn { get; set; }
+        /// <summary>Listed maximum separation of sidewall heads along their host wall (feet).</summary>
+        public double? SidewallMaxAlongWallSpacingFt { get; set; }
+        /// <summary>Listed maximum directional throw perpendicular to the host wall (feet).</summary>
+        public double? SidewallMaxThrowFt { get; set; }
+        /// <summary>Listed end-wall/corner clearance limit for sidewall heads (feet).</summary>
+        public double? SidewallEndWallClearanceFt { get; set; }
     }
 
     public sealed class SmokeDetectorCatalogRow

@@ -223,8 +223,8 @@ namespace FireProtection.Tests
 
             var result = AudibleCoverageEngine.Evaluate(
                 appliances, geometry, new List<ObstacleBox>(),
-                ambientDb: 40.0, maxSustainedDb: 70.0,
-                isSleepingArea: false, config);
+                sourceDbaAt10Ft: 90.0, ambientDb: 40.0, maxSustainedDb: 70.0,
+                isSleepingArea: false, config: config);
 
             Check(result.SamplesChecked > 0, "audible engine sampled the room (" + result.SamplesChecked + " points)");
             Check(result.CoveragePercentage >= 0.0 && result.CoveragePercentage <= 100.0,

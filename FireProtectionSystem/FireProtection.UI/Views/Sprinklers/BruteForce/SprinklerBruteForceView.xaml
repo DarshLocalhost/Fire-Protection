@@ -88,6 +88,22 @@
                                   IsEnabled="{Binding IsSprinklerFamilySelected}"/>
                     </StackPanel>
                 </WrapPanel>
+                <TextBlock Grid.Row="2" Margin="0,38,0,0"
+                           Style="{StaticResource DataMuted}"
+                           Text="{Binding SelectedSprinklerCatalogEntry.DisplayLabel, TargetNullValue=Catalog type data will appear here when selected.}"/>
+
+                <!-- Why the family/type combo is empty (missing sheet vs no families in the model).
+                     Only meaningful when there is a selection problem, so it stays collapsed
+                     otherwise rather than adding a permanent second line of muted text. -->
+                <StackPanel Grid.Row="2" Margin="0,56,0,0">
+                    <TextBlock Style="{StaticResource WarningText}"
+                               Text="{Binding CatalogStatusMessage}"
+                               Visibility="{Binding CatalogStatusMessage, Converter={StaticResource StringToVis}}"/>
+                    <TextBlock Style="{StaticResource WarningText}"
+                               Margin="0,4,0,0"
+                               Text="{Binding MissingCatalogDataMessage}"
+                               Visibility="{Binding MissingCatalogDataMessage, Converter={StaticResource StringToVis}}"/>
+                </StackPanel>
             </Grid>
         </Border>
 
@@ -428,11 +444,11 @@
                                  sit clear of the HAZARD and FAMILY / TYPE combos next to them. -->
                             <Grid.ColumnDefinitions>
                                 <ColumnDefinition Width="36"/>
-                                <ColumnDefinition Width="2.4*"/>
+                                <ColumnDefinition Width="2.2*"/>
                                 <ColumnDefinition Width="0.9*"/>
-                                <ColumnDefinition Width="1.5*"/>
+                                <ColumnDefinition Width="1.4*"/>
                                 <ColumnDefinition Width="0.8*"/>
-                                <ColumnDefinition Width="2.0*"/>
+                                <ColumnDefinition Width="1.8*"/>
                                 <ColumnDefinition Width="0.85*"/>
                                 <ColumnDefinition Width="0.85*"/>
                                 <ColumnDefinition Width="0.85*"/>
@@ -448,14 +464,14 @@
                             <!-- 7 = the combo's own left padding, so these headers line up with the text
                                  inside the combo below rather than with its border. -->
                             <TextBlock Grid.Column="3" Text="HAZARD" Margin="7,0,12,0" Style="{StaticResource EyebrowText}"/>
-                            <TextBlock Grid.Column="4" Text="{Binding CeilingColumnHeader}" Margin="0,0,18,0" TextAlignment="Center" Style="{StaticResource EyebrowTextRight}"/>
+                            <TextBlock Grid.Column="4" Text="CEILING TYPE" Margin="0,0,18,0" TextAlignment="Center" Style="{StaticResource EyebrowTextRight}"/>
                             <TextBlock Grid.Column="5" Text="FAMILY / TYPE" Margin="7,0,12,0" Style="{StaticResource EyebrowText}"/>
                             <!-- 19 = the column's 12px gutter + the input box's 7px padding, so the header's
                                  right edge lines up with the digits inside the box rather than with its border. -->
                             <TextBlock Grid.Column="6" Text="{Binding SpacingColumnHeader}" Margin="0,0,19,0" Style="{StaticResource EyebrowTextRight}"/>
                             <TextBlock Grid.Column="7" Text="{Binding ClearanceColumnHeader}" Margin="0,0,19,0" Style="{StaticResource EyebrowTextRight}"/>
+                            <TextBlock Grid.Column="8" Text="{Binding WallDistanceColumnHeader}" Margin="0,0,19,0" Style="{StaticResource EyebrowTextRight}"/>
                             <TextBlock Grid.Column="9" Text="RESET" TextAlignment="Center" Style="{StaticResource EyebrowText}"/>
-                            <!--<TextBlock Grid.Column="8" Text="ORIENTATION" Margin="7,0,12,0" Style="{StaticResource EyebrowText}"/>-->
                         </Grid>
                     </Border>
 
@@ -518,11 +534,11 @@
                                                  takes that width out of this grid). -->
                                             <Grid.ColumnDefinitions>
                                                 <ColumnDefinition Width="36"/>
-                                                <ColumnDefinition Width="2.4*"/>
+                                                <ColumnDefinition Width="2.2*"/>
                                                 <ColumnDefinition Width="0.9*"/>
-                                                <ColumnDefinition Width="1.5*"/>
+                                                <ColumnDefinition Width="1.4*"/>
                                                 <ColumnDefinition Width="0.8*"/>
-                                                <ColumnDefinition Width="2.0*"/>
+                                                <ColumnDefinition Width="1.8*"/>
                                                 <ColumnDefinition Width="0.85*"/>
                                                 <ColumnDefinition Width="0.85*"/>
                                                 <ColumnDefinition Width="0.85*"/>
@@ -593,7 +609,7 @@
                                             </StackPanel>
 
                                             <TextBlock Grid.Column="4"
-                                                       Text="{Binding CeilingHeightFt, StringFormat={}{0:F2}}"
+                                                       Text="{Binding CeilingType}"
                                                        Margin="0,0,18,0"
                                                        TextAlignment="Center"
                                                        Style="{StaticResource DataNumeric}"/>
@@ -653,13 +669,27 @@
                                                 </TextBox.Style>
                                             </TextBox>
 
-                                        <!-- <ComboBox Grid.Column="8"
-           Margin="0,0,12,0"
-           VerticalAlignment="Center"
-           Style="{StaticResource CellComboBoxStyle}"
-           ItemsSource="{Binding OrientationOptions}"
-           SelectedItem="{Binding SelectedOrientation, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}"
-           ToolTip="Sprinkler orientation: auto uses the family default"/>-->
+                                            <!-- S→W: user-editable MAXIMUM device-to-wall distance (blank = rule-set
+                                                 NFPA half-spacing default). Independent of the WALL column, which is the
+                                                 MINIMUM clearance. -->
+                                            <TextBox Grid.Column="8"
+                                                     Margin="0,0,12,0"
+                                                     VerticalAlignment="Center"
+                                                     Text="{Binding MaxDistanceToWallInput, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}">
+                                                <TextBox.ToolTip>
+                                                    <ToolTip Content="{Binding MaxDistanceToWallTooltip}"/>
+                                                </TextBox.ToolTip>
+                                                <TextBox.Style>
+                                                    <Style TargetType="TextBox" BasedOn="{StaticResource NumericCellInputStyle}">
+                                                        <Style.Triggers>
+                                                            <DataTrigger Binding="{Binding HasMaxDistanceToWallError}" Value="True">
+                                                                <Setter Property="BorderBrush" Value="{StaticResource BlockedBrush}"/>
+                                                                <Setter Property="BorderThickness" Value="1.5"/>
+                                                            </DataTrigger>
+                                                        </Style.Triggers>
+                                                    </Style>
+                                                </TextBox.Style>
+                                            </TextBox>
 
                                             <Button Grid.Column="9"
                                                     Style="{StaticResource OutlineButtonStyle}"

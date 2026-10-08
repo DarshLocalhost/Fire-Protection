@@ -513,7 +513,19 @@ namespace FireProtection.Backend.Services.Model
                 HeightAboveLevelFt = src.HeightAboveLevelFt,
                 SlopeType = src.SlopeType,
                 SlopeDegrees = src.SlopeDegrees,
-                IsRoomDirectCeiling = src.IsRoomDirectCeiling
+                IsRoomDirectCeiling = src.IsRoomDirectCeiling,
+                // Grid fields MUST be carried, or the ceiling reaches the calc engine with
+                // HasReadableGrid=false and tile-center snapping silently never runs (the room
+                // falls back to the free/centered array or the user-typed tile size).
+                ThicknessFt = src.ThicknessFt,
+                BoundaryPolygon = src.BoundaryPolygon,
+                HasReadableGrid = src.HasReadableGrid,
+                GridOriginXFt = src.GridOriginXFt,
+                GridOriginYFt = src.GridOriginYFt,
+                GridSpacingUFt = src.GridSpacingUFt,
+                GridSpacingVFt = src.GridSpacingVFt,
+                GridAngleRad = src.GridAngleRad,
+                Notes = src.Notes
             };
         }
     }

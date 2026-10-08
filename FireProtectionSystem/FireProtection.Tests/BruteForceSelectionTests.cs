@@ -36,6 +36,19 @@ namespace FireProtection.Tests
 
         public void ClearEligibilityCache() { }
 
+        // T1.4 added the host-resolution pass to the contract purely for performance (the
+        // Ceiling/Floor/RoofBase collector used to run once per candidate point). The fake has no
+        // Revit document, so the pass is a no-op - but the counters are exposed so tests can assert
+        // that the ViewModel brackets a sweep correctly.
+        public int HostPassBeginCount;
+        public int HostPassEndCount;
+
+        public void BeginHostResolutionPass() => HostPassBeginCount++;
+
+        public void EndHostResolutionPass() => HostPassEndCount++;
+
+        public long HostCollectorCallsSaved { get; set; }
+
         // Decision 017 added this member to ISprinklerPlacementService. These tests cover the
         // eligibility/selection contract only, so the fake reports "no missing families".
         public IReadOnlyList<MissingFamilyEntry> ProbeMissingFamilies(BruteForceCalculationResult calcResult) =>

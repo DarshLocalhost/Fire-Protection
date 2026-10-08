@@ -9,7 +9,7 @@ namespace FireProtection.Backend.Services.Placement.Sprinklers.Final.BruteForce
     /// <see cref="IHazardPlacementRules"/> implementation and must be replaceable later when the
     /// senior/project provides exact NFPA13-2022 values.
     /// </summary>
-    public class HazardPlacementRuleSet
+public class HazardPlacementRuleSet
     {
         public HazardClass HazardClass { get; set; }
 
@@ -26,8 +26,42 @@ namespace FireProtection.Backend.Services.Placement.Sprinklers.Final.BruteForce
         /// <summary>Maximum coverage area per sprinkler (square feet).</summary>
         public double MaxCoverageAreaSqFt { get; set; }
 
-        /// <summary>Maximum coverage radius attributed to a single sprinkler (feet).</summary>
+        /// <summary>
+        /// Maximum coverage radius attributed to a single sprinkler (feet).
+        /// NOTE: this is the head's LISTED coverage radius (from its approval / NFPA table),
+        /// NOT the geometric distance-to-nearest-head of the layout the engine generates.
+        /// Use <see cref="EffectiveCoverageRadiusFt"/> for the layout-geometry check.</summary>
         public double CoverageRadiusFt { get; set; }
+
+        /// <summary>
+        /// The geometric coverage radius the engine should test a generated layout against.
+        ///
+        /// For a rectangular array on a square-ish grid of centre-to-centre spacing S, the
+        /// worst-case distance from ANY point on the floor to the nearest head is:
+        ///
+        ///     array corner : sqrt((S/2)^2 + (S/2)^2) = S / sqrt(2)  ~ 0.707 * S   (worst)
+        ///     array edge   : S / 2                                 ~ 0.500 * S
+        ///     array centre : S / sqrt(2)                           ~ 0.707 * S
+        ///
+        /// The stored <see cref="CoverageRadiusFt"/> was set to S/2 for every hazard class,
+        /// which is only valid along the array EDGES. Testing a correct centred array against
+        /// S/2 therefore reports a coverage gap at every corner and array centre — a false
+        /// positive on every single room.
+        ///
+        /// S/2 and S/sqrt(2) happened to partly cancel out against a 5% tolerance, which is
+        /// why the error was invisible. Both halves are corrected together in
+        /// FinalizeSelection; see RemoteDistanceLimitFt for the reporting side.
+        /// </summary>
+        public double EffectiveCoverageRadiusFt =>
+            MaxSpacingFt > 0
+                ? MaxSpacingFt / Math.Sqrt(2.0)
+                : CoverageRadiusFt;
+
+        /// <summary>
+        /// The NFPA remote-distance limit used for the ADVISORY coverage report: the furthest
+        /// floor point from any head must not exceed 0.7 * nominal spacing.
+        /// </summary>
+        public double RemoteDistanceLimitFt => MaxSpacingFt * 0.7;
 
         /// <summary>Required clearance from obstacles (feet).</summary>
         public double ObstacleClearanceFt { get; set; }
@@ -41,7 +75,16 @@ namespace FireProtection.Backend.Services.Placement.Sprinklers.Final.BruteForce
         /// <summary>Maximum distance from walls (feet) - NFPA13-2022 requirement.</summary>
         public double MaxDistanceFromWallsFt { get; set; }
 
-        /// <summary>Minimum K-factor requirement for this hazard class.</summary>
+        /// <summary>
+        /// Minimum K-factor requirement for this hazard class.
+        ///
+        /// NOT ENFORCED. This value is populated by every rule set and carried through
+        /// <see cref="Clone"/>, but nothing in the calculation engine reads it, because K-factor
+        /// is a property of the selected sprinkler TYPE and is validated at the hydraulic stage,
+        /// which this tool does not perform. It is retained so the approved rule set has a home
+        /// for the value; <see cref="IsProvisional"/> stays true until an engineer signs off.
+        /// Do not read this as "the layout satisfies the K-factor requirement".
+        /// </summary>
         public double MinKFactor { get; set; }
 
         /// <summary>Ceiling height adjustment factor (multiplier for spacing).</summary>
@@ -55,9 +98,6 @@ namespace FireProtection.Backend.Services.Placement.Sprinklers.Final.BruteForce
 
         /// <summary>Orientation-specific spacing adjustments (key: orientation, value: spacing multiplier).</summary>
         public Dictionary<string, double> OrientationSpacingAdjustments { get; set; }
-
-        /// <summary>Coverage pattern adjustment factors (key: pattern type, value: spacing multiplier).</summary>
-        public Dictionary<string, double> CoveragePatternAdjustments { get; set; }
 
         /// <summary>
         /// True when these values are provisional placeholders that must NOT be treated as
@@ -82,12 +122,11 @@ namespace FireProtection.Backend.Services.Placement.Sprinklers.Final.BruteForce
                 { "SLOPED", 0.9 },
                 { "STEPPED", 0.85 }
             };
-            CoveragePatternAdjustments = new Dictionary<string, double>(StringComparer.OrdinalIgnoreCase)
-            {
-                { "circular", 1.0 },
-                { "rectangular", 0.9 },
-                { "square", 0.95 }
-            };
+            // CoveragePatternAdjustments and GetCoveragePatternAdjustment were removed.
+            // They had ZERO callers anywhere in the solution, so the circular/rectangular/square
+            // factors were never applied to any layout — an unvalidated-looking table that a
+            // future reader could easily mistake for an implemented rule. Nothing selects a
+            // coverage pattern today, so there is no pattern to adjust.
         }
 
         public double GetObstacleClearance(string obstacleType)
@@ -106,12 +145,6 @@ namespace FireProtection.Backend.Services.Placement.Sprinklers.Final.BruteForce
         {
             if (string.IsNullOrWhiteSpace(slopeType)) return 1.0;
             return CeilingSlopeAdjustments.TryGetValue(slopeType, out double adjustment) ? adjustment : 1.0;
-        }
-
-        public double GetCoveragePatternAdjustment(string patternType)
-        {
-            if (string.IsNullOrWhiteSpace(patternType)) return 1.0;
-            return CoveragePatternAdjustments.TryGetValue(patternType, out double adjustment) ? adjustment : 1.0;
         }
 
         /// <summary>
@@ -148,10 +181,6 @@ namespace FireProtection.Backend.Services.Placement.Sprinklers.Final.BruteForce
             if (this.OrientationSpacingAdjustments != null)
             {
                 copy.OrientationSpacingAdjustments = new Dictionary<string, double>(this.OrientationSpacingAdjustments, StringComparer.OrdinalIgnoreCase);
-            }
-            if (this.CoveragePatternAdjustments != null)
-            {
-                copy.CoveragePatternAdjustments = new Dictionary<string, double>(this.CoveragePatternAdjustments, StringComparer.OrdinalIgnoreCase);
             }
             return copy;
         }

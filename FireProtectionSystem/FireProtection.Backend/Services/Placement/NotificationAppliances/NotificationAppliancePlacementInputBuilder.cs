@@ -44,6 +44,9 @@ namespace FireProtection.Backend.Services.Placement.NotificationAppliances
                     SelectedFamilyName = item.SelectedFamilyName,
                     SelectedTypeName = item.SelectedTypeName,
                     BoundaryPolygon = item.Polygon ?? new List<double[]>(),
+                    OverrideMaxDistanceToWallFt = item.OverrideMaxDistanceToWallFt,
+                    OverrideCeilingTileUFt = item.OverrideCeilingTileUFt,
+                    OverrideCeilingTileVFt = item.OverrideCeilingTileVFt,
                     DeviceKind = FireProtection.UI.Services.DeviceKind.NotificationAppliance
                 };
 

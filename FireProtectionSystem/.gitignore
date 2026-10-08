@@ -1,0 +1,7 @@
+
+# Tooling / generated artifacts
+node_modules/
+.archify/
+.kilo/
+FireProtectionSystem.zip
+FireProtectionSystem/.analysis/

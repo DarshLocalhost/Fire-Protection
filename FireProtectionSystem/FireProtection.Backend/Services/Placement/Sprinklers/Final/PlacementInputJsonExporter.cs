@@ -129,7 +129,15 @@ namespace FireProtection.Backend.Services.Placement.Sprinklers.Final
                     SelectedSprinklerTypeName = item.SelectedSprinklerTypeName,
                     OverrideMaxSpacingFt = item.OverrideMaxSpacingFt,
                     OverrideBoundaryClearanceFt = item.OverrideBoundaryClearanceFt,
-                    SelectedSprinklerOrientation = item.SelectedSprinklerOrientation
+                    OverrideMaxDistanceToWallFt = item.OverrideMaxDistanceToWallFt,
+                    OverrideCeilingTileUFt = item.OverrideCeilingTileUFt,
+                    OverrideCeilingTileVFt = item.OverrideCeilingTileVFt,
+                    SelectedSprinklerOrientation = item.SelectedSprinklerOrientation,
+                    TypeMaxCoverageAreaSqFt = item.TypeMaxCoverageAreaSqFt,
+                    TypeMaxSpacingFt = item.TypeMaxSpacingFt,
+                    TypeMinSpacingFt = item.TypeMinSpacingFt,
+                    TypeCoverageRadiusFt = item.TypeCoverageRadiusFt,
+                    SprinklerClass = item.SprinklerClass
                 };
 
                 RoomData roomData = null;

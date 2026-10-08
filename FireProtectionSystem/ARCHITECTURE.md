@@ -68,8 +68,9 @@ FireProtectionSystem.slnx
 - `MainWindowViewModel` aggregates tab ViewModels: `SprinklerViewModel` (which contains
   `SprinklerBruteForceViewModel` and `SprinklerCollisionViewModel`), `SmokeDetectorViewModel`,
   `NotificationApplianceViewModel`.
-- The BruteForce flow is the only fully wired feature; Collision/Smoke/Notification ViewModels are
-  currently empty shells (constructor + a `Data` property only).
+- The BruteForce flow and the Smoke / Notification device flows are both wired end-to-end
+  (calculation + Revit placement through `FireAlarmDevicePlacementCore`). `SprinklerCollisionViewModel`
+  remains a genuine empty shell (28 lines, one unused `Data` property, empty `<Grid>` view).
 
 ## 6. Revit API Integration
 
@@ -151,9 +152,15 @@ flowchart TD
 ## 9. Hazard Classification Architecture
 
 `HazardClassifier.ClassifyByName(roomName)` → `HazardResult`. The result is attached to `RoomData`
-(classification tagging). The **calculation** does **not** use hazard-specific engineering values:
-`DefaultHazardPlacementRules.GetRules(hazardClass)` returns the **same** 15 ft provisional placeholder
-for every class and sets `HasApprovedRules = false`. NFPA13-2022 hazard-specific rules are not present.
+(classification tagging). The calculation resolves a **per-hazard-class** rule set via
+`DefaultHazardPlacementRules.GetRules(hazardClass)`, with distinct provisional values per class
+(Light 15 ft / 225 ft², OH1 15 ft / 130 ft², OH2 15 ft / 130 ft², EH1 12 ft / 100 ft², EH2 12 ft / 100 ft²).
+All of them are **placeholder values traced to NFPA 13 (2002)** via a client-supplied textbook and are
+**not** AHJ/FPE verified, so `HasApprovedRules = false` and `IsProvisional = true` on every set. Approved
+NFPA 13-2022 values are **not** implemented.
+
+*Correction (2026-10-07): an earlier revision of this section stated all classes share an identical
+15 ft placeholder. That is no longer true — the values differ per class, though all remain provisional.*
 
 ## 10. Snowdon Integration
 
@@ -283,7 +290,9 @@ The UI depends only on the **interfaces** `ISprinklerPlacementService`, `ISprink
 
 - The UI depends on Backend-constructed services injected via long constructor chains; any change to
   `UiLauncher.Show`/`MainWindow`/`MainWindowViewModel` signatures ripples through.
-- Collision / Smoke / Notification tabs are empty shells; wiring exists but logic is absent.
+- `SprinklerCollisionViewModel` is an empty shell; the Collision tab is blank. Smoke / Notification are
+  wired for placement but rely on provisional, unapproved rule values and never receive obstacle,
+  existing-device or airflow inputs.
 - Provisional spacing means every result is `ReviewRequired`; no compliant output yet.
 - Linked-level resolution and linked-ceiling hosting are partial (host-document fallback only).
 

@@ -31,6 +31,9 @@ namespace FireProtection.Tests
             TestSToSDrivesHeadCount();
             TestGridSpacingWithinMax();
             TestPerimeterHeadsWithinHalfSpacing();
+            TestIgnoresSlabOfLevelAbove();
+            TestPrefersOwnLevelCeiling();
+            TestFlagsOutOfBandCeiling();
 
             if (_failures == 0)
             {
@@ -178,6 +181,120 @@ namespace FireProtection.Tests
                 "nearest head to each wall is within S/2=" + (S / 2.0).ToString("F1")
                 + " ft (worst wall gap=" + worstWall.ToString("F2") + " ft: L=" + left.ToString("F2")
                 + ", R=" + right.ToString("F2") + ", B=" + bottom.ToString("F2") + ", T=" + top.ToString("F2") + ")");
+        }
+
+        // =================================================================
+        // Mounting plane (Z) selection — wrong-Z regression tests
+        // =================================================================
+        //
+        // A room in a stacked building has several candidate ceilings: its own, a bulkhead or
+        // soffit, and the slab that forms the FLOOR of the level above. Selecting the wrong one
+        // places an entire room's heads at the wrong height — a silent error that is very hard
+        // to spot in the model and impossible to detect in a plan view.
+
+        private static CeilingData CeilingAt(double bottom, string slope, string levelId)
+        {
+            return new CeilingData
+            {
+                SlopeType = slope,
+                BottomElevationFt = bottom,
+                LevelId = levelId,
+                Source = new SourceReferenceData()
+            };
+        }
+
+        /// <summary>
+        /// With ceilings on BOTH the room's level and the level above, the room's own ceiling wins.
+        /// The previous fallback ranked by HIGHEST bottom elevation whenever no level match was
+        /// required, so a room with no level-tagged ceiling selected the ceiling of the floor
+        /// above — a 12 ft Z error across every head in the room.
+        /// </summary>
+        private static void TestIgnoresSlabOfLevelAbove()
+        {
+            Console.WriteLine("Test: the ceiling of the level ABOVE is not used as the mounting plane");
+
+            PlacementRoomInput room = MakeRoom("Z", Rect(0, 0, 40, 30));
+            room.LevelElevationFt = 0.0;
+            room.CeilingHeightFt = 9.0;
+            // Room's own ceiling at 9 ft (untagged level), plus the Level 2 slab ceiling at 21 ft.
+            room.Ceilings = new List<CeilingData>
+            {
+                CeilingAt(21.0, "FLAT", "L2"),
+                CeilingAt(9.0, "FLAT", null)
+            };
+
+            var res = Calc(room);
+            Check(res.Points.Count > 0, "room still places heads (got " + res.CalculatedCount + ")");
+
+            // The selected mounting plane is the 9 ft ceiling, less one deflector drop (Ch.19 p.225).
+            double expectedZ = 9.0 - Nfpa13RulebookRules.DeflectorMinDropUnobstructedFt;
+            double worstZ = res.Points.Count == 0 ? double.NaN : res.Points.Max(p => p.Z);
+            Check(Math.Abs(worstZ - expectedZ) < 0.01,
+                "all heads land under the room's own 9 ft ceiling, not the 21 ft slab (worst Z="
+                + worstZ.ToString("F2") + " ft, expected " + expectedZ.ToString("F2") + " ft)");
+        }
+
+        /// <summary>When both levels carry a tagged ceiling, the room's own level wins outright.</summary>
+        private static void TestPrefersOwnLevelCeiling()
+        {
+            Console.WriteLine("Test: a ceiling tagged with the room's own level is preferred");
+
+            PlacementRoomInput room = MakeRoom("ZL", Rect(0, 0, 40, 30));
+            room.LevelId = "L1";
+            room.LevelElevationFt = 0.0;
+            room.CeilingHeightFt = 9.0;
+            room.Ceilings = new List<CeilingData>
+            {
+                CeilingAt(21.0, "FLAT", "L2"),
+                CeilingAt(9.0, "FLAT", "L1")
+            };
+
+            var res = Calc(room);
+            double expectedZ = 9.0 - Nfpa13RulebookRules.DeflectorMinDropUnobstructedFt;
+            double worstZ = res.Points.Count == 0 ? double.NaN : res.Points.Max(p => p.Z);
+            Check(Math.Abs(worstZ - expectedZ) < 0.01,
+                "the L1 ceiling is selected over the L2 ceiling (worst Z=" + worstZ.ToString("F2")
+                + " ft, expected " + expectedZ.ToString("F2") + " ft)");
+        }
+
+        /// <summary>
+        /// A ceiling far above the room's nominal height (a plenum deck) is not a mounting plane.
+        /// It must be excluded AND the room must be told, rather than the heads being placed
+        /// silently against the deck.
+        /// </summary>
+        private static void TestFlagsOutOfBandCeiling()
+        {
+            Console.WriteLine("Test: a ceiling far above the nominal height is rejected and reported");
+
+            PlacementRoomInput room = MakeRoom("ZB", Rect(0, 0, 40, 30));
+            room.LevelId = "L1";
+            room.LevelElevationFt = 0.0;
+            room.CeilingHeightFt = 9.0;
+            // Only candidate is a plenum deck at 20 ft — 11 ft above the nominal 9 ft ceiling.
+            room.Ceilings = new List<CeilingData> { CeilingAt(20.0, "FLAT", "L1") };
+
+            var res = Calc(room);
+            double worstZ = res.Points.Count == 0 ? double.NaN : res.Points.Max(p => p.Z);
+            Check(Math.Abs(worstZ - 20.0) > 0.01,
+                "heads are NOT placed against the 20 ft plenum deck (worst Z=" + worstZ.ToString("F2") + " ft)");
+
+            Check(res.Status == CalculationStatus.ReviewRequired,
+                "the room is flagged ReviewRequired (got " + res.Status + ")");
+            Check(HasMessageAboutCeiling(res),
+                "the user is told the ceiling needs review");
+        }
+
+        private static bool HasMessageAboutCeiling(RoomCalculationResult res)
+        {
+            foreach (string w in res.Warnings)
+            {
+                if (w != null && w.IndexOf("ceiling", StringComparison.OrdinalIgnoreCase) >= 0) return true;
+            }
+            foreach (string e in res.Errors)
+            {
+                if (e != null && e.IndexOf("ceiling", StringComparison.OrdinalIgnoreCase) >= 0) return true;
+            }
+            return false;
         }
     }
 }

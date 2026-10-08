@@ -27,5 +27,13 @@ obj/
 
 # OS files
 .DS_Store
-Thumbs.dbFireProtectionSystem/Layout, Detail, And Calculations of Fire Sprinkler Systems (1).pdf
+Thumbs.db
+FireProtectionSystem/Layout, Detail, And Calculations of Fire Sprinkler Systems (1).pdf
 FireProtectionSystem/*.pdf
+
+# Tooling / generated artifacts
+node_modules/
+.archify/
+.kilo/
+FireProtectionSystem.zip
+FireProtectionSystem/.analysis/

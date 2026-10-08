@@ -61,6 +61,8 @@ namespace FireProtection.UI.ViewModels.NotificationAppliances
 
         public override string DeviceDisplayName => "NOTIFICATION APPLIANCE CONFIGURATION";
 
+        protected override string CatalogSheetName => "NotificationAppliances";
+
         protected override FireProtection.UI.Services.DeviceKind TabDeviceKind => FireProtection.UI.Services.DeviceKind.NotificationAppliance;
 
         // ---------------------------------------------------------------------------------------
@@ -75,9 +77,6 @@ namespace FireProtection.UI.ViewModels.NotificationAppliances
 
         public IReadOnlyList<string> NotificationDbaOptions =>
             Catalog != null ? Catalog.AvailableNotificationDbas : Empty;
-
-        /// <summary>The Candela / dBA pairs that actually exist in the workbook, deduplicated.</summary>
-        public IReadOnlyList<string> CandelaDbaOptions => BuildCandelaDbaOptions();
 
         // ---------------------------------------------------------------------------------------
         // Family/type-derived attributes. The catalog carries ApplianceType, Candela and dBA per
@@ -118,6 +117,31 @@ namespace FireProtection.UI.ViewModels.NotificationAppliances
         protected override void OnUniversalFamilyTypeChanged()
         {
             RaiseDerivedAttributeNotifications();
+            OnPropertyChanged(nameof(MissingCatalogDataMessage));
+        }
+
+        /// <summary>
+        /// Warns when the selected family/type has no photometric/audible rating.
+        ///
+        /// Reuses the existing zero-sentinel convention rather than new nullable fields: the loader
+        /// stores 0 for a blank cell, and a 0 cd strobe or 0 dBA horn is not a real device, so
+        /// Candela &lt;= 0 AND NotificationDba &lt;= 0 already means "no rating known" throughout the
+        /// codebase (see DeriveAttribute and NotificationApplianceViewModel's own zero-guard).
+        /// </summary>
+        protected override string DescribeMissingCatalogData()
+        {
+            if (!string.IsNullOrWhiteSpace(DerivedCandelaDba)) return null;
+
+            NotificationApplianceCatalogEntry entry = FindCatalogEntry(Catalog, UniversalFamilyName, UniversalTypeName);
+            if (entry != null && (entry.Candela > 0 || entry.NotificationDba > 0))
+            {
+                // The row exists and carries a rating, so the warning would be wrong.
+                return null;
+            }
+
+            return BuildMissingCatalogDataWarning(
+                "candela and dBA ratings are unknown.",
+                "Placement will use the provisional defaults instead.");
         }
 
         protected override string DeriveAttribute(string key, string familyName, string typeName)
@@ -256,7 +280,6 @@ namespace FireProtection.UI.ViewModels.NotificationAppliances
             OnPropertyChanged(nameof(ApplianceTypeOptions));
             OnPropertyChanged(nameof(CandelaOptions));
             OnPropertyChanged(nameof(NotificationDbaOptions));
-            OnPropertyChanged(nameof(CandelaDbaOptions));
             RaiseDerivedAttributeNotifications();
         }
 
@@ -272,7 +295,6 @@ namespace FireProtection.UI.ViewModels.NotificationAppliances
         {
             string previous = _candelaDbaDefault;
             _candelaDbaDefault = FormatCandelaDba(_candela, _notificationDba);
-            OnPropertyChanged(nameof(CandelaDbaOptions));
             PropagateUniversalDefault("CandelaDba", previous, _candelaDbaDefault);
         }
 
@@ -280,38 +302,6 @@ namespace FireProtection.UI.ViewModels.NotificationAppliances
         {
             if (string.IsNullOrEmpty(candela) && string.IsNullOrEmpty(dba)) return null;
             return (candela ?? "0") + "cd / " + (dba ?? "0") + "dBA";
-        }
-
-        private IReadOnlyList<string> BuildCandelaDbaOptions()
-        {
-            List<string> list = new List<string>();
-            HashSet<string> seen = new HashSet<string>(StringComparer.OrdinalIgnoreCase);
-
-            ICatalog catalog = Catalog;
-            if (catalog == null || !catalog.IsLoaded) return list;
-
-            IReadOnlyList<string> families = catalog.GetNotificationApplianceFamilies();
-            if (families == null) return list;
-
-            foreach (string family in families)
-            {
-                IReadOnlyList<NotificationApplianceCatalogEntry> entries =
-                    catalog.GetNotificationAppliancesForFamily(family);
-                if (entries == null) continue;
-
-                foreach (NotificationApplianceCatalogEntry entry in entries)
-                {
-                    if (entry == null) continue;
-
-                    string label = FormatCandelaDba(
-                        entry.Candela.ToString(CultureInfo.InvariantCulture),
-                        entry.NotificationDba.ToString(CultureInfo.InvariantCulture));
-
-                    if (label != null && seen.Add(label)) list.Add(label);
-                }
-            }
-
-            return list;
         }
 
         private static string PickDefault(IReadOnlyList<string> options, string current)

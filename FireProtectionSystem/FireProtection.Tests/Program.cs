@@ -74,7 +74,12 @@ namespace FireProtection.Tests
             TestGridResolutionFloor();
             TestCoverageGapFreeBaseline();
             TestCoverageGapDetection();
-            CatalogLoaderTests.RunAll();
+            // CatalogLoaderTests must run through RunGuarded like every other suite: it signals
+            // failure by throwing, so a direct call would abort the entire run and hide the
+            // results of every suite registered after it.
+            Console.WriteLine();
+            Console.WriteLine("Test: CatalogLoaderTests");
+            RunGuarded("CatalogLoaderTests", CatalogLoaderTests.RunAll);
 
             // Both of these self-report and throw on failure rather than incrementing _failures.
             Console.WriteLine();
@@ -83,6 +88,12 @@ namespace FireProtection.Tests
             Console.WriteLine();
             Console.WriteLine("Test: BruteForceSelectionTests");
             RunGuarded("BruteForceSelectionTests", BruteForceSelectionTests.RunAll);
+            Console.WriteLine();
+            Console.WriteLine("Test: TileCentricPatternTests");
+            RunGuarded("TileCentricPatternTests", TileCentricPatternTests.RunAll);
+            Console.WriteLine();
+            Console.WriteLine("Test: EligibilityCoalescingTests");
+            RunGuarded("EligibilityCoalescingTests", EligibilityCoalescingTests.RunAll);
             Console.WriteLine();
             Console.WriteLine("Test: UiDefaultsTests");
             RunGuarded("UiDefaultsTests", UiDefaultsTests.RunAll);
@@ -104,6 +115,161 @@ namespace FireProtection.Tests
             Console.WriteLine();
             Console.WriteLine("Test: CenteredGridPlacementTests");
             RunGuarded("CenteredGridPlacementTests", CenteredGridPlacementTests.RunAll);
+            Console.WriteLine();
+            Console.WriteLine("Test: CeilingGridSnapTests");
+            RunGuarded("CeilingGridSnapTests", CeilingGridSnapTests.RunAll);
+            Console.WriteLine();
+            Console.WriteLine("Test: CeilingGridPlacementTests");
+            RunGuarded("CeilingGridPlacementTests", CeilingGridPlacementTests.RunAll);
+            Console.WriteLine();
+            Console.WriteLine("Test: HazardRuleValuesTests");
+            RunGuarded("HazardRuleValuesTests", HazardRuleValuesTests.RunAll);
+            Console.WriteLine();
+            Console.WriteLine("Test: SidewallDirectionalSolverTests");
+            RunGuarded("SidewallDirectionalSolverTests", SidewallDirectionalSolverTests.RunAll);
+            Console.WriteLine();
+            Console.WriteLine("Test: PerTypeCatalogMergeTests");
+            RunGuarded("PerTypeCatalogMergeTests", PerTypeCatalogMergeTests.RunAll);
+
+            Console.WriteLine();
+            Console.WriteLine("Test: CatalogSourceModeTests");
+            RunGuarded("CatalogSourceModeTests", CatalogSourceModeTests.RunAll);
+
+            Console.WriteLine();
+            Console.WriteLine("Test: Nfpa13RulebookRulesTests");
+            RunGuarded("Nfpa13RulebookRulesTests", Nfpa13RulebookRulesTests.RunAll);
+
+            ReportSuiteCoverage();
+        }
+
+        /// <summary>
+        /// Locates this project's source directory by walking up from the assembly output
+        /// directory until a folder containing *Tests.cs sources is found. Preferred over
+        /// relative path arithmetic because the output path depth varies per configuration
+        /// (bin/Debug/... vs bin/Revit2026/net8.0-windows/...).
+        /// </summary>
+        private static string FindProjectSourceDirectory()
+        {
+            var dir = new System.IO.DirectoryInfo(AppContext.BaseDirectory);
+            while (dir != null)
+            {
+                if (System.IO.Directory.GetFiles(dir.FullName, "*Tests.cs", System.IO.SearchOption.TopDirectoryOnly).Length > 0)
+                {
+                    return dir.FullName;
+                }
+                dir = dir.Parent;
+            }
+            return null;
+        }
+
+        /// <summary>
+        /// Guards against the failure mode that actually happened in this repository: three
+        /// complete suites (HazardRuleValuesTests, SidewallDirectionalSolverTests,
+        /// PerTypeCatalogMergeTests) existed and self-reported correctly, but were never
+        /// registered in <see cref="RunAll"/> — so the run printed "ALL TESTS PASSED" while
+        /// silently skipping the hazard-value regression lock, the sidewall directional solver
+        /// suite and the per-type catalog merge suite.
+        ///
+        /// A count assertion fails LOUD when a suite goes missing, rather than failing open.
+        /// Update <see cref="_registeredSuites"/> in the same edit that adds a new suite.
+        /// </summary>
+        private static readonly string[] _registeredSuites =
+        {
+"CatalogLoaderTests",
+            "BruteForceOverrideTests",
+"BruteForceSelectionTests",
+            "TileCentricPatternTests",
+            "EligibilityCoalescingTests",
+            "UiDefaultsTests",
+            "Phase7Tests",
+            "SidewallPlacementTests",
+            "NotificationApplianceRulesTests",
+            "SmokeDetectorCalculationTests",
+            "DeviceReportAndKindTests",
+            "CenteredGridPlacementTests",
+            "CeilingGridSnapTests",
+            "CeilingGridPlacementTests",
+            "CatalogSourceModeTests",
+            "Nfpa13RulebookRulesTests",
+            "HazardRuleValuesTests",
+            "SidewallDirectionalSolverTests",
+            "PerTypeCatalogMergeTests"
+        };
+
+        private static void ReportSuiteCoverage()
+        {
+            Console.WriteLine();
+            Console.WriteLine("=== Suite coverage ===");
+
+            // Every *Suite class declared in this assembly must appear in _registeredSuites.
+            // Discovered by scanning the source tree so a new suite cannot be added without
+            // either registering it or failing this check.
+            var declared = new List<string>();
+            var seenNames = new HashSet<string>(StringComparer.Ordinal);
+            try
+            {
+                string srcDir = FindProjectSourceDirectory();
+                if (srcDir == null)
+                {
+                    Console.WriteLine("  WARN: could not locate the test project source directory; "
+                        + "skipping unregistered-suite detection.");
+                    return;
+                }
+
+                // TopDirectoryOnly: the suite sources live beside Program.cs in the project
+                // root, so bin/ and obj/ are never traversed.
+                foreach (string file in System.IO.Directory.GetFiles(
+                    srcDir, "*Tests.cs", System.IO.SearchOption.TopDirectoryOnly))
+                {
+                    string name = System.IO.Path.GetFileNameWithoutExtension(file);
+                    if (!name.EndsWith("Tests", StringComparison.Ordinal)) continue;
+                    if (name == "Program") continue;
+                    if (!seenNames.Add(name)) continue;
+
+                    string text = System.IO.File.ReadAllText(file);
+                    if (text.IndexOf("void RunAll", StringComparison.Ordinal) < 0) continue;
+                    // Intentionally-excluded probes (e.g. SmokeRoom100Probe) opt out by saying so.
+                    if (text.IndexOf("Not part of the regression suite", StringComparison.OrdinalIgnoreCase) >= 0) continue;
+                    declared.Add(name);
+                }
+            }
+            catch (Exception ex)
+            {
+                Console.WriteLine("  WARN: could not scan for unregistered suites (" + ex.Message + ")");
+                return;
+            }
+
+            declared.Sort(StringComparer.Ordinal);
+
+            var unregistered = new List<string>();
+            foreach (string name in declared)
+            {
+                bool registered = false;
+                foreach (string r in _registeredSuites)
+                {
+                    if (string.Equals(r, name, StringComparison.Ordinal)) { registered = true; break; }
+                }
+                if (registered)
+                {
+                    Console.WriteLine("  registered: " + name);
+                }
+                else
+                {
+                    Console.WriteLine("  MISSING   : " + name + "  <-- suite exists but is never run");
+                    unregistered.Add(name);
+                }
+            }
+
+            if (unregistered.Count > 0)
+            {
+                Console.WriteLine("  FAIL: " + unregistered.Count
+                    + " test suite(s) exist but are never registered: " + string.Join(", ", unregistered));
+                _failures++;
+            }
+            else
+            {
+                Console.WriteLine("  OK: all " + declared.Count + " discovered test suites are registered.");
+            }
         }
 
         /// <summary>
@@ -231,6 +397,35 @@ namespace FireProtection.Tests
             };
         }
 
+        /// <summary>
+        /// True when any user-facing message channel on the room result mentions <paramref name="fragment"/>.
+        /// A room result carries three channels: <c>Errors</c> (blocking reasons), <c>Warnings</c>
+        /// (review-required notes) and <c>Diagnostics</c> (informational). Tests that assert the
+        /// engine "explains itself" must not pin the wording to one channel, because moving a
+        /// message between channels is a presentation refactor, not a behaviour change.
+        /// </summary>
+        private static bool HasMessageContaining(RoomCalculationResult room, string fragment)
+        {
+            if (room == null || string.IsNullOrEmpty(fragment)) return false;
+            return Contains(room.Errors, fragment)
+                || Contains(room.Warnings, fragment)
+                || Contains(room.Diagnostics, fragment);
+        }
+
+        private static bool Contains(List<string> messages, string fragment)
+        {
+            if (messages == null) return false;
+            for (int i = 0; i < messages.Count; i++)
+            {
+                if (messages[i] != null
+                    && messages[i].IndexOf(fragment, StringComparison.OrdinalIgnoreCase) >= 0)
+                {
+                    return true;
+                }
+            }
+            return false;
+        }
+
         private static void Check(bool condition, string message)
         {
             if (condition)
@@ -256,7 +451,11 @@ namespace FireProtection.Tests
             RoomCalculationResult room = r.Rooms[0];
             Check(room.CalculatedCount > 0, "rectangular room produced sprinkler points");
             Check(room.Points.All(p => p.X >= 0 && p.X <= 20 && p.Y >= 0 && p.Y <= 10), "all points inside rectangle bounds");
-            Check(room.Points.All(p => Math.Abs(p.Z - 9.0) < 1e-6), "placement Z equals flat ceiling elevation");
+            // Ch.19 p.225: the deflector sits 1-12 in BELOW the ceiling (min 1 in so the fitting can be
+            // removed without pulling the ceiling). Heads are no longer placed on the ceiling plane.
+            double expectedZ = 9.0 - Nfpa13RulebookRules.DeflectorMinDropUnobstructedFt;
+            Check(room.Points.All(p => Math.Abs(p.Z - expectedZ) < 1e-6),
+                "placement Z is one deflector drop below the flat ceiling (" + expectedZ.ToString("F3") + " ft)");
         }
 
         private static void TestLShapedRoom()
@@ -517,16 +716,12 @@ namespace FireProtection.Tests
                 "unsupported behavior -> InvalidInput (got " + result.Rooms[0].Status + ")");
             Check(result.Rooms[0].CalculatedCount == 0,
                 "unsupported behavior produces zero sprinklers (got " + result.Rooms[0].CalculatedCount + ")");
-            bool hasUnsupportedNote = false;
-            for (int i = 0; i < result.Rooms[0].Diagnostics.Count; i++)
-            {
-                if (result.Rooms[0].Diagnostics[i] != null
-                    && result.Rooms[0].Diagnostics[i].IndexOf("unsupported", StringComparison.OrdinalIgnoreCase) >= 0)
-                {
-                    hasUnsupportedNote = true; break;
-                }
-            }
-            Check(hasUnsupportedNote, "diagnostics mention 'unsupported'");
+            // The engine must EXPLAIN the failure, not just fail. Blocking reasons belong in
+            // Errors; informational notes belong in Diagnostics. Assert against every channel so
+            // this test tracks the real contract (the user is told why) rather than which list
+            // the message happens to sit in.
+            Check(HasMessageContaining(result.Rooms[0], "unsupported"),
+                "a user-facing message mentions 'unsupported' placement behaviour");
         }
 
         private static void TestWallDistanceUpperBoundFlagsReview()
@@ -653,11 +848,29 @@ namespace FireProtection.Tests
             BruteForceCalculationResult r = BruteForceCalculationService.Calculate(s, provider, BruteForceCalculationConfig.Default());
             RoomCalculationResult res = r.Rooms[0];
 
-            // Look for the gap diagnostic.
-            bool hasGapNote = res.Warnings.Any(w => w != null && w.IndexOf("Coverage gap", StringComparison.OrdinalIgnoreCase) >= 0);
+            // A coverage gap must be REPORTED. The message wording is not part of the contract, so this
+            // looks for "Coverage" across every user-facing channel rather than pinning one
+            // literal string. It additionally pins the agreed behaviour that coverage is
+            // ADVISORY: reporting a gap must never change the room status on its own.
+            bool hasGapNote = res.Warnings.Any(w => w != null && w.IndexOf("Coverage", StringComparison.OrdinalIgnoreCase) >= 0)
+                || res.Diagnostics.Any(d => d != null && d.IndexOf("Coverage check (advisory)", StringComparison.OrdinalIgnoreCase) >= 0);
             Check(hasGapNote,
-                "coverage gap diagnostic recorded when MinSpacing leaves a region uncovered (placed=" + res.CalculatedCount + ")");
+                "coverage advisory recorded when MinSpacing leaves a region uncovered (placed=" + res.CalculatedCount + ")");
             Check(res.CalculatedCount > 0, "at least one sprinkler was placed (got " + res.CalculatedCount + ")");
+
+            // The advisory must not be the reason the room is flagged. Only inspect the
+            // coverage ADVISORY messages: the per-sprinkler AREA warning also mentions
+            // "coverage" but is a different check with its own code basis and legitimately
+            // escalates to ReviewRequired.
+            foreach (string w in res.Warnings)
+            {
+                if (w == null) continue;
+                if (w.IndexOf("Coverage", StringComparison.OrdinalIgnoreCase) < 0) continue;
+                if (w.IndexOf("MaxCoverageAreaSqFt", StringComparison.OrdinalIgnoreCase) >= 0) continue;
+                Check(w.IndexOf("Review required", StringComparison.OrdinalIgnoreCase) < 0,
+                    "coverage advisory is informational, not a review-required trigger");
+                break;
+            }
         }
 
         private static void TestGridResolutionFloor()
@@ -741,8 +954,8 @@ namespace FireProtection.Tests
                 "Unknown behavior + no ceiling -> MissingCeiling (got " + resUnknown.Status + ")");
             Check(resUnknown.CalculatedCount == 0,
                 "Unknown behavior + no ceiling produces zero sprinklers (got " + resUnknown.CalculatedCount + ")");
-            bool hasBlockedNote = resUnknown.Diagnostics.Any(d => d != null && d.IndexOf("BLOCKED", StringComparison.OrdinalIgnoreCase) >= 0);
-            Check(hasBlockedNote, "BLOCKED diagnostic recorded for hosted-family + missing ceiling");
+            Check(HasMessageContaining(resUnknown, "blocked"),
+                "a user-facing message reports the calculation was blocked (hosted family + no ceiling)");
 
             // Explicitly FaceHosted must produce the same BLOCKED outcome.
             PlacementInputSnapshot sFace = Snapshot(MakeRoom("F", Rect(0, 0, 10, 10), ceilingHeightFt: null));
@@ -794,11 +1007,11 @@ namespace FireProtection.Tests
             BruteForceCalculationResult r = Calc(s);
             RoomCalculationResult res = r.Rooms[0];
 
-            // Expected: placement Z = (8 + 12) / 2 = 10.0 ft
-            double expectedZ = 10.0;
+            // Expected: weighted-average Z = (8 + 12) / 2 = 10.0 ft, less one deflector drop (Ch.19 p.225).
+            double expectedZ = 10.0 - Nfpa13RulebookRules.DeflectorMinDropUnobstructedFt;
             bool allMatchZ = res.Points.Count > 0 && res.Points.All(p => Math.Abs(p.Z - expectedZ) < 1e-6);
             Check(allMatchZ,
-                "all sloped-ceiling sprinklers land at weighted-average Z (expected " + expectedZ.ToString("F2") + " ft, got Zs=[" +
+                "all sloped-ceiling sprinklers land at weighted-average Z less one drop (expected " + expectedZ.ToString("F2") + " ft, got Zs=[" +
                 string.Join(",", res.Points.Select(p => p.Z.ToString("F2"))) + "])");
 
             // The diagnostic must mention the averaging so the reviewer can audit the choice.

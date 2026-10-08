@@ -30,11 +30,12 @@ namespace FireProtection.UI.ViewModels.Sprinklers.BruteForce
         private double? _boundaryClearanceFtOverride;
         private double? _defaultMaxSpacingFt;
         private double? _defaultBoundaryClearanceFt;
-        private string _selectedOrientation;
-        private string _defaultOrientation;
-
-        private static readonly IReadOnlyList<string> OrientationOptionsList =
-            new List<string> { "(auto)", "pendent", "upright", "sidewall" };
+        // S->W (max distance-to-wall) + acoustic-tile fallback size. All nullable: null = use the
+        // readable ceiling grid / rule-set default. No catalog default is seeded for these — the
+        // "default" is the rule set (S->W) or the Revit-read grid (tile), so IsOverridden == HasValue.
+        private double? _maxDistanceToWallFtOverride;
+        private double? _tileUFtOverride;
+        private double? _tileVFtOverride;
 
         public RoomItemViewModel(
             RoomUiData room,
@@ -82,6 +83,9 @@ namespace FireProtection.UI.ViewModels.Sprinklers.BruteForce
 
         public double? CeilingHeightFt =>
             Room.Geometry?.CeilingHeightFt;
+
+        public string CeilingType =>
+            Room.Geometry?.CeilingType ?? "—";
 
         public double AreaSqFt =>
             Room.AreaSqFt;
@@ -501,23 +505,69 @@ namespace FireProtection.UI.ViewModels.Sprinklers.BruteForce
             get { return _boundaryClearanceFtOverride.HasValue ? _boundaryClearanceFtOverride.Value.ToString("F2") : "—"; }
         }
 
-        public IReadOnlyList<string> OrientationOptions => OrientationOptionsList;
-
-        public string SelectedOrientation
+        // ----- S->W (max distance-to-wall) + acoustic-tile fallback overrides -----------------------
+        // These have NO catalog default; null means "use the rule-set S->W / the Revit-read grid".
+        // Overridden simply means the user typed a value.
+        public double? MaxDistanceToWallFtOverride
         {
-            get { return _selectedOrientation ?? "(auto)"; }
+            get { return _maxDistanceToWallFtOverride; }
             set
             {
-                if (SetProperty(ref _selectedOrientation, value == "(auto)" ? null : value))
+                if (SetProperty(ref _maxDistanceToWallFtOverride, value))
                 {
-                    OnPropertyChanged(nameof(IsOrientationOverridden));
+                    OnPropertyChanged(nameof(IsMaxWallOverridden));
+                    OnPropertyChanged(nameof(MaxDistanceToWallFtOverrideDisplay));
+                    SyncEditableText();
                 }
             }
         }
 
-        public bool IsOrientationOverridden =>
-            !string.IsNullOrEmpty(_selectedOrientation) &&
-            !string.Equals(_selectedOrientation, _defaultOrientation ?? string.Empty, StringComparison.OrdinalIgnoreCase);
+        public double? TileUFtOverride
+        {
+            get { return _tileUFtOverride; }
+            set
+            {
+                if (SetProperty(ref _tileUFtOverride, value))
+                {
+                    OnPropertyChanged(nameof(IsTileOverridden));
+                    OnPropertyChanged(nameof(TileUFtOverrideDisplay));
+                    SyncEditableText();
+                }
+            }
+        }
+
+        public double? TileVFtOverride
+        {
+            get { return _tileVFtOverride; }
+            set
+            {
+                if (SetProperty(ref _tileVFtOverride, value))
+                {
+                    OnPropertyChanged(nameof(IsTileOverridden));
+                    OnPropertyChanged(nameof(TileVFtOverrideDisplay));
+                    SyncEditableText();
+                }
+            }
+        }
+
+        public bool IsMaxWallOverridden => _maxDistanceToWallFtOverride.HasValue;
+
+        public bool IsTileOverridden => _tileUFtOverride.HasValue || _tileVFtOverride.HasValue;
+
+        public string MaxDistanceToWallFtOverrideDisplay
+        {
+            get { return _maxDistanceToWallFtOverride.HasValue ? _maxDistanceToWallFtOverride.Value.ToString("F2") : "—"; }
+        }
+
+        public string TileUFtOverrideDisplay
+        {
+            get { return _tileUFtOverride.HasValue ? _tileUFtOverride.Value.ToString("F2") : "—"; }
+        }
+
+        public string TileVFtOverrideDisplay
+        {
+            get { return _tileVFtOverride.HasValue ? _tileVFtOverride.Value.ToString("F2") : "—"; }
+        }
 
         // ----- Inline cell validation (item 8) -------------------------------------------------------
         // The editable cells bind to these strings rather than to the nullable doubles. A non-numeric or
@@ -530,6 +580,12 @@ namespace FireProtection.UI.ViewModels.Sprinklers.BruteForce
         private string _clearanceText;
         private string _clearanceError;
         private bool _editingText;
+        private string _maxWallText;
+        private string _maxWallError;
+        private string _tileUText;
+        private string _tileUError;
+        private string _tileVText;
+        private string _tileVError;
 
         // Sane engineering bounds (decimal feet) for the editable spacing cells. These are NOT NFPA
         // values - the rule set + backend clamp still decide the real ceiling; they only stop an
@@ -538,6 +594,11 @@ namespace FireProtection.UI.ViewModels.Sprinklers.BruteForce
         private const double MaxSpacingMaxFt = 40.0;
         private const double ClearanceMinFt = 0.0;
         private const double ClearanceMaxFt = 10.0;
+        // S->W: a room-scale max distance-to-wall (feet). Tile: acoustic-tile pitch fallback (feet).
+        private const double MaxWallMinFt = 1.0;
+        private const double MaxWallMaxFt = 20.0;
+        private const double TileMinFt = 1.0;
+        private const double TileMaxFt = 10.0;
 
         public string MaxSpacingInput
         {
@@ -631,6 +692,128 @@ namespace FireProtection.UI.ViewModels.Sprinklers.BruteForce
             }
         }
 
+        public string MaxDistanceToWallInput
+        {
+            get { return _maxWallText ?? FormatEditable(_maxDistanceToWallFtOverride); }
+            set
+            {
+                _maxWallText = value;
+                _editingText = true;
+                try
+                {
+                    double? feet;
+                    string error;
+                    if (TryReadCell(value, MaxWallMinFt, MaxWallMaxFt, "Wall distance", out feet, out error)) MaxDistanceToWallFtOverride = feet;
+                    MaxDistanceToWallError = error;
+                }
+                finally { _editingText = false; }
+                OnPropertyChanged();
+            }
+        }
+
+        public string MaxDistanceToWallError
+        {
+            get { return _maxWallError; }
+            private set
+            {
+                if (_maxWallError == value) return;
+                _maxWallError = value;
+                OnPropertyChanged();
+                OnPropertyChanged(nameof(HasMaxDistanceToWallError));
+                OnPropertyChanged(nameof(MaxDistanceToWallTooltip));
+            }
+        }
+
+        public bool HasMaxDistanceToWallError => !string.IsNullOrEmpty(_maxWallError);
+
+        public string MaxDistanceToWallTooltip
+        {
+            get
+            {
+                return HasMaxDistanceToWallError
+                    ? _maxWallError
+                    : "S→W: maximum device-to-wall distance (" + UnitDisplay.Suffix + "). Leave blank to use the rule-set NFPA half-spacing default.";
+            }
+        }
+
+        public string TileUInput
+        {
+            get { return _tileUText ?? FormatEditable(_tileUFtOverride); }
+            set
+            {
+                _tileUText = value;
+                _editingText = true;
+                try
+                {
+                    double? feet;
+                    string error;
+                    if (TryReadCell(value, TileMinFt, TileMaxFt, "Tile size", out feet, out error)) TileUFtOverride = feet;
+                    TileUError = error;
+                }
+                finally { _editingText = false; }
+                OnPropertyChanged();
+            }
+        }
+
+        public string TileUError
+        {
+            get { return _tileUError; }
+            private set
+            {
+                if (_tileUError == value) return;
+                _tileUError = value;
+                OnPropertyChanged();
+                OnPropertyChanged(nameof(HasTileUError));
+                OnPropertyChanged(nameof(TileTooltip));
+            }
+        }
+
+        public bool HasTileUError => !string.IsNullOrEmpty(_tileUError);
+
+        public string TileVInput
+        {
+            get { return _tileVText ?? FormatEditable(_tileVFtOverride); }
+            set
+            {
+                _tileVText = value;
+                _editingText = true;
+                try
+                {
+                    double? feet;
+                    string error;
+                    if (TryReadCell(value, TileMinFt, TileMaxFt, "Tile size", out feet, out error)) TileVFtOverride = feet;
+                    TileVError = error;
+                }
+                finally { _editingText = false; }
+                OnPropertyChanged();
+            }
+        }
+
+        public string TileVError
+        {
+            get { return _tileVError; }
+            private set
+            {
+                if (_tileVError == value) return;
+                _tileVError = value;
+                OnPropertyChanged();
+                OnPropertyChanged(nameof(HasTileVError));
+                OnPropertyChanged(nameof(TileTooltip));
+            }
+        }
+
+        public bool HasTileVError => !string.IsNullOrEmpty(_tileVError);
+
+        public string TileTooltip
+        {
+            get
+            {
+                if (HasTileUError) return _tileUError;
+                if (HasTileVError) return _tileVError;
+                return "Acoustic-tile size (" + UnitDisplay.Suffix + ") used to center devices when Revit has no readable ceiling grid. Leave blank to use the Revit-read grid or a free array.";
+            }
+        }
+
         /// <summary>Blank (or the em-dash placeholder) clears the override; anything else must parse as a
         /// length within the column's sane bounds. Returns false when the text is unusable, in which case
         /// the model is left alone. The bounds are UI sanity checks only — the rule set's hazard ceiling
@@ -667,13 +850,22 @@ namespace FireProtection.UI.ViewModels.Sprinklers.BruteForce
             if (_editingText) return;
             _maxSpacingText = null;
             _clearanceText = null;
+            _maxWallText = null;
+            _tileUText = null;
+            _tileVText = null;
             MaxSpacingError = null;
             BoundaryClearanceError = null;
+            MaxDistanceToWallError = null;
+            TileUError = null;
+            TileVError = null;
             OnPropertyChanged(nameof(MaxSpacingInput));
             OnPropertyChanged(nameof(BoundaryClearanceInput));
+            OnPropertyChanged(nameof(MaxDistanceToWallInput));
+            OnPropertyChanged(nameof(TileUInput));
+            OnPropertyChanged(nameof(TileVInput));
         }
 
-        public void SetCatalogDefaults(string family, string type, double? maxSpacingFt, double? boundaryClearanceFt, string orientation = null)
+        public void SetCatalogDefaults(string family, string type, double? maxSpacingFt, double? boundaryClearanceFt)
         {
             // Decision 019 semantics, row scope: the top-level (universal) selection is the
             // default. A row that is still sitting on the previous default follows the new one;
@@ -683,19 +875,16 @@ namespace FireProtection.UI.ViewModels.Sprinklers.BruteForce
             bool typeWasOverridden = IsTypeOverridden;
             bool spacingWasOverridden = IsSpacingOverridden;
             bool wallSpaceWasOverridden = IsWallSpaceOverridden;
-            bool orientationWasOverridden = IsOrientationOverridden;
 
             _defaultFamily = family;
             _defaultType = type;
             _defaultMaxSpacingFt = maxSpacingFt;
             _defaultBoundaryClearanceFt = boundaryClearanceFt;
-            _defaultOrientation = orientation;
 
             if (_selectedFamily == null || !familyWasOverridden) _selectedFamily = family;
             if (_selectedType == null || !typeWasOverridden) _selectedType = type;
             if (!_maxSpacingFtOverride.HasValue || !spacingWasOverridden) _maxSpacingFtOverride = maxSpacingFt;
             if (!_boundaryClearanceFtOverride.HasValue || !wallSpaceWasOverridden) _boundaryClearanceFtOverride = boundaryClearanceFt;
-            if ((_selectedOrientation == null || orientationWasOverridden)) _selectedOrientation = orientation;
 
             // The row's Type list follows the row's Family, which may have just been re-seeded.
             if (_typesResolver != null)
@@ -733,8 +922,6 @@ namespace FireProtection.UI.ViewModels.Sprinklers.BruteForce
             OnPropertyChanged(nameof(MaxSpacingFtOverrideDisplay));
             OnPropertyChanged(nameof(BoundaryClearanceFtOverrideDisplay));
             OnPropertyChanged(nameof(SelectedFamilyTypeDisplay));
-            OnPropertyChanged(nameof(SelectedOrientation));
-            OnPropertyChanged(nameof(IsOrientationOverridden));
             SyncEditableText();
         }
 
@@ -768,15 +955,24 @@ namespace FireProtection.UI.ViewModels.Sprinklers.BruteForce
         {
             _maxSpacingFtOverride = _defaultMaxSpacingFt;
             _boundaryClearanceFtOverride = _defaultBoundaryClearanceFt;
-            _selectedOrientation = _defaultOrientation;
+            // S->W and tile have no catalog default -> reset clears them (back to rule set / Revit grid).
+            _maxDistanceToWallFtOverride = null;
+            _tileUFtOverride = null;
+            _tileVFtOverride = null;
             OnPropertyChanged(nameof(MaxSpacingFtOverride));
             OnPropertyChanged(nameof(BoundaryClearanceFtOverride));
+            OnPropertyChanged(nameof(MaxDistanceToWallFtOverride));
+            OnPropertyChanged(nameof(TileUFtOverride));
+            OnPropertyChanged(nameof(TileVFtOverride));
             OnPropertyChanged(nameof(IsSpacingOverridden));
             OnPropertyChanged(nameof(IsWallSpaceOverridden));
+            OnPropertyChanged(nameof(IsMaxWallOverridden));
+            OnPropertyChanged(nameof(IsTileOverridden));
             OnPropertyChanged(nameof(MaxSpacingFtOverrideDisplay));
             OnPropertyChanged(nameof(BoundaryClearanceFtOverrideDisplay));
-            OnPropertyChanged(nameof(SelectedOrientation));
-            OnPropertyChanged(nameof(IsOrientationOverridden));
+            OnPropertyChanged(nameof(MaxDistanceToWallFtOverrideDisplay));
+            OnPropertyChanged(nameof(TileUFtOverrideDisplay));
+            OnPropertyChanged(nameof(TileVFtOverrideDisplay));
             SyncEditableText();
         }
 

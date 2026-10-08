@@ -79,6 +79,12 @@ namespace FireProtection.UI.Services
         {
             if (TryActivateExisting()) return;
 
+            // Revit is not a WPF host: without this, Application.Current is null and the
+            // dispatcher can be finalised while Revit still needs it, which surfaces later as
+            // SEHException "External component has thrown an exception" at DeactivateActCtx.
+            // Must happen BEFORE the first Window is constructed.
+            WpfHost.EnsureApplication();
+
             MainWindow window = new MainWindow(
                 json, placementInputExporter, sprinklerFamilySource, sprinklerPlacementService, catalog, deviceSeams);
 
@@ -91,7 +97,11 @@ namespace FireProtection.UI.Services
             window.Closed += delegate
             {
                 _current = null;
-                FireProtectionLog.Info("Tool window closed.");
+                // Drop references into the Revit host: the model-catalog factory is a closure over
+                // the active Document. Leaving a Document pinned by the UI object graph across
+                // teardown is a known contributor to add-in unload failures.
+                if (catalog != null) catalog.ReleaseHostReferences();
+                FireProtectionLog.Info("Tool window closed; host references released.");
             };
             window.Show();
             FireProtectionLog.Info("Tool window opened (modeless, owner handle "

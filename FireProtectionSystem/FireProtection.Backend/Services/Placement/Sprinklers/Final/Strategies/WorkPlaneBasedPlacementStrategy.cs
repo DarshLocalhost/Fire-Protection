@@ -27,15 +27,22 @@ namespace FireProtection.Backend.Services.Placement.Sprinklers.Final.Strategies
             {
                 try
                 {
+                    XYZ placeAt = host.ProjectedPointOnFace ?? xyz;
                     XYZ refDir = ComputeInPlaneReferenceDirection(doc, host.HostFace);
                     FamilyInstance faceInstance = doc.Create.NewFamilyInstance(
-                        host.HostFace, xyz, refDir, context.Symbol);
+                        host.HostFace, placeAt, refDir, context.Symbol);
 
-                    // FIX: Enforce level association and offset
-                    LevelAssociation.EnforceAndVerify(doc, faceInstance, context.Level, xyz.Z);
+                    LevelAssociation.EnforceAndVerify(doc, faceInstance, context.Level, placeAt.Z);
+
+                    // FIX: Force Revit to not shift the Z-elevation from the face
+                    Parameter offsetParam = faceInstance.get_Parameter(BuiltInParameter.INSTANCE_FREE_HOST_OFFSET_PARAM);
+                    if (offsetParam != null && !offsetParam.IsReadOnly)
+                    {
+                        offsetParam.Set(0.0);
+                    }
 
                     return PlacementOutcome.CreatedInstance(
-                        faceInstance, "WorkPlaneCeilingFace", host.Source, host.LinkInstanceName, host.CeilingElementId);
+                        faceInstance, "WorkPlaneCeilingFace", host.Source, host.LinkInstanceName, host.CeilingElementId, expectedLocation: placeAt);
                 }
                 catch (Exception ex)
                 {
@@ -57,11 +64,10 @@ namespace FireProtection.Backend.Services.Placement.Sprinklers.Final.Strategies
                 FamilyInstance instance = doc.Create.NewFamilyInstance(
                     sketchPlane.GetPlaneReference(), xyz, XYZ.BasisX, context.Symbol);
 
-                // FIX: Enforce level association and offset
                 LevelAssociation.EnforceAndVerify(doc, instance, context.Level, xyz.Z);
 
                 return PlacementOutcome.CreatedInstance(
-                    instance, "WorkPlaneSketchPlane", host.Source);
+                    instance, "WorkPlaneSketchPlane", host.Source, expectedLocation: xyz);
             }
             catch (Exception ex)
             {

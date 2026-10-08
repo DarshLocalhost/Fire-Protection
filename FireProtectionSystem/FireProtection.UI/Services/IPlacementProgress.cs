@@ -45,7 +45,7 @@ namespace FireProtection.UI.Services
     public static class ExistingDevicePolicyOptions
     {
         public const string SkipRoomLabel = "Skip rooms that already have devices";
-        public const string AddAnywayLabel = "keep existing";
+        public const string AddAnywayLabel = "Add to existing devices in the room";
         public const string ReplaceExistingLabel = "Replace existing devices in the room";
 
         public static readonly string[] Labels =

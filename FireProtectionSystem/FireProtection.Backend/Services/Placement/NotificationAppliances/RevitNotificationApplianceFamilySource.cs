@@ -50,23 +50,7 @@ namespace FireProtection.Backend.Services.Placement.NotificationAppliances
 
         public bool TryLoadFamily(string familyFilePath, out string error)
         {
-            error = null;
-            if (string.IsNullOrWhiteSpace(familyFilePath)) { error = "No family file was selected."; return false; }
-            try
-            {
-                Family family;
-                if (!_document.LoadFamily(familyFilePath, out family))
-                {
-                    error = "Revit did not load the family file.";
-                    return false;
-                }
-                return true;
-            }
-            catch (Exception ex)
-            {
-                error = ex.Message;
-                return false;
-            }
+            return FamilyLoadHelper.TryLoad(_document, familyFilePath, out error);
         }
 
         public DevicePlacementBehavior GetPlacementBehavior(string familyName, string typeName)

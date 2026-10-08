@@ -47,7 +47,7 @@ Which sheet column feeds which control:
 
 ### Row 2 (column headers)
 
-**Sprinklers** (col 1..6): `Category, FamilyName, TypeName, HazardClass, Mount, Notes`
+**Sprinklers** (col 1..18): `Category, FamilyName, TypeName, HazardClass, Mount, Notes, SprinklerClass, MaxCoverageAreaSqFt, MaxSpacingFt, MinSpacingFt, CoverageRadiusFt, KFactor, ResponseType, TempRatingF, DeflectorToCeilingIn, SidewallMaxAlongWallSpacingFt, SidewallMaxThrowFt, SidewallEndWallClearanceFt`
 **SmokeDetectors** (col 1..7): `Category, FamilyName, TypeName, DetectorType, Mount, CeilingSlope, Notes`
 **NotificationAppliances** (col 1..7): `Category, FamilyName, TypeName, ApplianceType, Candela, NotificationDba, Notes`
 
@@ -63,6 +63,18 @@ Which sheet column feeds which control:
 | `HazardClass` | no       | leave **blank** (see below); if filled: `LIGHT`, `OH1`, `OH2`, `EH1`, `EH2` — other values are accepted with a warning |
 | `Mount`       | no       | `Pendent`, `Upright`, `Sidewall`, `Recessed` (other values accepted with a warning) |
 | `Notes`       | no       | free text                                                                  |
+| `SprinklerClass` | no    | `StandardSpray`, `ExtendedCoverage`, `Residential`, `Sidewall`, `ESFR`, `CMSA` (other values accepted with a warning) |
+| `MaxCoverageAreaSqFt` | no | positive number — the listed max protection area per head (ft²)         |
+| `MaxSpacingFt`   | no    | positive number — the listed max head-to-head spacing S (ft)               |
+| `MinSpacingFt`   | no    | positive number — the listed min head-to-head spacing (ft)                 |
+| `CoverageRadiusFt` | no  | positive number — the listed coverage radius (ft)                          |
+| `KFactor`        | no    | positive number — the nominal orifice K-factor                             |
+| `ResponseType`   | no    | `QR` (quick-response) or `SR` (standard-response); other values accepted with a warning |
+| `TempRatingF`    | no    | positive integer — the listed temperature rating (°F)                      |
+| `DeflectorToCeilingIn` | no | positive number — the listed deflector-to-ceiling distance (in)         |
+| `SidewallMaxAlongWallSpacingFt` | no | positive listed maximum head-to-head separation along the host wall (ft) |
+| `SidewallMaxThrowFt` | no | positive listed directional throw normal to the host wall (ft) |
+| `SidewallEndWallClearanceFt` | no | positive listed end-wall/corner limit (ft) |
 
 **Leave `HazardClass` blank.** It is validated only when non-blank, and nothing in the pipeline
 reads it: the hazard class is a **per-room** choice made in the UI from the hardcoded
@@ -71,8 +83,26 @@ because a duplicate `(FamilyName, TypeName)` is a hard error — so one type can
 hazard class. Every row in the shipped `CatalogTemplate.xlsx` leaves it blank.
 
 **`Mount` records orientation only** — `Pendent` or `Sidewall`. It is informational (it feeds the
-`AvailableSprinklerMounts` list) and does not drive placement. Trim style (recessed / semi-recessed
-/ exposed) and wet-vs-dry are already encoded in the Revit `FamilyName`, so do not repeat them here.
+`AvailableSprinklerMounts` list) and steers the placement branch (ceiling grid vs wall-anchored
+sidewall). Trim style (recessed / semi-recessed / exposed) and wet-vs-dry are already encoded in the
+Revit `FamilyName`, so do not repeat them here.
+
+**Per-type columns 7-18 are the placement source of truth, and every one is optional.** When a cell
+is filled, that listed number overrides the provisional hazard-class default for the type — clamped
+to the NFPA-13 hazard ceiling so a catalog value can never exceed code max. When a cell is **blank**,
+the engine falls back to the provisional hazard-class default (nothing breaks). This is how a client
+makes any family/type place to its own listing without touching code. `SprinklerClass` values `ESFR`
+and `CMSA` place on the listed spacing but additionally raise a review flag — storage-class layouts
+need FPE sign-off on min head count / K-factor / pressure, which this tool does not compute.
+
+> ⚠️ **The per-type numbers in the shipped `CatalogTemplate.xlsx` are PROVISIONAL EXAMPLES**
+> (illustrative Light-hazard spray values), **not verified listings and not for construction.**
+> Replace them with the actual manufacturer / FM / UL listing for each type before any real project.
+
+> **Horizontal-sidewall safety gate:** automatic placement is currently disabled for sidewall types.
+> The three directional fields above are intentionally blank in the template because the actual
+> manufacturer listing is required. A generic circular coverage radius cannot prove directional
+> throw, opposing-wall coverage, or end-wall limits.
 
 #### SmokeDetectors
 

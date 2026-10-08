@@ -33,7 +33,11 @@ namespace FireProtection.Backend.Services.Placement.SmokeDetectors
                 items => SmokeDetectorCalculationService.Calculate(
                     SmokeDetectorPlacementInputBuilder.BuildSnapshot(items.ToList(), familySource),
                     new Nfpa72SmokeDetectorRules(),
-                    BruteForceCalculationConfig.Default()));
+                    BruteForceCalculationConfig.Default()),
+                // Smoke-only catch-all so hosted ceiling families (OneLevelBasedHosted, etc.) still place
+                // instead of failing with "No strategy supports placement type". Neutral to notification
+                // appliances (they do not pass a fallback) and to sprinklers (separate service).
+                new SmokeDetectorLastResortPlacementStrategy());
         }
 
         public PlacementRunReport ExecutePlacement(

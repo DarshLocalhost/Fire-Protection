@@ -39,6 +39,7 @@ namespace FireProtection.Backend.Services.Placement.Sprinklers.Final.BruteForce
                 bool intersects = ((yi > y) != (yj > y)) &&
                     (x < (xj - xi) * (y - yi) / (yj - yi) + xi);
 
+
                 if (intersects) inside = !inside;
             }
 

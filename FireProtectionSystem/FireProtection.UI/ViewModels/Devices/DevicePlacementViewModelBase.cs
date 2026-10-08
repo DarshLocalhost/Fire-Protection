@@ -37,6 +37,20 @@ namespace FireProtection.UI.ViewModels.Devices
         private string _placementStatusMessage;
 
         private bool _isEligibilityRefreshing;
+
+        /// <summary>True while an eligibility sweep is queued or running (T1.1 coalescing).</summary>
+        private bool _eligibilityRefreshPending;
+
+        /// <summary>
+        /// Bumped when a trigger is coalesced away, so the running pass knows its result is already
+        /// stale and schedules exactly one follow-up (T1.1).
+        /// </summary>
+        private int _eligibilityInputsVersion;
+
+        // T1.2 idempotence memory: the catalog instance and mode this tab last reacted to.
+        private ICatalog _lastHandledCatalog;
+        private bool _lastHandledCatalogFileMode;
+        private bool _hasHandledCatalog;
         private bool _suppressEligibilityRefresh;
         private bool _showEligibleRoomsOnly;
 
@@ -290,6 +304,49 @@ namespace FireProtection.UI.ViewModels.Devices
 
         protected virtual string DeriveAttribute(string key, string familyName, string typeName) => null;
 
+        /// <summary>
+        /// Warns that the selected family/type has no engineering data in the active catalog.
+        ///
+        /// WHY THIS IS NEEDED IN MODEL MODE
+        /// -------------------------------
+        /// A Revit model can supply family/type NAMES but never ratings: a fire-alarm FamilySymbol has
+        /// no dBA, Candela, DetectorType, Mount or CeilingSlope parameter. So in Model mode those
+        /// attributes are simply absent, the derived value is null, and the picker silently reverts to
+        /// a free-text box. Placement then runs on a provisional value with nothing on screen saying
+        /// so. This message names the gap instead of leaving the user to assume the blank field is
+        /// meaningful.
+        ///
+        /// NULL when nothing is selected, or when the catalog DOES supply the data - it is an
+        /// advisory, so it must stay out of the way in the common case. Implementations override
+        /// <see cref="DescribeMissingCatalogData"/>, which is invoked only once a family/type is set.
+        /// </summary>
+        public string MissingCatalogDataMessage
+        {
+            get
+            {
+                if (!IsDeviceTypeSelected || Catalog == null || !Catalog.IsLoaded) return null;
+                return DescribeMissingCatalogData();
+            }
+        }
+
+        /// <summary>
+        /// Returns a warning when the selected family/type has no usable rating, or null when it does.
+        /// Each derived tab overrides this for its own attribute set.
+        /// </summary>
+        protected virtual string DescribeMissingCatalogData() => null;
+
+        /// <summary>Standard wording so all three tabs say the same thing about the same situation.</summary>
+        protected string BuildMissingCatalogDataWarning(string whatIsMissing, string consequence)
+        {
+            string family = SelectedDeviceFamily != null ? SelectedDeviceFamily.FamilyName : null;
+            string type = SelectedDeviceType != null ? SelectedDeviceType.TypeName : null;
+
+            return "No catalog data for " + (family ?? "<family>") + " / " + (type ?? "<type>") + ": "
+                   + whatIsMissing + " " + consequence
+                   + " Values come from the workbook, not the Revit model — load a catalog workbook "
+                   + "with \"Browse...\" in the top bar to supply them.";
+        }
+
         private string EffectiveDeviceAttribute(DeviceRoomItemViewModel roomVm, string key, string familyName, string typeName)
         {
             string derived = DeriveAttribute(key, familyName, typeName);
@@ -511,6 +568,64 @@ namespace FireProtection.UI.ViewModels.Devices
         public string AreaColumnHeader => "Area (sq ft)";
         public string UnitSuffix => UnitDisplay.Suffix;
 
+        // -------------------------------------------------------------------------------------------
+        // Universal geometry overrides (grid-center placement + S->W). Applies to ALL device tabs
+        // (smoke + notification), so they live on the base and propagate through the same
+        // universal -> level-default -> room mechanism the device attributes use. Text-typed: blank
+        // means "use the readable Revit ceiling grid / rule-set default", parsed to double? at build.
+        // -------------------------------------------------------------------------------------------
+        private string _maxDistanceToWallInput;
+        private string _tileUInput;
+        private string _tileVInput;
+
+        public string WallDistanceLabel => "Max S→W " + UnitDisplay.HeaderSuffix;
+        public string TileSizeLabel => "Ceiling tile (U × V) " + UnitDisplay.HeaderSuffix;
+
+        public string MaxDistanceToWallTooltip =>
+            "S→W: maximum device-to-wall distance. Leave blank to use the rule-set NFPA half-spacing default. Provisional — not clamped to a verified table.";
+
+        public string TileSizeTooltip =>
+            "Acoustic-tile fallback size used to center devices when Revit has no readable ceiling grid. Leave blank to use the Revit-read grid.";
+
+        public string MaxDistanceToWallInput
+        {
+            get => _maxDistanceToWallInput;
+            set
+            {
+                string old = _maxDistanceToWallInput;
+                if (SetProperty(ref _maxDistanceToWallInput, value))
+                {
+                    PropagateUniversalDefault("MaxDistanceToWall", old, value);
+                }
+            }
+        }
+
+        public string TileUInput
+        {
+            get => _tileUInput;
+            set
+            {
+                string old = _tileUInput;
+                if (SetProperty(ref _tileUInput, value))
+                {
+                    PropagateUniversalDefault("TileU", old, value);
+                }
+            }
+        }
+
+        public string TileVInput
+        {
+            get => _tileVInput;
+            set
+            {
+                string old = _tileVInput;
+                if (SetProperty(ref _tileVInput, value))
+                {
+                    PropagateUniversalDefault("TileV", old, value);
+                }
+            }
+        }
+
         public string SelectedExistingDevicePolicyLabel
         {
             get => _selectedExistingDevicePolicyLabel;
@@ -595,7 +710,7 @@ namespace FireProtection.UI.ViewModels.Devices
 
                 IReadOnlyList<DeviceFamilyOption> families = GetCatalogFamilyOptions();
 
-                if ((families == null || families.Count == 0) && _deviceFamilySource != null)
+                if ((families == null || families.Count == 0) && CanFallBackToModelFamilies())
                 {
                     families = _deviceFamilySource.GetAvailableFamilies();
                 }
@@ -620,6 +735,26 @@ namespace FireProtection.UI.ViewModels.Devices
             }
         }
 
+        /// <summary>
+        /// Whether an empty catalog may be back-filled from the live Revit model.
+        ///
+        /// True only in Model mode (or when there is no <see cref="CatalogViewModel"/> at all, which
+        /// is the designer/test-host case).
+        ///
+        /// This matters most for the two alarm tabs: smoke detectors and notification appliances
+        /// BOTH enumerate <c>OST_FireAlarmDevices</c>, so a workbook that has only a
+        /// <c>Sprinklers</c> sheet and no <c>SmokeDetectors</c> sheet used to yield an empty
+        /// catalog for that tab and then silently fall back to EVERY fire-alarm family in the
+        /// project. The dropdown would contradict the source the user had chosen. In CatalogFile
+        /// mode an empty sheet must read as empty.
+        /// </summary>
+        private bool CanFallBackToModelFamilies()
+        {
+            if (_deviceFamilySource == null) return false;
+            if (_catalogVm == null) return true;
+            return !_catalogVm.IsCatalogFileMode;
+        }
+
         protected virtual IReadOnlyList<DeviceFamilyOption> GetCatalogFamilyOptions() => new List<DeviceFamilyOption>();
 
         protected virtual IReadOnlyList<string> GetCatalogTypesForFamily(string familyName) => new List<string>();
@@ -635,15 +770,51 @@ namespace FireProtection.UI.ViewModels.Devices
             }
         }
 
+        /// <summary>
+        /// The workbook sheet this tab reads. Overridden per tab so the empty-state message can name
+        /// the exact sheet the user must add rows to, instead of a vague "no data".
+        /// </summary>
+        protected virtual string CatalogSheetName => null;
+
+        /// <summary>
+        /// Explains an EMPTY dropdown rather than leaving it blank and unexplained.
+        ///
+        /// The three failure modes are genuinely different and were previously conflated into one
+        /// message that always told the user to "pick the catalog workbook", which is wrong advice in
+        /// Model mode and gave no hint when a workbook was simply missing this tab's sheet:
+        ///   1. no catalog at all,
+        ///   2. catalog loaded but this tab's sheet has no rows,
+        ///   3. Model mode with no families of this kind in the open document.
+        /// </summary>
         public string CatalogStatusMessage
         {
             get
             {
+                string device = DeviceDisplayName.ToLowerInvariant();
+                bool catalogFileMode = _catalogVm != null && _catalogVm.IsCatalogFileMode;
+
                 if (_catalogVm == null || _catalogVm.Catalog == null || !_catalogVm.Catalog.IsLoaded)
-                    return "No catalog loaded — pick the catalog workbook in the top bar to populate the "
-                           + DeviceDisplayName.ToLowerInvariant() + " options.";
+                {
+                    return catalogFileMode
+                        ? "No catalog workbook loaded — pick one with Browse... in the top bar."
+                        : "No " + device + " families found in the open model — load families with "
+                          + "\"Load families...\" in the header, or switch to Catalog file.";
+                }
+
                 if (!IsCatalogLoaded)
-                    return "The loaded catalog has no rows for " + DeviceDisplayName.ToLowerInvariant() + ".";
+                {
+                    if (!catalogFileMode)
+                    {
+                        return "No " + device + " families found in the open model — load families with "
+                               + "\"Load families...\" in the header, or switch to Catalog file.";
+                    }
+
+                    return string.IsNullOrEmpty(CatalogSheetName)
+                        ? "The loaded workbook has no rows for " + device + "."
+                        : "The loaded workbook has no rows on its \"" + CatalogSheetName
+                          + "\" sheet, so there are no " + device + " options.";
+                }
+
                 return null;
             }
         }
@@ -691,11 +862,46 @@ namespace FireProtection.UI.ViewModels.Devices
         private void OnCatalogViewModelPropertyChanged(object sender, PropertyChangedEventArgs e)
         {
             if (e == null) return;
-            if (e.PropertyName != nameof(CatalogViewModel.IsLoaded)
+
+            // Listen for the SOURCE MODE as well as the derived catalog facts.
+            //
+            // IsCatalogFileMode drives two things the other properties do not: which families may
+            // legally be listed (CanFallBackToModelFamilies), and the wording of CatalogStatusMessage.
+            // Without it a mode switch that produced an equivalent-looking catalog would leave the
+            // dropdown populated from the previous source.
+            //
+            // This is the same property set the sprinkler tab reacts to; the two used to disagree,
+            // which meant a change could refresh one tab and leave the other stale.
+            //
+            // The filter stays WIDE on purpose. The idempotence check below makes the extra
+            // notifications cheap; narrowing the filter would be fragile, because a property added to
+            // SetCatalog later would then silently stop refreshing these dropdowns.
+            if (e.PropertyName != nameof(CatalogViewModel.Catalog)
+                && e.PropertyName != nameof(CatalogViewModel.IsLoaded)
                 && e.PropertyName != nameof(CatalogViewModel.TotalRowCount)
                 && e.PropertyName != nameof(CatalogViewModel.CatalogVersion)
-                && e.PropertyName != nameof(CatalogViewModel.SourcePath))
+                && e.PropertyName != nameof(CatalogViewModel.SourcePath)
+                && e.PropertyName != nameof(CatalogViewModel.IsCatalogFileMode))
                 return;
+
+            // IDEMPOTENCE (T1.2). SetCatalog raises EIGHT PropertyChanged events and SourceMode adds
+            // IsCatalogFileMode, so one mode switch arrived here ~7 times - each time rebuilding every
+            // dropdown and running a full eligibility sweep. Comparing the ACTUAL catalog instance and
+            // mode (rather than trimming the property list) keeps this correct if SetCatalog grows
+            // another property later.
+            ICatalog currentCatalog = _catalogVm != null ? _catalogVm.Catalog : null;
+            bool currentMode = _catalogVm != null && _catalogVm.IsCatalogFileMode;
+
+            if (_hasHandledCatalog
+                && ReferenceEquals(currentCatalog, _lastHandledCatalog)
+                && currentMode == _lastHandledCatalogFileMode)
+            {
+                return;
+            }
+
+            _lastHandledCatalog = currentCatalog;
+            _lastHandledCatalogFileMode = currentMode;
+            _hasHandledCatalog = true;
 
             LoadDeviceFamilies();
 
@@ -714,6 +920,7 @@ namespace FireProtection.UI.ViewModels.Devices
 
             OnPropertyChanged(nameof(IsCatalogLoaded));
             OnPropertyChanged(nameof(CatalogStatusMessage));
+            OnPropertyChanged(nameof(MissingCatalogDataMessage));
             CommandManager.InvalidateRequerySuggested();
             RefreshEligibility();
         }
@@ -1058,6 +1265,10 @@ namespace FireProtection.UI.ViewModels.Devices
                 ApplianceType = EffectiveDeviceAttribute(roomVm, "ApplianceType", effectiveFamily, effectiveType),
                 CandelaDba = EffectiveDeviceAttribute(roomVm, "CandelaDba", effectiveFamily, effectiveType),
 
+                OverrideMaxDistanceToWallFt = ParseNullableDouble(roomVm.GetEffective("MaxDistanceToWall")),
+                OverrideCeilingTileUFt = ParseNullableDouble(roomVm.GetEffective("TileU")),
+                OverrideCeilingTileVFt = ParseNullableDouble(roomVm.GetEffective("TileV")),
+
                 DeviceKind = TabDeviceKind
             };
         }
@@ -1178,6 +1389,20 @@ namespace FireProtection.UI.ViewModels.Devices
             return roomVm.GetEffective(key);
         }
 
+        /// <summary>
+        /// Parses a user-entered override string ("S->W" / tile size) into feet. Blank / unparseable => null,
+        /// which the engine reads as "use the readable Revit grid or the rule-set default". Invariant culture
+        /// so a period is always the decimal separator, matching how the values are stored.
+        /// </summary>
+        private static double? ParseNullableDouble(string text)
+        {
+            if (string.IsNullOrWhiteSpace(text)) return null;
+            return double.TryParse(text.Trim(), System.Globalization.NumberStyles.Float,
+                System.Globalization.CultureInfo.InvariantCulture, out double v)
+                ? (double?)v
+                : null;
+        }
+
         protected void ApplyDefaultSelection()
         {
             foreach (DeviceLevelItemViewModel level in Levels)
@@ -1287,6 +1512,21 @@ namespace FireProtection.UI.ViewModels.Devices
             if (IsBackendPending) return;
             if (_suppressEligibilityRefresh) return;
 
+            // COALESCING (T1.1). RevitApiContext.Run ENQUEUES and never de-duplicates, so a burst of
+            // triggers used to enqueue one complete sweep per trigger. A sweep probes every room, so
+            // the queue drained for a long time on the thread that also pumps the UI.
+            //
+            // If a pass is already queued, return: it reads the CURRENT property values when it runs.
+            // Bumping the version here (not at each call site) makes the running pass re-arm, and it
+            // cannot be forgotten by a future edit.
+            if (_eligibilityRefreshPending)
+            {
+                _eligibilityInputsVersion++;
+                return;
+            }
+
+            _eligibilityRefreshPending = true;
+
             _isEligibilityRefreshing = true;
             CommandManager.InvalidateRequerySuggested();
 
@@ -1295,6 +1535,9 @@ namespace FireProtection.UI.ViewModels.Devices
 
         private void OnEligibilityRefreshFailed(Exception ex)
         {
+            // MUST clear the pending flag. If it were left set, one transient failure would disable
+            // eligibility refresh for the rest of the session - worse than the freeze being fixed.
+            _eligibilityRefreshPending = false;
             _isEligibilityRefreshing = false;
             FireProtectionLog.Warn(DeviceDisplayName + ": eligibility preflight could not run — "
                 + (ex != null ? ex.Message : "unknown error") + ". Rooms left selectable.");
@@ -1303,8 +1546,35 @@ namespace FireProtection.UI.ViewModels.Devices
 
         private void RefreshEligibilityCore()
         {
+            int versionAtStart = _eligibilityInputsVersion;
+            DateTime startedAt = DateTime.UtcNow;
+
             try
             {
+                RunEligibilityPass();
+            }
+            finally
+            {
+                _eligibilityRefreshPending = false;
+                _isEligibilityRefreshing = false;
+
+                double elapsedMs = (DateTime.UtcNow - startedAt).TotalMilliseconds;
+                FireProtectionLog.Info(
+                    DeviceDisplayName + ": eligibility pass complete in " + Math.Round(elapsedMs)
+                    + " ms across " + AllRooms.Count + " room(s).");
+
+                CommandManager.InvalidateRequerySuggested();
+
+                if (_eligibilityInputsVersion != versionAtStart) RefreshEligibility();
+            }
+        }
+
+        /// <summary>
+        /// The actual per-room device eligibility sweep, split out so the coalescing and timing
+        /// bookkeeping in <see cref="RefreshEligibilityCore"/> wraps one clear region.
+        /// </summary>
+        private void RunEligibilityPass()
+        {
                 List<DeviceRoomInputItem> allRooms = CollectAllRoomsForEligibility();
 
                 IReadOnlyDictionary<string, PlacementEligibilityResult> map = null;
@@ -1378,12 +1648,6 @@ namespace FireProtection.UI.ViewModels.Devices
                 OnPropertyChanged(nameof(RoomSelectionToggleLabel));
                 if (ShowEligibleRoomsOnly) RoomsView.Refresh();
                 RaiseRoomCounts();
-            }
-            finally
-            {
-                _isEligibilityRefreshing = false;
-                CommandManager.InvalidateRequerySuggested();
-            }
         }
     }
 }

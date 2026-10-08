@@ -61,6 +61,8 @@ namespace FireProtection.UI.ViewModels.SmokeDetectors
 
         public override string DeviceDisplayName => "SMOKE DETECTOR CONFIGURATION";
 
+        protected override string CatalogSheetName => "SmokeDetectors";
+
         protected override FireProtection.UI.Services.DeviceKind TabDeviceKind => FireProtection.UI.Services.DeviceKind.SmokeDetector;
 
         // ---------------------------------------------------------------------------------------
@@ -98,6 +100,26 @@ namespace FireProtection.UI.ViewModels.SmokeDetectors
         protected override void OnUniversalFamilyTypeChanged()
         {
             RaiseDerivedAttributeNotifications();
+            OnPropertyChanged(nameof(MissingCatalogDataMessage));
+        }
+
+        /// <summary>
+        /// Warns when none of the three derived attributes could be read for the selected
+        /// family/type. All three missing means the catalog has no row for it at all, which is the
+        /// Model-mode-without-workbook case.
+        /// </summary>
+        protected override string DescribeMissingCatalogData()
+        {
+            if (!string.IsNullOrWhiteSpace(DerivedDetectorType)
+                || !string.IsNullOrWhiteSpace(DerivedMount)
+                || !string.IsNullOrWhiteSpace(DerivedCeilingSlope))
+            {
+                return null;
+            }
+
+            return BuildMissingCatalogDataWarning(
+                "detector type, mount and ceiling slope are unknown.",
+                "Placement will use the provisional defaults instead.");
         }
 
         protected override string DeriveAttribute(string key, string familyName, string typeName)

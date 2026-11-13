@@ -1,0 +1,63 @@
+{
+  "name": "fireprotection_query_catalog_sprinklers",
+  "title": "Query sprinkler catalog entries",
+  "description": "Queries the loaded sprinkler catalog for families, types, and their properties. Returns all sprinkler families, or types for a specific family, or full entries for a family. Use this to populate UI dropdowns or to look up sprinkler specifications (K-factor, coverage area, spacing, temperature rating, etc.) before running calculations.",
+  "input_schema": {
+    "type": "object",
+    "properties": {
+      "family_name": {
+        "type": "string",
+        "description": "Optional family name to filter by. If omitted, returns all families."
+      },
+      "include_entries": {
+        "type": "boolean",
+        "default": false,
+        "description": "If true and family_name is provided, returns full entries with all properties (KFactor, MaxCoverageAreaSqFt, MaxSpacingFt, etc.)."
+      }
+    },
+    "additionalProperties": false
+  },
+  "output_schema": {
+    "type": "object",
+    "properties": {
+      "families": { "type": "array", "items": { "type": "string" } },
+      "types_for_family": { "type": "array", "items": { "type": "string" } },
+      "entries": {
+        "type": "array",
+        "items": {
+          "type": "object",
+          "properties": {
+            "family_name": { "type": "string" },
+            "type_name": { "type": "string" },
+            "hazard_class": { "type": "string" },
+            "mount": { "type": "string" },
+            "sprinkler_class": { "type": "string" },
+            "max_coverage_area_sq_ft": { "type": ["number", "null"] },
+            "max_spacing_ft": { "type": ["number", "null"] },
+            "min_spacing_ft": { "type": ["number", "null"] },
+            "coverage_radius_ft": { "type": ["number", "null"] },
+            "k_factor": { "type": ["number", "null"] },
+            "response_type": { "type": "string" },
+            "temp_rating_f": { "type": ["integer", "null"] },
+            "deflector_to_ceiling_in": { "type": ["number", "null"] },
+            "sidewall_max_along_wall_spacing_ft": { "type": ["number", "null"] },
+            "sidewall_max_throw_ft": { "type": ["number", "null"] },
+            "sidewall_end_wall_clearance_ft": { "type": ["number", "null"] }
+          },
+          "required": ["family_name", "type_name"]
+        }
+      }
+    },
+    "required": ["families"]
+  },
+  "input_examples": [
+    {},
+    { "family_name": "Tyco TY-FRB", "include_entries": true }
+  ],
+  "annotations": {
+    "readOnlyHint": true,
+    "destructiveHint": false,
+    "idempotentHint": true,
+    "openWorldHint": false
+  }
+}

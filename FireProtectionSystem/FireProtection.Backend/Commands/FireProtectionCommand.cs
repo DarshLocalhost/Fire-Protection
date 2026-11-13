@@ -5,6 +5,7 @@ using FireProtection.Backend.Models.DTOs;
 using FireProtection.Backend.Services;
 using FireProtection.Backend.Services.Catalog;
 using FireProtection.Backend.Services.Extraction;
+using FireProtection.Backend.Services.Model;
 using FireProtection.Backend.Services.Placement;
 using FireProtection.Backend.Services.Placement.NotificationAppliances;
 using FireProtection.Backend.Services.Placement.SmokeDetectors;
@@ -13,6 +14,7 @@ using FireProtection.UI.Services;
 using FireProtection.UI.ViewModels.Catalog;
 using Newtonsoft.Json;
 using System;
+using System.Collections.Generic;
 
 namespace FireProtection.Backend.Commands
 {
@@ -55,17 +57,47 @@ namespace FireProtection.Backend.Commands
 
                 FireProtectionExtractionService extractionService = new FireProtectionExtractionService();
 
-                var (snapshot, exportPath) = extractionService.ExtractAndExport(hostDocument);
+                // Fast lightweight extraction (levels, ceilings, rooms, existing sprinklers) for instant UI launch
+                ModelSnapshot snapshot = extractionService.ExtractLightweightSnapshot(hostDocument);
 
                 string json = JsonConvert.SerializeObject(snapshot, Formatting.Indented);
 
-                // CatalogHolder is a tiny shared mutable reference to the current
-                // ICatalog. The Revit-aware family source (and its resolver
-                // delegate) is constructed BEFORE the user picks a catalog file,
-                // so the resolver cannot capture a catalog at construction time.
-                // Instead, it reads the holder lazily on every call — the
-                // CatalogViewModel writes the holder when the user loads a file.
+                // Lazy obstacle cache — extracted on-demand when placement calculation runs
+                IReadOnlyList<ObstacleData> cachedObstacles = null;
+                Func<IReadOnlyList<ObstacleData>> lazyObstacles = () =>
+                {
+                    if (cachedObstacles != null) return cachedObstacles;
+                    try
+                    {
+                        cachedObstacles = extractionService.ExtractObstacles(hostDocument, snapshot.Rooms);
+                        snapshot.Obstacles = cachedObstacles as List<ObstacleData> ?? new List<ObstacleData>(cachedObstacles);
+                    }
+                    catch (Exception ex)
+                    {
+                        FireProtectionLog.Warn("Lazy obstacle extraction error: " + ex.Message);
+                        cachedObstacles = new List<ObstacleData>();
+                    }
+                    return cachedObstacles;
+                };
+
+                /// CatalogHolder is a tiny shared mutable reference to the current
+                /// ICatalog. The Revit-aware family source (and its resolver
+                /// delegate) is constructed BEFORE the user picks a catalog file,
+                /// so the resolver cannot capture a catalog at construction time.
+                /// Instead, it reads the holder lazily on every call — the
+                /// CatalogViewModel writes the holder when the user loads a file.
+                /// Decision 020 superseded by the catalog-source switch: family/type lists come from
+                /// EITHER the open model (default) or a user-selected workbook, chosen by a radio
+                /// group in the top bar and persisted between sessions.
+                ///
+                /// Two holders, deliberately:
+                ///   catalogHolder     - whatever source is ACTIVE. The Revit family sources read
+                ///                        this to resolve Mount at call time.
+                ///   workbookHolder    - ONLY the Excel workbook. The model-backed catalog overlays
+                ///                        per-type values from this one. If it read catalogHolder it
+                ///                        would find itself in model mode and recurse.
                 CatalogHolder catalogHolder = new CatalogHolder();
+                CatalogHolder workbookHolder = new CatalogHolder();
 
                 // The family source's resolver looks up the Mount column from the
                 // CURRENT catalog. Passing the holder's Current getter as a
@@ -73,43 +105,59 @@ namespace FireProtection.Backend.Commands
                 RevitSprinklerFamilySource sprinklerFamilySource = new RevitSprinklerFamilySource(
                     hostDocument, () => catalogHolder.Current);
 
-                // Step 2 — pass the Revit-aware device-context resolver (produced by
-                // sprinklerFamilySource) into the placement input exporter so the
-                // per-row (and universal) device placement context can be resolved
-                // at the Revit-aware boundary and carried on every PlacementRoomInput.
-                // The calculation engine itself does not yet read the context; the
-                // calculation algorithm is unchanged byte-for-byte.
+                /// Step 2 — pass the Revit-aware device-context resolver (produced by
+                /// sprinklerFamilySource) into the placement input exporter so the
+                /// per-row (and universal) device placement context can be resolved
+                /// at the Revit-aware boundary and carried on every PlacementRoomInput.
+                /// The calculation engine itself does not yet read the context; the
+                /// calculation algorithm is unchanged byte-for-byte.
                 PlacementInputJsonExporter inputExporter = new PlacementInputJsonExporter(
-                    snapshot.Obstacles,
+                    lazyObstacles,
                     snapshot.ExistingSprinklers,
                     sprinklerFamilySource.GetDeviceContextResolver());
 
                 RevitSprinklerPlacementService placementService = new RevitSprinklerPlacementService(hostDocument);
 
-                // Decision 020: the catalog (Excel) is the catalog of record. The user selects
-                // the workbook each session via the in-UI file picker; the loader is Backend-only
-                // (ClosedXML), so the Backend constructs the CatalogService and the UI consumes
-                // it through ICatalog. The catalog starts unloaded — the user picks a file in
-                // the top bar.
-                //
-                // The viewmodel receives the holder so it can write the loaded
-                // catalog into it on every successful TryLoad — the family
-                // source's resolver then sees the new catalog on its next call.
-                CatalogViewModel catalogViewModel = new CatalogViewModel(BuildCatalogFromPath, catalogHolder);
+                /// Decision 020: the catalog (Excel) is the catalog of record. The user selects
+                /// the workbook each session via the in-UI file picker; the loader is Backend-only
+                /// (ClosedXML), so the Backend constructs the CatalogService and the UI consumes
+                /// it through ICatalog. The catalog starts unloaded — the user picks a file in
+                /// the top bar.
+                ///
+                /// The viewmodel receives the holder so it can write the loaded
+                /// catalog into it on every successful TryLoad — the family
+                /// source's resolver then sees the new catalog on its next call.
+                CatalogViewModel catalogViewModel = new CatalogViewModel(
+                    BuildCatalogFromPath,
+                    catalogHolder,
+                    workbookHolder,
+                    () =>
+                    {
+                        // Built lazily so the model is read when the user switches to Model mode,
+                        // not once at startup. ModelFamilyEnumerator is the Revit-aware edge;
+                        // the catalog itself stays Revit-free.
+                        var modelCatalog = new ModelBackedCatalog(() => workbookHolder.Current);
+                        ModelFamilyEnumerator.LoadInto(modelCatalog, hostDocument);
+                        return modelCatalog;
+                    });
 
-                // Device seams: the Revit-aware family source + placement executor for each device tab. The
-                // smoke-detector sources read the CURRENT catalog lazily via the same holder as the sprinkler
-                // source, so a catalog (re)load after the window opens is picked up on the next call. The
-                // notification-appliance executor uses rating-aware NFPA 72 Chapter 18 planning rules
-                // keyed by appliance type, candela, dBA, mount, ceiling slope, obstacles, and duplicates;
-                // the result remains flagged for engineering review until the project design basis is approved.
+                /// Device seams: the Revit-aware family source + placement executor for each device tab. The
+                /// smoke-detector sources read the CURRENT catalog lazily via the same holder as the sprinkler
+                /// source, so a catalog (re)load after the window opens is picked up on the next call. The
+                /// notification-appliance executor uses rating-aware NFPA 72 Chapter 18 planning rules
+                /// keyed by appliance type, candela, dBA, mount, ceiling slope, obstacles, and duplicates;
+                /// the result remains flagged for engineering review until the project design basis is approved.
                 DevicePlacementSeams deviceSeams = new DevicePlacementSeams
                 {
                     SmokeFamilySource = new RevitSmokeDetectorFamilySource(hostDocument, () => catalogHolder.Current),
-                    SmokeExecutor = new RevitSmokeDetectorPlacementExecutor(hostDocument, () => catalogHolder.Current),
+                    SmokeExecutor = new RevitSmokeDetectorPlacementExecutor(
+                        hostDocument, () => catalogHolder.Current, lazyObstacles),
                     NotificationFamilySource = new RevitNotificationApplianceFamilySource(hostDocument),
-                    NotificationExecutor = new RevitNotificationAppliancePlacementExecutor(hostDocument, () => catalogHolder.Current)
+                    NotificationExecutor = new RevitNotificationAppliancePlacementExecutor(
+                        hostDocument, () => catalogHolder.Current, lazyObstacles)
                 };
+
+                var refreshService = new RevitModelRefreshService(hostDocument);
 
                 // Modeless + owned by Revit's main window: Revit stays fully usable while the tool is open.
                 UiLauncher.Show(
@@ -119,7 +167,8 @@ namespace FireProtection.Backend.Commands
                     placementService,
                     catalogViewModel,
                     uiApplication.MainWindowHandle,
-                    deviceSeams);
+                    deviceSeams,
+                    refreshService);
 
                 return Result.Succeeded;
             }

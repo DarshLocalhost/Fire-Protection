@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Linq;
 using Autodesk.Revit.DB;
 using FireProtection.Backend.Models.Placement.Sprinklers.Final;
+using FireProtection.Backend.Services.Placement.Devices;
 using FireProtection.UI.Services;
 using FireProtection.UI.ViewModels.Devices;
 
@@ -31,8 +32,26 @@ namespace FireProtection.Backend.Services.Placement.NotificationAppliances
                 .OfCategory(BuiltInCategory.OST_FireAlarmDevices)
                 .Cast<FamilySymbol>();
 
+            // Filter specifically for notification appliance families:
+            // Must NOT be an obvious smoke detector and should match notification appliance keywords
+            // or resolve to NotificationAppliance.
             var results = new List<DeviceFamilyOption>();
-            foreach (var group in collector.GroupBy(s => s.FamilyName, StringComparer.OrdinalIgnoreCase))
+            var familiesGroup = collector
+                .Where(s =>
+                {
+                    string fam = s.FamilyName ?? string.Empty;
+                    string type = s.Name ?? string.Empty;
+                    // Check if it resolves explicitly as smoke detector
+                    if (DeviceKindResolver.TryResolve(fam, type, out DeviceKind resolvedKind) &&
+                        resolvedKind == DeviceKind.SmokeDetector)
+                    {
+                        return false;
+                    }
+                    return true;
+                })
+                .GroupBy(s => s.FamilyName, StringComparer.OrdinalIgnoreCase);
+
+            foreach (var group in familiesGroup)
             {
                 results.Add(new DeviceFamilyOption
                 {
@@ -50,23 +69,7 @@ namespace FireProtection.Backend.Services.Placement.NotificationAppliances
 
         public bool TryLoadFamily(string familyFilePath, out string error)
         {
-            error = null;
-            if (string.IsNullOrWhiteSpace(familyFilePath)) { error = "No family file was selected."; return false; }
-            try
-            {
-                Family family;
-                if (!_document.LoadFamily(familyFilePath, out family))
-                {
-                    error = "Revit did not load the family file.";
-                    return false;
-                }
-                return true;
-            }
-            catch (Exception ex)
-            {
-                error = ex.Message;
-                return false;
-            }
+            return FamilyLoadHelper.TryLoad(_document, familyFilePath, out error);
         }
 
         public DevicePlacementBehavior GetPlacementBehavior(string familyName, string typeName)

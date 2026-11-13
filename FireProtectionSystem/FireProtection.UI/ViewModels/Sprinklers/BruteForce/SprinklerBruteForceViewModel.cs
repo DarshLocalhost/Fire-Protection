@@ -35,7 +35,7 @@ namespace FireProtection.UI.ViewModels.Sprinklers.BruteForce
         private bool _canCancelPlacement;
         private string _placementProgressText;
         private PlacementProgressReporter _progressReporter;
-        private string _selectedExistingDevicePolicyLabel = ExistingDevicePolicyOptions.SkipRoomLabel;
+        private string _selectedExistingDevicePolicyLabel = ExistingDevicePolicyOptions.ReplaceExistingLabel;
         private string _bulkSpacingInput;
         private string _bulkClearanceInput;
 
@@ -43,6 +43,17 @@ namespace FireProtection.UI.ViewModels.Sprinklers.BruteForce
         // (expensive, Revit-transactional) per-room eligibility probe runs once at the end instead of per move.
         private bool _suppressEligibilityRefresh;
         private bool _isEligibilityRefreshing;
+
+        /// <summary>True while a sweep is queued or running. See <see cref="RefreshEligibility"/>.</summary>
+        private bool _eligibilityRefreshPending;
+
+        /// <summary>Bumped whenever an input feeding eligibility changes; drives re-arm coalescing.</summary>
+        private int _eligibilityInputsVersion;
+
+        // T1.2 idempotence memory: the catalog instance and mode this tab last reacted to.
+        private ICatalog _lastHandledCatalog;
+        private bool _lastHandledCatalogFileMode;
+        private bool _hasHandledCatalog;
         private string _placementStatusMessage;
 
         private SprinklerFamilyOption _selectedSprinklerFamily;
@@ -167,6 +178,10 @@ namespace FireProtection.UI.ViewModels.Sprinklers.BruteForce
             PlaceSprinklersCommand = new RelayCommand(
                 _ => ExecutePlaceSprinklers(),
                 _ => CanExecutePlaceSprinklers());
+
+            GoToFinalCommand = new RelayCommand(
+                _ => ExecuteGoToFinal(),
+                _ => CanExecuteGoToFinal());
 
             ResetCommand = new RelayCommand(_ => Reset());
 
@@ -345,6 +360,8 @@ namespace FireProtection.UI.ViewModels.Sprinklers.BruteForce
 
                     OnPropertyChanged(nameof(IsSprinklerFamilySelected));
                     OnPropertyChanged(nameof(IsSprinklerTypeSelected));
+                    OnPropertyChanged(nameof(SelectedSprinklerCatalogEntry));
+                    OnPropertyChanged(nameof(MissingCatalogDataMessage));
                     // The top-level selection is the default for every row: re-seed rows that are
                     // still on the old default and leave user-overridden rows alone.
                     SeedPerRowCatalogDefaults();
@@ -362,6 +379,8 @@ namespace FireProtection.UI.ViewModels.Sprinklers.BruteForce
                 if (SetProperty(ref _selectedSprinklerType, value))
                 {
                     OnPropertyChanged(nameof(IsSprinklerTypeSelected));
+                    OnPropertyChanged(nameof(SelectedSprinklerCatalogEntry));
+                    OnPropertyChanged(nameof(MissingCatalogDataMessage));
                     SeedPerRowCatalogDefaults();
                     CommandManager.InvalidateRequerySuggested();
                     RefreshEligibility();
@@ -371,6 +390,76 @@ namespace FireProtection.UI.ViewModels.Sprinklers.BruteForce
 
         public bool IsSprinklerFamilySelected => SelectedSprinklerFamily != null;
         public bool IsSprinklerTypeSelected => SelectedSprinklerType != null;
+
+        /// <summary>
+        /// Explains an EMPTY family/type dropdown instead of leaving it blank.
+        ///
+        /// Separate from <see cref="PlacementStatusMessage"/> on purpose: that one reports the outcome
+        /// of the last run, this one reports why there is nothing to pick. Without it, a workbook with
+        /// no Sprinklers rows and a model with no sprinkler families look identical, and neither
+        /// matched the old advice to "pick the catalog workbook" (which is wrong in Model mode).
+        /// </summary>
+        public string CatalogStatusMessage
+        {
+            get
+            {
+                bool catalogFileMode = _catalogViewModel != null && _catalogViewModel.IsCatalogFileMode;
+
+                if (_catalogViewModel == null || _catalog == null || !_catalog.IsLoaded)
+                {
+                    return catalogFileMode
+                        ? "No catalog workbook loaded — pick one with Browse... in the top bar."
+                        : "No sprinkler families found in the open model — load families with "
+                          + "\"Load families...\" in the header, or switch to Catalog file.";
+                }
+
+                if (SprinklerFamilies.Count == 0)
+                {
+                    if (!catalogFileMode)
+                    {
+                        return "No sprinkler families found in the open model — load families with "
+                               + "\"Load families...\" in the header, or switch to Catalog file.";
+                    }
+
+                    return "The loaded workbook has no rows on its \"Sprinklers\" sheet, so there are "
+                           + "no sprinkler options.";
+                }
+
+                return null;
+            }
+        }
+
+        public SprinklerCatalogEntry SelectedSprinklerCatalogEntry =>
+            _catalog == null || SelectedSprinklerFamily == null || SelectedSprinklerType == null
+                ? null
+                : _catalog.GetSprinklerEntry(SelectedSprinklerFamily.FamilyName, SelectedSprinklerType.TypeName);
+
+        /// <summary>
+        /// Warns that the selected sprinkler type has no engineering data in the active catalog.
+        ///
+        /// A null <see cref="SelectedSprinklerCatalogEntry"/> means the catalog has NO ROW for this
+        /// family/type, which is the normal Model-mode-without-workbook case: the model supplies the
+        /// names and nothing supplies K-factor, spacing, coverage or temperature. The engine then falls
+        /// back to provisional hazard-class defaults (BruteForceCalculationService.MergeTypeRuleValues
+        /// returns the base rule set unchanged when all four type values are absent), so placement is
+        /// still valid — it is just not the device's listed rating.
+        ///
+        /// Null when nothing is selected, so it stays out of the way.
+        /// </summary>
+        public string MissingCatalogDataMessage
+        {
+            get
+            {
+                if (!IsSprinklerTypeSelected || _catalog == null || !_catalog.IsLoaded) return null;
+                if (SelectedSprinklerCatalogEntry != null) return null;
+
+                return "No catalog row for " + SelectedSprinklerFamily.FamilyName + " / "
+                       + SelectedSprinklerType.TypeName
+                       + ": K-factor, spacing and coverage will use provisional hazard-class defaults. "
+                       + "Those values come from the workbook, not the Revit model — load a catalog "
+                       + "workbook with \"Browse...\" in the top bar to supply them.";
+            }
+        }
 
         public int SelectedLevelCount => Levels.Count(l => l.IsSelected);
 
@@ -534,6 +623,9 @@ namespace FireProtection.UI.ViewModels.Sprinklers.BruteForce
         public string RoomSelectionToggleLabel =>
             AreAllSelectableRoomsSelected ? "Clear All" : "Select All";
 
+        public Action RequestNavigateToFinal { get; set; }
+        public ICommand GoToFinalCommand { get; }
+
         public ICommand PlaceSprinklersCommand { get; }
         public ICommand ResetCommand { get; }
         public ICommand CancelPlacementCommand { get; }
@@ -606,6 +698,8 @@ namespace FireProtection.UI.ViewModels.Sprinklers.BruteForce
         public string CeilingColumnHeader => "CEILING " + UnitDisplay.HeaderSuffix;
         public string SpacingColumnHeader => "S→S " + UnitDisplay.HeaderSuffix;
         public string ClearanceColumnHeader => "WALL " + UnitDisplay.HeaderSuffix;
+        public string WallDistanceColumnHeader => "S→W " + UnitDisplay.HeaderSuffix;
+        public string TileColumnHeader => "TILE " + UnitDisplay.HeaderSuffix;
         public string AreaColumnHeader => "AREA (FT²)";
         public string UnitSuffix => UnitDisplay.Suffix;
 
@@ -623,15 +717,26 @@ namespace FireProtection.UI.ViewModels.Sprinklers.BruteForce
                 SelectedSprinklerFamily = null;
                 SelectedSprinklerType = null;
 
-                // Decision 017: the Excel catalog is the source of truth for families + types.
-                // ISprinklerFamilySource (the Revit-document listing) is only a fallback and returns
-                // an empty list unless FireProtectionConfig.UseRevitFamilyListing is turned on.
+                // The ACTIVE ICatalog supplies families + types. Which concrete catalog that is
+                // depends on the source radio in the top bar: the Revit-model catalog (default) or
+                // the selected Excel workbook. Either way it implements ICatalog, so this method
+                // does not change between modes.
+                //
+                // ISprinklerFamilySource remains only as a last-resort fallback, for the case where
+                // no catalog is active at all (designer host, or a failed model read).
                 foreach (SprinklerFamilyOption family in BuildFamilyOptionsFromCatalog())
                 {
                     SprinklerFamilies.Add(family);
                 }
 
-                if (SprinklerFamilies.Count == 0 && _sprinklerFamilySource != null)
+                // ISprinklerFamilySource is a last-resort fallback ONLY when the active source is the
+                // Revit model (designer host, or a failed model read).
+                //
+                // It must NEVER run in CatalogFile mode. The user chose the workbook as the source of
+                // truth, so a workbook whose Sprinklers sheet is empty must present an EMPTY list, not
+                // silently import every sprinkler family in the project. Falling back there made the
+                // dropdown disagree with the source the user picked.
+                if (SprinklerFamilies.Count == 0 && CanFallBackToModelFamilies())
                 {
                     IReadOnlyList<SprinklerFamilyOption> families = _sprinklerFamilySource.GetAvailableFamilies();
                     if (families != null)
@@ -655,6 +760,24 @@ namespace FireProtection.UI.ViewModels.Sprinklers.BruteForce
             {
                 _suppressEligibilityRefresh = previousSuppress;
             }
+        }
+
+        /// <summary>
+        /// Whether an empty catalog may be back-filled from the live Revit model.
+        ///
+        /// True only in Model mode (or when there is no <see cref="CatalogViewModel"/> at all, which
+        /// is the designer/test-host case). In CatalogFile mode the workbook IS the chosen source of
+        /// truth, so an empty sheet must read as empty rather than falling back to every family in
+        /// the project.
+        /// </summary>
+        private bool CanFallBackToModelFamilies()
+        {
+            if (_sprinklerFamilySource == null) return false;
+
+            // No catalog viewmodel means no source radio to honour (designer host, unit tests).
+            if (_catalogViewModel == null) return true;
+
+            return !_catalogViewModel.IsCatalogFileMode;
         }
 
         private IReadOnlyList<SprinklerFamilyOption> BuildFamilyOptionsFromCatalog()
@@ -689,14 +812,56 @@ namespace FireProtection.UI.ViewModels.Sprinklers.BruteForce
         private void OnCatalogViewModelPropertyChanged(object sender, PropertyChangedEventArgs e)
         {
             if (e == null) return;
-            if (e.PropertyName != nameof(CatalogViewModel.Catalog)) return;
 
-            _catalog = _catalogViewModel != null ? _catalogViewModel.Catalog : null;
+            // Same property set the device tabs react to (DevicePlacementViewModelBase). They used to
+            // disagree: the sprinkler tab listened only to Catalog while the device tabs listened to
+            // IsLoaded/TotalRowCount/CatalogVersion/SourcePath. Any catalog change that did not raise
+            // Catalog would refresh one tab and leave the other showing the previous source.
+            //
+            // This filter stays WIDE on purpose; the idempotence check below is what makes the extra
+            // notifications cheap. Narrowing the filter instead would be fragile - a property added to
+            // SetCatalog later would silently stop refreshing the dropdowns.
+            if (e.PropertyName != nameof(CatalogViewModel.Catalog)
+                && e.PropertyName != nameof(CatalogViewModel.IsLoaded)
+                && e.PropertyName != nameof(CatalogViewModel.TotalRowCount)
+                && e.PropertyName != nameof(CatalogViewModel.CatalogVersion)
+                && e.PropertyName != nameof(CatalogViewModel.SourcePath)
+                && e.PropertyName != nameof(CatalogViewModel.IsCatalogFileMode))
+                return;
+
+            // IDEMPOTENCE (T1.2). SetCatalog raises EIGHT PropertyChanged events (Catalog, IsLoaded,
+            // TotalRowCount, CatalogVersion, SourcePath, DisplayHeader, StatusMessage,
+            // RememberedCatalogPath) and SourceMode adds IsCatalogFileMode, so a single mode switch
+            // arrived here ~7 times. Each arrival rebuilt every dropdown AND ran a full eligibility
+            // sweep, so one radio click queued ~7 whole-model Revit probes. That was a measurable
+            // part of the freezing.
+            //
+            // Compare the ACTUAL catalog instance and mode rather than trimming the property list:
+            // this stays correct if SetCatalog grows another property later, which a hand-maintained
+            // whitelist would not.
+            ICatalog currentCatalog = _catalogViewModel != null ? _catalogViewModel.Catalog : null;
+            bool currentMode = _catalogViewModel != null && _catalogViewModel.IsCatalogFileMode;
+
+            if (ReferenceEquals(currentCatalog, _lastHandledCatalog)
+                && currentMode == _lastHandledCatalogFileMode
+                && _hasHandledCatalog)
+            {
+                return;
+            }
+
+            _lastHandledCatalog = currentCatalog;
+            _lastHandledCatalogFileMode = currentMode;
+            _hasHandledCatalog = true;
+
+            _catalog = currentCatalog;
 
             LoadSprinklerFamilies();
             SeedPerRowCatalogDefaults();
             RefreshEligibility();
             CommandManager.InvalidateRequerySuggested();
+
+            OnPropertyChanged(nameof(CatalogStatusMessage));
+            OnPropertyChanged(nameof(MissingCatalogDataMessage));
         }
 
         private void RefreshSprinklerTypesForSelectedFamily()
@@ -732,6 +897,21 @@ namespace FireProtection.UI.ViewModels.Sprinklers.BruteForce
                 SelectedSprinklerType = SprinklerTypes[0];
         }
 
+        private bool CanExecuteGoToFinal()
+        {
+            if (IsPlacementRunning) return false;
+            if (_isEligibilityRefreshing) return false;
+            if (SelectedVisibleEligibleRoomCount == 0) return false;
+            if (SelectedSprinklerFamily == null) return false;
+            if (SelectedSprinklerType == null) return false;
+            return true;
+        }
+
+        private void ExecuteGoToFinal()
+        {
+            RequestNavigateToFinal?.Invoke();
+        }
+
         private bool CanExecutePlaceSprinklers()
         {
             if (IsPlacementRunning) return false;
@@ -741,6 +921,25 @@ namespace FireProtection.UI.ViewModels.Sprinklers.BruteForce
             if (SelectedSprinklerType == null) return false;
             if (!string.Equals(SelectedSprinklerType.FamilyName, SelectedSprinklerFamily.FamilyName, StringComparison.OrdinalIgnoreCase)) return false;
             return true;
+        }
+
+        private bool _ignoreObstacles = false;
+
+        /// <summary>
+        /// When true, all calculated sprinklers are placed regardless of obstacle conflicts.
+        /// When false (default), sprinklers that directly collide with obstacle bounding boxes are skipped.
+        /// </summary>
+        public bool IgnoreObstacles
+        {
+            get => _ignoreObstacles;
+            set
+            {
+                if (_ignoreObstacles != value)
+                {
+                    _ignoreObstacles = value;
+                    OnPropertyChanged(nameof(IgnoreObstacles));
+                }
+            }
         }
 
         private void ExecutePlaceSprinklers()
@@ -753,19 +952,6 @@ namespace FireProtection.UI.ViewModels.Sprinklers.BruteForce
                 PlacementStatusMessage = validationMessage;
                 Dialogs.Show(validationMessage, "Place Sprinklers", MessageBoxButton.OK, MessageBoxImage.Warning);
                 return;
-            }
-
-            // Replace deletes existing devices. It is undoable (the whole run is one undo entry), but it is still
-            // destructive, so it is confirmed explicitly rather than applied on a combo-box selection alone.
-            if (ExistingDevicePolicySelection == ExistingDevicePolicy.ReplaceExisting &&
-                !Dialogs.Confirm(
-                    "Replace will DELETE the existing sprinklers inside every selected room before placing the new "
-                    + "set.\n\nThis can be undone in Revit (the run is a single undo entry), but the existing devices "
-                    + "and any data on them will be gone.\n\nContinue?",
-                    "Replace existing sprinklers"))
-            {
-                PlacementStatusMessage = "Placement cancelled.";
-                return; 
             }
 
             // Placement creates real Revit elements inside a Transaction, which is illegal from a modeless
@@ -822,6 +1008,11 @@ namespace FireProtection.UI.ViewModels.Sprinklers.BruteForce
         private void PlaceSprinklersCore()
         {
             PlacementStatusMessage = "Exporting placement input snapshot...";
+
+            // Host-resolution pass (T1.4), same as the eligibility sweep: the run places sprinkler
+            // instances but never modifies a Ceiling/Floor/RoofBase, so the collected element lists
+            // stay valid for the whole run and must not be rebuilt for every candidate point.
+            if (_sprinklerPlacementService != null) _sprinklerPlacementService.BeginHostResolutionPass();
 
             try
             {
@@ -906,7 +1097,36 @@ namespace FireProtection.UI.ViewModels.Sprinklers.BruteForce
                             }
                             // Dialogs.Owner is the tool window: the only window WPF will accept as an owner
                             // here (Application.Current.MainWindow was never shown through WPF under Revit).
-                            bool proceed = MissingFamiliesModal.ShowDialog(Dialogs.Owner, uiEntries);
+                            // Pass the load callback. Without it the modal's "Load family..." button is inert:
+                            // MissingFamiliesModal.LoadFamilyButton_Click returns immediately when
+                            // _loadFamily is null, so the sprinkler tab showed a live-looking button
+                            // that did nothing. The device tabs already passed one
+                            // (DevicePlacementViewModelBase). TryLoadFamily returns a FamilyLoadOutcome
+                            // rather than a bool, so it is mapped here to the modal's
+                            // Func<string,string> contract: null == success, non-null == error text.
+                            Func<string, string> loadFamily = null;
+                            ISprinklerFamilySource familySource = _sprinklerFamilySource;
+                            if (familySource != null)
+                            {
+                                loadFamily = path =>
+                                {
+                                    string loadError;
+                                    FamilyLoadOutcome outcome = familySource.TryLoadFamily(path, out loadError);
+                                    if (outcome == FamilyLoadOutcome.Failed) return loadError;
+
+                                    // T1.3: loading a family CHANGES THE DOCUMENT, and the eligibility
+                                    // cache key cannot see that. This is exactly the case where the cache
+                                    // must be dropped - see ISprinklerPlacementService.ClearEligibilityCache.
+                                    if (_sprinklerPlacementService != null)
+                                    {
+                                        _sprinklerPlacementService.ClearEligibilityCache();
+                                    }
+
+                                    return null;
+                                };
+                            }
+
+                            bool proceed = MissingFamiliesModal.ShowDialog(Dialogs.Owner, uiEntries, loadFamily);
                             if (!proceed)
                             {
                                 PlacementStatusMessage = "Placement cancelled: missing families were not resolved.";
@@ -934,7 +1154,8 @@ namespace FireProtection.UI.ViewModels.Sprinklers.BruteForce
                         typeName,
                         calc,
                         _progressReporter,
-                        ExistingDevicePolicySelection);
+                        ExistingDevicePolicySelection,
+                        _ignoreObstacles);
 
                     LastPlacementResult = placement;
                     didPlace = true;
@@ -1006,6 +1227,8 @@ namespace FireProtection.UI.ViewModels.Sprinklers.BruteForce
                 CanCancelPlacement = false;
                 PlacementProgressText = null;
                 _progressReporter = null;
+                // Release the cached host elements before any later document change (T1.4).
+                if (_sprinklerPlacementService != null) _sprinklerPlacementService.EndHostResolutionPass();
                 CommandManager.InvalidateRequerySuggested();
             }
         }
@@ -1073,6 +1296,7 @@ namespace FireProtection.UI.ViewModels.Sprinklers.BruteForce
                     }
 
                     JObject fullRoomJson = BuildFullRoomJson(roomData);
+                    SprinklerCatalogEntry catalogEntry = GetCatalogEntry(roomVm);
 
                     list.Add(new PlacementRoomInputItem
                     {
@@ -1093,7 +1317,14 @@ namespace FireProtection.UI.ViewModels.Sprinklers.BruteForce
                         SelectedSprinklerTypeName = roomVm.SelectedType,
                         OverrideMaxSpacingFt = roomVm.MaxSpacingFtOverride,
                         OverrideBoundaryClearanceFt = roomVm.BoundaryClearanceFtOverride,
-                        SelectedSprinklerOrientation = roomVm.SelectedOrientation,
+                        OverrideMaxDistanceToWallFt = roomVm.MaxDistanceToWallFtOverride,
+                        OverrideCeilingTileUFt = roomVm.TileUFtOverride,
+                        OverrideCeilingTileVFt = roomVm.TileVFtOverride,
+                        TypeMaxCoverageAreaSqFt = catalogEntry?.MaxCoverageAreaSqFt,
+                        TypeMaxSpacingFt = catalogEntry?.MaxSpacingFt,
+                        TypeMinSpacingFt = catalogEntry?.MinSpacingFt,
+                        TypeCoverageRadiusFt = catalogEntry?.CoverageRadiusFt,
+                        SprinklerClass = catalogEntry?.SprinklerClass,
                         FullRoomJson = fullRoomJson
                     });
                 }
@@ -1225,6 +1456,20 @@ namespace FireProtection.UI.ViewModels.Sprinklers.BruteForce
                 // preflight cache key), so a per-room hazard edit must re-run the deterministic preflight.
                 RefreshEligibility();
             }
+            else if (e.PropertyName == nameof(RoomItemViewModel.SelectedFamily)
+                     || e.PropertyName == nameof(RoomItemViewModel.SelectedType))
+            {
+                // A per-room family/type edit must re-run the preflight, exactly as the device tabs
+                // already do (DevicePlacementViewModelBase.OnRoomItemPropertyChanged). Without this the
+                // "Family not loaded" state was only ever discovered at place time: picking a catalog
+                // family that is not in the project left the row showing its previous, stale result.
+                //
+                // RefreshEligibility is a no-op while _suppressEligibilityRefresh is set, so the bulk
+                // seeding path (which rewrites many rows at once) still costs only one probe pass.
+                OnPropertyChanged(nameof(AreAllSelectableRoomsSelected));
+                OnPropertyChanged(nameof(RoomSelectionToggleLabel));
+                RefreshEligibility();
+            }
         }
 
         /// <summary>
@@ -1248,6 +1493,22 @@ namespace FireProtection.UI.ViewModels.Sprinklers.BruteForce
             if (_sprinklerPlacementService == null) return;
             if (_suppressEligibilityRefresh) return;
 
+            // COALESCING (T1.1). RevitApiContext.Run ENQUEUES and never de-duplicates, so a burst of
+            // triggers used to enqueue one complete sweep per trigger - and a sweep is rooms x
+            // candidates of Revit probing, so the queue drained for minutes and the UI was dead.
+            //
+            // If a pass is already queued, return: the queued pass reads the CURRENT property values
+            // when it eventually runs, so it already reflects the latest selection. Bumping the
+            // version here (rather than at each call site) is what makes the running pass re-arm -
+            // and it cannot be forgotten by a future edit, which a per-call-site counter could be.
+            if (_eligibilityRefreshPending)
+            {
+                _eligibilityInputsVersion++;
+                return;
+            }
+
+            _eligibilityRefreshPending = true;
+
             _isEligibilityRefreshing = true;
             CommandManager.InvalidateRequerySuggested();
 
@@ -1255,9 +1516,14 @@ namespace FireProtection.UI.ViewModels.Sprinklers.BruteForce
                 RefreshEligibilityCore,
                 ex =>
                 {
+                    // MUST clear the pending flag here. If it were left set, one transient failure
+                    // would disable eligibility refresh for the rest of the session - silently, and
+                    // worse than the freeze being fixed.
+                    _eligibilityRefreshPending = false;
                     _isEligibilityRefreshing = false;
                     CommandManager.InvalidateRequerySuggested();
                     System.Diagnostics.Debug.WriteLine("[ROOM-ELIGIBILITY] refresh failed: " + ex.Message);
+                    FireProtectionLog.Warn("Eligibility refresh failed: " + ex.Message);
                 });
         }
 
@@ -1266,12 +1532,51 @@ namespace FireProtection.UI.ViewModels.Sprinklers.BruteForce
         {
             if (_sprinklerPlacementService == null) return;
 
+            // Coalescing (T1.1): this pass may have been triggered many times while an earlier one was
+            // still queued. If any input moved while it ran, run ONE more pass so the final state is
+            // correct - never one pass per trigger.
+            int versionAtStart = _eligibilityInputsVersion;
+            long collectorSavedBefore = _sprinklerPlacementService.HostCollectorCallsSaved;
+            DateTime startedAt = DateTime.UtcNow;
+
+            // Host-resolution pass (T1.4): collect ceiling/floor/roof + link lists ONCE for the whole
+            // sweep. The pass only READS the document, so cached Element references stay valid.
+            _sprinklerPlacementService.BeginHostResolutionPass();
+
+            try
+            {
+                RunEligibilityPass();
+            }
+            finally
+            {
+                _sprinklerPlacementService.EndHostResolutionPass();
+                _eligibilityRefreshPending = false;
+                _isEligibilityRefreshing = false;
+
+                double elapsedMs = (DateTime.UtcNow - startedAt).TotalMilliseconds;
+                FireProtectionLog.Info(
+                    "Eligibility pass complete: " + Math.Round(elapsedMs) + " ms, "
+                    + AllRooms.Count + " room(s), family='" + (SelectedSprinklerFamily?.FamilyName ?? "(none)")
+                    + "', document collectors avoided by host cache: "
+                    + (_sprinklerPlacementService.HostCollectorCallsSaved - collectorSavedBefore) + ".");
+
+                CommandManager.InvalidateRequerySuggested();
+
+                // Inputs changed mid-pass: re-arm exactly once. The flag is already clear, so this
+                // enqueues one follow-up pass rather than one per change.
+                if (_eligibilityInputsVersion != versionAtStart) RefreshEligibility();
+            }
+        }
+
+        /// <summary>
+        /// The actual per-room eligibility sweep. Split out of <see cref="RefreshEligibilityCore"/> so
+        /// the pass bracketing (host cache, coalescing, timing) wraps one clear region.
+        /// </summary>
+        private void RunEligibilityPass()
+        {
             string familyName = SelectedSprinklerFamily?.FamilyName;
             string typeName = SelectedSprinklerType?.TypeName;
             bool canEvaluate = !string.IsNullOrWhiteSpace(familyName) && !string.IsNullOrWhiteSpace(typeName);
-
-            // Drop any cached probe results so this evaluation is authoritative, not stale.
-            _sprinklerPlacementService.ClearEligibilityCache();
 
             // Compute the REAL candidate points for every visible room via the exact BruteForce calculation
             // the placement step consumes. Eligibility then probes actual placement of those candidates.
@@ -1299,8 +1604,15 @@ namespace FireProtection.UI.ViewModels.Sprinklers.BruteForce
             // that would hide a calculation/infrastructure failure behind "blocked".
             bool calcFailed = calcRan && calcByRoom == null;
 
+            bool anyLevelSelected = Levels != null && Levels.Any(l => l.IsSelected);
+
             foreach (RoomItemViewModel roomVm in AllRooms)
             {
+                if (anyLevelSelected && roomVm.ParentLevel != null && !roomVm.ParentLevel.IsSelected)
+                {
+                    continue;
+                }
+
                 PlacementEligibilityResult result;
                 int candidateCount = 0;
 
@@ -1368,9 +1680,12 @@ namespace FireProtection.UI.ViewModels.Sprinklers.BruteForce
         private List<PlacementRoomInputItem> CollectAllVisibleRooms()
         {
             List<PlacementRoomInputItem> list = new List<PlacementRoomInputItem>();
+            bool anyLevelSelected = Levels != null && Levels.Any(l => l.IsSelected);
 
             foreach (LevelItemViewModel levelVm in Levels)
             {
+                if (anyLevelSelected && !levelVm.IsSelected) continue;
+
                 LevelUiData levelData = levelVm.Level;
                 if (levelData == null) continue;
 
@@ -1389,6 +1704,7 @@ namespace FireProtection.UI.ViewModels.Sprinklers.BruteForce
                         }
                     }
 
+                    SprinklerCatalogEntry catalogEntry = GetCatalogEntry(roomVm);
                     list.Add(new PlacementRoomInputItem
                     {
                         LevelId = levelData.LevelId,
@@ -1408,7 +1724,14 @@ namespace FireProtection.UI.ViewModels.Sprinklers.BruteForce
                         SelectedSprinklerTypeName = roomVm.SelectedType,
                         OverrideMaxSpacingFt = roomVm.MaxSpacingFtOverride,
                         OverrideBoundaryClearanceFt = roomVm.BoundaryClearanceFtOverride,
-                        SelectedSprinklerOrientation = roomVm.SelectedOrientation,
+                        OverrideMaxDistanceToWallFt = roomVm.MaxDistanceToWallFtOverride,
+                        OverrideCeilingTileUFt = roomVm.TileUFtOverride,
+                        OverrideCeilingTileVFt = roomVm.TileVFtOverride,
+                        TypeMaxCoverageAreaSqFt = catalogEntry?.MaxCoverageAreaSqFt,
+                        TypeMaxSpacingFt = catalogEntry?.MaxSpacingFt,
+                        TypeMinSpacingFt = catalogEntry?.MinSpacingFt,
+                        TypeCoverageRadiusFt = catalogEntry?.CoverageRadiusFt,
+                        SprinklerClass = catalogEntry?.SprinklerClass,
                         FullRoomJson = BuildFullRoomJson(roomData)
                     });
                 }
@@ -1422,6 +1745,13 @@ namespace FireProtection.UI.ViewModels.Sprinklers.BruteForce
         /// levels with no rooms are intentionally left unselected. Selection state lives on
         /// the source collections, so subsequent filtering cannot destroy it.
         /// </summary>
+        private SprinklerCatalogEntry GetCatalogEntry(RoomItemViewModel room)
+        {
+            return room == null || _catalog == null
+                ? null
+                : _catalog.GetSprinklerEntry(room.SelectedFamily, room.SelectedType);
+        }
+
         private void ApplyDefaultSelection()
         {
             foreach (LevelItemViewModel level in Levels)
@@ -1446,6 +1776,7 @@ namespace FireProtection.UI.ViewModels.Sprinklers.BruteForce
             RaiseRoomCounts();
             if (HideUnselectedLevels) LevelsView.Refresh();
             CommandManager.InvalidateRequerySuggested();
+            RefreshEligibility();
         }
 
         private void OnRoomSelectionChanged(object sender, EventArgs e)

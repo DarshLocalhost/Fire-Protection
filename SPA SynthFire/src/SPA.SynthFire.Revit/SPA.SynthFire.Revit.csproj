@@ -1,0 +1,73 @@
+<Project Sdk="Microsoft.NET.Sdk">
+
+	<PropertyGroup>
+		<TargetFramework>net8.0-windows</TargetFramework>
+		<UseWPF>true</UseWPF>
+		<RootNamespace>SPA.SynthFire.Revit</RootNamespace>
+		<AssemblyName>SPA.SynthFire.Revit</AssemblyName>
+
+		<!-- Revit loads add-ins from its own process; never copy the API locally. -->
+		<AppendTargetFrameworkToOutputPath>false</AppendTargetFrameworkToOutputPath>
+		<AddInId>b3f7c1e0-9a44-4d2b-8e6a-2f1c7d905e11</AddInId>
+
+		<!-- CRITICAL: Ensures HelixToolkit.Wpf.dll is copied to TargetDir and deployed -->
+		<CopyLocalLockFileAssemblies>true</CopyLocalLockFileAssemblies>
+	</PropertyGroup>
+
+	<ItemGroup>
+		<Reference Include="RevitAPI">
+			<HintPath>$(RevitApiDir)\RevitAPI.dll</HintPath>
+			<Private>false</Private>
+		</Reference>
+		<Reference Include="RevitAPIUI">
+			<HintPath>$(RevitApiDir)\RevitAPIUI.dll</HintPath>
+			<Private>false</Private>
+		</Reference>
+	</ItemGroup>
+
+	<ItemGroup>
+		<ProjectReference Include="..\SPA.SynthFire.Core\SPA.SynthFire.Core.csproj" />
+		<ProjectReference Include="..\SPA.SynthFire.Catalog\SPA.SynthFire.Catalog.csproj" />
+		<ProjectReference Include="..\SPA.SynthFire.Placement\SPA.SynthFire.Placement.csproj" />
+		<ProjectReference Include="..\SPA.SynthFire.Presentation\SPA.SynthFire.Presentation.csproj" />
+		<ProjectReference Include="..\SPA.SynthFire.UI\SPA.SynthFire.UI.csproj" />
+		<PackageReference Include="HelixToolkit.Wpf" Version="2.25.0" />
+	</ItemGroup>
+
+	<!-- Deploy to Revit only when explicitly asked:
+       dotnet build src\SPA.SynthFire.Revit -t:DeployToRevit -p:RevitVersion=2026 -p:DeployToRevit=true
+       Copies the built add-in + its dependencies into a subfolder and writes the
+       .addin manifest that registers the IExternalApplication. -->
+	<Target Name="DeployToRevit" AfterTargets="Build" Condition="'$(DeployToRevit)' == 'true' Or $(Configuration.StartsWith('Revit'))">
+		<PropertyGroup>
+			<DeployDir>$(RevitAddinDir)\SPA.SynthFire</DeployDir>
+			<AddinManifest>$(RevitAddinDir)\SPA.SynthFire.addin</AddinManifest>
+		</PropertyGroup>
+
+		<ItemGroup>
+			<DeployFiles Include="$(TargetDir)**\*.dll" />
+			<DeployFiles Include="$(TargetDir)**\*.pdb" />
+		</ItemGroup>
+
+		<MakeDir Directories="$(DeployDir)" />
+		<Copy SourceFiles="@(DeployFiles)" DestinationFiles="@(DeployFiles->'$(DeployDir)\%(RecursiveDir)%(Filename)%(Extension)')" SkipUnchangedFiles="true" />
+
+		<ItemGroup>
+			<AddinLines Include="&lt;?xml version=&quot;1.0&quot; encoding=&quot;utf-8&quot;?&gt;" />
+			<AddinLines Include="&lt;RevitAddIns&gt;" />
+			<AddinLines Include="  &lt;AddIn Type=&quot;Application&quot;&gt;" />
+			<AddinLines Include="    &lt;Name&gt;SPA SynthFire&lt;/Name&gt;" />
+			<AddinLines Include="    &lt;Assembly&gt;$(DeployDir)\SPA.SynthFire.Revit.dll&lt;/Assembly&gt;" />
+			<AddinLines Include="    &lt;AddInId&gt;$(AddInId)&lt;/AddInId&gt;" />
+			<AddinLines Include="    &lt;FullClassName&gt;SPA.SynthFire.Revit.SynthFireApplication&lt;/FullClassName&gt;" />
+			<AddinLines Include="    &lt;VendorId&gt;SPA&lt;/VendorId&gt;" />
+			<AddinLines Include="    &lt;VendorDescription&gt;SPA SynthFire&lt;/VendorDescription&gt;" />
+			<AddinLines Include="  &lt;/AddIn&gt;" />
+			<AddinLines Include="&lt;/RevitAddIns&gt;" />
+		</ItemGroup>
+
+		<WriteLinesToFile File="$(AddinManifest)" Lines="@(AddinLines)" Overwrite="true" Encoding="UTF-8" />
+		<Message Importance="high" Text="SPA SynthFire deployed to $(DeployDir) and registered at $(AddinManifest)" />
+	</Target>
+
+</Project>

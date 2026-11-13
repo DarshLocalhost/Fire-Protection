@@ -8,6 +8,10 @@ namespace FireProtection.UI.Models.Sprinklers.BruteForce
     /// </summary>
     public class RoomCalculationResult
     {
+         
+
+
+
         public string RoomId { get; set; }
         public string RoomName { get; set; }
         public string RoomNumber { get; set; }

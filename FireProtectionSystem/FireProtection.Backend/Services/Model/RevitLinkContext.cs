@@ -13,20 +13,25 @@ namespace FireProtection.Backend.Services.Model
         public Document LinkedDocument { get; }
         public ElementId InstanceId => LinkInstance.Id;
         public string LinkName { get; }
+        public bool IsNested { get; }
         public string DocumentTitle => LinkedDocument != null ? LinkedDocument.Title : "<unloaded>";
         public string DocumentPath => LinkedDocument != null ? (LinkedDocument.PathName ?? string.Empty) : string.Empty;
         public bool IsLoaded => LinkedDocument != null;
         public Transform Transform { get; }
         public Transform TotalTransform { get; }
 
-        public RevitLinkContext(RevitLinkInstance linkInstance)
+        public RevitLinkContext(RevitLinkInstance linkInstance, Transform parentTransform = null, bool isNested = false)
         {
             LinkInstance = linkInstance ?? throw new ArgumentNullException(nameof(linkInstance));
             LinkedDocument = linkInstance.GetLinkDocument();
             LinkName = linkInstance.Name;
+            IsNested = isNested;
 
             Transform = linkInstance.GetTransform();
-            TotalTransform = linkInstance.GetTotalTransform();
+            Transform instanceTransform = linkInstance.GetTotalTransform() ?? Transform;
+            TotalTransform = parentTransform == null
+                ? instanceTransform
+                : parentTransform.Multiply(instanceTransform);
         }
 
         public TransformData ToTransformData()
@@ -64,7 +69,7 @@ namespace FireProtection.Backend.Services.Model
                 DocumentTitle = DocumentTitle,
                 DocumentPath = DocumentPath,
                 IsLoaded = IsLoaded,
-                IsNested = false,
+                IsNested = IsNested,
                 RoomCount = roomCount,
                 Transform = ToTransformData()
             };

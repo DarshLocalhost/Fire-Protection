@@ -9,7 +9,7 @@ namespace FireProtection.Tests
     {
         // Bumped whenever the sample rows change so a regenerated workbook is distinguishable from an
         // earlier one authored the same day. Free-form string; the loader only requires it to be non-blank.
-        internal const string CatalogVersion = "2026-09-02.2";
+        internal const string CatalogVersion = "2026-09-21.1";
 
         // Type lists for the sprinkler families loaded in the host Revit model
         // (Project Browser > Families > Sprinklers). These strings must match the Revit
@@ -67,6 +67,22 @@ namespace FireProtection.Tests
             sheet.Cell(2, 4).Value = "HazardClass";
             sheet.Cell(2, 5).Value = "Mount";
             sheet.Cell(2, 6).Value = "Notes";
+            // Optional per-type listed columns (7+). Blank = "not listed" -> the engine falls back to
+            // the provisional hazard-class default. The values written below are PROVISIONAL EXAMPLES
+            // (they mirror commonly published NFPA 13 spray tables) — NOT verified listings and NOT for
+            // construction. Replace them with the actual manufacturer/FM/UL listing for each type.
+            sheet.Cell(2, 7).Value = "SprinklerClass";
+            sheet.Cell(2, 8).Value = "MaxCoverageAreaSqFt";
+            sheet.Cell(2, 9).Value = "MaxSpacingFt";
+            sheet.Cell(2, 10).Value = "MinSpacingFt";
+            sheet.Cell(2, 11).Value = "CoverageRadiusFt";
+            sheet.Cell(2, 12).Value = "KFactor";
+            sheet.Cell(2, 13).Value = "ResponseType";
+            sheet.Cell(2, 14).Value = "TempRatingF";
+            sheet.Cell(2, 15).Value = "DeflectorToCeilingIn";
+            sheet.Cell(2, 16).Value = "SidewallMaxAlongWallSpacingFt";
+            sheet.Cell(2, 17).Value = "SidewallMaxThrowFt";
+            sheet.Cell(2, 18).Value = "SidewallEndWallClearanceFt";
 
             // HazardClass is deliberately left blank on every row. The loader rejects a duplicate
             // (FamilyName, TypeName) as a hard error, so one type cannot be repeated once per hazard
@@ -75,39 +91,70 @@ namespace FireProtection.Tests
             // (Pendent / Sidewall) - recessed vs semi-recessed vs exposed is already in FamilyName.
             int r = 3;
 
+            // PROVISIONAL example values (see header note). Sidewall families -> Sidewall class;
+            // standard pendent families -> StandardSpray class. Numbers are illustrative Light-hazard
+            // spray values; a real project supplies the listed numbers per type.
+            SprinklerParams sidewall = new SprinklerParams
+            {
+                SprinklerClass = "Sidewall", MaxCoverageAreaSqFt = 196, MaxSpacingFt = 14, MinSpacingFt = 6,
+                CoverageRadiusFt = 7, KFactor = 5.6, ResponseType = "QR", TempRatingF = 155, DeflectorToCeilingIn = 6
+            };
+            SprinklerParams standardSpray = new SprinklerParams
+            {
+                SprinklerClass = "StandardSpray", MaxCoverageAreaSqFt = 225, MaxSpacingFt = 15, MinSpacingFt = 6,
+                CoverageRadiusFt = 7.5, KFactor = 5.6, ResponseType = "QR", TempRatingF = 155, DeflectorToCeilingIn = 3
+            };
+
             AddFamily(sheet, ref r, "Sprinkler - Dry - Horizontal Sidewall - Fully Recessed - Hosted",
-                DryHorizontalSidewallTypes, "Sidewall", "Dry pipe, fully recessed trim, hosted");
+                DryHorizontalSidewallTypes, "Sidewall", "Dry pipe, fully recessed trim, hosted. PROVISIONAL values.", sidewall);
             AddFamily(sheet, ref r, "Sprinkler - Dry - Horizontal Sidewall - Hosted",
-                DryHorizontalSidewallTypes, "Sidewall", "Dry pipe, exposed, hosted");
+                DryHorizontalSidewallTypes, "Sidewall", "Dry pipe, exposed, hosted. PROVISIONAL values.", sidewall);
             AddFamily(sheet, ref r, "Sprinkler - Dry - Horizontal Sidewall - Semi-Recessed - Hosted",
-                DryHorizontalSidewallTypes, "Sidewall", "Dry pipe, semi-recessed trim, hosted");
+                DryHorizontalSidewallTypes, "Sidewall", "Dry pipe, semi-recessed trim, hosted. PROVISIONAL values.", sidewall);
 
             AddFamily(sheet, ref r, "Sprinkler - Dry - Pendent - Fully Recessed - Hosted",
-                DryPendentTypes, "Pendent", "Dry pipe, fully recessed trim, hosted");
+                DryPendentTypes, "Pendent", "Dry pipe, fully recessed trim, hosted. PROVISIONAL values.", standardSpray);
             AddFamily(sheet, ref r, "Sprinkler - Dry - Pendent - Hosted",
-                DryPendentTypes, "Pendent", "Dry pipe, exposed, hosted");
+                DryPendentTypes, "Pendent", "Dry pipe, exposed, hosted. PROVISIONAL values.", standardSpray);
             AddFamily(sheet, ref r, "Sprinkler - Dry - Pendent - Semi-Recessed - Hosted",
-                DryPendentTypes, "Pendent", "Dry pipe, semi-recessed trim, hosted");
+                DryPendentTypes, "Pendent", "Dry pipe, semi-recessed trim, hosted. PROVISIONAL values.", standardSpray);
 
             AddFamily(sheet, ref r, "Sprinkler - Pendent - Fully Recessed - Hosted",
-                PendentTypes, "Pendent", "Wet pipe, fully recessed trim, hosted");
+                PendentTypes, "Pendent", "Wet pipe, fully recessed trim, hosted. PROVISIONAL values.", standardSpray);
             AddFamily(sheet, ref r, "Sprinkler - Pendent - Hosted",
-                PendentTypes, "Pendent", "Wet pipe, exposed, hosted");
+                PendentTypes, "Pendent", "Wet pipe, exposed, hosted. PROVISIONAL values.", standardSpray);
             AddFamily(sheet, ref r, "Sprinkler - Pendent - Semi-Recessed - Hosted",
-                PendentTypes, "Pendent", "Wet pipe, semi-recessed trim, hosted");
+                PendentTypes, "Pendent", "Wet pipe, semi-recessed trim, hosted. PROVISIONAL values.", standardSpray);
 
             sheet.Columns().AdjustToContents();
         }
 
-        private static void AddFamily(IXLWorksheet sheet, ref int r, string family, string[] types, string mount, string notes)
+        /// <summary>Optional per-type listed values written to the sprinkler sheet's columns 7+.</summary>
+        private sealed class SprinklerParams
+        {
+            public string SprinklerClass;
+            public double? MaxCoverageAreaSqFt;
+            public double? MaxSpacingFt;
+            public double? MinSpacingFt;
+            public double? CoverageRadiusFt;
+            public double? KFactor;
+            public string ResponseType;
+            public int? TempRatingF;
+            public double? DeflectorToCeilingIn;
+            public double? SidewallMaxAlongWallSpacingFt;
+            public double? SidewallMaxThrowFt;
+            public double? SidewallEndWallClearanceFt;
+        }
+
+        private static void AddFamily(IXLWorksheet sheet, ref int r, string family, string[] types, string mount, string notes, SprinklerParams p = null)
         {
             for (int i = 0; i < types.Length; i++)
             {
-                AddSprinkler(sheet, ref r, family, types[i], null, mount, notes);
+                AddSprinkler(sheet, ref r, family, types[i], null, mount, notes, p);
             }
         }
 
-        private static void AddSprinkler(IXLWorksheet sheet, ref int r, string family, string type, string hazard, string mount, string notes)
+        private static void AddSprinkler(IXLWorksheet sheet, ref int r, string family, string type, string hazard, string mount, string notes, SprinklerParams p = null)
         {
             sheet.Cell(r, 1).Value = "Sprinkler";
             sheet.Cell(r, 2).Value = family;
@@ -115,6 +162,21 @@ namespace FireProtection.Tests
             if (!string.IsNullOrEmpty(hazard)) sheet.Cell(r, 4).Value = hazard;
             if (!string.IsNullOrEmpty(mount)) sheet.Cell(r, 5).Value = mount;
             if (!string.IsNullOrEmpty(notes)) sheet.Cell(r, 6).Value = notes;
+            if (p != null)
+            {
+                if (!string.IsNullOrEmpty(p.SprinklerClass)) sheet.Cell(r, 7).Value = p.SprinklerClass;
+                if (p.MaxCoverageAreaSqFt.HasValue) sheet.Cell(r, 8).Value = p.MaxCoverageAreaSqFt.Value;
+                if (p.MaxSpacingFt.HasValue) sheet.Cell(r, 9).Value = p.MaxSpacingFt.Value;
+                if (p.MinSpacingFt.HasValue) sheet.Cell(r, 10).Value = p.MinSpacingFt.Value;
+                if (p.CoverageRadiusFt.HasValue) sheet.Cell(r, 11).Value = p.CoverageRadiusFt.Value;
+                if (p.KFactor.HasValue) sheet.Cell(r, 12).Value = p.KFactor.Value;
+                if (!string.IsNullOrEmpty(p.ResponseType)) sheet.Cell(r, 13).Value = p.ResponseType;
+                if (p.TempRatingF.HasValue) sheet.Cell(r, 14).Value = p.TempRatingF.Value;
+                if (p.DeflectorToCeilingIn.HasValue) sheet.Cell(r, 15).Value = p.DeflectorToCeilingIn.Value;
+                if (p.SidewallMaxAlongWallSpacingFt.HasValue) sheet.Cell(r, 16).Value = p.SidewallMaxAlongWallSpacingFt.Value;
+                if (p.SidewallMaxThrowFt.HasValue) sheet.Cell(r, 17).Value = p.SidewallMaxThrowFt.Value;
+                if (p.SidewallEndWallClearanceFt.HasValue) sheet.Cell(r, 18).Value = p.SidewallEndWallClearanceFt.Value;
+            }
             r++;
         }
 

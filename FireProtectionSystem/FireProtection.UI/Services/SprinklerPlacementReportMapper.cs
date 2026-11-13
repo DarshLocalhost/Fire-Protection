@@ -97,17 +97,32 @@ namespace FireProtection.UI.Services
                     }
                 }
 
+                RoomCalculationResult calcRoom = null;
+                if (calc?.Rooms != null)
+                {
+                    calcRoom = calc.Rooms.Find(r => r != null && (r.RoomId == room.RoomId || r.RoomNumber == room.RoomNumber || r.RoomName == room.RoomName));
+                }
+
+                double? coveragePercent = null;
+                double throwRadius = calcRoom?.AppliedMaxSpacingFt ?? 12.75;
+                if (calcRoom?.Polygon != null && calcRoom.Polygon.Count >= 3 && room.Placed != null && room.Placed.Count > 0)
+                {
+                    coveragePercent = CalculateRoomCoveragePercent(calcRoom.Polygon, room.Placed, throwRadius);
+                }
+
                 string status;
                 if (attempted == 0) status = "Skipped";
                 else if (placedValid + placedInvalid == 0) status = "Failed";
                 else if (placedInvalid > 0 || realFailures > 0) status = "ReviewRequired";
+                else if (coveragePercent.HasValue && coveragePercent.Value < 95.0) status = "ReviewRequired";
                 else status = "Success";
 
                 string message;
                 switch (status)
                 {
                     case "Success":
-                        message = "Placed " + placedValid + " of " + attempted + " sprinkler(s)."
+                        message = (coveragePercent.HasValue ? "Coverage: " + coveragePercent.Value.ToString("F1") + "%. " : string.Empty)
+                            + "Placed " + placedValid + " of " + attempted + " sprinkler(s)."
                             + (skippedDup > 0 ? " " + skippedDup + " skipped (duplicate)." : string.Empty)
                             + (skippedOutside > 0 ? " " + skippedOutside + " refused (outside room boundary)." : string.Empty);
                         break;
@@ -116,9 +131,19 @@ namespace FireProtection.UI.Services
                             + (firstFailure != null ? " First: " + firstFailure : string.Empty);
                         break;
                     case "ReviewRequired":
-                        message = "Placed " + (placedValid + placedInvalid) + " with " + placedInvalid
-                            + " spatially-invalid and " + realFailures + " failed point(s); engineering review required."
-                            + (firstFailure != null ? " First: " + firstFailure : string.Empty);
+                        if (coveragePercent.HasValue && coveragePercent.Value < 95.0 && placedInvalid == 0 && realFailures == 0)
+                        {
+                            message = "Coverage incomplete: " + coveragePercent.Value.ToString("F1") + "% (threshold 95%). Placed "
+                                + placedValid + " of " + attempted + " sprinkler(s); engineering review required."
+                                + (skippedDup > 0 ? " " + skippedDup + " skipped (duplicate)." : string.Empty);
+                        }
+                        else
+                        {
+                            message = (coveragePercent.HasValue ? "Coverage: " + coveragePercent.Value.ToString("F1") + "%. " : string.Empty)
+                                + "Placed " + (placedValid + placedInvalid) + " with " + placedInvalid
+                                + " spatially-invalid and " + realFailures + " failed point(s); engineering review required."
+                                + (firstFailure != null ? " First: " + firstFailure : string.Empty);
+                        }
                         break;
                     default:
                         message = "Room skipped - nothing was calculated or attempted here"
@@ -134,6 +159,7 @@ namespace FireProtection.UI.Services
                     RoomName = room.RoomName ?? room.RoomNumber ?? room.RoomId,
                     LevelName = levelName,
                     Status = status,
+                    CoveragePercent = coveragePercent,
                     Message = message,
                     FailureReason = status == "Failed" || status == "ReviewRequired" ? message : null,
                     ReviewRequired = status == "ReviewRequired",
@@ -190,6 +216,82 @@ namespace FireProtection.UI.Services
                 + (report.IsProvisional ? " PROVISIONAL rules - engineering review required." : string.Empty);
 
             return report;
+        }
+
+        private static double? CalculateRoomCoveragePercent(
+            List<double[]> polygon,
+            List<PlacedSprinklerEntry> placed,
+            double throwRadius)
+        {
+            if (polygon == null || polygon.Count < 3 || placed == null || placed.Count == 0)
+                return null;
+
+            double minX = double.MaxValue, maxX = double.MinValue;
+            double minY = double.MaxValue, maxY = double.MinValue;
+            foreach (var pt in polygon)
+            {
+                if (pt == null || pt.Length < 2) continue;
+                if (pt[0] < minX) minX = pt[0];
+                if (pt[0] > maxX) maxX = pt[0];
+                if (pt[1] < minY) minY = pt[1];
+                if (pt[1] > maxY) maxY = pt[1];
+            }
+
+            if (minX >= maxX || minY >= maxY) return null;
+
+            double step = 0.5; // 6-inch sampling grid
+            int totalInside = 0;
+            int totalCovered = 0;
+            double throwSq = throwRadius * throwRadius;
+
+            var activePlaced = new List<PlacedSprinklerEntry>();
+            foreach (var p in placed)
+            {
+                if (p != null) activePlaced.Add(p);
+            }
+            if (activePlaced.Count == 0) return 0.0;
+
+            for (double x = minX + step / 2; x < maxX; x += step)
+            {
+                for (double y = minY + step / 2; y < maxY; y += step)
+                {
+                    if (!IsPointInPolygon(x, y, polygon)) continue;
+                    totalInside++;
+
+                    bool covered = false;
+                    for (int i = 0; i < activePlaced.Count; i++)
+                    {
+                        double dx = x - activePlaced[i].X;
+                        double dy = y - activePlaced[i].Y;
+                        if (dx * dx + dy * dy <= throwSq)
+                        {
+                            covered = true;
+                            break;
+                        }
+                    }
+                    if (covered) totalCovered++;
+                }
+            }
+
+            return totalInside > 0 ? (totalCovered * 100.0 / totalInside) : (double?)null;
+        }
+
+        private static bool IsPointInPolygon(double x, double y, List<double[]> polygon)
+        {
+            bool inside = false;
+            int j = polygon.Count - 1;
+            for (int i = 0; i < polygon.Count; i++)
+            {
+                double xi = polygon[i][0], yi = polygon[i][1];
+                double xj = polygon[j][0], yj = polygon[j][1];
+
+                bool intersect = ((yi > y) != (yj > y)) &&
+                    (x < (xj - xi) * (y - yi) / ((yj - yi) == 0 ? 0.00001 : (yj - yi)) + xi);
+                if (intersect)
+                    inside = !inside;
+                j = i;
+            }
+            return inside;
         }
     }
 }

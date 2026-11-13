@@ -15,7 +15,10 @@ namespace FireProtection.Backend.Services.Model
             BuiltInCategory.OST_Walls,
             BuiltInCategory.OST_DuctCurves,
             BuiltInCategory.OST_PipeCurves,
-            BuiltInCategory.OST_CableTray
+            BuiltInCategory.OST_CableTray,
+            BuiltInCategory.OST_Sprinklers,
+            BuiltInCategory.OST_FireAlarmDevices,
+            BuiltInCategory.OST_FireProtection 
         };
 
         public List<ObstacleData> ExtractObstacles(RevitModelContext context, List<ExtractionIssue> issues)

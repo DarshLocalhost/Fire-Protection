@@ -1,0 +1,23 @@
+<Project Sdk="Microsoft.NET.Sdk">
+
+  <!-- Standalone WPF prototype ("Preview Lab") for judging the Tandm-style coverage
+       plan canvas on screen with canned data, before wiring it into the Revit add-in.
+       It reuses the SAME control (SPA.SynthFire.UI.Controls.CoveragePlanCanvas) and the
+       SAME Revit-free preview model the add-in will use. No Revit references, so it is
+       kept out of the Revit* configurations. -->
+  <PropertyGroup>
+    <OutputType>WinExe</OutputType>
+    <TargetFramework>net8.0-windows</TargetFramework>
+    <UseWPF>true</UseWPF>
+    <RootNamespace>SPA.SynthFire.PreviewLab</RootNamespace>
+    <AssemblyName>SPA.SynthFire.PreviewLab</AssemblyName>
+    <Configurations>Debug;Release</Configurations>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <ProjectReference Include="..\..\src\SPA.SynthFire.Core\SPA.SynthFire.Core.csproj" />
+    <ProjectReference Include="..\..\src\SPA.SynthFire.Placement\SPA.SynthFire.Placement.csproj" />
+    <ProjectReference Include="..\..\src\SPA.SynthFire.UI\SPA.SynthFire.UI.csproj" />
+  </ItemGroup>
+
+</Project>

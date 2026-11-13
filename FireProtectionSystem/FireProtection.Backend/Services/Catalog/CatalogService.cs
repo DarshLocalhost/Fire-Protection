@@ -283,6 +283,48 @@ namespace FireProtection.Backend.Services.Catalog
             return string.IsNullOrWhiteSpace(match.HazardClass) ? null : match.HazardClass.Trim();
         }
 
+        public SprinklerCatalogEntry GetSprinklerEntry(string familyName, string typeName)
+        {
+            if (string.IsNullOrWhiteSpace(familyName) || string.IsNullOrWhiteSpace(typeName)) return null;
+            if (!_sprinklerByFamily.TryGetValue(familyName.Trim(), out List<SprinklerCatalogRow> rows)) return null;
+            SprinklerCatalogRow match = rows.FirstOrDefault(r =>
+                string.Equals(r.TypeName?.Trim(), typeName.Trim(), StringComparison.OrdinalIgnoreCase));
+            return match == null ? null : ToEntry(match);
+        }
+
+        public IReadOnlyList<SprinklerCatalogEntry> GetSprinklerEntriesForFamily(string familyName)
+        {
+            if (string.IsNullOrWhiteSpace(familyName)) return new List<SprinklerCatalogEntry>();
+            if (!_sprinklerByFamily.TryGetValue(familyName.Trim(), out List<SprinklerCatalogRow> rows)) return new List<SprinklerCatalogEntry>();
+            return rows
+                .Where(r => !string.IsNullOrWhiteSpace(r.TypeName))
+                .Select(ToEntry)
+                .ToList();
+        }
+
+        private static SprinklerCatalogEntry ToEntry(SprinklerCatalogRow r)
+        {
+            return new SprinklerCatalogEntry
+            {
+                FamilyName = r.FamilyName,
+                TypeName = r.TypeName,
+                HazardClass = r.HazardClass,
+                Mount = r.Mount,
+                SprinklerClass = r.SprinklerClass,
+                MaxCoverageAreaSqFt = r.MaxCoverageAreaSqFt,
+                MaxSpacingFt = r.MaxSpacingFt,
+                MinSpacingFt = r.MinSpacingFt,
+                CoverageRadiusFt = r.CoverageRadiusFt,
+                KFactor = r.KFactor,
+                ResponseType = r.ResponseType,
+                TempRatingF = r.TempRatingF,
+                DeflectorToCeilingIn = r.DeflectorToCeilingIn,
+                SidewallMaxAlongWallSpacingFt = r.SidewallMaxAlongWallSpacingFt,
+                SidewallMaxThrowFt = r.SidewallMaxThrowFt,
+                SidewallEndWallClearanceFt = r.SidewallEndWallClearanceFt
+            };
+        }
+
         public IReadOnlyList<string> GetSmokeDetectorFamilies()
         {
             return _smokeFamilies.ToList();

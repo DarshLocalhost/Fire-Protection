@@ -133,7 +133,7 @@ namespace FireProtection.Backend.Services.Model
                         : null;
 
                     // Boundary Extraction
-                    BoundaryData boundaryData = ExtractBoundary(room, transform, issues);
+                    BoundaryData boundaryData = ExtractBoundary(document, room, transform, issues);
 
                     // Room volume (if computed)
                     double? volumeCuFt = null;
@@ -174,7 +174,12 @@ namespace FireProtection.Backend.Services.Model
                         floorZ,
                         roomTopZ,
                         levelId,
-                        ceilingItems);
+                        ceilingItems,
+                        boundaryData?.Polygon);
+
+
+
+                    //Nemo
 
                     // Determine primary ceiling height and type
                     double? ceilingHeightFt = room.UnboundedHeight > 0 ? (double?)room.UnboundedHeight : null;
@@ -191,6 +196,26 @@ namespace FireProtection.Backend.Services.Model
                         }
                     }
 
+                    //// Determine primary ceiling height and type
+                    //double? ceilingHeightFt = null;
+                    //string ceilingType = "NONE";
+
+                    //if (matchedCeilings.Count > 0)
+                    //{
+                    //    CeilingData primaryCeiling = matchedCeilings[0];
+                    //    ceilingType = primaryCeiling.SlopeType;
+                    //    if (primaryCeiling.BottomElevationFt.HasValue)
+                    //    {
+                    //        ceilingHeightFt = primaryCeiling.BottomElevationFt.Value - levelElevation;
+                    //        primaryCeiling.HeightAboveLevelFt = ceilingHeightFt;
+                    //    }
+                    //}
+
+                    else
+                    {
+                        // No physical ceiling exists — leave ceilingHeightFt as null so the engine
+                        // flags the room for review or resolves the sloped roof underside via ray-casting.
+                    }
                     List<string> roomWarnings = new List<string>();
                     if (boundaryData.Polygon.Count == 0)
                     {
@@ -318,6 +343,7 @@ namespace FireProtection.Backend.Services.Model
         }
 
         private BoundaryData ExtractBoundary(
+            Document document,
             Room room,
             Transform transform,
             List<ExtractionIssue> issues)
@@ -374,6 +400,9 @@ namespace FireProtection.Backend.Services.Model
                         segType = "Curve";
                     }
 
+                    bool isWallBoundary = segment.ElementId != ElementId.InvalidElementId
+                        && document.GetElement(segment.ElementId) is Wall;
+
                     BoundarySegmentData segData = new BoundarySegmentData
                     {
                         Type = segType,
@@ -381,7 +410,8 @@ namespace FireProtection.Backend.Services.Model
                         End = new Point3DData(end.X, end.Y, end.Z),
                         Mid = new Point3DData(mid.X, mid.Y, mid.Z),
                         LengthFt = curve.Length,
-                        RadiusFt = radius
+                        RadiusFt = radius,
+                        IsWall = isWallBoundary
                     };
 
                     loopData.Segments.Add(segData);
@@ -423,7 +453,8 @@ namespace FireProtection.Backend.Services.Model
             double roomBottomZ,
             double roomTopZ,
             string roomLevelId,
-            List<CeilingExtractor.ExtractedCeilingItem> ceilingItems)
+            List<CeilingExtractor.ExtractedCeilingItem> ceilingItems,
+            List<double[]> roomPolygon = null)
         {
             List<CeilingData> matches = new List<CeilingData>();
             if (ceilingItems == null || ceilingItems.Count == 0)
@@ -431,52 +462,122 @@ namespace FireProtection.Backend.Services.Model
                 return matches;
             }
 
+            // -------------------------------------------------------------------------
+            // PASS 1: Search for true finished ceilings (OST_Ceilings).
+            // Finished ceilings take strict priority over overhead structural slabs.
+            // -------------------------------------------------------------------------
             foreach (CeilingExtractor.ExtractedCeilingItem cItem in ceilingItems)
             {
                 if (cItem.HostBoundingBox == null) continue;
+                if (!string.Equals(cItem.Dto?.Category, "OST_Ceilings", StringComparison.OrdinalIgnoreCase)) continue;
 
                 BoundingBox3DData cBox = cItem.HostBoundingBox;
 
-                // XY overlap between the ceiling footprint and the room footprint/bounding box.
-                // Prefer the room bounding box; fall back to the room location point when no box exists.
-                bool xyOverlap;
-                if (hostBBox != null)
-                {
-                    xyOverlap = SpatialHelpers.XYOverlap(cBox, hostBBox);
-                }
-                else if (hostLocationPoint != null)
-                {
-                    xyOverlap = SpatialHelpers.XYContains(cBox, hostLocationPoint);
-                }
-                else
-                {
-                    xyOverlap = false;
-                }
+                // XY coarse check
+                bool xyOverlap = (hostBBox != null)
+                    ? SpatialHelpers.XYOverlap(cBox, hostBBox)
+                    : (hostLocationPoint != null && SpatialHelpers.XYContains(cBox, hostLocationPoint));
 
                 if (!xyOverlap) continue;
 
-                // Z overlap: the ceiling's vertical extent must intersect the room's vertical band.
-                // Tightened from +5.0 ft to +0.5 ft upward slop: a ceiling that is many feet
-                // above the room's nominal top is the floor of the level above (or unrelated),
-                // not a candidate for this room. The room DTO and the BruteForce
-                // SelectPrimaryCeiling re-sort again, so this is a coarse pre-filter.
+                // Z overlap: ceiling's vertical extent must intersect the room's vertical band
                 if (cBox.Min.Z <= roomTopZ + 0.5 && cBox.Max.Z >= roomBottomZ - 0.5)
                 {
-                    CeilingData clone = CloneCeilingData(cItem.Dto);
-                    clone.IsRoomDirectCeiling = true;
-                    matches.Add(clone);
+                    // Precise horizontal test: verify that the ceiling face physically covers
+                    // or intersects this room (prevents L-shaped/adjacent corridor ceilings
+                    // from falsely matching neighboring rooms).
+                    if (CeilingIntersectsRoom(cItem, hostLocationPoint, hostBBox, roomPolygon))
+                    {
+                        CeilingData clone = CloneCeilingData(cItem.Dto);
+                        clone.IsRoomDirectCeiling = true;
+                        matches.Add(clone);
+                    }
+                }
+            }
+
+            // -------------------------------------------------------------------------
+            // PASS 2: If the room has NO true finished ceiling OR only partial-coverage
+            // ceilings (such as modular bathroom pods / Model Groups covering < 50% of the room),
+            // search for the overhead structural floor slab (OST_Floors) or roof (OST_Roofs).
+            // This ensures open-structure / loft rooms with local pods are based on the true
+            // room-wide overhead deck (e.g. 12' 10") rather than adopting the 8' pod height
+            // for the entire room.
+            // -------------------------------------------------------------------------
+            double roomArea = room.Area;
+            bool hasFullCoverageCeiling = false;
+            foreach (CeilingData cd in matches)
+            {
+                bool isPartial = cd.IsModelGroup || (roomArea > 0 && cd.AreaSqFt > 0 && (cd.AreaSqFt / roomArea) < 0.50);
+                if (!isPartial)
+                {
+                    hasFullCoverageCeiling = true;
+                    break;
+                }
+            }
+
+            if (!hasFullCoverageCeiling)
+            {
+                CeilingExtractor.ExtractedCeilingItem bestSlab = null;
+                double closestDelta = double.MaxValue;
+
+                foreach (CeilingExtractor.ExtractedCeilingItem cItem in ceilingItems)
+                {
+                    if (cItem.HostBoundingBox == null) continue;
+                    string cat = cItem.Dto?.Category;
+                    if (!string.Equals(cat, "OST_Floors", StringComparison.OrdinalIgnoreCase)
+                        && !string.Equals(cat, "OST_Roofs", StringComparison.OrdinalIgnoreCase))
+                    {
+                        continue;
+                    }
+
+                    BoundingBox3DData cBox = cItem.HostBoundingBox;
+
+                    // Fast XY overlap
+                    if (!SpatialHelpers.XYOverlap(cBox, hostBBox)) continue;
+
+                    // The slab underside must be overhead (at least 4.0 ft above room floor)
+                    double slabBottomZ = cItem.BottomElevationFt ?? cBox.Min.Z;
+                    if (slabBottomZ < roomBottomZ + 4.0) continue;
+
+                    // Must sit near the room's upper limit (not multiple floors above)
+                    if (slabBottomZ > roomTopZ + 4.0) continue;
+
+                    // Verify slab covers the room horizontally
+                    bool covers = (hostLocationPoint != null && SpatialHelpers.XYContains(cBox, hostLocationPoint))
+                        || (hostBBox != null && SpatialHelpers.XYOverlap(cBox, hostBBox));
+                    if (!covers) continue;
+
+                    double delta = Math.Abs(slabBottomZ - roomTopZ);
+                    if (delta < closestDelta)
+                    {
+                        closestDelta = delta;
+                        bestSlab = cItem;
+                    }
+                }
+
+                if (bestSlab != null)
+                {
+                    CeilingData slabDto = CloneCeilingData(bestSlab.Dto);
+                    slabDto.IsRoomDirectCeiling = true;
+                    double slabBottomZ = bestSlab.BottomElevationFt ?? bestSlab.HostBoundingBox.Min.Z;
+                    slabDto.BottomElevationFt = slabBottomZ;
+                    slabDto.HeightAboveLevelFt = slabBottomZ - roomBottomZ;
+                    matches.Add(slabDto);
                 }
             }
 
             if (matches.Count == 0) return matches;
 
-            // Sort: level-matched ceilings first (this room's own ceiling, not the slab of
-            // the level above / below), then by BottomElevationFt descending so the room's
-            // own (highest) ceiling is the FIRST element of the list — that becomes the
-            // primary ceiling the DTO exposes to the calculation engine.
+            // Sort: Full-coverage ceilings / overhead slabs come first (so the room's
+            // primary ceiling is the true room-wide boundary, not a small pod),
+            // then level-matched, then by BottomElevationFt descending.
             bool hasRoomLevel = !string.IsNullOrEmpty(roomLevelId);
             matches.Sort((a, b) =>
             {
+                bool aPartial = a.IsModelGroup || (roomArea > 0 && a.AreaSqFt > 0 && (a.AreaSqFt / roomArea) < 0.50);
+                bool bPartial = b.IsModelGroup || (roomArea > 0 && b.AreaSqFt > 0 && (b.AreaSqFt / roomArea) < 0.50);
+                if (aPartial != bPartial) return aPartial.CompareTo(bPartial); // false (full) before true (partial)
+
                 int aLevel = (hasRoomLevel && a != null && string.Equals(a.LevelId, roomLevelId, System.StringComparison.OrdinalIgnoreCase)) ? 0 : 1;
                 int bLevel = (hasRoomLevel && b != null && string.Equals(b.LevelId, roomLevelId, System.StringComparison.OrdinalIgnoreCase)) ? 0 : 1;
                 if (aLevel != bLevel) return aLevel.CompareTo(bLevel);
@@ -486,6 +587,91 @@ namespace FireProtection.Backend.Services.Model
             });
 
             return matches;
+        }
+
+        private static bool CeilingIntersectsRoom(
+            CeilingExtractor.ExtractedCeilingItem cItem,
+            Point3DData hostLocationPoint,
+            BoundingBox3DData hostBBox,
+            List<double[]> roomPolygon)
+        {
+            if (cItem.BottomFaces == null || cItem.BottomFaces.Count == 0)
+            {
+                return true;
+            }
+
+            Transform invTransform = cItem.Transform != null ? cItem.Transform.Inverse : null;
+
+            // 1. Check if the room's location point projects onto any bottom face of the ceiling
+            if (hostLocationPoint != null)
+            {
+                XYZ locPt = new XYZ(hostLocationPoint.X, hostLocationPoint.Y, cItem.BottomElevationFt ?? hostLocationPoint.Z);
+                XYZ localLocPt = invTransform != null ? invTransform.OfPoint(locPt) : locPt;
+                foreach (PlanarFace face in cItem.BottomFaces)
+                {
+                    IntersectionResult ir = face.Project(localLocPt);
+                    if (ir != null) return true;
+                }
+            }
+
+            // 2. Check if the room center projects onto any bottom face
+            if (hostBBox != null)
+            {
+                XYZ centerPt = new XYZ(
+                    (hostBBox.Min.X + hostBBox.Max.X) * 0.5,
+                    (hostBBox.Min.Y + hostBBox.Max.Y) * 0.5,
+                    cItem.BottomElevationFt ?? ((hostBBox.Min.Z + hostBBox.Max.Z) * 0.5));
+                XYZ localCenterPt = invTransform != null ? invTransform.OfPoint(centerPt) : centerPt;
+                foreach (PlanarFace face in cItem.BottomFaces)
+                {
+                    IntersectionResult ir = face.Project(localCenterPt);
+                    if (ir != null) return true;
+                }
+            }
+
+            // 3. Check if any room polygon vertex projects onto any bottom face
+            if (roomPolygon != null && roomPolygon.Count >= 3)
+            {
+                for (int i = 0; i < roomPolygon.Count; i++)
+                {
+                    XYZ polyPt = new XYZ(roomPolygon[i][0], roomPolygon[i][1], cItem.BottomElevationFt ?? 0.0);
+                    XYZ localPolyPt = invTransform != null ? invTransform.OfPoint(polyPt) : polyPt;
+                    foreach (PlanarFace face in cItem.BottomFaces)
+                    {
+                        IntersectionResult ir = face.Project(localPolyPt);
+                        if (ir != null) return true;
+                    }
+                }
+            }
+
+            // 4. Check if any vertex of the ceiling bottom face is inside the room polygon
+            if (roomPolygon != null && roomPolygon.Count >= 3)
+            {
+                foreach (PlanarFace face in cItem.BottomFaces)
+                {
+                    try
+                    {
+                        Mesh mesh = face.Triangulate();
+                        if (mesh != null)
+                        {
+                            for (int i = 0; i < mesh.Vertices.Count; i++)
+                            {
+                                XYZ hv = RevitModelContext.TransformPoint(mesh.Vertices[i], cItem.Transform);
+                                if (SpatialHelpers.PointInPolygonXY(hv.X, hv.Y, roomPolygon))
+                                {
+                                    return true;
+                                }
+                            }
+                        }
+                    }
+                    catch
+                    {
+                        // Ignore triangulation errors
+                    }
+                }
+            }
+
+            return false;
         }
 
         private static CeilingData CloneCeilingData(CeilingData src)
@@ -513,7 +699,21 @@ namespace FireProtection.Backend.Services.Model
                 HeightAboveLevelFt = src.HeightAboveLevelFt,
                 SlopeType = src.SlopeType,
                 SlopeDegrees = src.SlopeDegrees,
-                IsRoomDirectCeiling = src.IsRoomDirectCeiling
+                IsRoomDirectCeiling = src.IsRoomDirectCeiling,
+                IsModelGroup = src.IsModelGroup,
+                AreaSqFt = src.AreaSqFt,
+                // Grid fields MUST be carried, or the ceiling reaches the calc engine with
+                // HasReadableGrid=false and tile-center snapping silently never runs (the room
+                // falls back to the free/centered array or the user-typed tile size).
+                ThicknessFt = src.ThicknessFt,
+                BoundaryPolygon = src.BoundaryPolygon,
+                HasReadableGrid = src.HasReadableGrid,
+                GridOriginXFt = src.GridOriginXFt,
+                GridOriginYFt = src.GridOriginYFt,
+                GridSpacingUFt = src.GridSpacingUFt,
+                GridSpacingVFt = src.GridSpacingVFt,
+                GridAngleRad = src.GridAngleRad,
+                Notes = src.Notes
             };
         }
     }

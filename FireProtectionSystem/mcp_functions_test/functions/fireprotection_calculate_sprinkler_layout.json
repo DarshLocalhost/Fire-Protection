@@ -1,0 +1,185 @@
+{
+  "name": "fireprotection_calculate_sprinkler_layout",
+  "title": "Calculate sprinkler placement layout (BruteForce)",
+  "description": "Runs the BruteForce sprinkler placement calculation engine on the provided rooms using NFPA 13-2022 rules. The engine computes optimal sprinkler locations based on room geometry, hazard classification, ceiling type/height, obstacles, and selected sprinkler type. Supports both ceiling-grid-snapped (tile-centered) and free-centered array layouts. Handles pendent, upright, and sidewall orientations. Applies ceiling height adjustments, slope factors, and small-room rules. Obstacle conflicts are flagged but do not discard candidates (non-destructive). Returns per-room results with calculated points, diagnostics, warnings, and errors. This is a read-only calculation that does not modify the Revit model. The calculation uses provisional spacing rules (15 ft default) unless project-approved hazard placement rules are supplied.",
+  "input_schema": {
+    "type": "object",
+    "properties": {
+      "rooms": {
+        "type": "array",
+        "minItems": 1,
+        "description": "Array of room input objects for calculation.",
+        "items": {
+          "type": "object",
+          "properties": {
+            "level_id": { "type": "string" },
+            "level_name": { "type": "string" },
+            "level_elevation_ft": { "type": "number" },
+            "room_id": { "type": "string" },
+            "room_name": { "type": "string" },
+            "room_number": { "type": "string" },
+            "area_sq_ft": { "type": "number" },
+            "volume_cu_ft": { "type": ["number", "null"] },
+            "effective_hazard_class": { "type": "string", "enum": ["Light", "OH1", "OH2", "EH1", "EH2"] },
+            "ceiling_height_ft": { "type": ["number", "null"] },
+            "ceiling_type": { "type": "string" },
+            "polygon": {
+              "type": "array",
+              "minItems": 3,
+              "items": { "type": "array", "items": { "type": "number" }, "minItems": 2, "maxItems": 2 }
+            },
+            "boundary": {
+              "type": "object",
+              "properties": {
+                "polygon": { "type": "array", "items": { "type": "array", "items": { "type": "number" }, "minItems": 2, "maxItems": 2 } },
+                "outer_loop": {
+                  "type": "object",
+                  "properties": {
+                    "is_outer": { "type": "boolean" },
+                    "polygon": { "type": "array", "items": { "type": "array", "items": { "type": "number" }, "minItems": 2, "maxItems": 2 } },
+                    "segments": {
+                      "type": "array",
+                      "items": {
+                        "type": "object",
+                        "properties": {
+                          "type": { "type": "string" },
+                          "start": { "type": "object", "properties": { "x": { "type": "number" }, "y": { "type": "number" }, "z": { "type": "number" } }, "required": ["x", "y", "z"] },
+                          "end": { "type": "object", "properties": { "x": { "type": "number" }, "y": { "type": "number" }, "z": { "type": "number" } }, "required": ["x", "y", "z"] },
+                          "mid": { "type": "object", "properties": { "x": { "type": "number" }, "y": { "type": "number" }, "z": { "type": "number" } }, "required": ["x", "y", "z"] },
+                          "length_ft": { "type": "number" },
+                          "radius_ft": { "type": ["number", "null"] },
+                          "is_wall": { "type": "boolean" }
+                        },
+                        "required": ["type", "start", "end", "mid", "length_ft", "is_wall"]
+                      }
+                    }
+                  },
+                  "required": ["is_outer", "polygon", "segments"]
+                },
+                "inner_loops": { "type": "array", "items": { "type": "object" } }
+              },
+              "required": ["polygon", "outer_loop", "inner_loops"]
+            },
+            "ceilings": { "type": "array", "items": { "type": "object" } },
+            "obstacles": { "type": "array", "items": { "type": "object" } },
+            "existing_sprinklers": { "type": "array", "items": { "type": "object" } },
+            "source": { "type": "object" },
+            "selected_sprinkler_family_name": { "type": "string" },
+            "selected_sprinkler_type_name": { "type": "string" },
+            "override_max_spacing_ft": { "type": ["number", "null"] },
+            "override_boundary_clearance_ft": { "type": ["number", "null"] },
+            "override_max_distance_to_wall_ft": { "type": ["number", "null"] },
+            "override_ceiling_tile_u_ft": { "type": ["number", "null"] },
+            "override_ceiling_tile_v_ft": { "type": ["number", "null"] },
+            "selected_sprinkler_orientation": { "type": "string", "enum": ["pendent", "upright", "sidewall"] },
+            "type_max_coverage_area_sq_ft": { "type": ["number", "null"] },
+            "type_max_spacing_ft": { "type": ["number", "null"] },
+            "type_min_spacing_ft": { "type": ["number", "null"] },
+            "type_coverage_radius_ft": { "type": ["number", "null"] },
+            "sprinkler_class": { "type": "string" }
+          },
+          "required": ["level_id", "level_name", "level_elevation_ft", "room_id", "room_name", "room_number", "area_sq_ft", "effective_hazard_class", "polygon"]
+        }
+      },
+      "selected_family_name": { "type": "string", "description": "Universal sprinkler family name for rooms without per-room override." },
+      "selected_type_name": { "type": "string", "description": "Universal sprinkler type name for rooms without per-room override." },
+      "project_name": { "type": "string", "default": "RevitModel" },
+      "config": {
+        "type": "object",
+        "properties": {
+          "max_candidate_points": { "type": "integer", "default": 5000, "minimum": 100, "maximum": 20000 },
+          "tolerance_ft": { "type": "number", "default": 0.01, "minimum": 0.001, "maximum": 1.0 },
+          "grid_resolution_factor": { "type": "number", "default": 1.0, "minimum": 0.5, "maximum": 2.0 }
+        },
+        "additionalProperties": false
+      }
+    },
+    "required": ["rooms", "selected_family_name", "selected_type_name"],
+    "additionalProperties": false
+  },
+  "output_schema": {
+    "type": "object",
+    "properties": {
+      "success": { "type": "boolean" },
+      "is_provisional": { "type": "boolean" },
+      "applied_rules_summary": { "type": "string" },
+      "total_calculated_sprinklers": { "type": "integer" },
+      "rooms": {
+        "type": "array",
+        "items": {
+          "type": "object",
+          "properties": {
+            "room_id": { "type": "string" },
+            "room_name": { "type": "string" },
+            "room_number": { "type": "string" },
+            "sprinkler_family_name": { "type": "string" },
+            "sprinkler_type_name": { "type": "string" },
+            "status": { "type": "string", "enum": ["Success", "ReviewRequired", "Failed", "InvalidRoomGeometry", "InvalidInput", "NoValidCandidates", "MissingCeiling", "UnsupportedCeiling", "CalculationFailed"] },
+            "calculated_count": { "type": "integer" },
+            "required_count": { "type": "integer" },
+            "applied_max_spacing_ft": { "type": "number" },
+            "applied_boundary_clearance_ft": { "type": "number" },
+            "rules_approved": { "type": "boolean" },
+            "polygon": { "type": "array", "items": { "type": "array", "items": { "type": "number" }, "minItems": 2, "maxItems": 2 } },
+            "points": {
+              "type": "array",
+              "items": {
+                "type": "object",
+                "properties": {
+                  "x": { "type": "number" },
+                  "y": { "type": "number" },
+                  "z": { "type": "number" },
+                  "room_id": { "type": "string" },
+                  "level_id": { "type": "string" },
+                  "level_name": { "type": "string" },
+                  "wall_edge_index": { "type": ["integer", "null"] },
+                  "has_obstacle_conflict": { "type": "boolean" },
+                  "obstacle_conflict_description": { "type": "string" }
+                },
+                "required": ["x", "y", "z", "room_id", "level_id", "level_name"]
+              }
+            },
+            "warnings": { "type": "array", "items": { "type": "string" } },
+            "errors": { "type": "array", "items": { "type": "string" } },
+            "diagnostics": { "type": "array", "items": { "type": "string" } }
+          },
+          "required": ["room_id", "room_name", "room_number", "status", "calculated_count"]
+        }
+      },
+      "warnings": { "type": "array", "items": { "type": "string" } },
+      "errors": { "type": "array", "items": { "type": "string" } }
+    },
+    "required": ["success", "is_provisional", "applied_rules_summary", "total_calculated_sprinklers", "rooms", "warnings", "errors"]
+  },
+  "input_examples": [
+    {
+      "project_name": "Sample Project",
+      "selected_family_name": "Tyco TY-FRB",
+      "selected_type_name": "1/2\" Pendent 155F",
+      "rooms": [
+        {
+          "level_id": "123456",
+          "level_name": "Level 1",
+          "level_elevation_ft": 0,
+          "room_id": "789012",
+          "room_name": "Office 101",
+          "room_number": "101",
+          "area_sq_ft": 400,
+          "effective_hazard_class": "Light",
+          "ceiling_height_ft": 9,
+          "ceiling_type": "FLAT",
+          "polygon": [[0, 0], [20, 0], [20, 20], [0, 20]],
+          "selected_sprinkler_family_name": "Tyco TY-FRB",
+          "selected_sprinkler_type_name": "1/2\" Pendent 155F",
+          "selected_sprinkler_orientation": "pendent"
+        }
+      ]
+    }
+  ],
+  "annotations": {
+    "readOnlyHint": true,
+    "destructiveHint": false,
+    "idempotentHint": true,
+    "openWorldHint": false
+  }
+}

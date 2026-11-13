@@ -11,6 +11,17 @@ namespace FireProtection.Backend.Services.Extraction
         ModelSnapshot ExtractModelSnapshot(Document hostDocument);
 
         /// <summary>
+        /// Executes fast lightweight model data extraction (Levels, Ceilings, Rooms, Existing Sprinklers)
+        /// without heavy obstacle geometry extraction, enabling near-instantaneous UI launch.
+        /// </summary>
+        ModelSnapshot ExtractLightweightSnapshot(Document hostDocument);
+
+        /// <summary>
+        /// Extracts MEP, architectural, and structural obstacles and associates them to rooms on-demand.
+        /// </summary>
+        System.Collections.Generic.List<ObstacleData> ExtractObstacles(Document hostDocument, System.Collections.Generic.List<RoomData> rooms);
+
+        /// <summary>
         /// Executes extraction and exports the result to a JSON file.
         /// </summary>
         (ModelSnapshot Snapshot, string ExportPath) ExtractAndExport(Document hostDocument, string exportFilePath = null);

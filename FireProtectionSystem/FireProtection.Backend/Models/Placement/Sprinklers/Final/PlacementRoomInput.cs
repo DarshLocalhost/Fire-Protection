@@ -105,6 +105,31 @@ namespace FireProtection.Backend.Models.Placement.Sprinklers.Final
         public double? OverrideBoundaryClearanceFt { get; set; }
 
         /// <summary>
+        /// Per-room MAXIMUM distance-to-wall (S→W) override in feet. This is the NFPA 13
+        /// ½-spacing upper bound enforced post-selection in
+        /// <c>BruteForceCalculationService.FinalizeSelection</c>, independent of the
+        /// MINIMUM <see cref="OverrideBoundaryClearanceFt"/>. null = use rule-set
+        /// <c>MaxDistanceFromWallsFt</c>. NOT NFPA-clamped — user value is honored verbatim
+        /// and flagged provisional (review required).
+        /// </summary>
+        [JsonProperty("overrideMaxDistanceToWallFt")]
+        public double? OverrideMaxDistanceToWallFt { get; set; }
+
+        /// <summary>
+        /// Per-room fallback ceiling-tile pitch (feet) along the primary axis, used ONLY when
+        /// the ceiling has no readable grid pattern (<see cref="DTOs.CeilingData.HasReadableGrid"/>
+        /// false). Enables tile-center snapping from a user-entered tile size (e.g. 2×2 / 2×4).
+        /// null = no synthetic grid (free centered array).
+        /// </summary>
+        [JsonProperty("overrideCeilingTileUFt")]
+        public double? OverrideCeilingTileUFt { get; set; }
+
+        /// <summary>Per-room fallback ceiling-tile pitch (feet) along the secondary axis. See
+        /// <see cref="OverrideCeilingTileUFt"/>. null = square tile (V = U) or no synthetic grid.</summary>
+        [JsonProperty("overrideCeilingTileVFt")]
+        public double? OverrideCeilingTileVFt { get; set; }
+
+        /// <summary>
         /// Per-row sprinkler orientation: <c>"pendent"</c>, <c>"upright"</c>, or
         /// <c>"sidewall"</c>. Drives <see cref="FireProtection.Backend.Services.Placement.Sprinklers.Final.BruteForce.HazardPlacementRuleSet.GetOrientationAdjustment"/>
         /// which scales MaxSpacing / CoverageRadius per NFPA 13 §10.2 (sidewall gets a
@@ -112,6 +137,19 @@ namespace FireProtection.Backend.Models.Placement.Sprinklers.Final
         /// </summary>
         [JsonProperty("selectedSprinklerOrientation")]
         public string SelectedSprinklerOrientation { get; set; }
+
+        // Listed per-family/type values supplied by the catalog. Null deliberately means
+        // "not listed" and preserves the provisional hazard baseline.
+        [JsonProperty("typeMaxCoverageAreaSqFt")]
+        public double? TypeMaxCoverageAreaSqFt { get; set; }
+        [JsonProperty("typeMaxSpacingFt")]
+        public double? TypeMaxSpacingFt { get; set; }
+        [JsonProperty("typeMinSpacingFt")]
+        public double? TypeMinSpacingFt { get; set; }
+        [JsonProperty("typeCoverageRadiusFt")]
+        public double? TypeCoverageRadiusFt { get; set; }
+        [JsonProperty("sprinklerClass")]
+        public string SprinklerClass { get; set; }
 
         [JsonProperty("source")]
         public SourceReferenceData Source { get; set; }

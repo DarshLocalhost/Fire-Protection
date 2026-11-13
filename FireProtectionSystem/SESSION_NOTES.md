@@ -16,6 +16,142 @@
 
 ---
 
+### 2026-11-12 — Sidewall head misplacement (end-face stacking) and deviation metric fix
+
+- **Context**: User reported that with "Ignore Obstacles" unchecked, rooms with obstacles appeared to be skipped wholesale. Evidence from the 2026-11-11 export JSONs (`%USERPROFILE%\Documents\FireProtectionSystem\Exports\`) proved the per-point obstacle gate already behaves correctly (e.g. run 143028: KITCHEN 5 placed + exactly 1 `OBSTACLE_CONFLICT` point skipped; checked runs place all 24). The real defects were in `WallSidewallPlacementStrategy`:
+  1. Face selection accepted wall **end faces** (only Z-normal filtering). On the kitchen top wall, three heads requested at X 22.07/12.97/3.87 were all placed at X −7.86 (the wall's end-face plane) and one edge-0 head landed at an arbitrary X=11.24.
+  2. `IsSpatiallySane` widened its envelope to `Math.Max(maxDeviationFt, 15.0)`, so 30-ft misplacements passed sanity.
+  3. `PlacementDeviationFt` compared the instance location against the strategy's projected host target instead of the requested calc point, reporting ~6e-15 for 29.9-ft errors.
+  4. Morning runs (09:27–12:30) that failed whole rooms (KITCHEN 8/8, STUDY 2/2) were cascading `PLACEMENT_FAILED` from the face-ref direction parallelism error ("Reference direction is parallel to face normal"), not obstacle logic.
+- **Actions Taken** (all inside the sidewall path; no other device/ceiling logic touched):
+  - `WallSidewallPlacementStrategy.cs` — `BuildHostFromWall` rewritten: considers `HostObjectUtils.GetSideFaces` (Interior + Exterior) **and** the geometry scan, both filtered to true side faces (`|normal · wallDir| ≤ 0.7`, Z-normal ≤ 0.3), scored by room-facing + distance to requested point; synthesizes the plane from the wall curve when no side face is usable (that plane is ⊥ wallDir by construction). Added an along-wall drift guard in `Place()` (`|Δ·edgeDir| > 3.0 ft` ⇒ fail loudly instead of stacking heads). `IsSpatiallySane` now enforces the strict 3.5 ft envelope.
+  - `RevitSprinklerPlacementService.cs` — `PlacementDeviationFt` now follows its DTO contract (requested calc point vs actual instance location). Post-placement validity is two-part: execution accuracy (actual vs `ExpectedLocation` ≤ `PlacementValidationToleranceFt`) **and** sidewall fidelity (projected target vs requested point ≤ 1.5 ft face-snap envelope, sidewall outcomes only). Invalid placements report both deviations.
+  - `PlacementInputBuilder.cs` + `PlacementInputJsonExporter.cs` — `BoundaryData.Segments` (wall / non-wall classification from the room extraction) is now carried through `PlacementRoomSelection.Boundary` into the snapshot, so `BuildWallEdgeMask` restricts sidewall rows to real wall edges per [[DECISIONS]] 032 instead of treating every edge as a wall.
+  - Built `Debug`, `Revit2025`, `Revit2026`: 0 errors / 0 warnings. Backend deployed to the 2025 and 2026 addins dirs 2026-11-12 ~09:52. All 19 test suites PASS under Revit2025 and Revit2026 configurations.
+- **Open Questions / Blockers**:
+  - ~~Runtime verification pending~~ **VERIFIED later 2026-11-12**: after Revit restart (PID started ~09:54 > 09:51 deploy), run on HOUSE_MODEL placed 24/24 across 9 rooms, all `PLACED_AND_VALID`. All 8 kitchen heads at exact requested X (bottom wall 393169 Y=0.48: X −2.12/5.94/14.00/22.07; top wall 322695 Y=16.48: X −6.84/3.87/12.97/22.07), dev = 0.50 ft (true face snap), no stacking. Live geometry matches export exactly.
+  - Corner-edge host ambiguity remains (an edge-0 head at a room corner can host either adjacent room-bounding wall; composite scoring unchanged). Observed as a benign wrong-wall pick, not a position error.
+  - NFPA 13 sidewall verification (later 2026-11-12): user asked whether sidewalls "cover within 15 ft radius". Answer: **no — 15 ft is the provisional placeholder, not an NFPA sidewall value**. NFPA 13 (2022) §10.3: max along-wall spacing 14 ft LH / 10 ft OH (§10.3.4), max protection area 196 ft² LH / 100 ft² OH (§10.3.3.2.1) → effective throw LH 14 ft / OH ≈10 ft. Code already implements the NFPA model when catalog values exist (`throwDepth = TypeMaxCoverageAreaSqFt / alongSpacing`, BruteForceCalculationService.cs L1523–1526); `throwDepth = alongSpacing` (15 ft, `throwAssumedSquare`) applies ONLY because the "1/2" Dry Horizontal Sidewall" family has empty catalog coverage values. Full-layout audit vs §10.3: all along-wall gaps, protection areas (~42–116 ft²), min spacing (6 ft), min end clearance, and opposing-row depth rule PASS; deltas are end-wall distances (limit S/2 = 5 ft OH / 7 ft LH): kitchen 5.74 (0.74 over ×4 heads), sitting room 8.27 (1.27 over), bedroom 1 8.56 (1.56 over) — all traceable to provisional `endWallMax = S/2 = 7.5` (NFSA p.219 ceiling table) and the short-edge midpoint seeding branch (L1590–1607). Recorded in [[TODO]] under the P0 provisional-rules item.
+  - Rulebook verification (later 2026-11-12, user request): the client rulebook (`sprinkler_rulebook.md` = extracted text of "Layout, Detail and Calculation of Fire Sprinkler Systems", Ch.19 p.228 / PDF p.234) **Table 19-2** confirms: LH 14 ft spacing, single-row width 12 (combustible) / 14 (noncombustible), area 120 / 196 sq ft; OH 10 ft / 10 ft / 80 / 100 sq ft; opposing rows to room width 20 ft OH / 24 ft LH; no back-to-back without continuous lintel/soffit; deflector 4–6 in below ceiling (listed to 18 in); soffit > 8 in needs pendent. Agrees with the web-verified NFPA 13 (2022) §10.3 values. **Doc-vs-code discrepancies found:** (1) `FireProtection-Sprinklers.md` §2.3/§10 claim the sidewall solver is "governed entirely by Table 19-2" — false: actual `alongSpacing = 15 × 0.9 (CeilingHeightAdjustmentFactor placeholder) × 0.85 (orientation placeholder) = 11.475 ft` for OH1, proven by exact seed-position match (endWallMax = 5.7375 reproduces all 8 kitchen head positions −2.12/5.94/14.00/22.07 and 3.87/12.97/22.07); (2) §2.3 mis-transcribes LH-Combustible single-row width as 14 (rulebook: 12); (3) no `SidewallWallFinish` in PlacementRoomInput; (4) catalog `TypeSidewallMax*` fields exist only in the Catalog layer and are never consumed by the sidewall solver; (5) `Nfpa13RulebookRules.cs` contains zero sidewall rules; (6) stand-off is 0.5 ft in code vs 1.5 in in the doc. Implementation of Table 19-2 belongs to the P0 provisional-rules task in [[TODO]].
+- **Handoff**: If the whole-room skip is still reported after a Revit restart, capture the new `sprinkler_placement_result_*.json` — with the two-part validity check, any misplacement now surfaces as `PLACED_BUT_INVALID` plus a `[REVIEW]` warning naming both deviations, instead of a silent ~0 ft report.
+
+### 2026-11-11 — Sidewall sprinkler obstacle coverage sampling and foundation wall hosting fix
+
+- **Context**: User reported sidewall sprinkler placement skipping or not covering Kitchen R-01 and other rooms when obstacles exist. The user required:
+  1. When "Ignore Obstacles" is checked: place all calculated sidewall sprinklers regardless of obstacle collisions.
+  2. When "Ignore Obstacles" is unchecked: only skip sprinklers whose calculated location falls directly on an obstacle bounding box; all other non-colliding sprinklers must be placed.
+  3. No changes to other device types (pendent, upright, smoke detectors, notification appliances).
+- **Actions Taken**:
+  - `SprinklerCollisionView.xaml`: Added CheckBox bound to `IgnoreObstacles` in the action bar.
+  - `SprinklerBruteForceViewModel.cs` / `SprinklerCollisionViewModel.cs`: Made `IgnoreObstacles` a bindable public property, removed modal popup dialog.
+  - `BruteForceCalculationService.cs`: In `SelectSidewallDirectional`, removed obstacle exclusion from coverage sample grid creation. All floor points inside the room are evaluated for coverage so rooms with obstacles (columns, casework) are not under-covered.
+  - `WallSidewallPlacementStrategy.cs`: Increased foundation wall penalty to 500.0 (both for type name containing "Found" and for walls ending below requested Z - 0.5) to ensure above-grade perimeter walls win host selection over subgrade/foundation walls.
+  - Built and deployed to Revit 2025 and 2026 addins directories. All 19 test suites PASS.
+- **Handoff**: Launch Revit and test sidewall placement on KITCHEN R-01 with both checkbox states.
+
+---
+
+### 2026-11-02 — sprinkler explainer rewrite + 5-slide highlights deck
+
+- **Context**: user asked for a rewrite of `SPRINKLER_POINT_CALCULATION_EXPLAINED.md` grounded in the
+  current sources with MEP-engineer process vocabulary (that file only), then a simple, professional
+  4-5 slide highlights deck in the project root summarizing it. User prefers being asked over
+  assumptions ("grill me"); every visible deck run must be >= 20 pt.
+- **Actions Taken** (documentation only; **no product code changed**):
+  - v2 same-day: user rejected the process narrative ("i just want the internal logic, no any other
+    bullshit than the logic"; grill-me answers: formulas+definitions, ONE compact worked example, full
+    solver math, pipeline-stage layout). Delivered ~250-line logic-only full replacement of
+    `SPRINKLER_POINT_CALCULATION_EXPLAINED.md` with every formula re-verified verbatim in source
+    (non-tile loop :604-774, RequiredCount :1448/:1798, CheckCoverageBySxL :2179-2263,
+    MergeTypeRuleValues :2433-2468, TryApplySmallRoomRule :2718-2782; RemoteDistanceLimitFt confirmed
+    enforced at :1374; combinedFactor = height x slope x class at :307). Doc explicitly lists
+    declared-but-not-enforced constants; content inventory lives in the PROGRESS.md v2 bullet.
+    - First pass: rewrote `SPRINKLER_POINT_CALCULATION_EXPLAINED.md` (~430 lines) from the final placement sources:
+    `BruteForceCalculationService`, `DefaultHazardPlacementRules`, `Nfpa13RulebookRules`,
+    `HazardPlacementRuleSet`, `PlacementInputJsonExporter`, `PlacementEligibilityResult`,
+    `HazardClassifier`, `SprinklerBruteForceViewModel`. Corrections over the old doc: obstacle
+    proximity is tracked-not-rejected at candidate stage; required count = area / (pi x r squared);
+    ceiling band limit = floor + ceiling height + 5 ft; spacing check names the worst head.
+  - Built `Sprinkler_Layout_Highlights.pptx` (5 slides, SPA brand) via
+    `%TEMP%\opencode\deck-build\highlights-lib.ps1` / `highlights-slides.ps1` / `highlights-build.ps1`.
+    Fonts: Segoe UI + Nasalization (Poppins / Figtree installed nowhere on this machine - HKCU/HKLM
+    confirmed). QA in build: < 20 pt scan + forbidden-phrase scan (text and notes) + PNG pixel check
+    (`hi-slides\slide-0N.png`, `hi-contact-sheet.png`). COM gotcha: `TextRange.Paragraphs()`
+    collection does not support `.Item(N)` in PowerShell - call `Paragraphs(N)` indexed directly.
+  - Later session: deck extended 5 -> 7 slides with a KITCHEN R-01 worked example (slide 06: OH1
+    15 x 0.9 = 13.5 ft spacing, 3 x 2 = 6 heads vs area estimate ceil(532.87/130) = 5; slide 07:
+    centred-grid point formula with first/last coordinates and the 6 heads drawn on a room plan).
+    Placed result verified against the live HOUSE_MODEL model over Revit MCP (room id 395769,
+    sprinkler instance ids 460544-460549; predicted vs read-back centroids agree within 0.01 ft).
+    Backup of the 5-slide version: `Sprinkler_Layout_Highlights_backup_5slides.pptx`.
+  - Discrepancy recorded (implementation is source of truth): the walkthrough doc and the old
+    PROGRESS bullet describe required count as room area / (pi x coverage-radius squared); the
+    actually executed centred-grid path (`BruteForceCalculationService.SelectCenteredGrid`, nx/ny
+    ceil around :604-611 with `combinedFactor = heightFactor x slopeFactor x
+    CeilingHeightAdjustmentFactor` at :307) tiles by `maxSpacingFt x combinedFactor`. KITCHEN R-01
+    computed 6 heads this way, not the area estimate's 5. `CeilingHeightFt` comes from
+    `RoomExtractor.cs` (room UnboundedHeight or physical ceiling bottom minus level elevation).
+- **Decisions**: none recorded in [[DECISIONS]]. Chosen in-session by user: 5-slide structure, SPA
+  brand reuse, 20 pt floor as hard rule, one-line disclaimer on the last slide, system-font
+  substitution.
+- **Open Questions / Blockers**: unchanged - runtime verification pending; all rule values remain
+  provisional (`HasApprovedRules = false`). Parked: minimal redesign of the 16-slide
+  `Sprinkler_Layout_Logic_Walkthrough.pptx` still has slides 5-8, 9-12 and A1-A4 edits pending plus
+  three standing user questions (no-shift obstacle default, provisional flags block vs warn, where
+  operators see point-level results).
+- **Handoff**: treat the new doc and deck as static-trace documentation only; the code is the source
+  of truth. Highlights deck scripts are in TEMP and disappear with it - copy them into the repo
+  before editing deck content long-term.
+
+### 2026-09-22 — sim_expl_2.md: ELI5 location-point logic for all 3 devices
+
+- **Context**: User found the sprinkler section of `explanation_2.md` hard to follow and asked for an
+  ELI5 covering location-point logic only, then for the same style for smoke detectors and notification
+  appliances in one new root-level file.
+- **Actions Taken** (documentation only; **no product code changed**):
+  - Re-read source to ground the simplified explanations: `BruteForceCalculationService` (centered grid,
+    sidewall directional solver, four candidate filters), `SmokeDetectorCalculationService` (ceiling /
+    wall / peak-row candidates, single-device centroid fast path, center-out greedy selection),
+    `Nfpa72SmokeDetectorRules`, `Nfpa72NotificationApplianceRules` (candela/dBA stricter-of tables),
+    `AudibleCoverageEngine` (post-placement dBA audit; tests/internal wiring).
+  - Wrote **`sim_expl_2.md`** (project root): three parallel ELI5 sections (sprinkler / smoke detector /
+    notification appliance), each structured as rules → grid → discard bad dots → pick final points →
+    honesty checks, plus a one-glance side-by-side table. Provisional status called out throughout.
+- **Decisions**: none new.
+- **Open Questions / Blockers**: same as prior entry — runtime verification pending; all three rule
+  providers remain provisional; `AudibleCoverageEngine` still not on the main placement path.
+- **Handoff**: next session should treat `sim_expl_2.md` as the plain-language companion to the more
+  technical `explanation_2.md`; do not treat either as proof of runtime behavior.
+
+### 2026-09-22 — explanation_2.md: candidate-location identification for all 3 devices
+
+- **Context**: User requested a new root-level document `explanation_2.md` describing, for sprinklers, smoke
+  detectors, and notification appliances, how candidate location points are identified — plain-English first,
+  then a technical walkthrough with key codeblocks, class/method index, family/type coverage, all scenarios,
+  and edge cases. Clarifying answers: full pipeline (generate + filter + select + post-checks); key excerpts
+  + index (not full method bodies); flag provisional (`HasApprovedRules=false`), static-only status, and
+  doc-vs-code discrepancies.
+- **Actions Taken** (documentation only; **no product code changed**):
+  - Read all project-memory files + `Explanation.md` + `TARGET_DEVICE_PLACEMENT_LOGIC.md`.
+  - Verified source: `DeviceLocationPointIdentifier`, `BruteForceCalculationService` (CalculateRoom /
+    SelectCenteredGrid / SelectSidewallDirectional), `SmokeDetectorCalculationService` (mode branch,
+    ceiling/wall/peak candidates, SelectFromCandidates), `Nfpa72SmokeDetectorRules`,
+    `Nfpa72NotificationApplianceRules`, `DefaultHazardPlacementRules`, `FireAlarmDevicePlacementCore`.
+  - Wrote **`explanation_2.md`** (project root): shared foundation; per-device plain-English + technical
+    deep-dive (rules → Z → generate → filter → select → post-checks); side-by-side comparison; family/type
+    matrix; edge-case catalogue; class & method index; 12 known doc-vs-code discrepancies (§9), including
+    centered-grid vs older “divide-and-centre” wording, silent smoke/NA `MaxCandidatePoints` truncation,
+    `AudibleCoverageEngine` tests-only, and `DeviceLocationPointIdentifier` as labeling not dispatcher.
+- **Decisions**: none new; documented existing Decisions 004/009/011/016–021 as they appear in code.
+- **Open Questions / Blockers**: P0 runtime verification of Decision 011/012 still pending; all three rule
+  providers remain provisional; smoke/NA post-check depth and truncation honesty are known asymmetries
+  recorded in explanation_2 §9 (code changes not requested this session).
+- **Handoff**: Treat `explanation_2.md` as the candidate-identification explainer; do not let
+  `TARGET_DEVICE_PLACEMENT_LOGIC.md` override its §9 discrepancy list. Next engineering work still gated
+  on P0 runtime verify, then NFPA-approved rule values.
+
+---
+
 ### 2026-09-02 — ClosedXML "Browse → load Excel" popup: missing/mis-redirected runtime dependencies (deployment fix)
 
 - **Context**: Clicking **Browse** in the catalog bar and selecting a workbook produced an error popup
@@ -170,9 +306,12 @@
     `SprinklerPlacementResult.SkippedMissingFamilyCount` counter.
   - `FireProtection.UI/ViewModels/Sprinklers/BruteForce/RoomItemViewModel.cs` — per-row
     `SelectedFamily` / `SelectedType` / `MaxSpacingFtOverride` / `BoundaryClearanceFtOverride` /
-    `FamilyAvailability` + `SetCatalogDefaults` / `ResetFamilyAndTypeToDefault` /
-    `ResetSpacingOverridesToDefault` / `Apply*ToAllEligible` commands. New
-    `FamilyAvailability` enum.
+    `SetCatalogDefaults` / `ResetFamilyAndTypeToDefault` /
+    `ResetSpacingOverridesToDefault` / `Apply*ToAllEligible` commands.
+    NOTE: this entry previously also claimed a `FamilyAvailability` property and enum. Neither
+    exists — grep finds no such member. Whether a family is loaded in the project is reported
+    through the eligibility preflight instead (`PlacementEligibilityStatusCodes.FamilyNotLoaded`,
+    surfaced as `RoomItemViewModel.EligibilityShortReason` = "Family not loaded").
   - `FireProtection.UI/ViewModels/Sprinklers/BruteForce/SprinklerBruteForceViewModel.cs` — ctor
     takes `ICatalog catalog`; `SeedPerRowCatalogDefaults()` populates per-row dropdowns;
     `ApplyFamily/Type/MaxSpacing/BoundaryClearanceToAllEligibleCommand` set; per-row family/type
@@ -693,3 +832,48 @@ were invisible to it.
 - **Handoff:** live Revit pass — (1) place smoke → place NA in same rooms with policy Skip: neither may
   skip/delete the other; (2) confirm derived attributes follow per-row family changes into the calc;
   (3) confirm the sprinkler report window renders themed + truthful on a real run.
+
+---
+
+### 2026-11-11 — Sidewall sprinkler full-coverage fix, linked wall hosting, and UI obstacle toggle
+
+- **Context**: Sidewall sprinklers were failing to cover rooms like Kitchen (R-01) and Study (R-04) when interior casework/obstacles were present. In addition, when obstacles were present, non-colliding sprinklers were mistakenly skipped. User requested a clean UI toggle for obstacle handling and promised strict isolation to sidewall logic only.
+- **Root Causes**:
+  1. `SelectSidewallDirectional` coverage sampling grid skipped sample points inside obstacle bounding boxes, leading the coverage solver to believe rooms like Kitchen were already covered with fewer heads.
+  2. Polygon index mismatch: `result.Polygon` was set to the uncleaned outer loop while `WallEdgeIndex` indexed `CleanPolygonLoop(polygon)`.
+  3. `FindWallFaceHostForEdge`: In MEP models with linked architectural models, host-doc foundation walls were picked first and pre-empted linked architectural walls, snapping instances across the room or below grade where spatial sanity checks failed.
+- **Actions Taken**:
+  1. `BruteForceCalculationService.SelectSidewallDirectional`:
+     - Retained full interior sampling so opposing-wall seeding (NFPA 13 §11.3.3.2) triggers properly across deep/obstructed rooms.
+     - Added `CheckSprinklerObstacleConflict` tagging individual sidewall heads directly colliding with 3D obstacle bounding boxes.
+     - Assigned `result.Polygon = polygon` after cleaning.
+  2. `WallSidewallPlacementStrategy`:
+     - Added joint candidate scoring across host doc and linked models; penalised faceless hosts (+1000) and foundation walls (+500), ensuring linked architectural walls win hosting.
+  3. UI / Placement Service:
+     - Added `Ignore Obstacles` CheckBox in `SprinklerCollisionView` (Final Review) bound through ViewModels.
+     - When unchecked, only heads with direct obstacle bounding box collisions are skipped; all other heads are placed. When checked, all heads are placed unconditionally.
+     - Defaulted re-run device policy to `ReplaceExisting`.
+  4. Non-sidewall isolation:
+     - Reverted accidental changes to ceiling/grid sprinkler obstacle logic and test suite. All 19 test suites PASS (0 failures).
+- **Verification**: `dotnet build` succeeded for both Revit2025 and Revit2026. Unit test runner passed all 19 suites.
+
+---
+
+### 2026-11-12 — Pure sprinkler layout (no obstacle shifting) & UI obstacle checkbox skip
+
+- **Context**: User clarified that sprinklers should NOT be shifted or relocated to other positions when an obstacle is encountered. Instead, sprinklers must be calculated strictly at their natural grid/wall locations. If a point falls on an obstacle, it is flagged as a conflict. The UI "Ignore Obstacles" checkbox controls whether to place all calculated sprinklers or skip only the conflicting ones. The confirmation modal popup was also removed.
+- **Actions Taken**:
+  1. `BruteForceCalculationService.cs`:
+     - Removed candidate snapping / obstacle-recovery expanded search (`spacing/2`) from `CenteredGridPattern` and `SelectCenteredGridOnTiles`. Grid points remain strictly at natural coordinates `(rx = tx, ry = ty)`.
+     - Removed obstacle rejection from `TryAcceptPoint` and `IsPlacementValid`.
+     - Added `CheckSprinklerObstacleConflict` tagging across all calculated points without moving them.
+  2. `RevitSprinklerPlacementService.cs`:
+     - If `ignoreObstacles == false` (unchecked), skips *only* the specific points with `HasObstacleConflict == true`. All other sprinklers are placed at exact calculated points.
+     - If `ignoreObstacles == true` (checked), places all points unconditionally.
+  3. `SprinklerBruteForceViewModel.cs`:
+     - Removed `Dialogs.Confirm` modal popup on "Place Sprinklers".
+  4. Tests:
+     - Updated `Program.cs` to assert `HasObstacleConflict` tagging rather than point displacement. All 19 suites PASS.
+- **Verification**: `dotnet build` 0 errors for Revit2025 and Revit2026. All 19 test suites PASS.
+
+

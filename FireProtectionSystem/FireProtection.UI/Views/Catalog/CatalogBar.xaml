@@ -1,6 +1,7 @@
 <UserControl x:Class="FireProtection.UI.Views.Catalog.CatalogBar"
              xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
              xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             xmlns:conv="clr-namespace:FireProtection.UI.Converters"
              xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
              xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
              mc:Ignorable="d"
@@ -14,12 +15,17 @@
                 <ResourceDictionary Source="/FireProtection.UI;component/Themes/Colors.xaml"/>
                 <ResourceDictionary Source="/FireProtection.UI;component/Themes/Styles.xaml"/>
             </ResourceDictionary.MergedDictionaries>
+
+            <!-- Enum <-> IsChecked bridge for the mutually-exclusive source choice. Declared here
+                 rather than globally because it is only used by this control. -->
+            <conv:EnumToBoolConverter x:Key="EnumToBool" />
         </ResourceDictionary>
     </UserControl.Resources>
 
     <Border Style="{StaticResource CardBorder}" Padding="14,8" Margin="0,0,0,8">
         <Grid>
             <Grid.ColumnDefinitions>
+                <ColumnDefinition Width="Auto"/>
                 <ColumnDefinition Width="Auto"/>
                 <ColumnDefinition Width="*"/>
                 <ColumnDefinition Width="Auto"/>
@@ -32,11 +38,30 @@
                            Fill="{StaticResource BrandBrush}"
                            Margin="0,0,10,0"
                            VerticalAlignment="Center"/>
-                <TextBlock Text="CATALOG"
+                <TextBlock Text="SOURCE"
                            Style="{StaticResource EyebrowText}"/>
             </StackPanel>
 
-            <TextBlock Grid.Column="1"
+            <!-- Source radio group. A single group drives all three device tabs because this bar
+                 is hosted once at window level, outside the TabControl. -->
+            <StackPanel Grid.Column="1" Orientation="Horizontal" VerticalAlignment="Center" Margin="14,0,10,0">
+                <RadioButton Style="{StaticResource ChoiceRadioStyle}"
+                             Tag="RevitModel"
+                             Checked="SourceRadio_Checked"
+                             IsChecked="{Binding SourceMode, Mode=OneWay, Converter={StaticResource EnumToBool}, ConverterParameter=RevitModel}"
+                             Content="Model"
+                             ToolTip="Read families and types from the open Revit model. Recommended: it can never offer a family the project cannot place."/>
+
+                <RadioButton Style="{StaticResource ChoiceRadioStyle}"
+                             Margin="10,0,0,0"
+                             Tag="CatalogFile"
+                             Checked="SourceRadio_Checked"
+                             IsChecked="{Binding SourceMode, Mode=OneWay, Converter={StaticResource EnumToBool}, ConverterParameter=CatalogFile}"
+                             Content="Catalog file"
+                             ToolTip="Read families and types from a selected Excel workbook."/>
+            </StackPanel>
+
+            <TextBlock Grid.Column="2"
                        Text="{Binding DisplayHeader}"
                        VerticalAlignment="Center"
                        Margin="14,0,14,0"
@@ -53,12 +78,20 @@
                 </TextBlock.Style>
             </TextBlock>
 
-            <Button Grid.Column="2"
+            <!-- Browse is only meaningful in CatalogFile mode: it picks the workbook that IS the
+                 catalog. In Model mode the family/type names come from the open document, so
+                 there is nothing to browse. (Previously bound through InverseBoolToVis, which
+                 showed Browse in Model mode and hid it exactly when it was needed.)
+                 Reload stays visible in BOTH modes because it is mode-aware: it re-reads the
+                 document in model mode (for when the user has just loaded families into the
+                 project) and re-reads the workbook in file mode. -->
+            <Button Grid.Column="3"
                     x:Name="BrowseButton"
                     Style="{StaticResource OutlineButtonStyle}"
                     Content="Browse..."
                     Click="BrowseButton_Click"
                     Padding="14,5"
+                    Visibility="{Binding IsCatalogFileMode, Converter={StaticResource BoolToVis}}"
                     IsEnabled="{Binding IsLoading, Converter={StaticResource InverseBoolConverter}}"/>
 
             <Button Grid.Column="4"

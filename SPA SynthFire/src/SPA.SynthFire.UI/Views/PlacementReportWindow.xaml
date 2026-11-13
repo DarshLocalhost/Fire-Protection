@@ -1,0 +1,54 @@
+<Window x:Class="SPA.SynthFire.UI.Views.PlacementReportWindow"
+        xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        Title="SPA SynthFire — Placement Report"
+        Width="820" Height="460"
+        WindowStartupLocation="CenterScreen"
+        Background="{DynamicResource Surface}"
+        Foreground="{DynamicResource Ink}"
+        FontFamily="Segoe UI" FontSize="13"
+        ShowInTaskbar="False">
+    <Window.Resources>
+        <ResourceDictionary Source="/SPA.SynthFire.UI;component/Themes/Styles.xaml"/>
+    </Window.Resources>
+    <Grid Margin="20">
+        <Grid.RowDefinitions>
+            <RowDefinition Height="Auto"/>
+            <RowDefinition Height="Auto"/>
+            <RowDefinition Height="Auto"/>
+            <RowDefinition Height="*"/>
+            <RowDefinition Height="Auto"/>
+        </Grid.RowDefinitions>
+
+        <TextBlock Grid.Row="0" x:Name="TitleText" Style="{StaticResource SectionHeader}"
+                   Text="Placement Report"/>
+        <TextBlock Grid.Row="1" x:Name="SummaryText" Margin="0,6,0,10" Style="{StaticResource Caption}"/>
+
+        <Border Grid.Row="2" x:Name="ReviewBanner" Background="{StaticResource WarnBg}" BorderBrush="{StaticResource Warn}"
+                BorderThickness="1" CornerRadius="8" Padding="12,10" Margin="0,0,0,12"
+                Visibility="Collapsed">
+            <TextBlock x:Name="ReviewText" TextWrapping="Wrap" Foreground="{StaticResource Warn}"/>
+        </Border>
+
+        <DataGrid Grid.Row="3" x:Name="RoomsGrid" AutoGenerateColumns="False"
+                  IsReadOnly="True" HeadersVisibility="Column" GridLinesVisibility="Horizontal"
+                  CanUserAddRows="False" RowHeaderWidth="0">
+            <DataGrid.Columns>
+                <DataGridTextColumn Header="Level" Binding="{Binding LevelName}" Width="120"/>
+                <DataGridTextColumn Header="Room" Binding="{Binding RoomName}" Width="*"/>
+                <DataGridTextColumn Header="Status" Binding="{Binding Status}" Width="130"/>
+                <DataGridTextColumn Header="Heads" Binding="{Binding Count}" Width="55"/>
+                <DataGridTextColumn Header="Max spacing (ft)" Binding="{Binding MaxSpacing}" Width="110"/>
+                <DataGridTextColumn Header="Coverage (ft²/head)" Binding="{Binding Coverage}" Width="120"/>
+                <DataGridTextColumn Header="Coverage check" Binding="{Binding CoverageCheck}" Width="150"/>
+            </DataGrid.Columns>
+        </DataGrid>
+
+        <StackPanel Grid.Row="4" Orientation="Horizontal" HorizontalAlignment="Right" Margin="0,10,0,0">
+            <Button x:Name="ExportButton" Content="Export CSV…" Width="120" Margin="0,0,8,0"
+                    Click="Export_Click" Style="{StaticResource SecondaryButton}"/>
+            <Button Content="Close" Width="96" IsCancel="True" IsDefault="True"
+                    Style="{StaticResource PrimaryButton}"/>
+        </StackPanel>
+    </Grid>
+</Window>

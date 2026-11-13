@@ -54,6 +54,15 @@ namespace FireProtection.UI.Services
         /// <summary>Resolved host Level name, when available.</summary>
         public string HostLevelName { get; set; }
 
+        /// <summary>True when room is classified as a specialized / special-hazard area.</summary>
+        public bool IsSpecialHazard { get; set; }
+
+        /// <summary>Classification of the special hazard (CommercialKitchen, WaterCurtain, ElectricalServerRoom, Shaft).</summary>
+        public string SpecialHazardType { get; set; }
+
+        /// <summary>The alternative suppression system required (e.g. "UL 300 hood system", "Clean agent system").</summary>
+        public string SpecialHazardSystem { get; set; }
+
         public bool IsEligible =>
             string.Equals(EligibilityState, EligibilityStates.Eligible, System.StringComparison.OrdinalIgnoreCase);
 
@@ -122,7 +131,10 @@ namespace FireProtection.UI.Services
                 LinkInstanceName = source.LinkInstanceName,
                 HostCeilingElementId = source.HostCeilingElementId,
                 HostLevelId = source.HostLevelId,
-                HostLevelName = source.HostLevelName
+                HostLevelName = source.HostLevelName,
+                IsSpecialHazard = source.IsSpecialHazard,
+                SpecialHazardType = source.SpecialHazardType,
+                SpecialHazardSystem = source.SpecialHazardSystem
             };
         }
     }
@@ -152,5 +164,6 @@ namespace FireProtection.UI.Services
         public const string NoUsableCeilingHost = "NO_USABLE_CEILING_HOST";
         public const string CalculationFailed = "CALCULATION_FAILED";
         public const string PreflightError = "PREFLIGHT_ERROR";
+        public const string SpecialHazardExcluded = "SPECIAL_HAZARD_EXCLUDED";
     }
 }

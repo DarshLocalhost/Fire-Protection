@@ -44,6 +44,14 @@ namespace FireProtection.UI.Services
         public string ApplianceType { get; set; }
         public string CandelaDba { get; set; }
 
+        /// <summary>Per-room MAXIMUM distance-to-wall (S->W) override in feet. null = engine-derived (½·spacing).</summary>
+        public double? OverrideMaxDistanceToWallFt { get; set; }
+
+        /// <summary>Per-room fallback ceiling-tile pitch (feet), primary/secondary axis. Used only when the
+        /// ceiling has no readable grid pattern. null = free lattice (no synthetic grid) / square tile.</summary>
+        public double? OverrideCeilingTileUFt { get; set; }
+        public double? OverrideCeilingTileVFt { get; set; }
+
         public DeviceKind DeviceKind { get; set; } = DeviceKind.SmokeDetector;
 
         public DeviceRoomInputItem()

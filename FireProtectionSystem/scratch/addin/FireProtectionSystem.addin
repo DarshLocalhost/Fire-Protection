@@ -1,0 +1,11 @@
+﻿<?xml version="1.0" encoding="utf-8" standalone="no"?>
+<RevitAddIns>
+<AddIn Type="Application">
+<Name>Fire Protection System</Name>
+<Assembly>C:\Users\darshan.badigera\Documents\test\MEP\FireProtectionSystem\scratch\addin\FireProtection.Backend.dll</Assembly>
+<AddInId>7E6F5F2A-8C2B-4F43-A8C8-4C8D2B9F6A11</AddInId>
+<FullClassName>FireProtection.Backend.Revit.FireProtectionApplication</FullClassName>
+<VendorId>FPS</VendorId>
+<VendorDescription>Fire Protection System</VendorDescription>
+</AddIn>
+</RevitAddIns>

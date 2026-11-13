@@ -23,6 +23,10 @@ namespace FireProtection.Tests
             TestCandelaRequiredForNotificationAppliance();
             TestAudibleOnlyNotificationApplianceLoads();
             TestNotificationApplianceWithNoRatingFails();
+            TestPerTypeNumericColumnsLoad();
+            TestBlankPerTypeColumnsFallBackToNull();
+            TestOutOfRangePerTypeValueWarnsNotFails();
+            TestSprinklerEntryLookup();
             TestTemplateGenerator();
 
             if (_failures == 0)
@@ -255,6 +259,183 @@ namespace FireProtection.Tests
                 Check(f1Types.Count == 2, "F1 has two types");
                 string hazard = svc.GetHazardClassForSprinkler("F1", "T1");
                 Check(hazard == "Light", "F1/T1 hazard = Light");
+            }
+            finally
+            {
+                if (File.Exists(path)) File.Delete(path);
+            }
+        }
+
+        /// <summary>
+        /// Writes a Sprinklers sheet carrying the full header (cols 1-15) plus a single data row,
+        /// letting the caller fill the optional per-type cells (7-15). Column indices mirror
+        /// <see cref="CatalogLoader.ReadSprinklers"/> exactly.
+        /// </summary>
+        private static string WriteSprinklerWorkbook(Action<IXLWorksheet> fillRow3)
+        {
+            return WriteTempWorkbook(wb =>
+            {
+                IXLWorksheet ws = wb.Worksheets.Add("Sprinklers");
+                ws.Cell(1, 1).Value = "CatalogVersion";
+                ws.Cell(1, 2).Value = "2026-09-01";
+                ws.Cell(2, 1).Value = "Category";
+                ws.Cell(2, 2).Value = "FamilyName";
+                ws.Cell(2, 3).Value = "TypeName";
+                ws.Cell(2, 4).Value = "HazardClass";
+                ws.Cell(2, 5).Value = "Mount";
+                ws.Cell(2, 6).Value = "Notes";
+                ws.Cell(2, 7).Value = "SprinklerClass";
+                ws.Cell(2, 8).Value = "MaxCoverageAreaSqFt";
+                ws.Cell(2, 9).Value = "MaxSpacingFt";
+                ws.Cell(2, 10).Value = "MinSpacingFt";
+                ws.Cell(2, 11).Value = "CoverageRadiusFt";
+                ws.Cell(2, 12).Value = "KFactor";
+                ws.Cell(2, 13).Value = "ResponseType";
+                ws.Cell(2, 14).Value = "TempRatingF";
+                ws.Cell(2, 15).Value = "DeflectorToCeilingIn";
+                ws.Cell(3, 1).Value = "Sprinkler";
+                ws.Cell(3, 2).Value = "F1";
+                ws.Cell(3, 3).Value = "T1";
+                fillRow3(ws);
+            });
+        }
+
+        private static void TestPerTypeNumericColumnsLoad()
+        {
+            Console.WriteLine("Test: per-type numeric columns (7-15) load into the row");
+            string path = WriteSprinklerWorkbook(ws =>
+            {
+                ws.Cell(3, 7).Value = "ExtendedCoverage";
+                ws.Cell(3, 8).Value = 400;
+                ws.Cell(3, 9).Value = 20;
+                ws.Cell(3, 10).Value = 8;
+                ws.Cell(3, 11).Value = 10;
+                ws.Cell(3, 12).Value = 11.2;
+                ws.Cell(3, 13).Value = "QR";
+                ws.Cell(3, 14).Value = 200;
+                ws.Cell(3, 15).Value = 4;
+            });
+            try
+            {
+                Catalog c = CatalogLoader.Load(path);
+                SprinklerCatalogRow row = c.Sprinklers[0];
+                Check(row.SprinklerClass == "ExtendedCoverage", "SprinklerClass parsed (col 7)");
+                Check(row.MaxCoverageAreaSqFt == 400, "MaxCoverageAreaSqFt parsed (col 8)");
+                Check(row.MaxSpacingFt == 20, "MaxSpacingFt parsed (col 9)");
+                Check(row.MinSpacingFt == 8, "MinSpacingFt parsed (col 10)");
+                Check(row.CoverageRadiusFt == 10, "CoverageRadiusFt parsed (col 11)");
+                Check(row.KFactor == 11.2, "KFactor parsed (col 12)");
+                Check(row.ResponseType == "QR", "ResponseType parsed (col 13)");
+                Check(row.TempRatingF == 200, "TempRatingF parsed (col 14)");
+                Check(row.DeflectorToCeilingIn == 4, "DeflectorToCeilingIn parsed (col 15)");
+            }
+            catch (Exception ex)
+            {
+                Check(false, "per-type columns threw: " + ex.Message);
+            }
+            finally
+            {
+                if (File.Exists(path)) File.Delete(path);
+            }
+        }
+
+        private static void TestBlankPerTypeColumnsFallBackToNull()
+        {
+            Console.WriteLine("Test: blank per-type cells load as null (engine falls back to hazard default)");
+            // Row 3 carries only the required identity cells; every optional column is left blank.
+            string path = WriteSprinklerWorkbook(ws => { });
+            try
+            {
+                Catalog c = CatalogLoader.Load(path);
+                SprinklerCatalogRow row = c.Sprinklers[0];
+                Check(string.IsNullOrEmpty(row.SprinklerClass), "blank SprinklerClass -> empty");
+                Check(!row.MaxCoverageAreaSqFt.HasValue, "blank MaxCoverageAreaSqFt -> null (not 0)");
+                Check(!row.MaxSpacingFt.HasValue, "blank MaxSpacingFt -> null (not 0)");
+                Check(!row.MinSpacingFt.HasValue, "blank MinSpacingFt -> null");
+                Check(!row.CoverageRadiusFt.HasValue, "blank CoverageRadiusFt -> null");
+                Check(!row.KFactor.HasValue, "blank KFactor -> null");
+                Check(!row.TempRatingF.HasValue, "blank TempRatingF -> null");
+                Check(!row.DeflectorToCeilingIn.HasValue, "blank DeflectorToCeilingIn -> null");
+            }
+            catch (Exception ex)
+            {
+                Check(false, "blank per-type columns threw: " + ex.Message);
+            }
+            finally
+            {
+                if (File.Exists(path)) File.Delete(path);
+            }
+        }
+
+        private static void TestOutOfRangePerTypeValueWarnsNotFails()
+        {
+            Console.WriteLine("Test: out-of-range / unknown per-type values WARN, do not fail the load");
+            string path = WriteSprinklerWorkbook(ws =>
+            {
+                ws.Cell(3, 7).Value = "Bogus";   // unknown SprinklerClass -> warning
+                ws.Cell(3, 8).Value = -5;         // non-positive coverage -> warning
+                ws.Cell(3, 9).Value = 10;         // MaxSpacing 10
+                ws.Cell(3, 10).Value = 14;        // MinSpacing 14 > MaxSpacing -> warning
+                ws.Cell(3, 13).Value = "XX";      // unknown ResponseType -> warning
+            });
+            try
+            {
+                // A load that only produces WARNINGs must succeed (no throw) and keep the row.
+                Catalog c = CatalogLoader.Load(path);
+                Check(c.Sprinklers.Count == 1, "row with out-of-range values still loads (warnings only)");
+
+                // The validator must surface these as WARNINGs, never ERRORs.
+                CatalogValidationResult v = CatalogValidator.Validate(c);
+                Check(!v.HasErrors, "out-of-range per-type values produce no ERRORs");
+                int warnings = 0;
+                foreach (CatalogIssue i in v.Issues)
+                    if (i != null && i.Code == CatalogValidator.SeverityWarning) warnings++;
+                Check(warnings >= 3, "unknown class + negative coverage + min>max each warn (got " + warnings + ")");
+            }
+            catch (Exception ex)
+            {
+                Check(false, "out-of-range per-type values should not throw: " + ex.Message);
+            }
+            finally
+            {
+                if (File.Exists(path)) File.Delete(path);
+            }
+        }
+
+        private static void TestSprinklerEntryLookup()
+        {
+            Console.WriteLine("Test: CatalogService.GetSprinklerEntry surfaces per-type values");
+            string path = WriteSprinklerWorkbook(ws =>
+            {
+                ws.Cell(3, 5).Value = "Sidewall";
+                ws.Cell(3, 7).Value = "Sidewall";
+                ws.Cell(3, 8).Value = 196;
+                ws.Cell(3, 9).Value = 14;
+                ws.Cell(3, 12).Value = 5.6;
+            });
+            try
+            {
+                Catalog c = CatalogLoader.Load(path);
+                FireProtection.Backend.Services.Catalog.CatalogService svc =
+                    FireProtection.Backend.Services.Catalog.CatalogService.FromCatalog(c);
+
+                FireProtection.UI.Services.SprinklerCatalogEntry entry = svc.GetSprinklerEntry("F1", "T1");
+                Check(entry != null, "entry found for (F1, T1)");
+                Check(entry.SprinklerClass == "Sidewall", "entry SprinklerClass = Sidewall");
+                Check(entry.MaxCoverageAreaSqFt == 196, "entry MaxCoverageAreaSqFt = 196");
+                Check(entry.MaxSpacingFt == 14, "entry MaxSpacingFt = 14");
+                Check(entry.KFactor == 5.6, "entry KFactor = 5.6");
+
+                // A type the workbook does not list returns null (no fabricated data).
+                Check(svc.GetSprinklerEntry("F1", "NoSuchType") == null, "missing type -> null entry");
+
+                IReadOnlyList<FireProtection.UI.Services.SprinklerCatalogEntry> forFamily =
+                    svc.GetSprinklerEntriesForFamily("F1");
+                Check(forFamily.Count == 1, "GetSprinklerEntriesForFamily returns the family's one type");
+            }
+            catch (Exception ex)
+            {
+                Check(false, "GetSprinklerEntry lookup threw: " + ex.Message);
             }
             finally
             {

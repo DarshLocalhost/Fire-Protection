@@ -3,6 +3,200 @@
 > Decisions are extracted from actual source code, comments, `.csproj`, and `TextFile1.txt`. No
 > decisions are invented. Where rationale cannot be established, it is marked **Undetermined**.
 
+## Decision 037 — Per-Sprinkler Overhead Host Resolution (Ceilings, Slabs, and Model Group Pods)
+
+### Status
+Accepted
+
+### Context
+In multi-family residential or commercial loft models (e.g. Snowdon Towers Level 4 Units 404 & 408), units are open to a 12' 10" structural slab overhead, but contain modular model groups (such as 134 SF bathroom/closet pods) with an 8' drywall ceiling covering only 22% of the room. Previously:
+1. The 22% pod ceiling was chosen as the room's single ceiling height. Sprinklers across the other 78% of the room (living/sleeping loft space) were placed at 8' height, floating mid-air ~4.8 ft below the structural slab.
+2. `CeilingHostResolver` had a narrow $\pm 4\text{ ft}$ $Z$ tolerance that failed to find the 12' 10" slab when candidate points carried an 8' nominal elevation.
+
+### Decision
+1. **Model Group / Coverage-Ratio Discrimination (`CeilingExtractor` & `RoomExtractor`)**:
+   - Extract `IsModelGroup` (`element.GroupId != InvalidElementId`) and `AreaSqFt`.
+   - In `FindCeilingsForRoom`, classify ceilings with `IsModelGroup || AreaSqFt / RoomArea < 0.50` as partial pod ceilings.
+   - When only partial pod ceilings exist in a room, Pass 2 automatically resolves the full-coverage overhead structural slab (12' 10") as the room's primary ceiling boundary.
+2. **Point-Level Vertical Column Raycasting (`CeilingHostResolver`)**:
+   - Raycasts upward through the room's vertical band `[levelElevation + 3.0, levelElevation + 35.0]`.
+   - Selects the lowest downward planar face (`FaceNormal.Z < -0.5`) directly above $(point.X, point.Y)$.
+   - Sprinklers under the bathroom pod attach to the pod ceiling (8' 0"); sprinklers outside the pod attach to the structural slab (12' 10").
+3. **Level-Based Strategy Parity (`LevelBasedPlacementStrategy`)**:
+   - For `OneLevelBased` families (e.g. upright sprinklers), sets `placePt.Z` to `host.ProjectedPointOnFace.Z - 0.0833` so level-hosted families also sit directly below their overhead surface.
+
+### Consequences
+- Eliminates mid-air floating heads in multi-elevation and pod-equipped rooms.
+- Preserves 2D NFPA 13 horizontal spacing rules and obstacle avoidance completely intact.
+
+---
+
+## Decision 036 — Overhead Structural Floor/Roof Slab Identification for Open-Ceiling Spaces
+
+### Status
+Accepted
+
+### Context
+In models with exposed ceilings, lofts, or industrial open spaces (such as Level 4 in Snowdon Towers Sample Architectural), units have no finished dropped ceilings (`OST_Ceilings`); only the corridor or soffits have finished ceilings. Previously:
+1. `CeilingExtractor` only collected `BuiltInCategory.OST_Ceilings`. Open rooms (e.g., Room 401) had 0 ceilings extracted, which triggered `CalculationStatus.MissingCeiling` and completely blocked calculation when ceiling-hosted families were selected.
+2. `SpatialHelpers.XYOverlap(cBox, hostBBox)` used axis-aligned bounding boxes (AABBs). Because the corridor ceiling is L-shaped and spans the building, its AABB overlapped adjacent open rooms (403, 405, 406, etc.), falsely assigning the corridor's 8.33 ft finished ceiling to those rooms.
+3. During candidate calculation, sprinklers were calculated at the corridor's 8.33 ft elevation. During Revit placement, Revit looked for a ceiling face at the candidate location inside the room, but the corridor ceiling had no geometry there. Placement failed with *"WorkPlaneBased placement failed: no usable ceiling face"* or fell back to a `SketchPlane` floating in mid-air.
+4. In `CeilingHostResolver`, `if (!element.LevelId.Equals(level.Id)) continue;` rejected floor slabs (`OST_Floors`) because a floor slab above a room belongs to the level above (e.g. Level 5 for a Level 4 room).
+
+### Decision
+1. **Extraction (`CeilingExtractor`)**:
+   - Collect `BuiltInCategory.OST_Floors` and `BuiltInCategory.OST_Roofs` alongside `OST_Ceilings`, extracting bottom downward planar faces (`FaceNormal.Z < -0.1`) and bottom elevation.
+2. **Room Matching (`RoomExtractor.FindCeilingsForRoom`)**:
+   - Pass 1: Search `OST_Ceilings`. Validate with `CeilingIntersectsRoom` (face projection of room location point/center/vertices and polygon intersection of ceiling face mesh) to prevent adjacent L-shaped corridor ceilings from falsely matching neighboring rooms.
+   - Pass 2: If a room has NO finished ceiling (`OST_Ceilings`), search overhead structural slabs (`OST_Floors` / `OST_Roofs`) whose bottom elevation is overhead (`slabBottomZ >= roomBottomZ + 4.0` and `slabBottomZ <= roomTopZ + 4.0`). Select the slab closest to `roomTopZ` and set `BottomElevationFt` to the slab underside and `HeightAboveLevelFt` to the true room height.
+   - Finished ceilings strictly take precedence over overhead slabs.
+3. **Hosting (`CeilingHostResolver`)**:
+   - For `element is Ceiling`, preserve `element.LevelId.Equals(level.Id)` check.
+   - For `element is Floor || element is RoofBase`, bypass the level check so the overhead slab of the level above is evaluated against the 3D bounding box (`zTol = 4.0`) and downward face projection.
+4. **Zero Impact on Calculation Logic**: Spacing formulas, hazard rule sets, NFPA 13 tables, obstruction checks, and grid algorithms remain 100% untouched.
+
+### Consequences
+- Open-ceiling rooms (like Room 401) now identify the overhead structural slab as their overhead boundary instead of failing with `MissingCeiling`.
+- Sprinklers in open-structure rooms are placed hosted directly to the underside face of the floor slab at the true room height (~12.83 ft) instead of floating in mid-air at corridor ceiling height (~8.33 ft).
+- Rooms with actual finished ceilings (like Corridor 402) continue to host on their finished ceilings at 8.33 ft.
+
+---
+
+## Decision 033 — Sidewall Obstacle Notch Bridging and Ignore-Obstacles Contract Enforcement
+
+### Status
+Accepted
+
+### Context
+When room boundaries in Revit encounter room-bounding elements (such as architectural columns or casework juts along walls), Revit carves local notches into the room boundary polygon. For sidewall sprinklers:
+1. This fragmented continuous physical walls (e.g. 35.66 ft South wall in Kitchen R-01) into disjoint segments (2.54 ft before column, column notch, and 31.15 ft after column). The solver only placed heads on the 31.15 ft piece, leaving the column location completely uncalculated.
+2. Even if a head was generated at the column location along the host wall, `IsPointInsideRoom` dropped it because the standoff coordinate fell inside the obstacle notch (outside the raw room polygon).
+3. The host-space guard `!IsPointInsideRoom` in `RevitSprinklerPlacementService` subsequently refused points conflicting with room-bounding obstacles when `IgnoreObstacles == true`, categorizing them as `OutsideRoomBoundary`.
+Consequently, sidewall sprinklers on obstacles were skipped whether "Ignore Obstacles" was checked or unchecked.
+
+### Decision
+1. In `BruteForceCalculationService.SelectSidewallDirectional`:
+   - Implement `BridgeObstacleNotches` to detect local polygon notches returning to a collinear wall baseline (within 3.5 ft depth and 15 ft span), bridging them to restore the continuous physical wall baseline for sidewall spacing calculations.
+   - Construct `bridgedGeometry` from the bridged polygon so point-in-room checks operate against the continuous room baseline.
+   - In candidate standoff filtering, retain candidate heads whose standoff falls within detected obstacle boxes along the wall so that heads are preserved as candidates and properly evaluated by `CheckSprinklerObstacleConflict` (`HasObstacleConflict = true`).
+   - In `BuildWallEdgeMask`, accumulate physical wall vs non-wall segment lengths to ensure an obstacle notch segment does not mark an entire physical wall as non-wall.
+2. In `RevitSprinklerPlacementService`:
+   - Relax `IsPointInsideRoom` coordinate-space refusal when `ignoreObstacles && point.HasObstacleConflict && point.WallEdgeIndex.HasValue`, allowing sidewall heads colliding with room-bounding obstacles to be placed unconditionally onto the host wall when the user checks "Ignore Obstacles".
+   - When "Ignore Obstacles" is unchecked, `!ignoreObstacles && point.HasObstacleConflict` reliably skips conflicting heads as expected.
+
+### Consequences
+- Strictly scoped to sidewall sprinklers only. Pendent sprinklers, smoke detectors, and notification appliances are completely untouched.
+- When "Ignore Obstacles" is checked: all calculated sidewall heads (including those on columns or casework along walls) are placed at pure calculated grid locations.
+- When "Ignore Obstacles" is unchecked: only colliding sidewall heads are skipped, and all other heads are placed.
+
+---
+
+## Decision 032 — Sidewall placement only uses real wall edges
+
+### Status
+Accepted
+
+### Context
+The sidewall solver had no guard against room boundaries that were not actual walls. In kitchens, studies, and similar rooms with room-separation lines or opening edges, sidewall head generation could use these virtual boundaries and produce candidates that had no valid wall host in Revit.
+
+### Decision
+1. `RoomExtractor` records `BoundarySegmentData.IsWall` based on the actual Revit element type for each boundary segment.
+2. `BruteForceCalculationService.SelectSidewallDirectional` filters polygon edges using that wall mask before calculating candidate rows.
+3. A non-wall boundary edge is skipped and logged as a diagnostic; it never becomes a valid sidewall wall-edge index.
+
+### Consequences
+- Sidewall heads only form along real wall boundaries.
+- Non-wall room separation/opening edges no longer create phantom placement points.
+- The change is limited to the sidewall placement path and does not alter ceiling-grid or detector logic.
+
+---
+
+## Decision 031 — Structural Obstacle Conflict Checks via NFPA 13 Chapter 20 Three-Times Rule
+
+### Status
+Accepted
+
+### Context
+When the user answered "No" to the obstacle placement prompt, candidate sprinklers clashing with obstacles were intended to be omitted. In Room 395769 (Kitchen R-01), a sprinkler placed at $(-1.91, 12.48)$ was situated only $0.48\text{ ft}$ from structural Column 460814. However, the conflict evaluation in `SelectCenteredGrid` and `SelectCenteredGridOnTiles` only checked `InsideExpandedBox(..., 0.0)` for structural members, completely omitting the NFPA 13 Chapter 20 Three-Times Rule clearance ($\min(3 \times \text{dimension}, 2.0\text{ ft})$). Consequently, the candidate point had `HasObstacleConflict = false` and was placed despite clicking "No".
+
+### Decision
+1. Implement a unified `CheckPointObstacleConflict` helper function in `BruteForceCalculationService.cs`.
+2. Evaluate both direct bounding box clashes and clearance zones:
+   - For non-structural obstacles (`!box.IsStructuralMember`), test expanded bounding box using `box.ClearanceFt`.
+   - For structural obstacles (`box.IsStructuralMember`), test the Chapter 20 Three-Times rule clearance ($3 \times \text{horizontal dimension}$, capped at 24 in / 2.0 ft).
+3. Apply `CheckPointObstacleConflict` across single-centroid, pure centered grid, and tile-centric grid calculation routines.
+
+### Consequences
+- Sprinklers positioned within the column's NFPA 13 obstruction exclusion zone are properly tagged with `HasObstacleConflict = true`.
+- Clicking "No" in the obstacle prompt reliably skips heads conflicting with structural columns/beams as well as non-structural MEP equipment.
+
+---
+
+## Decision 030 — Pure Grid Calculations & Continuous Baseline Synthesis for Sidewalls
+
+### Status
+Accepted
+
+### Context
+Previous obstacle recovery and snap logic shifted sprinklers away from target grid points, causing irregular spacing and uneven head distribution near obstacles. In addition, architectural indents/cutouts (such as column jogs along the North wall of Kitchen R-01) fragmented wall edges into short sub-segments, preventing opposing sidewall rows from balancing properly (resulting in 1 head on North and 4 on South).
+
+### Decision
+1. **No shifting/dodging around obstacles**: Candidate sprinkler coordinates are calculated on pure regular grid intervals and along pure wall baselines. Candidate points intersecting obstacles are flagged with `HasObstacleConflict = true` without moving or displacing them.
+2. **Confirmation popup semantics**:
+   - Clicking **Yes**: Places all candidate sprinklers at pure coordinates regardless of obstacles.
+   - Clicking **No**: Skips only the candidate points where `HasObstacleConflict == true`, while continuing to place all non-conflicting points on the same wall or grid row.
+3. **Continuous wall baseline synthesis**: `CleanPolygonLoop` synthesizes small architectural indents (&lt; 2.5 ft deep) along collinear baseline planes (`SimplifyArchitecturalCutouts`) so opposing sidewalls receive balanced rows (e.g. 4 on North, 4 on South).
+
+### Consequences
+- Sprinklers land precisely on pure design grid intervals.
+- Opposing sidewall rows remain balanced even with column indents along walls.
+- Engineers retain full control to place or skip conflicting heads via the confirmation dialog.
+
+---
+
+## Decision 029 — Wall Backing Validation for Sidewall Sprinkler Placement
+
+### Status
+Accepted
+
+### Context
+When calculating horizontal sidewall sprinkler layouts, `SelectSidewallDirectional` previously treated every segment of a room's outer polygon as a physical wall. In rooms with open boundaries, openings, or room separation lines (e.g. Kitchen open to Hallway), candidate heads were placed along the empty boundary, causing Revit placement errors (`Wall placement failed near edge X`).
+
+### Decision
+1. `BoundarySegmentData` captures the Revit element ID and an `IsWall` boolean flag.
+2. `RoomExtractor` verifies whether the boundary segment is an actual `Wall` element (`OST_Walls`).
+3. `SelectSidewallDirectional` skips edges that do not represent physical walls, preventing phantom head placement on open room boundaries.
+
+### Consequences
+- Sidewall sprinklers only place on real, hostable walls.
+- Prevents transaction failure and avoids leaving orphaned heads on open doorways or room separation boundaries.
+
+---
+
+## Decision 028 — Simplified Obstacle Handling & Placement Wizard
+
+### Status
+Accepted
+
+### Context
+In complex models, obstacle avoidance logic previously omitted or shifted sprinklers away from target grid coordinates, causing inconsistent spacing or missing heads. The requirement was to place sprinklers at direct target coordinates regardless of obstacles while maintaining obstacle extraction, identification, and reporting.
+
+### Decision
+1. Obstacles continue to be extracted from Revit and identified, with clashes tracked in diagnostics and per-point conflict flags (`HasObstacleConflict`).
+2. In calculation (`BruteForceCalculationService.cs`), candidate points are calculated at the intended grid locations without shifting or displacement; points conflicting with obstacles are flagged (`HasObstacleConflict = true`).
+3. Placement UI introduces a 2-step navigation workflow: Preliminary (selection & overrides) -> Final Review (table of selected rooms and settings with Previous/Apply/Cancel).
+4. Apply action prompts a confirmation popup (*"Place sprinklers at calculated locations regardless of detected obstacles?"*):
+   - **Yes**: Places all candidate sprinklers even if obstacles are present (`ignoreObstacles = true`).
+   - **No**: Skips points conflicting with obstacles, logging them as `PlacementStatusCodes.ObstacleConflict` while placing other non-conflicting points (`ignoreObstacles = false`).
+5. Existing sprinkler collision policy remains user-driven via dropdown.
+
+### Consequences
+- Sprinklers place deterministically at intended ceiling grid points.
+- Users receive clear diagnostics of obstacle intersections for manual engineering review.
+- UI fits compact laptops down to 820x500 without clipping.
+
+---
+
 ## Decision 001 — Extraction is fully separated from calculation, UI, and placement
 
 ### Status
@@ -980,3 +1174,425 @@ Three defects found together while wiring the smoke / notification placement leg
   what you cannot identify); the message path still reports the room's outcome.
 - `DeviceKindResolver` is now load-bearing (was dead code); its `Resolve()` fallback-to-smoke remains
   for diagnostics, `TryResolve` is the policy-safe entry point.
+
+---
+
+## Decision 022 — Sprinkler Obstacle Avoidance Recovery & Nearest-Point Relocation (2026-10-07)
+
+### Status
+Accepted & Implemented (static verified, 335 test checks green).
+
+### Context
+When a sprinkler placement candidate hit a physical obstacle (beam, column, duct, wall boundary), the engine previously attempted a tight snap (`captureRadius = max(stepX, stepY) / 2.0`). If no candidate was found within that tight radius, the target cell was silently skipped (`cellsSkipped++; continue;`). In complex room layouts with structural members or MEP obstructions, this silently dropped heads, leaving gaps in the array coverage. Additionally, `IsPlacementValid` was incomplete compared to `TryAcceptPoint`, missing NFPA 13 Ch.20 **Three Times Rule**, **Beam Rule** footprint rejection, and the **4 in wall clearance floor**.
+
+### Decision
+1. **Rule Alignment**:
+   - `IsPlacementValid` now evaluates the complete set of structural member rules (Three Times Rule for columns/joists, Beam Rule footprint rejection) and wall clearance constraints (minimum 4 in code floor).
+2. **Obstacle Avoidance Recovery Search**:
+   - When a physical obstacle (beam, column, duct, wall) blocks an ideal grid target and the initial tight `captureRadius` snap finds no candidate, the search expands up to `spacing / 2.0`.
+   - `spacing / 2.0` is the mathematical upper bound that preserves NFPA 13 spacing limits: displacing a head by at most $S/2$ keeps its gap to the adjacent array position at most $1.5S$, which is then caught and flagged by `FinalizeSelection`'s nearest-neighbour check.
+3. **Existing Sprinkler Disambiguation**:
+   - Target cells blocked by an **existing sprinkler** (`distance <= ExistingSprinklerSeparationFt`) are skipped without snapping, because the existing sprinkler already satisfies that grid position in the room. Relocating a head next to an existing sprinkler would over-concentrate heads and ruin the grid array.
+4. **Tile-Grid Obstacle Recovery**:
+   - For suspended tile ceilings, if none of the 8 immediate neighbour tiles is valid within `snapBudget`, the search expands across valid tile indices within `spacing / 2.0` of the array target (`extRange = max(tileStepU, tileStepV) + 1`).
+   - A distinct `placedObstacleRecovered` diagnostic counter tracks when expanded obstacle recovery fires vs normal 8-neighbour tile snaps.
+
+### Rationale
+- Eliminates silent head drops when grid positions hit physical obstructions.
+- Ensures NFPA 13 compliance across all candidate validation methods.
+- Prevents redundant head placements around existing sprinklers while ensuring genuine obstacle blockages are recovered.
+
+### Consequences
+- Sprinkler heads blocked by beams or columns are snapped to the nearest valid candidate point within $S/2$ instead of being dropped.
+- Grid pitch and array extent remain intact.
+- Diagnostics explicitly report `placedObstacleRecovered` counts.
+
+### Verification
+- Static verification: solution builds clean across **Revit2026**, **Revit2025**, and **Revit2024** (0 errors).
+- Console test harness: **all 16 test suites** (over 335 checks) pass green.
+
+
+## Catalog Source Discipline and Host Stability (2026-10-07)
+
+### Context
+The Model / Catalog-file source switch was feature-complete but had three defects found by reading
+the code and confirmed from `%APPDATA%\FireProtection\logs\`:
+
+1. Revit crashed on every launch with `SEHException 0x80004005` at `DeactivateActCtx`.
+2. The Browse button appeared in the wrong mode.
+3. Catalog-file mode leaked Revit model families into the dropdowns.
+
+### Decisions
+
+1. **A WPF `Application` must be created and statically pinned by the host.**
+   Revit is not a WPF host, so `Application.Current` is null and nothing keeps WPF's dispatcher alive
+   across the add-in's lifetime. `WpfHost` (FireProtection.UI/Services/WpfHost.cs) creates one with
+   `ShutdownMode.OnExplicitShutdown` and holds it in a static field. Two rules, both load-bearing:
+   pinning prevents the GC finalising the dispatcher; `OnExplicitShutdown` prevents closing the tool
+   window from shutting down the dispatcher Revit still uses. `Dispatcher.CurrentDispatcher` must NOT
+   be used as a fallback — on a thread with no dispatcher it CREATES one and attaches an activation
+   context to that thread, which is what produces `DeactivateActCtx` failures at thread exit.
+
+2. **A binding must never target a read-only property.**
+   `InvalidOperationException: A TwoWay or OneWayToSource binding cannot work on the read-only
+   property 'SourceMode'` was thrown inside `Window.Show()`, which aborted the command. Revit then ran
+   a finalizer thread that hit `Autodesk.Internal.Windows.SxSActivationContext.Finalize()` ->
+   `DeactivateActCtx()` -> `SEHException` and crashed the process. The binding error was the real
+   fault; the SEHException was Revit's crash *reporting*, with no user frames and an unevaluable
+   stack. `SourceMode` has a private setter by design (changes route through `TrySetSourceMode` so a
+   switch can be rejected and the catalog rebuilt), so the radio bindings are `Mode=OneWay` and the
+   `Checked` handler drives the viewmodel. Every other `TwoWay`/`OneWayToSource` binding in the
+   solution was swept for the same defect; none found.
+
+3. **Uncaught add-in exceptions must be logged at the source.**
+   `FireProtectionApplication.InstallCrashDiagnostics()` subscribes to
+   `AppDomain.CurrentDomain.UnhandledException`, and `WpfHost` attaches
+   `Dispatcher.UnhandledException` when it creates the Application. This is what located fault #2;
+   without it the only evidence was Revit's teardown stack. The dispatcher handler deliberately does
+   NOT set `e.Handled` — swallowing the exception is what hides the fault.
+
+4. **In Catalog-file mode the workbook is the only source of names. No fallback.**
+   When a catalog returned zero families, both tab ViewModels fell back to enumerating the live Revit
+   model. A workbook with no `SmokeDetectors` sheet therefore dumped every fire-alarm family in the
+   project into the smoke dropdown. The fallback is now gated on Model mode via
+   `CanFallBackToModelFamilies()`. Empty sheet and "no catalog at all" are distinct states with
+   distinct messages.
+
+5. **Catalog families are listed verbatim, even when not loadable.**
+   The user chose not to filter to the project intersection: filtering would silently contradict the
+   source the user picked. Instead the existing `MissingFamiliesModal` is the load affordance, and the
+   sprinkler tab's copy of it was wired to a dead button (it called the 2-arg `ShowDialog` overload
+   with no `loadFamily` callback, so "Load family..." returned immediately). Both tabs now report the
+   same `FamilyNotLoaded` status, and a per-row family/type change re-runs the eligibility preflight
+   so the condition surfaces at selection time rather than at place time.
+
+6. **Missing engineering data is stated per type, never silently defaulted.**
+   A Revit `FamilySymbol` has no dBA/Candela/DetectorType/Mount parameter, so in Model mode those
+   attributes are genuinely absent. The free-text fallback stays, and
+   `MissingCatalogDataMessage` names the gap. It stays null when the catalog DOES cover the type —
+   a warning that fires in both cases trains the user to ignore it.
+
+7. **All three tab ViewModels react to the same catalog properties.**
+   The sprinkler tab listened only to `Catalog`; the device tabs listened to
+   `IsLoaded`/`TotalRowCount`/`CatalogVersion`/`SourcePath`. A change that did not raise `Catalog`
+   refreshed one tab and left the other stale. Both now listen to the union, which includes
+   `IsCatalogFileMode` because it governs both the legal family source and the status wording.
+
+8. **Candela/dBA stay non-nullable `int`.** The planned nullable-reader refactor was dropped: `0` is
+   already the established sentinel for "no rating known" (`ICatalog.AvailableNotificationDbas`
+   documents "non-zero", and `DeriveAttribute` guards `Candela <= 0 && NotificationDba <= 0`), and a
+   0 cd / 0 dBA device is not physically real. The change would have rippled through the row models,
+   loader, service, both derived ViewModels and the validator for no accuracy gain.
+
+### Consequences
+- Revit no longer crashes on launch from the catalog source switch.
+- Catalog-file mode shows exactly the workbook's contents; an empty sheet reads as empty.
+- "Family not loaded" appears when a family is picked, not only when placement runs, and on both
+  sprinkler and device tabs.
+- Provisional engineering values are labelled per type instead of silently applied.
+
+### Verification
+- Static: solution builds clean across **Revit2024**, **Revit2025**, **Revit2026** (0 errors).
+- Console test harness: **17 suites** pass, including 5 new source-discipline and notification-contract
+  tests in `CatalogSourceModeTests`.
+- **Not runtime-verified.** The crash fix and the loading affordances need a live Revit session. Per
+  the project's runtime-distinction rule, a clean build is not evidence that Revit no longer crashes.
+## UI Freeze Root-Cause Work, Tier 1 (2026-10-07)
+
+### Context
+The tool and Revit both froze repeatedly ("hangs a lot"), reported on switching catalog source,
+typing in search boxes, and editing per-row grid cells.
+
+### Root cause: one thread, no coalescing, and repeated identical work
+
+`RevitApiContext.Run` (`RevitApiContext.cs:54`) ENQUEUES and calls `Raise()`; `Execute` (`:61-85`)
+drains the queue INLINE on Revit's main thread, which is also the WPF dispatcher thread. So work
+"queued to Revit" is still the UI thread, and the queue was never de-duplicated - N triggers meant N
+complete sweeps drained back to back.
+
+Each sweep was itself extremely expensive, and self-defeating:
+- `RefreshEligibilityCore` called `ClearEligibilityCache()` first, so the per-(room,family,type) cache
+  could never help across sweeps.
+- It then ran `CalculateBruteForce` for every room and probed every candidate point.
+- Per candidate point, `CeilingHostResolver.FindCeilingHost` ran `4 + 3L` WHOLE-DOCUMENT collectors
+  (`3` for Ceiling/Floor/RoofBase with `.ToElements()`, `1` for link instances, then `3` more per
+  linked model) to rebuild lists that are IDENTICAL for every candidate in a pass.
+
+### Self-inflicted regression, and its correction
+
+The previous session's "unify the catalog-change notification contract" fix made this materially
+worse: `SetCatalog` raises eight `PropertyChanged` events and `SourceMode` adds a ninth, and the new
+handler matched six of them, so ONE mode switch queued ~7 whole-model sweeps on the sprinkler tab
+(up from 1). Devices went 4 -> 7. Correctness fix, large performance regression, owned and reverted
+in shape below.
+
+### Decisions
+
+1. **Coalesce eligibility refreshes with a pending flag plus an input version.**
+   `RefreshEligibility` returns early when a sweep is already queued and bumps `_eligibilityInputsVersion`
+   in that branch. The version is bumped at the DECLINE point, not at each call site, so a future edit
+   cannot forget to record a change. The running sweep compares versions on exit and re-arms exactly
+   once. N triggers -> 1 sweep plus at most one follow-up.
+   The pending flag MUST also be cleared in both failure callbacks (`OnEligibilityRefreshFailed`, and
+   the inline `onError`); a latched flag would silently disable eligibility refresh for the rest of the
+   session, which is worse than the freeze. Pinned by a test.
+
+2. **Compare the actual catalog instance and mode instead of trimming the property filter.**
+   The handler keeps its wide property filter and adds `_lastHandledCatalog` / `_lastHandledCatalogFileMode`
+   / `_hasHandledCatalog`, returning early when neither changed. This stays correct if `SetCatalog` gains
+   another property later, which a hand-maintained whitelist would not.
+
+3. **Hoist the host element list out of the per-candidate loop.**
+   `CeilingHostResolver` now caches Ceiling/Floor/RoofBase and `RevitLinkInstance` lists per
+   `Document`, bracketed by `BeginPass()` / `EndPass()`. Bracketed deliberately: within a pass the
+   document is only READ, so cached `Element` references stay valid, and the cache can never survive a
+   document modification. Geometry is NOT cached - only the collection is - because materialising
+   geometry per candidate would be a far larger memory risk than the collector cost it replaces. The
+   cheap bounding-box reject at `:91-93` still runs per candidate.
+   Exposed through `ISprinklerPlacementService.BeginHostResolutionPass/EndHostResolutionPass` and
+   bracketed around BOTH the eligibility sweep and the placement run.
+
+4. **Stop clearing the eligibility cache unconditionally.**
+   The cache key already covers room identity, level name, hazard class, family and type, so those
+   inputs miss the cache naturally. Invalidation moved to the two places that genuinely change the
+   document: after `TryLoadFamily` succeeds (the missing-families modal callback and
+   `MainWindowViewModel.LoadFamiliesCore`).
+   **Known remaining gap, deliberately not papered over:** a linked-model edit or an in-place ceiling
+   move is invisible to the cache key and can serve stale results. The proper fix is a subscription to
+   Revit's `DocumentChanged` event; it is left open rather than faked.
+
+5. **Measure instead of guessing.**
+   `FireProtectionLog` now records, per sweep: elapsed milliseconds, room count, selected family, and
+   document collectors avoided by the host cache. This is what turns "it hangs" into a number.
+
+### Consequences
+- One gesture queues one sweep instead of N; one mode switch rebuilds once instead of ~7 times.
+- The per-candidate document sweep becomes ~3 collectors per pass instead of `4 + 3L` per candidate.
+- Repeat sweeps can hit the eligibility cache instead of always starting cold.
+
+### Verification
+- Static: builds clean on **Revit2024**, **Revit2025**, **Revit2026**.
+- Console harness: **18 suites** pass (was 17). New `EligibilityCoalescingTests` asserts the
+  contracts, not timings: 8 triggers queue 1 sweep; a coalesced trigger schedules exactly one follow-up;
+  a failed sweep does not latch the coalescer; every sweep brackets a balanced host pass even when it
+  throws; one mode switch queues exactly 1 sweep.
+- **Still not runtime-verified.** No Revit here, so the actual speed-up is unmeasured. The new log line
+  is the instrument for that: run Revit, exercise the three reported interactions, and read
+  `%APPDATA%\FireProtection\logs\`.
+
+### Deliberately deferred (Tier 2+), with the reason
+- Per-keystroke `RoomsView.Refresh()` plus up to 11 O(n) notifications in the search boxes and the five
+  override cells. Coalescing helps the preflight path; the local filter/count work still runs per
+  keystroke. A 250 ms debounce was approved by the user but is Tier 3.
+- `FilteredElementCollector` on the raw WPF thread via `CatalogBar.SourceRadio_Checked` /
+  `ReloadButton_Click` -> `BuildModelCatalog` -> `ModelFamilyEnumerator.LoadInto`. Both a full-project
+  `FamilySymbol` sweep on the UI thread and a Revit API-context violation. Not fixed by Tier 1.
+- O(n^2) count getters (`RoomsFoundText` = 4 scans, `RoomsSelectedSummary` = 4 scans,
+  `BulkTargetCount`/`BulkTargetSummary`/`CanBulkEdit` = 4 executions of one `Where`, amplified by
+  `CommandManager.RequerySuggested`).
+- Modal `ShowDialog` raised from inside a Revit API context (`MissingFamiliesModal`,
+  `PlacementResultReportWindow`) blocks Revit's main thread until answered; Cancel is dead meanwhile.
+- Backend O(n^2) extraction in `FireProtectionExtractionService` on every ribbon click.
+## Tile-Centric Ceiling Placement (2026-10-08)
+
+### Context
+Devices that take a ceiling as host (pendant and hosted sprinklers, smoke detectors, notification
+appliances) were not landing on the centre of a ceiling tile. The reference implementation supplied
+for comparison (GriddedCeilingPlacer / CeilingGridAnalyzer / CeilingGridViewExport) solves this on the
+grid with X-2X-X.
+
+### What already existed here, and what was actually wrong
+The tile machinery was NOT missing. `CeilingGridMath` (lattice, world<->tile, tile-centre enumeration)
+and `BruteForceCalculationService.SelectCenteredGridOnTiles` already targeted tile centres. Four real
+defects were found:
+
+1. **Grid detection had one source.** `CeilingExtractor` read the grid only from the ceiling type's
+   material MODEL fill pattern. With no such pattern, `HasReadableGrid` was false and the room silently
+   fell back to a free centred array with no tile snapping at all. The reference reads the grid from
+   three independent sources.
+2. **The lattice PHASE could be a guess, and looked exact.** `TryReadGridFromPattern` returned true even
+   when the pattern origin could not be mapped and the code fell back to the face/bbox centre. A phase
+   error of half a tile puts every device on a tile CORNER while still reporting a valid grid.
+3. **No orthogonality check.** Only `FillGrid[0]` and `[1]` were read and their second angle was silently
+   DISCARDED, although `CeilingGridMath` assumes v-hat is u-hat rotated by exactly 90 degrees. A
+   non-perpendicular pair produced a lattice that was not the pattern.
+4. **The layout was anchored, not solved.** The array started at the first tile of the room and appended
+   the far index when the stride missed it. 20 ft room, 2 ft tiles, 15 ft spacing -> stride 7 tiles ->
+   tiles 0, 7, 9 -> wall gaps 1 ft, 14 ft, 4 ft. Also, the device tabs fed every tile centre to a greedy
+   selector with no pitch quantisation or wall-gap rule at all.
+
+### Decisions
+
+1. **`Ceiling.GetCeilingGridLines` is the preferred grid source, via reflection.** Resolved once into a
+   `MethodInfo`, so one codebase compiles for Revit 2024/2025/2026 and only 2025.3+ uses it; older
+   versions fall through to the material pattern. Lines are grouped into two families by direction
+   (mod PI), required to be near-perpendicular, the module is the median gap between each family's
+   offsets, and the origin is the literal intersection of two real lines - so the phase is EXACT and
+   cannot be half a tile out. The material pattern and type-name paths are kept as fallbacks.
+   The custom-exporter view-export path from the reference was deliberately NOT ported (see below).
+
+2. **Origin confidence is recorded and reported, not assumed.**
+   `CeilingData.GridOriginSource` is one of `ExactGridLines`, `MaterialPatternMapped`,
+   `ProvisionalGeometry`, `TypeName`, `None`, surfaced as `HasExactGridPhase` and on `CeilingGrid`.
+   Extraction emits a WARNING (not just Info) for a provisional phase and tells the user how to fix it.
+   This is what makes "is my device on a tile centre?" a question with an answer in the run report.
+
+3. **A pattern's angles must be perpendicular or it is rejected.** `OrthogonalityToleranceRad` is
+   ~5.7 degrees, applied to the material-pattern reader. Loose enough for a hand-drawn pattern, tight
+   enough that a hatch cannot be mistaken for a square/rectangular tile module.
+
+4. **Tile layout is SOLVED on the grid, not anchored and not snapped.**
+   `TileCentricPatternGenerator` is pure math, no Revit API, in the same Revit-free style as
+   `CeilingGridMath`. Per direction it uses ONE whole-tile pitch for every gap and chooses the START
+   TILE so the two wall gaps mirror each other and sit closest to half the pitch. Independent rounding
+   of ideal X-2X-X points is deliberately NOT used: the ideal pitch is rarely a whole number of tiles
+   (7 rows in a 12.6-tile room is 1.8 tiles), so rounding each point separately sends some gaps up and
+   others down.
+   Both wall-gap tests must pass - symmetry (the two Xs are equal) AND proportion (their average is half
+   the pitch). Testing only the proportion lets a layout whose gaps merely average out correctly pass,
+   which is not X-2X-X on both walls.
+
+5. **The caller's pitch is a MAXIMUM, not a fixed value.** This was the non-obvious part. X-2X-X forces
+   the room length to be about `count x pitch`, and a pitch floored to "largest whole tile count within
+   max spacing" often cannot satisfy that - a 14 ft pitch in a 20 ft room can only ever give 3 ft gaps
+   against an X of 7 ft. The solver therefore searches pitches DOWN from the caller's maximum and keeps
+   the largest that genuinely achieves X-2X-X. For the 20 ft / 2 ft tile / 15 ft spacing case it steps to
+   a 10 ft pitch and 2 columns with 5 ft gaps, replacing the 1/14/4 ft result.
+   A single device is only a candidate in a room narrower than two tiles, otherwise a large pitch would
+   "win" trivially by placing one lonely column in a 20 ft room.
+
+6. **The generator PROPOSES; the rule engine DISPOSES.** `TileCentricPatternGenerator` knows nothing
+   about NFPA rules - not min/max spacing, obstruction clearance, deflector distance or coverage area.
+   Its output is a candidate pattern that still passes through each engine's existing `TryAccept`,
+   bounded snap, min-spacing and `FinalizeSelection` pairwise checks. The reference is a lighting tool
+   whose counts come from an FC calculation, so its output could be final; in this tool counts and
+   spacing come from code rules, so it must not be. This is the single most important reason the port is
+   not a drop-in.
+
+7. **Existing per-engine behaviour is preserved as a fallback.** The sprinkler path falls back to the
+   old anchor-and-append if no balanced start exists; both device paths fall back to enumerating every
+   tile centre if the balanced pattern accepts nothing. Nothing regresses to "no candidates".
+
+8. **`SnapPositionsToTiles` is a safety net, not a decision.** When no balanced layout can be solved, it
+   moves existing positions to the nearest free tile block, never lets two devices share a tile, and
+   NEVER drops a device - dropping one would silently reduce protection.
+
+9. **`CeilingGrid` was made public.** It is nested in `CeilingGridMath`, so the generator needs an alias
+   to use it unqualified. Moving the type would have churned every existing reference in both engines.
+
+### Deliberately not done
+- **No view-export fallback.** The reference's `CeilingGridViewExport` (CustomExporter +
+  IExportContext2D, with its own frame-verification logic) was left out by decision: 2025.3+ uses
+  `GetCeilingGridLines` and older versions keep the material-pattern and type-name fallbacks plus the
+  per-room manual tile-size override. If 2024/2025.0-2025.2 detection proves inadequate on real models,
+  this is the next piece to port.
+- **Rotation of the placed family is unchanged.** `FaceBasedPlacementStrategy` derives rotation from the
+  FACE NORMAL, not `GridAngleRad`. Devices land on correct tile centres of a rotated grid but are not
+  rotated to match it. Mostly cosmetic for pendent/hosted sprinklers, real for rectilinear devices.
+  Raised with the user and deferred.
+- **Multi-ceiling rooms still use one lattice per room.** `SelectPrimaryCeiling` picks a single ceiling,
+  so a room served by two ceilings at different phase has no per-region grid.
+- **The smoke and sprinkler engines rank ceilings differently** (`SelectPrimaryCeiling` slope priority
+  lists differ), so they can disagree on which ceiling defines the grid.
+
+### Verification
+- Static: builds clean on **Revit2024**, **Revit2025**, **Revit2026**.
+- Console harness: **19 suites** pass. New `TileCentricPatternTests` pins the invariants:
+  every emitted position is an exact tile centre (worst deviation 0.000E+000 ft on both an axis-aligned
+  and a 30-degree lattice); X-2X-X gaps within tolerance; pitch is a whole tile count; the count is
+  never below required (checked for 1..12); no two devices share a tile; an irregular footprint keeps a
+  single pitch; the balanced solver beats the anchored layout on the worked example; the safety net
+  preserves count and never stacks devices.
+- **Not runtime-verified.** Tile CENTRES are provably on the lattice by static proof of the maths, but
+  whether Revit's real ceiling grid is detected, and whether the phase is exact on a real model, can
+  only be confirmed in Revit. The new `CeilingGrid` extraction diagnostic is the instrument for that.
+## NFPA 13 & Industry-Preferred Sidewall Sprinkler Distribution
+
+### Context
+In sidewall sprinkler candidate generation along wall edges (SelectSidewallDirectional), candidate spacing previously forced the two end sprinklers to sit at endWallMax ({max} / 2$) from the wall corners and divided the remaining span between them. For walls where the remaining span was shorter than or close to {max}$, this left an oversized dead zone in the center of the wall (e.g. .14\\text{ ft}$ between two heads on a .61\\text{ ft}$ wall with .735\\text{ ft}$ corner offsets). When a column bump or obstacle sat near the center of the wall, the two heads naturally fell to its left and right; when the obstacle was removed, the heads remained locked at {max} / 2$ from the corners, creating the false appearance of residual obstacle-avoidance logic.
+
+### Decision
+Replaced the corner-anchored formula with the NFPA 13 & Industry-Preferred symmetrical centered distribution:
+1. Primary Authority (NFPA 13 Chapter 19 & Table 19-2):
+   -  \\le S_{max}$ along the wall.
+   -  \\le S_{max} / 2$ to end walls / corners.
+   -  \\ge 4\\text{ inches}$ (.333\\text{ ft}$) minimum distance to corners (NFPA 13 §10.3.4.2).
+   -  \\ge 6.0\\text{ ft}$ minimum spacing between sprinklers (NFPA 13 §10.3.3.4).
+2. Secondary Priority (Industry-Preferred Practice):
+   - Wall length $ is divided into  = \\max(1, \\lceil W / S_{max} \\rceil)$ equal coverage bays.
+   - Sprinklers sit in the center of each bay: step  = W / N$, corner offsets  = S / 2 = W / (2N)$.
+   - Corner offsets are symmetrical ({start} == E_{end}$).
+   - No artificial voids in the center, and no obstacle dodging or shifting of candidate points.
+   - Direct obstacle collisions continue to be flagged per head (HasObstacleConflict) and skipped only when IgnoreObstacles is false.
+
+### Verification
+- SidewallPlacementTests.TestSidewallBalancedWallDistribution verifies that a .61\\text{ ft}$ wall receives exactly 2 heads with symmetrical .40\\text{ ft}$ end clearances and uniform .81\\text{ ft}$ spacing.
+- All 19 test suites pass. Clean builds across Revit2025 and Revit2026.
+
+
+---
+
+## Decision 034 — NFPA 72 Chapter 18 Notification Appliance Engine & Streamlined UI
+
+### Status
+Implemented (static), unit tests passing, runtime verification pending.
+
+### Context
+Notification Appliances previously shared `Nfpa72SmokeDetectorEngine`, which computes layouts according to NFPA 72 Chapter 17 initiating device rules (continuous 30 ft smooth-ceiling grid, 21.2 ft detection radius, ceiling drops).
+However:
+1. Smoke Detectors (Chapter 17) and Notification Appliances (Chapter 18) have fundamentally different purposes, physics, and layout standards:
+   - Smoke detectors are initiating/sensing devices placed on continuous ceiling lattices to sample smoke particles.
+   - Notification appliances are output/warning appliances governed by compartmentation/room-level alerting: Table 18.5.5.4.1(a) (visual strobe candela per room area), §18.4 (audible dBA loudness and attenuation), and §18.5.5.5 (corridor spacing).
+2. The UI in `NotificationApplianceView.xaml` previously showed redundant top dropdowns (`Appliance Type`, `Candela`, `Notification dBA`) that Smoke Detectors did not have, which cluttered the interface and conflicted with the clean, full-height `DevicePlacementView` used across the rest of the application.
+
+### Decision
+1. **UI Streamlined (`NotificationApplianceView.xaml`)**:
+   - Removed the top `Border` with `Appliance Type`, `Candela`, and `Notification dBA` pickers.
+   - Embeds `<vDevices:DevicePlacementView />` directly, achieving visual and interaction parity with `SmokeDetectorView.xaml`.
+2. **Dedicated Placement Engine (`Nfpa72NotificationApplianceEngine.cs`)**:
+   - Implemented pure, Revit-free NFPA 72 Chapter 18 calculation engine.
+   - **Corridors** (aspect ratio >= 2.5:1, width <= 20 ft): Spaced along the corridor at <= 100 ft intervals with <= 15 ft end offsets (NFPA 72 §18.5.5.5).
+   - **Standard Rooms** (<= 30 ft x 30 ft or <= 900 sq ft): Places exactly 1 appliance per compartment rule.
+     - **Wall-Mounted**: Placed at the midpoint of the primary (longest) physical wall edge, inward standoff 0.5 ft, at 90 inches AFF (7.5 ft above finished floor, within NFPA 72's required 80 - 96 in window). Bridges obstacle notches so the edge index correctly maps to `WallSidewallPlacementStrategy`.
+     - **Ceiling-Mounted**: Placed at room geometric centroid at ceiling elevation (Z = LevelElevation + CeilingHeight).
+   - **Large Rooms** (> 900 sq ft): Distributes appliances across 30 ft x 30 ft bays.
+   - **Non-destructive Obstacle Detection**: Evaluates obstacle intersections in 3D and sets `HasObstacleConflict = true` without mutating candidate geometry.
+3. **Executor Integration (`RevitNotificationAppliancePlacementExecutor.cs`)**:
+   - Delegates calculation directly to `Nfpa72NotificationApplianceEngine.Calculate`.
+
+### Verification
+- `NotificationApplianceRulesTests` expanded with tests for standard room single-appliance placement (wall & ceiling), corridor spacing (S <= 100 ft, E <= 15 ft), wall mounting height (Z = 7.5 ft AFF), and obstacle conflict detection.
+- All 19 test suites pass.
+- Clean compilation for both `Revit2025` and `Revit2026`.
+
+
+---
+
+## Decision 035 — Large Model UI Launch Optimization & Freeze Prevention
+
+### Status
+Implemented (static), unit tests passing, runtime verification pending.
+
+### Context
+In large multi-story Revit models with hundreds of rooms and tens of thousands of MEP/structural elements, launching the Fire Protection System window took 30–60+ seconds and caused Revit and the UI to freeze.
+Root causes:
+1. `FireProtectionCommand.Execute` ran synchronous whole-model extraction including all walls, columns, structural framing, ducts, pipes, and cable trays across host and all linked models upfront.
+2. `AssociateObstaclesToRooms` ran a nested $O(\text{Rooms} \times \text{Obstacles})$ loop checking 3D overlaps across 50,000+ elements.
+3. Serializing and deserializing the massive obstacle payload via JSON on the main UI thread caused heavy memory churn and delays.
+4. On startup, `RefreshEligibility` calculated brute force sprinkler layouts and probed Revit face hosts for every room in the entire building simultaneously, even for unselected floors.
+
+### Decision
+1. **Lightweight Startup Extraction**:
+   - `FireProtectionExtractionService.ExtractLightweightSnapshot` extracts only levels, ceilings, rooms, and existing sprinklers (everything needed to render the UI table) in < 1 second.
+   - Heavy obstacle extraction is deferred to a cached lazy provider `lazyObstacles = Func<IReadOnlyList<ObstacleData>>`.
+2. **Just-In-Time (JIT) Obstacle Extraction**:
+   - Obstacles are extracted on-demand only when placement calculation runs during review or placement.
+   - `AssociateObstaclesToRooms` uses vertical Z-screening and $O(1)$ `HashSet` lookups, accelerating room-obstacle association while preserving 100% identical outputs.
+   - Internal NFPA 13 and NFPA 72 calculation logic, obstacle clash detection, and placement algorithms remain completely untouched.
+3. **Selected-Levels Scoped Preflight**:
+   - `SprinklerBruteForceViewModel.RunEligibilityPass` and `DevicePlacementViewModelBase.RunEligibilityPass` evaluate rooms on the user's currently selected levels first.
+   - When the user selects a new level, `OnLevelSelectionChanged` refreshes eligibility via the existing coalesced queue.
+
+### Verification
+- All 19 unit test suites pass.
+- Clean build for both `Revit2025` and `Revit2026`.

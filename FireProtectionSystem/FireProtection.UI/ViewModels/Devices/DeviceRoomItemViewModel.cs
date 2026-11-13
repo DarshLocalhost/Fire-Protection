@@ -272,6 +272,13 @@ namespace FireProtection.UI.ViewModels.Devices
         public string ApplianceTypeOverride { get { return GetEffective("ApplianceType"); } set { SetOverride("ApplianceType", value); } }
         public string CandelaDbaOverride { get { return GetEffective("CandelaDba"); } set { SetOverride("CandelaDba", value); } }
 
+        // S->W (maximum device-to-wall distance, feet) and the acoustic-tile fallback size (U x V, feet).
+        // All three are typed as text like the other device overrides; the base ViewModel parses them to
+        // double? when building the DeviceRoomInputItem. Blank = use the readable Revit grid / rule default.
+        public string MaxDistanceToWallOverride { get { return GetEffective("MaxDistanceToWall"); } set { SetOverride("MaxDistanceToWall", value); } }
+        public string TileUOverride { get { return GetEffective("TileU"); } set { SetOverride("TileU", value); } }
+        public string TileVOverride { get { return GetEffective("TileV"); } set { SetOverride("TileV", value); } }
+
         // -----------------------------------------------------------------------------------
         // Per-row device family / type (Decision 019, row scope).
         // The tab's top-level Family/Type selection is the default; a row may override it.

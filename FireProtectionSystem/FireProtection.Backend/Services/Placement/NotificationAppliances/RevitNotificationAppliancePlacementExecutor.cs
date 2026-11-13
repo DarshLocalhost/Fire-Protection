@@ -2,6 +2,7 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 using Autodesk.Revit.DB;
+using FireProtection.Backend.Models.DTOs;
 using FireProtection.Backend.Services.Placement.Devices;
 using FireProtection.Backend.Services.Placement.NotificationAppliances.Final.BruteForce;
 using FireProtection.Backend.Services.Placement.SmokeDetectors.Final.BruteForce;
@@ -23,7 +24,10 @@ namespace FireProtection.Backend.Services.Placement.NotificationAppliances
 
         /// <param name="catalogAccessor">Accepted for construction parity with the other device executors;
         /// the provisional notification rules do not read the catalog, so it is unused today.</param>
-        public RevitNotificationAppliancePlacementExecutor(Document document, Func<ICatalog> catalogAccessor = null)
+        public RevitNotificationAppliancePlacementExecutor(
+            Document document,
+            Func<ICatalog> catalogAccessor = null,
+            Func<IReadOnlyList<ObstacleData>> obstaclesAccessor = null)
         {
             if (document == null) throw new ArgumentNullException(nameof(document));
 
@@ -32,20 +36,26 @@ namespace FireProtection.Backend.Services.Placement.NotificationAppliances
                 document,
                 "notification appliance",
                 "Fire Protection: Place Notification Appliances",
-                items => SmokeDetectorCalculationService.Calculate(
-                    NotificationAppliancePlacementInputBuilder.BuildSnapshot(
-                        items.ToList(),
-                        familySource),
-                    new Nfpa72NotificationApplianceRules(),
-                    BruteForceCalculationConfig.Default()));
+                items =>
+                {
+                    IReadOnlyList<ObstacleData> obs = obstaclesAccessor != null ? obstaclesAccessor() : null;
+                    return Nfpa72NotificationApplianceEngine.Calculate(
+                        NotificationAppliancePlacementInputBuilder.BuildSnapshot(
+                            items.ToList(),
+                            familySource,
+                            obs),
+                        new Nfpa72NotificationApplianceRules(),
+                        BruteForceCalculationConfig.Default());
+                });
         }
 
         public PlacementRunReport ExecutePlacement(
             IReadOnlyList<DeviceRoomInputItem> items,
             IPlacementProgress progress = null,
-            ExistingDevicePolicy existingDevicePolicy = ExistingDevicePolicy.SkipRoom)
+            ExistingDevicePolicy existingDevicePolicy = ExistingDevicePolicy.SkipRoom,
+            bool ignoreObstacles = true)
         {
-            return _core.ExecutePlacement(items, progress, existingDevicePolicy);
+            return _core.ExecutePlacement(items, progress, existingDevicePolicy, ignoreObstacles);
         }
 
         /// <inheritdoc />

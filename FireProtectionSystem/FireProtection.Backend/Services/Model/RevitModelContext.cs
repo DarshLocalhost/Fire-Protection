@@ -29,27 +29,57 @@ namespace FireProtection.Backend.Services.Model
 
         private void DiscoverLinks()
         {
-            FilteredElementCollector linkCollector = new FilteredElementCollector(HostDocument)
-                .OfClass(typeof(RevitLinkInstance));
+            DiscoverLinksInDocument(HostDocument, Transform.Identity, false, new HashSet<string>());
+        }
 
-            foreach (Element element in linkCollector)
+        private void DiscoverLinksInDocument(
+            Document document,
+            Transform parentTransform,
+            bool isNested,
+            HashSet<string> visitedDocuments)
+        {
+            if (document == null) return;
+
+            string documentKey = document.PathName;
+            if (string.IsNullOrWhiteSpace(documentKey)) documentKey = document.Title;
+            if (string.IsNullOrWhiteSpace(documentKey)) documentKey = document.GetHashCode().ToString();
+            if (!visitedDocuments.Add(documentKey)) return;
+
+            try
             {
-                if (element is RevitLinkInstance linkInstance)
+                FilteredElementCollector linkCollector = new FilteredElementCollector(document)
+                    .OfClass(typeof(RevitLinkInstance));
+
+                foreach (Element element in linkCollector)
                 {
-                    RevitLinkContext context = new RevitLinkContext(linkInstance);
-                    Links.Add(context);
+                    if (!(element is RevitLinkInstance linkInstance)) continue;
 
-                    if (context.IsLoaded)
+                    RevitLinkContext context;
+                    try
                     {
-                        LoadedLinks.Add(context);
-
-                        // Check if link contains rooms or architectural elements
-                        if (HasRooms(context.LinkedDocument))
-                        {
-                            ArchitecturalLinks.Add(context);
-                        }
+                        context = new RevitLinkContext(linkInstance, parentTransform, isNested);
                     }
+                    catch
+                    {
+                        continue;
+                    }
+
+                    Links.Add(context);
+                    if (!context.IsLoaded) continue;
+
+                    LoadedLinks.Add(context);
+                    if (HasRooms(context.LinkedDocument)) ArchitecturalLinks.Add(context);
+
+                    DiscoverLinksInDocument(
+                        context.LinkedDocument,
+                        context.TotalTransform ?? context.Transform,
+                        true,
+                        visitedDocuments);
                 }
+            }
+            finally
+            {
+                visitedDocuments.Remove(documentKey);
             }
         }
 

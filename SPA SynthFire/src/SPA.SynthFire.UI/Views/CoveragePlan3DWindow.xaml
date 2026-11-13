@@ -1,0 +1,100 @@
+﻿<Window x:Class="SPA.SynthFire.UI.Views.CoveragePlan3DWindow"
+        xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        Title="SPA SynthFire — Coverage Plan (3D)" Height="720" Width="1120"
+        Background="#1B1F24" WindowStartupLocation="CenterOwner">
+    <Window.Resources>
+        <SolidColorBrush x:Key="Ink" Color="#E6E9ED"/>
+        <SolidColorBrush x:Key="Sub" Color="#9AA3AD"/>
+        <Style TargetType="TextBlock">
+            <Setter Property="Foreground" Value="{StaticResource Ink}"/>
+            <Setter Property="FontFamily" Value="Segoe UI"/>
+        </Style>
+        <Style x:Key="SectionCaption" TargetType="TextBlock">
+            <Setter Property="FontSize" Value="11"/>
+            <Setter Property="FontWeight" Value="Bold"/>
+            <Setter Property="Foreground" Value="{StaticResource Sub}"/>
+            <Setter Property="Margin" Value="0,0,0,8"/>
+        </Style>
+        <Style x:Key="DataRow" TargetType="TextBlock">
+            <Setter Property="Foreground" Value="MediumAquamarine"/>
+            <Setter Property="Margin" Value="0,0,0,4"/>
+        </Style>
+        <Style x:Key="LegendLabel" TargetType="TextBlock">
+            <Setter Property="Margin" Value="10,0,0,0"/>
+            <Setter Property="Foreground" Value="White"/>
+            <Setter Property="VerticalAlignment" Value="Center"/>
+        </Style>
+    </Window.Resources>
+
+    <Grid>
+        <Grid.ColumnDefinitions>
+            <ColumnDefinition Width="260"/>
+            <ColumnDefinition Width="*"/>
+        </Grid.ColumnDefinitions>
+
+        <!-- Left info panel -->
+        <Border Grid.Column="0" Background="#22272E" Padding="18">
+            <StackPanel>
+                <TextBlock Text="LEVEL" Style="{StaticResource SectionCaption}"/>
+                <ComboBox x:Name="LevelSelector" DisplayMemberPath="LevelName" Margin="0,0,0,14"/>
+                <TextBlock x:Name="LevelNameText" Text="—" FontSize="18" FontWeight="SemiBold" Margin="0,0,0,12"/>
+                <TextBlock x:Name="TotalDevicesText" Text="Total devices: —" Style="{StaticResource DataRow}"/>
+                <TextBlock x:Name="TotalNonCompText" Text="Non-compliances: —" Margin="0,0,0,4"/>
+
+                <TextBlock Text="SELECTED ROOM" Style="{StaticResource SectionCaption}" Margin="0,22,0,8"/>
+                <TextBlock x:Name="SelName" Text="(orbit to explore)" FontSize="15" FontWeight="SemiBold" Margin="0,0,0,10"/>
+                <TextBlock x:Name="SelArea" Text="Floor area: —" Style="{StaticResource DataRow}"/>
+                <TextBlock x:Name="SelDevices" Text="Devices: —" Style="{StaticResource DataRow}"/>
+                <TextBlock x:Name="SelCoverage" Text="Coverage: —" Style="{StaticResource DataRow}"/>
+                <TextBlock x:Name="SelNonComp" Text="Non-compliances: —" Style="{StaticResource DataRow}"/>
+
+                <TextBlock Text="LEGEND" Style="{StaticResource SectionCaption}" Margin="0,22,0,8"/>
+                <StackPanel Orientation="Horizontal" Margin="0,0,0,6">
+                    <Rectangle Width="16" Height="16" RadiusX="3" RadiusY="3" Fill="#805AC850"/>
+                    <TextBlock Text="Covered (1 device)" Style="{StaticResource LegendLabel}"/>
+                </StackPanel>
+                <StackPanel Orientation="Horizontal" Margin="0,0,0,6">
+                    <Rectangle Width="16" Height="16" RadiusX="3" RadiusY="3" Fill="#CC46AA50"/>
+                    <TextBlock Text="Overlap (2+ devices)" Style="{StaticResource LegendLabel}"/>
+                </StackPanel>
+                <StackPanel Orientation="Horizontal" Margin="0,0,0,6">
+                    <Rectangle Width="16" Height="16" RadiusX="3" RadiusY="3" Fill="#5FDC3737"/>
+                    <TextBlock Text="Uncovered gap" Style="{StaticResource LegendLabel}"/>
+                </StackPanel>
+                <StackPanel Orientation="Horizontal" Margin="0,0,0,6">
+                    <Rectangle Width="16" Height="16" RadiusX="3" RadiusY="3" Fill="#96969696"/>
+                    <TextBlock Text="Obstructed floor" Style="{StaticResource LegendLabel}"/>
+                </StackPanel>
+
+                <TextBlock Text="3D VIEW — read-only. Use the 2D plan to place/edit devices."
+                           TextWrapping="Wrap" FontSize="11" Foreground="#C8A24B" Margin="0,20,0,0"/>
+            </StackPanel>
+        </Border>
+
+        <!-- 3D viewport + toolbar -->
+        <Grid Grid.Column="1">
+            <Grid.RowDefinitions>
+                <RowDefinition Height="*"/>
+                <RowDefinition Height="Auto"/>
+            </Grid.RowDefinitions>
+
+            <!-- Viewport container host populated in code-behind -->
+            <Grid x:Name="ViewportHost" Grid.Row="0"/>
+
+            <Border Grid.Row="1" Background="#22272E" Padding="12,10">
+                <Grid>
+                    <StackPanel Orientation="Horizontal" HorizontalAlignment="Left" VerticalAlignment="Center">
+                        <Button x:Name="ResetCamBtn" Content="Reset Camera" Width="110" Height="28"/>
+                        <CheckBox x:Name="VolumesCheck" Content="Show coverage volumes"
+                                  Foreground="{StaticResource Sub}" VerticalAlignment="Center" Margin="18,0,0,0"/>
+                        <TextBlock Text="orbit = left-drag · zoom = scroll · pan = right-drag"
+                                   Foreground="{StaticResource Sub}" VerticalAlignment="Center" Margin="18,0,0,0"/>
+                    </StackPanel>
+                    <Button x:Name="CloseBtn" Content="Close" Width="90" Height="28"
+                            HorizontalAlignment="Right" VerticalAlignment="Center"/>
+                </Grid>
+            </Border>
+        </Grid>
+    </Grid>
+</Window>

@@ -10,6 +10,7 @@
     <BooleanToVisibilityConverter x:Key="BoolToVis"/>
     <conv:InverseBoolConverter x:Key="InverseBoolConverter"/>
     <conv:InverseBoolToVisibilityConverter x:Key="InverseBoolToVis"/>
+    <conv:StringToVisibilityConverter x:Key="StringToVis"/>
 
     <!-- ================= TYPOGRAPHY ================= -->
     <!-- Technical drawing voice: mono for data, Segoe UI for chrome -->
@@ -38,6 +39,13 @@
     <Style x:Key="DataMuted" TargetType="TextBlock">
         <Setter Property="FontFamily" Value="{StaticResource DataFontFamily}"/>
         <Setter Property="Foreground" Value="{StaticResource TextSecondaryBrush}"/>
+    </Style>
+
+    <!-- Explanatory text that the user must act on (missing catalog rows, families not loaded in the
+         model). Uses the UI face, not the mono data face: it is guidance, not data. -->
+    <Style x:Key="WarningText" TargetType="TextBlock">
+        <Setter Property="Foreground" Value="{StaticResource WarningBrush}"/>
+        <Setter Property="TextWrapping" Value="Wrap"/>
     </Style>
 
     <!-- ================= TEXT INPUT ================= -->
@@ -184,6 +192,68 @@
                         <Trigger Property="IsEnabled" Value="False">
                             <Setter Property="Foreground" Value="{StaticResource TextMutedBrush}"/>
                             <Setter TargetName="Bd" Property="BorderBrush" Value="{StaticResource DividerBrush}"/>
+                        </Trigger>
+                    </ControlTemplate.Triggers>
+                </ControlTemplate>
+            </Setter.Value>
+        </Setter>
+    </Style>
+
+    <!-- ================= RADIO BUTTON ================= -->
+    <!-- The first RadioButton style in this UI. Authored with an explicit ControlTemplate to
+         match the hand-rolled templates used by the Button styles above, and to use the same
+         brush resources rather than the stock WPF theme (which renders off-brand and ignores
+         Colors.xaml entirely). Selected state is carried by the BrandBrush fill plus bold text so
+         it is distinguishable without relying on colour alone. -->
+    <Style x:Key="ChoiceRadioStyle" TargetType="RadioButton">
+        <Setter Property="Foreground" Value="{StaticResource TextSecondaryBrush}"/>
+        <Setter Property="FontSize" Value="12.5"/>
+        <Setter Property="Cursor" Value="Hand"/>
+        <Setter Property="VerticalContentAlignment" Value="Center"/>
+        <Setter Property="Template">
+            <Setter.Value>
+                <ControlTemplate TargetType="RadioButton">
+                    <Border Background="Transparent"
+                            Padding="4,3"
+                            SnapsToDevicePixels="True">
+                        <StackPanel Orientation="Horizontal" VerticalAlignment="Center">
+                            <!-- Outer ring -->
+                            <Grid Width="14" Height="14" VerticalAlignment="Center">
+                                <Ellipse x:Name="Ring"
+                                         Stroke="{StaticResource SteelLighterBrush}"
+                                         StrokeThickness="1.25"
+                                         Fill="Transparent"/>
+                                <!-- Inner dot; size driven by the checked trigger -->
+                                <Ellipse x:Name="Dot"
+                                         Width="0" Height="0"
+                                         Fill="{StaticResource BrandBrush}"/>
+                            </Grid>
+                            <ContentPresenter Margin="7,0,0,0" VerticalAlignment="Center"/>
+                        </StackPanel>
+                    </Border>
+                    <ControlTemplate.Triggers>
+                        <Trigger Property="IsChecked" Value="True">
+                            <Setter TargetName="Ring" Property="Stroke" Value="{StaticResource BrandBrush}"/>
+                            <Setter TargetName="Dot" Property="Width" Value="7"/>
+                            <Setter TargetName="Dot" Property="Height" Value="7"/>
+                            <Setter Property="Foreground" Value="{StaticResource TextPrimaryBrush}"/>
+                            <Setter Property="FontWeight" Value="SemiBold"/>
+                        </Trigger>
+                        <MultiTrigger>
+                            <MultiTrigger.Conditions>
+                                <Condition Property="IsChecked" Value="False"/>
+                                <Condition Property="IsMouseOver" Value="True"/>
+                            </MultiTrigger.Conditions>
+                            <Setter TargetName="Ring" Property="Stroke" Value="{StaticResource BrandBrush}"/>
+                            <Setter Property="Foreground" Value="{StaticResource TextPrimaryBrush}"/>
+                        </MultiTrigger>
+                        <Trigger Property="IsEnabled" Value="False">
+                            <Setter Property="Foreground" Value="{StaticResource TextMutedBrush}"/>
+                            <Setter TargetName="Ring" Property="Stroke" Value="{StaticResource DividerBrush}"/>
+                            <Setter TargetName="Dot" Property="Fill" Value="{StaticResource DividerBrush}"/>
+                        </Trigger>
+                        <Trigger Property="IsKeyboardFocused" Value="True">
+                            <Setter TargetName="Ring" Property="Stroke" Value="{StaticResource FocusRingBrush}"/>
                         </Trigger>
                     </ControlTemplate.Triggers>
                 </ControlTemplate>

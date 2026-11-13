@@ -1,0 +1,126 @@
+{
+  "name": "fireprotection_calculate_notification_appliance_layout",
+  "title": "Calculate notification appliance placement layout (NFPA 72)",
+  "description": "Runs the provisional notification appliance (strobe/speaker/speaker-strobe) placement calculation on the provided rooms. The notification rules are PROVISIONAL and catalog-independent - they use simplified audible/visible coverage heuristics rather than full NFPA 72 Chapter 18 calculations. The run and its report are flagged 'engineering review required'. Computes device locations based on room geometry, appliance type (strobe, speaker, speaker-strobe), candela rating, and dBA rating. Uses centered grid layout with spacing derived from candela coverage. Obstacle conflicts are flagged. Returns per-room results with calculated points, diagnostics, warnings, and errors. This is a read-only calculation that does not modify the Revit model. Results are NOT NFPA 72 compliant without engineering review.",
+  "input_schema": {
+    "type": "object",
+    "properties": {
+      "rooms": {
+        "type": "array",
+        "minItems": 1,
+        "items": {
+          "type": "object",
+          "properties": {
+            "room_id": { "type": "string" },
+            "room_name": { "type": "string" },
+            "room_number": { "type": "string" },
+            "level_id": { "type": "string" },
+            "level_name": { "type": "string" },
+            "level_elevation_ft": { "type": "number" },
+            "area_sq_ft": { "type": "number" },
+            "boundary_polygon": {
+              "type": "array",
+              "minItems": 3,
+              "items": { "type": "array", "items": { "type": "number" }, "minItems": 2, "maxItems": 2 }
+            },
+            "boundary": { "type": "object" },
+            "selected_family_name": { "type": "string" },
+            "selected_type_name": { "type": "string" },
+            "appliance_type": { "type": "string", "enum": ["Strobe", "Speaker", "SpeakerStrobe"] },
+            "candela": { "type": "integer", "minimum": 15, "maximum": 1000 },
+            "notification_dba": { "type": "integer", "minimum": 70, "maximum": 120 },
+            "override_max_spacing_ft": { "type": ["number", "null"] },
+            "override_max_distance_to_wall_ft": { "type": ["number", "null"] },
+            "override_boundary_clearance_ft": { "type": ["number", "null"] },
+            "ceilings": { "type": "array", "items": { "type": "object" } },
+            "obstacles": { "type": "array", "items": { "type": "object" } }
+          },
+          "required": ["room_id", "room_name", "room_number", "level_id", "level_name", "level_elevation_ft", "area_sq_ft", "boundary_polygon", "selected_family_name", "selected_type_name", "appliance_type", "candela", "notification_dba"]
+        }
+      }
+    },
+    "required": ["rooms"],
+    "additionalProperties": false
+  },
+  "output_schema": {
+    "type": "object",
+    "properties": {
+      "success": { "type": "boolean" },
+      "is_provisional": { "type": "boolean", "const": true },
+      "applied_rules_summary": { "type": "string" },
+      "total_calculated_detectors": { "type": "integer" },
+      "rooms": {
+        "type": "array",
+        "items": {
+          "type": "object",
+          "properties": {
+            "room_id": { "type": "string" },
+            "room_name": { "type": "string" },
+            "room_number": { "type": "string" },
+            "family_name": { "type": "string" },
+            "type_name": { "type": "string" },
+            "status": { "type": "string", "enum": ["Success", "ReviewRequired", "Failed", "InvalidRoomGeometry", "InvalidInput", "NoValidCandidates", "CalculationFailed"] },
+            "calculated_count": { "type": "integer" },
+            "required_count": { "type": "integer" },
+            "applied_max_spacing_ft": { "type": "number" },
+            "applied_boundary_clearance_ft": { "type": "number" },
+            "polygon": { "type": "array", "items": { "type": "array", "items": { "type": "number" }, "minItems": 2, "maxItems": 2 } },
+            "points": {
+              "type": "array",
+              "items": {
+                "type": "object",
+                "properties": {
+                  "x": { "type": "number" },
+                  "y": { "type": "number" },
+                  "z": { "type": "number" },
+                  "room_id": { "type": "string" },
+                  "level_id": { "type": "string" },
+                  "level_name": { "type": "string" },
+                  "mount": { "type": "string" },
+                  "wall_edge_index": { "type": ["integer", "null"] },
+                  "has_obstacle_conflict": { "type": "boolean" },
+                  "obstacle_conflict_description": { "type": "string" }
+                },
+                "required": ["x", "y", "z", "room_id", "level_id", "level_name", "mount"]
+              }
+            },
+            "warnings": { "type": "array", "items": { "type": "string" } },
+            "errors": { "type": "array", "items": { "type": "string" } },
+            "diagnostics": { "type": "array", "items": { "type": "string" } }
+          },
+          "required": ["room_id", "room_name", "room_number", "status", "calculated_count"]
+        }
+      },
+      "warnings": { "type": "array", "items": { "type": "string" } },
+      "errors": { "type": "array", "items": { "type": "string" } }
+    },
+    "required": ["success", "is_provisional", "applied_rules_summary", "total_calculated_detectors", "rooms", "warnings", "errors"]
+  },
+  "input_examples": [
+    {
+      "rooms": [
+        {
+          "room_id": "789012",
+          "room_name": "Office 101",
+          "room_number": "101",
+          "level_id": "123456",
+          "level_name": "Level 1",
+          "level_elevation_ft": 0,
+          "area_sq_ft": 400,
+          "boundary_polygon": [[0, 0], [20, 0], [20, 20], [0, 20]],
+          "selected_family_name": "Wheelock Exceder",
+          "selected_type_name": "LED Strobe 15cd",
+          "appliance_type": "Strobe",
+          "candela": 15,
+          "notification_dba": 85
+        }
+      ]
+    }
+  ],
+  "annotations": {
+    "readOnlyHint": true,
+    "destructiveHint": false,
+    "idempotentHint": true,
+    "openWorldHint": false
+  }
+}

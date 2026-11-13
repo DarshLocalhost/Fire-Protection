@@ -1,0 +1,27 @@
+{
+  "name": "fireprotection_end_host_resolution_pass",
+  "title": "End host resolution pass",
+  "description": "Ends the read-only host-resolution pass opened by fireprotection_begin_host_resolution_pass and releases cached elements. Must be called before any document modification.",
+  "input_schema": {
+    "type": "object",
+    "properties": {},
+    "additionalProperties": false
+  },
+  "output_schema": {
+    "type": "object",
+    "properties": {
+      "ended": { "type": "boolean", "const": true },
+      "collector_calls_saved": { "type": "integer", "description": "Number of document-wide collector invocations avoided by the cache." }
+    },
+    "required": ["ended", "collector_calls_saved"]
+  },
+  "input_examples": [
+    {}
+  ],
+  "annotations": {
+    "readOnlyHint": true,
+    "destructiveHint": false,
+    "idempotentHint": false,
+    "openWorldHint": false
+  }
+}

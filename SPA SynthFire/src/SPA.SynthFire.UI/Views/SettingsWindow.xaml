@@ -1,0 +1,140 @@
+<Window x:Class="SPA.SynthFire.UI.Views.SettingsWindow"
+        xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        Title="SPA SynthFire — Settings"
+        Width="760" Height="500"
+        WindowStartupLocation="CenterScreen"
+        Background="{DynamicResource Surface}"
+        Foreground="{DynamicResource Ink}"
+        FontFamily="Segoe UI" FontSize="13"
+        ShowInTaskbar="False">
+    <Window.Resources>
+        <ResourceDictionary Source="/SPA.SynthFire.UI;component/Themes/Styles.xaml"/>
+    </Window.Resources>
+    <Grid Margin="0">
+        <Grid.ColumnDefinitions>
+            <ColumnDefinition Width="200"/>
+            <ColumnDefinition Width="*"/>
+        </Grid.ColumnDefinitions>
+        <Grid.RowDefinitions>
+            <RowDefinition Height="*"/>
+            <RowDefinition Height="Auto"/>
+        </Grid.RowDefinitions>
+
+        <!-- Left nav -->
+        <Border Grid.Row="0" Grid.Column="0" Background="#F3F4F6" BorderBrush="#E5E7EB" BorderThickness="0,0,1,0">
+            <StackPanel Margin="12,18">
+                <TextBlock Text="Settings" FontSize="16" FontWeight="SemiBold" Margin="4,0,0,14"/>
+                <RadioButton x:Name="NavStandards" Content="Standards &amp; Units" GroupName="Nav"
+                             IsChecked="True" Margin="4,6" Checked="Nav_Checked"/>
+                <RadioButton x:Name="NavDesign" Content="Design Standards" GroupName="Nav"
+                             Margin="4,6" Checked="Nav_Checked"/>
+                <RadioButton x:Name="NavGeneral" Content="General" GroupName="Nav"
+                             Margin="4,6" Checked="Nav_Checked"/>
+                <RadioButton x:Name="NavProfiles" Content="Profiles" GroupName="Nav"
+                             Margin="4,6" Checked="Nav_Checked"/>
+            </StackPanel>
+        </Border>
+
+        <!-- Content -->
+        <Grid Grid.Row="0" Grid.Column="1" Margin="22,18">
+            <!-- Standards & Units -->
+            <StackPanel x:Name="PanelStandards">
+                <TextBlock Text="Standards &amp; Units" FontSize="18" FontWeight="SemiBold" Margin="0,0,0,16"/>
+                <TextBlock Text="Design standard" FontWeight="SemiBold" Margin="0,0,0,6"/>
+                <StackPanel x:Name="StandardOptions" Margin="0,0,0,18"/>
+                <TextBlock Text="Units" FontWeight="SemiBold" Margin="0,0,0,6"/>
+                <StackPanel Orientation="Horizontal">
+                    <RadioButton x:Name="UnitMetric" Content="Metric" GroupName="Units" Margin="0,0,20,0"/>
+                    <RadioButton x:Name="UnitImperial" Content="Imperial" GroupName="Units"/>
+                </StackPanel>
+            </StackPanel>
+
+            <!-- Design Standards -->
+            <StackPanel x:Name="PanelDesign" Visibility="Collapsed">
+                <TextBlock x:Name="DesignTitle" FontSize="18" FontWeight="SemiBold" Margin="0,0,0,4"/>
+                <TextBlock x:Name="DesignProvisional" Foreground="#B45309" Margin="0,0,0,12" TextWrapping="Wrap"/>
+                <TextBlock Text="Edit the spacing/coverage values to use your own design criteria (in the standard's units)."
+                           Foreground="#666" Margin="0,0,0,8" TextWrapping="Wrap"/>
+                <DataGrid x:Name="DesignGrid" AutoGenerateColumns="False"
+                          HeadersVisibility="Column" GridLinesVisibility="Horizontal"
+                          CanUserAddRows="False" RowHeaderWidth="0" Height="300">
+                    <DataGrid.Columns>
+                        <DataGridTextColumn Header="Hazard class" Binding="{Binding Hazard}" Width="*" IsReadOnly="True"/>
+                        <DataGridTextColumn Header="Max spacing" Binding="{Binding MaxSpacing}" Width="110"/>
+                        <DataGridTextColumn Header="Min spacing" Binding="{Binding MinSpacing}" Width="110"/>
+                        <DataGridTextColumn Header="Max to wall" Binding="{Binding MaxToWall}" Width="110"/>
+                        <DataGridTextColumn Header="Coverage / head" Binding="{Binding Coverage}" Width="130"/>
+                    </DataGrid.Columns>
+                </DataGrid>
+            </StackPanel>
+
+            <!-- General -->
+            <StackPanel x:Name="PanelGeneral" Visibility="Collapsed">
+                <TextBlock Text="General" FontSize="18" FontWeight="SemiBold" Margin="0,0,0,16"/>
+                <TextBlock Text="Sprinkler standoff below a solid ceiling (inches)" Margin="0,0,0,4"/>
+                <TextBox x:Name="CeilingOffsetBox" Width="120" HorizontalAlignment="Left" Margin="0,0,0,16"/>
+                <TextBlock Text="Notification appliance mounting height (inches AFF)" Margin="0,0,0,4"/>
+                <TextBox x:Name="MountingHeightBox" Width="120" HorizontalAlignment="Left" Margin="0,0,0,16"/>
+                <TextBlock Text="Visual (strobe) candela — sets wall-appliance spacing (NFPA 72 Table 18.5.5.5.1(a))" Margin="0,0,0,4"/>
+                <TextBox x:Name="NotificationCandelaBox" Width="120" HorizontalAlignment="Left" Margin="0,0,0,20"/>
+
+                <TextBlock Text="Ceiling tile grid" FontWeight="SemiBold" Margin="0,0,0,6"/>
+                <CheckBox x:Name="SnapToTileBox" Content="Snap auto-placed ceiling devices to tile centres"
+                          Margin="0,0,0,10"/>
+                <Grid Margin="0,0,0,4">
+                    <Grid.ColumnDefinitions>
+                        <ColumnDefinition Width="Auto"/>
+                        <ColumnDefinition Width="Auto"/>
+                    </Grid.ColumnDefinitions>
+                    <Grid.RowDefinitions>
+                        <RowDefinition Height="Auto"/>
+                        <RowDefinition Height="Auto"/>
+                    </Grid.RowDefinitions>
+                    <TextBlock Grid.Row="0" Grid.Column="0" Text="Tile module X / Y (inches)"
+                               VerticalAlignment="Center" Margin="0,0,12,8"/>
+                    <StackPanel Grid.Row="0" Grid.Column="1" Orientation="Horizontal" Margin="0,0,0,8">
+                        <TextBox x:Name="TileModuleXBox" Width="80" Margin="0,0,8,0"/>
+                        <TextBox x:Name="TileModuleYBox" Width="80"/>
+                    </StackPanel>
+                    <TextBlock Grid.Row="1" Grid.Column="0" Text="Grid origin X / Y (inches)"
+                               VerticalAlignment="Center" Margin="0,0,12,0"/>
+                    <StackPanel Grid.Row="1" Grid.Column="1" Orientation="Horizontal">
+                        <TextBox x:Name="TileOriginXBox" Width="80" Margin="0,0,8,0"/>
+                        <TextBox x:Name="TileOriginYBox" Width="80"/>
+                    </StackPanel>
+                </Grid>
+                <TextBlock Text="Snapping keeps heads on the ceiling grid where the wall standoff still allows; every layout stays review-required."
+                           Foreground="#666" Margin="0,8,0,0" TextWrapping="Wrap"/>
+            </StackPanel>
+
+            <!-- Profiles -->
+            <StackPanel x:Name="PanelProfiles" Visibility="Collapsed">
+                <TextBlock Text="Profiles" FontSize="18" FontWeight="SemiBold" Margin="0,0,0,4"/>
+                <TextBlock Text="Save the current standard, units, design overrides and offsets as a named profile, then switch between them (e.g. a warehouse set-up vs. an office one)."
+                           Foreground="#666" Margin="0,0,0,12" TextWrapping="Wrap"/>
+                <ListBox x:Name="ProfileList" Height="240" Margin="0,0,0,10"
+                         SelectionChanged="ProfileList_SelectionChanged"/>
+                <StackPanel Orientation="Horizontal" Margin="0,0,0,8">
+                    <TextBox x:Name="ProfileNameBox" Width="220" Margin="0,0,8,0"/>
+                    <Button Content="Save current" Width="120" Click="ProfileSave_Click"
+                            Style="{StaticResource SecondaryButton}"/>
+                </StackPanel>
+                <StackPanel Orientation="Horizontal">
+                    <Button x:Name="ProfileLoadButton" Content="Load selected" Width="120" Margin="0,0,8,0"
+                            IsEnabled="False" Click="ProfileLoad_Click" Style="{StaticResource SecondaryButton}"/>
+                    <Button x:Name="ProfileDeleteButton" Content="Delete selected" Width="120"
+                            IsEnabled="False" Click="ProfileDelete_Click" Style="{StaticResource SecondaryButton}"/>
+                </StackPanel>
+                <TextBlock x:Name="ProfileStatus" Foreground="#666" Margin="0,10,0,0" TextWrapping="Wrap"/>
+            </StackPanel>
+        </Grid>
+
+        <!-- Buttons -->
+        <StackPanel Grid.Row="1" Grid.Column="1" Orientation="Horizontal" HorizontalAlignment="Right" Margin="22,0,22,16">
+            <Button Content="Restore defaults" Width="130" Margin="0,0,8,0" Click="Restore_Click" Style="{StaticResource SecondaryButton}"/>
+            <Button Content="OK" Width="96" Margin="0,0,8,0" IsDefault="True" Click="Ok_Click" Style="{StaticResource PrimaryButton}"/>
+            <Button Content="Cancel" Width="96" IsCancel="True" Style="{StaticResource SecondaryButton}"/>
+        </StackPanel>
+    </Grid>
+</Window>

@@ -2,6 +2,14 @@
 
 Priority order: P0 = critical, P1 = high, P2 = medium, P3 = low.
 
+## Completed Work
+
+- [x] **Simplified Obstacle Handling & Placement Wizard (2026-10-23)**
+  - Candidate points placed at calculated target locations regardless of obstacles; obstacle clashes tracked in diagnostics and warnings.
+  - 2-step navigation workflow: Preliminary (selection, overrides) -> Final Review (summary table, Previous, Apply, Cancel).
+  - Apply confirmation prompt: *"Place sprinklers at calculated locations regardless of detected obstacles?"*.
+  - UI compact responsiveness for smaller screens (window min constraints 820x500).
+
 ## Environment status
 
 - [ ] Restore a valid Revit runtime/build environment on this machine before claiming runtime verification.
@@ -17,6 +25,34 @@ Priority order: P0 = critical, P1 = high, P2 = medium, P3 = low.
 - [ ] Replace the provisional sprinkler spacing with code-edition-approved NFPA rules.
   - Area: [FireProtection.Backend/Services/Placement/Sprinklers/Final/BruteForce/DefaultHazardPlacementRules.cs](FireProtection.Backend/Services/Placement/Sprinklers/Final/BruteForce/DefaultHazardPlacementRules.cs)
   - Requirement: no placeholder 15 ft logic remains in the production path.
+  - **Sidewall-specific (2026-11-12 audit):** the sidewall path needs its OWN rule rows, not the
+    ceiling-table values — NFPA 13 (2022) §10.3.4 max along-wall spacing **14 ft light / 10 ft ordinary**,
+    §10.3.3.2.1 max protection area **196 ft² light / 100 ft² ordinary** (effective throw = area ÷ spacing:
+    LH 14 ft, OH ~10 ft). The provisional 15 ft throw (`throwAssumedSquare`,
+    BruteForceCalculationService.cs L1523–1531) over-estimates OH throw by 5 ft and could mask gaps in
+    single-row rooms deeper than ~10 ft. Seeding already implements the NFPA model
+    (`throwDepth = TypeMaxCoverageAreaSqFt / alongSpacing`); only the rule values are missing.
+  - Audited deltas of the current 24-head layout vs §10.3 (kitchen OH1, end-wall max = S/2): kitchen
+    ends 5.74 ft vs 5.0 (0.74 over, ×4 heads); sitting room mid-edge heads 8.27 ft vs 7.0; bedroom 1
+    8.56 ft vs 7.0. All along-wall gaps, protection areas, min spacing, and opposing-row depth
+    requirements pass.
+  - **Rulebook source verified (2026-11-12):** `sprinkler_rulebook.md` Ch.19 p.228 (PDF p.234) Table 19-2
+    confirms the sidewall values: LH 14 ft spacing / 12 ft (combustible) or 14 ft (noncombustible)
+    single-row width / 120 or 196 sq ft per head; OH 10 ft / 10 ft / 80 or 100 sq ft. Opposing rows
+    allowed to room width 20 ft OH / 24 ft LH; no back-to-back without continuous lintel/soffit;
+    deflector 4–6 in below ceiling (listed up to 18 in); soffit > 8 in needs a pendent. Matches the
+    independently web-verified NFPA 13 (2022) §10.3 values (LH 14/196, OH 10/100).
+  - **Implementation gaps found (doc claims ≠ code):** `FireProtection-Sprinklers.md` §2.3/§10 claim the
+    sidewall solver is "governed entirely by Table 19-2" — it is NOT. Actual chain:
+    `MaxSpacingFt 15 (provisional p.218) × 0.9 CeilingHeightAdjustmentFactor × 0.85 orientation
+    placeholder = 11.475 ft alongSpacing` (proven by exact head positions: endWallMax 5.7375 reproduces
+    all 8 kitchen heads); no wall-finish column (no `SidewallWallFinish` in PlacementRoomInput);
+    catalog `TypeSidewall*` fields (CatalogModels) never read by `SelectSidewallDirectional` (only
+    `TypeMaxCoverageAreaSqFt`); no sidewall deflector rule (4–6 in); no opposing-room-width (20/24 ft)
+    or back-to-back/lintel feasibility checks; `Nfpa13RulebookRules.cs` has zero sidewall content.
+  - Doc fixes needed: `FireProtection-Sprinklers.md` §2.3 Light-Combustible single-row width is
+    transcribed as **14**, rulebook says **12**; §10 "governed entirely by Table 19-2" must be marked
+    planned/not-implemented; stand-off 1.5 in (doc) vs 0.5 ft in code.
 
 - [ ] Finalize the shared device-placement framework but keep device rules independent.
   - Area: [FireProtection.Backend/Services/Placement](FireProtection.Backend/Services/Placement)
@@ -34,9 +70,9 @@ Priority order: P0 = critical, P1 = high, P2 = medium, P3 = low.
   - Area: [FireProtection.Backend/Services/Placement/SmokeDetectors](FireProtection.Backend/Services/Placement/SmokeDetectors), [FireProtection.UI/ViewModels/SmokeDetectors](FireProtection.UI/ViewModels/SmokeDetectors)
   - Requirement: detector spacing, ceiling mount, slope handling, wall offset, and valid-host checks must be independent from sprinkler rules.
 
-- [ ] Implement standards-based notification appliance placement logic.
-  - Area: [FireProtection.Backend/Services/Placement/NotificationAppliances](FireProtection.Backend/Services/Placement/NotificationAppliances), [FireProtection.UI/ViewModels/NotificationAppliances](FireProtection.UI/ViewModels/NotificationAppliances)
-  - Requirement: use NFPA-72 logic, not a sprinkler copy; visible and audible coverage must both be considered.
+- [x] Implement standards-based notification appliance placement logic (Decision 034).
+  - Area: [FireProtection.Backend/Services/Placement/NotificationAppliances](FireProtection.Backend/Services/Placement/NotificationAppliances), [FireProtection.UI/Views/NotificationAppliances](FireProtection.UI/Views/NotificationAppliances)
+  - Requirement: use NFPA-72 Chapter 18 logic (compartment 1-per-room up to 900 sq ft, 90 in AFF wall-mounting on primary wall, 100 ft corridor spacing with 15 ft end offsets), streamlined UI matching smoke detectors.
 
 - [ ] Complete catalog validation and missing-family handling.
   - Area: [FireProtection.Backend/Services/Catalog](FireProtection.Backend/Services/Catalog), [FireProtection.UI/ViewModels/Catalog](FireProtection.UI/ViewModels/Catalog)
@@ -119,4 +155,114 @@ Priority order: P0 = critical, P1 = high, P2 = medium, P3 = low.
 - Device rule separation: improved and now device-specific for smoke detectors and notification appliances instead of a shared sprinkler-style pattern.
 - Smoke detector and notification logic: implemented at the calculation layer with room-by-room candidate generation, spacing, and selection logic separated by device; production runtime validation remains pending.
 - Reporting UI: planned and required before production deployment.
-- Runtime validation: blocked by missing Autodesk Revit references in this environment; backend build continues to fail with CS0246 until the Revit assemblies are restored.
+- Runtime validation: **still blocked** — requires a user session in a live Revit host.
+
+## 2026-10-07 update — sprinklers focused, test gate now real
+
+Scope decision: **sprinklers only for now**, internal team first, external sale later if the internal team
+is satisfied. Pipe / hydraulics / fire alarm circuits / extra device types are explicitly out of scope.
+
+### Done
+
+- [x] `FireProtection.Tests` added to the solution (previously the solution built **no tests at all**).
+- [x] Three orphan suites registered — `HazardRuleValuesTests`, `SidewallDirectionalSolverTests`,
+      `PerTypeCatalogMergeTests` — they had never run while the harness printed `ALL TESTS PASSED`.
+- [x] `ReportSuiteCoverage()` fails loud when a suite exists but is not registered (verified negatively).
+- [x] 2 failing tests fixed; `CatalogLoaderTests` moved under `RunGuarded`.
+- [x] Pre-existing solution bug: `-c Revit2024` failed to build (UI mapped to `Debug` while Backend built
+      `net48`). Fixed. All 3 Revit configurations now build 0 errors and all tests pass.
+- [x] Sprinkler point identification: bounded tile snapping, array extent, corrected coverage radius
+      (`S/sqrt2`), advisory-only coverage, nearest-neighbour max-spacing check, single grid-maths owner,
+      split skip counters, corrected mounting-plane (Z) selection. See `PROGRESS.md` for detail.
+- [x] Dead code removed / made honest: coverage-pattern table (zero callers), `MinKFactor` documented as
+      not enforced.
+
+**Baseline: 388 checks, 17 suites, green on Revit2024 / 2025 / 2026; 0 build errors on all three.**
+
+### 2026-10-07 (later) — rulebook-driven sprinkler rules
+
+The two supplied rulebooks are now the **declared design basis**. Sprinkler rules were implemented from
+them and every value is cited in
+`FireProtection.Backend/Services/Placement/Sprinklers/Final/BruteForce/Nfpa13RulebookRules.cs`.
+Added `Nfpa13RulebookRulesTests` (16 tests / 59 checks).
+
+Implemented: min wall distance 4 in · non-90° corner 0.75 S · deflector drop 1–12 in unobstructed /
+1–6 in obstructed · unobstructed-vs-obstructed classification (3.7.2) · sloped peak rule 3 ft · S × L
+per-head coverage · Small Room Rule (4 conditions, 9 ft, averaging) · Ch.20 18 in zone plane ·
+Three Times rule (3 × **maximum** dimension, capped 24 in) + opposing-sprinkler exception ·
+permanent fixture > 4 ft wide below the zone plane.
+
+**Known gaps — rulebook does not contain the values, nothing was invented:**
+- [ ] **Beam rule (NFPA 13 Table 8.6.5.1.2)** — the rulebook references this table but does not
+      reproduce it. Obstruction clear distance vs. deflector height is therefore unimplemented and
+      recorded as `BeamRuleTableAvailable = false`. This is the single most significant missing rule.
+- [ ] Sprinklers in every beam pocket (Ch.19 p.226) and the concrete-tee exception.
+- [ ] Composite wood joist firestopping (Ch.19 p.228); concealed-space / attic rules (Ch.19 p.230).
+- [ ] High-piled storage / rack storage commodity tables (Ch.37, Ch.38).
+- [ ] Extended-coverage (Ch.21) and ESFR geometry — ESFR is still a review-only flag.
+- [ ] Non-90° corner limit is transcribed but corner *detection* is still advisory (polygon-shape
+      dependent).
+- [ ] Obstruction geometry is still axis-aligned bounding boxes; curved/diagonal members are approximated.
+
+### 2026-10-07 (latest) — catalog source switch (Model | Catalog file)
+
+- [x] **SOURCE radio group** in the top bar, one group for all three device tabs. Model is the
+      default; the choice persists between sessions along with the last workbook path.
+- [x] `ModelBackedCatalog` takes family/type **names** from the model and per-type **values** from the
+      workbook overlay, because the two sources are complementary, not interchangeable.
+- [x] **Shared device list** across the Smoke and Notification tabs (single Revit category
+      `OST_FireAlarmDevices`), with `DeviceCatalogOverlay` searching **both** workbook sheets so a
+      family catalogued on one sheet still resolves on the other.
+- [x] Persistent `InfoBanner` stating the active source and whether values are provisional — so a
+      missing per-type value is never silent.
+- [x] `FireProtectionConfig.UseRevitFamilyListing` retired; the radio is now the single source switch.
+- [x] `CatalogSourceModeTests` (12 tests / 53 checks).
+
+**Not verified:** the Revit-document reading half (`ModelFamilyEnumerator`, `FamilySymbol`
+enumeration) needs one live run in Revit.
+
+- [ ] Verify in Revit: switch Model → Catalog file → Model; confirm the dropdowns change source and
+      the banner text updates.
+- [ ] Confirm the shared device list looks right on both alarm tabs for a real project.
+- [ ] Consider persisting the *remembered workbook* separately from the mode, so a user who works
+      mostly from the model can still keep a workbook one click away.
+
+### Next — P0, blocked on the user
+
+- [ ] **Phase 3: live Revit verification.** Nothing is runtime-proven. The historical (0,0,0) origin-snap
+      defect must be re-checked. Checklist in `PROGRESS.md`.
+- [ ] Confirm placed Z lands on the intended ceiling and not the slab above (new mounting-plane ranking
+      is static-only until observed in Revit).
+
+### Still open (unchanged priorities)
+
+- [ ] NFPA13-2022 compliant spacing — needs approved values from a fire protection engineer. The rule
+      values are NFPA 13 **2002** via a client textbook and are **not** FPE-signed-off. Do not invent them.
+      A rules-from-file mechanism (Phase 8) is the planned route.
+- [ ] Collision tab ("Final") is an empty shell — build it or hide it.
+- [ ] Report must surface reason codes (`StatusCode`) and populate `PlacementDiagnostics`.
+- [ ] Cancelled run returns before `RoomReports` is populated.
+- [ ] Tag placed elements with a run ID; then add "remove devices I placed" and safe re-runs.
+- [ ] 2D plan preview before placing.
+- [ ] 6 hard-coded Revit `HintPath`s — build only works on this machine. No `Revit2027` configuration.
+- [ ] Spatial index for the free-grid candidate search — needs a real large model to validate.
+- [ ] Catalog provenance: record the source/page for each value (values currently also come from
+      "memory", which is a correctness risk for a life-safety tool).
+
+### Parked — known-wrong code that must not be used until fixed
+
+Sprinklers are the focus for now, so these are parked rather than fixed. They are small, well-understood
+fixes; leaving them is only safe while the features stay off.
+
+- [ ] Smoke/notification obstacles never reach the device calculation (`SmokeDetectorRoomInput.Obstacles`
+      is never assigned; `RoomData` has no `Obstacles`). Beam clearance, obstacle spacing and the whole
+      ACH branch are dead in production.
+- [ ] ACH airflow table is wrong: `Nfpa72SmokeDetectorRules.cs` thresholds are roughly an order of
+      magnitude off NFPA 72 Table 17.7.6.3.3.2 (actual: 2→125, 3→250, 4→375, 5→500, 6→625, 7→875,
+      8+→900 ft²) and invent a 750 ft² row that does not exist.
+- [ ] `AudibleCoverageEngine` has exactly one caller in the repo and it is a test — audible coverage is
+      never computed. Visible coverage has no implementation at all.
+- [ ] Wall-mounted strobes place nothing: `RevitNotificationAppliancePlacementExecutor` passes
+      `fallbackStrategy = null`, so `OneLevelBasedHosted` families fail with
+      "No strategy supports placement type".
+- [ ] Provisional rules do not flag device rooms — a clean room reports `Success` on unapproved values.

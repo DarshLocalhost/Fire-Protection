@@ -1,0 +1,111 @@
+{
+  "name": "fireprotection_recipe_clash_review",
+  "title": "Run coordination clash review recipe",
+  "description": "WORKFLOW RECIPE (read-only): runs a coordination clash sweep across multiple element-set pairs (host vs host, or host vs LINKED RVT) and returns a consolidated, prioritized clash report — hard clashes first, then clearance violations by smallest gap, counted per pair. Each pair is a check_clearance input; for links set setB.source='link' + linkId (from revit_get_linked_files). Composes check_clearance internally. Use this for a comprehensive coordination review across multiple systems.",
+  "input_schema": {
+    "type": "object",
+    "properties": {
+      "pairs": {
+        "type": "array",
+        "minItems": 1,
+        "description": "Coordination matrix: each entry is a labelled check_clearance pair.",
+        "items": {
+          "type": "object",
+          "properties": {
+            "label": { "type": "string", "description": "Human label for this pair, e.g. 'Ducts × Struct link'." },
+            "set_a": {
+              "type": "object",
+              "properties": {
+                "source": { "type": "string", "enum": ["host", "link"], "default": "host" },
+                "link_id": { "type": "integer" },
+                "categories": { "type": "array", "items": { "type": "string" } },
+                "limit": { "type": "integer", "minimum": 1, "maximum": 2000, "default": 500 },
+                "scope_id": { "type": "integer" }
+              },
+              "required": ["source"]
+            },
+            "set_b": {
+              "type": "object",
+              "properties": {
+                "source": { "type": "string", "enum": ["host", "link"], "default": "host" },
+                "link_id": { "type": "integer" },
+                "categories": { "type": "array", "items": { "type": "string" } },
+                "limit": { "type": "integer", "minimum": 1, "maximum": 2000, "default": 500 },
+                "scope_id": { "type": "integer" }
+              },
+              "required": ["source"]
+            },
+            "axis": { "type": "string", "enum": ["bbox", "Z"], "default": "bbox" },
+            "direction": { "type": "string", "enum": ["below", "above"], "default": "below" },
+            "clearance_mm": { "type": "number", "minimum": 0, "default": 0 },
+            "view_id": { "type": "integer" },
+            "sample_count": { "type": "integer", "minimum": 1, "maximum": 10, "default": 3 },
+            "max_results": { "type": "integer", "minimum": 1, "maximum": 2000, "default": 200 }
+          },
+          "required": ["set_a", "set_b"],
+          "additionalProperties": false
+        }
+      }
+    },
+    "required": ["pairs"],
+    "additionalProperties": false
+  },
+  "output_schema": {
+    "type": "object",
+    "properties": {
+      "pairs": {
+        "type": "array",
+        "items": {
+          "type": "object",
+          "properties": {
+            "label": { "type": "string" },
+            "clashes": { "type": "array", "items": { "type": "object" } },
+            "summary": { "type": "object" }
+          },
+          "required": ["label", "clashes", "summary"]
+        }
+      },
+      "consolidated_summary": {
+        "type": "object",
+        "properties": {
+          "total_hard_clashes": { "type": "integer" },
+          "total_clearance_violations": { "type": "integer" },
+          "worst_violation_mm": { "type": "number" },
+          "pairs_with_clashes": { "type": "integer" }
+        },
+        "required": ["total_hard_clashes", "total_clearance_violations", "worst_violation_mm", "pairs_with_clashes"]
+      }
+    },
+    "required": ["pairs", "consolidated_summary"]
+  },
+  "input_examples": [
+    {
+      "pairs": [
+        {
+          "label": "Ducts × Structural Link",
+          "set_a": { "source": "host", "categories": ["OST_DuctCurves"] },
+          "set_b": { "source": "link", "link_id": 12345, "categories": ["OST_StructuralFraming", "OST_StructuralColumns"] },
+          "axis": "bbox",
+          "clearance_mm": 50,
+          "max_results": 100
+        },
+        {
+          "label": "Pipes × Ceiling Link",
+          "set_a": { "source": "host", "categories": ["OST_PipeCurves"] },
+          "set_b": { "source": "link", "link_id": 12345, "categories": ["OST_Ceilings"] },
+          "axis": "Z",
+          "direction": "above",
+          "clearance_mm": 200,
+          "sample_count": 5,
+          "max_results": 100
+        }
+      ]
+    }
+  ],
+  "annotations": {
+    "readOnlyHint": true,
+    "destructiveHint": false,
+    "idempotentHint": true,
+    "openWorldHint": false
+  }
+}

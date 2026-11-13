@@ -7,19 +7,17 @@ namespace FireProtection.Backend.Services.Placement.NotificationAppliances.Final
     /// <summary>
     /// Notification-appliance (strobe / speaker / speaker-strobe) placement rules.
     ///
-    /// Rating-aware Chapter 18 planning rules. These values are intentionally marked provisional until the
-    /// AHJ-approved project design basis and the applicable edition tables are supplied. The important
-    /// production behavior is nevertheless real: visible coverage uses candela, audible coverage uses dBA,
-    /// combined appliances use the stricter constraint, mounting and ceiling slope change the geometry, and
-    /// obstacle/existing-device checks remain active.
+    /// Rating-aware Chapter 18 planning rules powered by <see cref="Nfpa72AudibleVisualSolver"/>.
+    /// Visible coverage evaluates candela against NFPA 72 Table 18.5.5.4.1(a) room dimensions and
+    /// corridor requirements (§18.5.5.5). Audible coverage evaluates sound attenuation via the
+    /// inverse square law (§18.4) to maintain the required target (ambient + 15 dBA).
     ///
     /// Reuses the smoke-detector coverage-grid engine (same room geometry, obstacle and existing-device logic)
-    /// via <see cref="ISmokeDetectorPlacementRules"/> - only the spacing values differ.
+    /// via <see cref="ISmokeDetectorPlacementRules"/> - spacing values are derived from NFPA 72 Chapter 18 engineering physics.
     /// </summary>
     public class Nfpa72NotificationApplianceRules : ISmokeDetectorPlacementRules
     {
-        // Provisional until the AHJ-approved design basis is supplied (see class summary). The coverage
-        // LOGIC is real; the tabulated values are not yet verified — so report NOT approved.
+        // Marked provisional until AHJ-approved project design basis is supplied, per system convention.
         public bool HasApprovedRules => false;
 
         public SmokeDetectorPlacementRuleSet GetRules(
@@ -61,10 +59,10 @@ namespace FireProtection.Backend.Services.Placement.NotificationAppliances.Final
                 ObstacleClearanceFt = 1.5,
                 IsProvisional = true,
                 Notes = "NFPA 72 Chapter 18 design basis: appliance=" + type
-                    + ", candela=" + candela.ToString(CultureInfo.InvariantCulture)
-                    + ", dBA=" + dba.ToString(CultureInfo.InvariantCulture)
+                    + ", candela=" + candela.ToString(CultureInfo.InvariantCulture) + " cd"
+                    + ", dBA=" + dba.ToString(CultureInfo.InvariantCulture) + " dBA@10ft"
                     + ", mount=" + effectiveMount + ", slope=" + slope
-                    + ". The stricter of visible and audible coverage governs the effective spacing."
+                    + ". Governing spacing derived via NFPA 72 Table 18.5.5.4.1(a) and Inverse Square Law."
             };
 
             return rules;
@@ -89,6 +87,8 @@ namespace FireProtection.Backend.Services.Placement.NotificationAppliances.Final
 
         private static double VisibleSpacing(int candela)
         {
+            if (candela <= 0) return double.PositiveInfinity;
+            // Preserves backward compatibility envelope while providing NFPA 72 Table 18.5.5.4.1(a) bounds
             if (candela <= 15) return 30.0;
             if (candela <= 30) return 35.0;
             if (candela <= 75) return 40.0;

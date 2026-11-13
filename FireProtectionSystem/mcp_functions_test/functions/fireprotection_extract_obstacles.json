@@ -1,0 +1,54 @@
+{
+  "name": "fireprotection_extract_obstacles",
+  "title": "Extract obstacles on demand",
+  "description": "Extracts MEP, architectural, and structural obstacles (columns, beams, walls, ducts, pipes, cable trays, etc.) from the active Revit document and linked models, and associates them to the provided rooms. This is typically called after a lightweight snapshot when obstacle data is needed for placement calculations. All obstacle geometry is normalized to host MEP coordinates. The operation is read-only and does not modify the model. Returns a list of ObstacleData with bounding boxes and room associations.",
+  "input_schema": {
+    "type": "object",
+    "properties": {
+      "room_ids": {
+        "type": "array",
+        "items": { "type": "string" },
+        "minItems": 1,
+        "description": "Room IDs (ElementIds as strings) to associate obstacles with. Only obstacles intersecting these rooms in XY and Z will be returned."
+      }
+    },
+    "required": ["room_ids"],
+    "additionalProperties": false
+  },
+  "output_schema": {
+    "type": "object",
+    "properties": {
+      "obstacles": {
+        "type": "array",
+        "items": {
+          "type": "object",
+          "properties": {
+            "element_id": { "type": "string" },
+            "category": { "type": "string" },
+            "name": { "type": "string" },
+            "bounding_box": {
+              "type": "object",
+              "properties": {
+                "min": { "type": "object", "properties": { "x": { "type": "number" }, "y": { "type": "number" }, "z": { "type": "number" } }, "required": ["x", "y", "z"] },
+                "max": { "type": "object", "properties": { "x": { "type": "number" }, "y": { "type": "number" }, "z": { "type": "number" } }, "required": ["x", "y", "z"] }
+              },
+              "required": ["min", "max"]
+            },
+            "associated_room_ids": { "type": "array", "items": { "type": "string" } }
+          },
+          "required": ["element_id", "category", "name", "bounding_box", "associated_room_ids"]
+        }
+      }
+    },
+    "required": ["obstacles"]
+  },
+  "input_examples": [
+    { "room_ids": ["123456", "123457", "123458"] }
+  ],
+  "annotations": {
+    "readOnlyHint": true,
+    "destructiveHint": false,
+    "idempotentHint": true,
+    "openWorldHint": false
+  }
+}

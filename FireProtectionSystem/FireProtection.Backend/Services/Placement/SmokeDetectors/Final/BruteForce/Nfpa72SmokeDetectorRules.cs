@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 
 namespace FireProtection.Backend.Services.Placement.SmokeDetectors.Final.BruteForce
 {
@@ -33,12 +33,18 @@ namespace FireProtection.Backend.Services.Placement.SmokeDetectors.Final.BruteFo
                 Notes = "NFPA 72 (2019/2022) Chapter 17 design basis for spot-type smoke detector placement."
             };
 
+            // NFPA 72 §17.7.3.2.1 / §17.6.3.1.3 mandates a 4-inch (0.333 ft) dead-air clearance
+            // from any sidewall for ceiling-mounted detectors.
+            // In physical installation, smoke detector base bodies have a radius of ~2.5 - 3.0 inches (0.21 - 0.25 ft).
+            // To ensure the outer physical edge of the detector satisfies the 4-inch dead-air gap
+            // and the device does not clash with or embed into wall finishes, the center-point clearance
+            // must be at least: dead air (4 in) + device radius (3 in) + engineering margin = 12 inches (1.0 ft).
             rules.MaxSpacingFt = 30.0;
             rules.MinSpacingFt = 10.0;
             rules.MaxCoverageAreaSqFt = 900.0;
             rules.CoverageRadiusFt = Math.Round(30.0 / Math.Sqrt(2.0), 3);
             rules.MaxDistanceFromWallsFt = 15.0;
-            rules.MinBoundaryClearanceFt = 0.333;
+            rules.MinBoundaryClearanceFt = 1.0; // 12 inches (1.0 ft) minimum standoff to finished wall face
 
             if (string.Equals(type, "Beam", StringComparison.OrdinalIgnoreCase) || type.IndexOf("Beam", StringComparison.OrdinalIgnoreCase) >= 0)
             {
@@ -47,7 +53,7 @@ namespace FireProtection.Backend.Services.Placement.SmokeDetectors.Final.BruteFo
                 rules.MaxCoverageAreaSqFt = 3600.0;
                 rules.CoverageRadiusFt = 30.0;
                 rules.MaxDistanceFromWallsFt = 30.0;
-                rules.MinBoundaryClearanceFt = 0.5;
+                rules.MinBoundaryClearanceFt = 1.0; // 12 inches minimum standoff from parallel walls
                 rules.Notes = "NFPA 72 beam detector design basis: beam spacing is governed by the listed beam path and host geometry, not a spot detector equivalent.";
             }
 

@@ -22,11 +22,13 @@ namespace FireProtection.Backend.Services.Placement.Sprinklers.Final
         };
 
         private readonly IReadOnlyList<ObstacleData> _globalObstacles;
+        private readonly Func<IReadOnlyList<ObstacleData>> _obstaclesAccessor;
+        private IReadOnlyList<ObstacleData> _cachedResolvedObstacles;
         private readonly IReadOnlyList<ExistingSprinklerData> _globalExistingSprinklers;
         private readonly DeviceContextResolver _resolver;
 
         public PlacementInputJsonExporter()
-            : this(null, null, null)
+            : this((IReadOnlyList<ObstacleData>)null, null, null)
         {
         }
 
@@ -35,6 +37,16 @@ namespace FireProtection.Backend.Services.Placement.Sprinklers.Final
             IReadOnlyList<ExistingSprinklerData> globalExistingSprinklers)
             : this(globalObstacles, globalExistingSprinklers, null)
         {
+        }
+
+        public PlacementInputJsonExporter(
+            Func<IReadOnlyList<ObstacleData>> obstaclesAccessor,
+            IReadOnlyList<ExistingSprinklerData> globalExistingSprinklers,
+            DeviceContextResolver resolver)
+        {
+            _obstaclesAccessor = obstaclesAccessor;
+            _globalExistingSprinklers = globalExistingSprinklers;
+            _resolver = resolver;
         }
 
         /// <summary>
@@ -129,7 +141,15 @@ namespace FireProtection.Backend.Services.Placement.Sprinklers.Final
                     SelectedSprinklerTypeName = item.SelectedSprinklerTypeName,
                     OverrideMaxSpacingFt = item.OverrideMaxSpacingFt,
                     OverrideBoundaryClearanceFt = item.OverrideBoundaryClearanceFt,
-                    SelectedSprinklerOrientation = item.SelectedSprinklerOrientation
+                    OverrideMaxDistanceToWallFt = item.OverrideMaxDistanceToWallFt,
+                    OverrideCeilingTileUFt = item.OverrideCeilingTileUFt,
+                    OverrideCeilingTileVFt = item.OverrideCeilingTileVFt,
+                    SelectedSprinklerOrientation = item.SelectedSprinklerOrientation,
+                    TypeMaxCoverageAreaSqFt = item.TypeMaxCoverageAreaSqFt,
+                    TypeMaxSpacingFt = item.TypeMaxSpacingFt,
+                    TypeMinSpacingFt = item.TypeMinSpacingFt,
+                    TypeCoverageRadiusFt = item.TypeCoverageRadiusFt,
+                    SprinklerClass = item.SprinklerClass
                 };
 
                 RoomData roomData = null;
@@ -143,6 +163,10 @@ namespace FireProtection.Backend.Services.Placement.Sprinklers.Final
                         {
                             selection.Ceilings = roomData.Ceilings;
                             selection.Source = roomData.Source;
+                            // Carry the extracted boundary so the sidewall edge mask sees the
+                            // wall / non-wall segment classification (Decision 032). Without
+                            // this the mask saw no segments and treated every edge as a wall.
+                            selection.Boundary = roomData.Boundary;
                         }
                     }
                     catch
@@ -152,9 +176,20 @@ namespace FireProtection.Backend.Services.Placement.Sprinklers.Final
                 }
 
                 List<string> associatedObstacleIds = roomData?.AssociatedObstacleIds;
-                if (_globalObstacles != null && _globalObstacles.Count > 0)
+                IReadOnlyList<ObstacleData> obstacles = _globalObstacles;
+                if (obstacles == null && _obstaclesAccessor != null)
                 {
-                    selection.Obstacles = _globalObstacles
+                    if (_cachedResolvedObstacles == null)
+                    {
+                        try { _cachedResolvedObstacles = _obstaclesAccessor(); }
+                        catch { _cachedResolvedObstacles = new List<ObstacleData>(); }
+                    }
+                    obstacles = _cachedResolvedObstacles;
+                }
+
+                if (obstacles != null && obstacles.Count > 0)
+                {
+                    selection.Obstacles = obstacles
                         .Where(o => (o.AssociatedRoomIds != null && o.AssociatedRoomIds.Contains(item.RoomId)) ||
                                     (associatedObstacleIds != null && associatedObstacleIds.Contains(o.ElementId)))
                         .ToList();

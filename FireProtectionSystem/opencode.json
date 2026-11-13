@@ -1,0 +1,36 @@
+{
+  "$schema": "https://opencode.ai/config.json",
+  "model": "nara/glm-5.3-flash",
+  "provider": {
+    "nara": {
+      "api": "openai",
+      "name": "Nara Router",
+      "options": {
+        "apiKey": "sk-nry-0n00jNHVTqO9EcsjmLkrdWjuB5kSpB2f7qveAbdx73E",
+        "baseURL": "https://router.bynara.id/v1"
+      }
+    }
+  },
+  "mcp": {
+  "revit-2025": {
+    "type": "local",
+    "command": [
+      "node",
+      "C:\\Users\\darshan.badigera\\AppData\\Local\\RevitMCPServer\\dist\\index.js"
+    ],
+    "environment": { "REVIT_MCP_VERSION": "2025", "REVIT_MCP_PORT": "7891" },
+    "enabled": true,
+    "timeout": 120000
+  },
+  "revit-2026": {
+    "type": "local",
+    "command": [
+      "node",
+      "C:\\Users\\darshan.badigera\\AppData\\Local\\RevitMCPServer\\dist\\index.js"
+    ],
+    "environment": { "REVIT_MCP_VERSION": "2026" },
+    "enabled": true,
+    "timeout": 120000
+  }
+}
+}

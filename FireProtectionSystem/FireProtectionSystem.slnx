@@ -12,7 +12,22 @@
     <Platform Solution="*|x64" Project="x64" />
   </Project>
   <Project Path="FireProtection.UI/FireProtection.UI.csproj">
-    <BuildType Solution="Revit2024|Any CPU" Project="Debug" />
+    <!-- Do NOT map Revit2024 to Debug here. FireProtection.UI declares a real Revit2024
+         configuration (net48), so forcing it to Debug rebuilt the UI as net8.0-windows while
+         FireProtection.Backend built net48 for the same solution build. That combination is an
+         unsatisfiable project reference and failed with:
+           "Project '..\FireProtection.UI.csproj' targets 'net8.0-windows'. It cannot be
+            referenced by a project that targets '.NETFramework,Version=v4.8'."
+         Building the solution as `-c Revit2024` without an explicit platform therefore failed
+         while each project built correctly on its own. Let both projects use the solution's
+         configuration verbatim so Revit2024 is consistently net48 across the whole graph. -->
+    <Platform Solution="*|x64" Project="x64" />
+  </Project>
+  <!-- The Revit-free calculation test harness. It is in the solution deliberately: with the
+       test projects outside the solution, a plain `dotnet build` compiles no tests at all and
+       nothing in the repository gates a change. FireProtection.Tests asserts at runtime that
+       every discovered test suite is registered (see ReportSuiteCoverage). -->
+  <Project Path="FireProtection.Tests/FireProtection.Tests.csproj">
     <Platform Solution="*|x64" Project="x64" />
   </Project>
 </Solution>

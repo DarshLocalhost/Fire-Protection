@@ -61,6 +61,8 @@ namespace FireProtection.UI.ViewModels.SmokeDetectors
 
         public override string DeviceDisplayName => "SMOKE DETECTOR CONFIGURATION";
 
+        protected override string CatalogSheetName => "SmokeDetectors";
+
         protected override FireProtection.UI.Services.DeviceKind TabDeviceKind => FireProtection.UI.Services.DeviceKind.SmokeDetector;
 
         // ---------------------------------------------------------------------------------------
@@ -98,6 +100,16 @@ namespace FireProtection.UI.ViewModels.SmokeDetectors
         protected override void OnUniversalFamilyTypeChanged()
         {
             RaiseDerivedAttributeNotifications();
+            OnPropertyChanged(nameof(MissingCatalogDataMessage));
+        }
+
+        /// <summary>
+        /// Production-grade UX: In model mode without a workbook, NFPA 72 prescriptive defaults
+        /// are automatically applied without scaring the user with orange warning banners.
+        /// </summary>
+        protected override string DescribeMissingCatalogData()
+        {
+            return null;
         }
 
         protected override string DeriveAttribute(string key, string familyName, string typeName)

@@ -364,6 +364,41 @@
                                        VerticalAlignment="Center"
                                        Margin="0,0,0,6"/>
                         </WrapPanel>
+
+                        <!-- Universal placement geometry (all selected rooms). S→W is the enforced maximum
+                             device-to-wall distance; the tile size is the acoustic-tile fallback used to
+                             center devices when Revit exposes no readable ceiling grid. Blank = rule/grid
+                             default. Applies to smoke + notification (this view is shared). -->
+                        <WrapPanel Margin="0,4,0,0" Orientation="Horizontal">
+                            <TextBlock Text="{Binding WallDistanceLabel}"
+                                       Style="{StaticResource EyebrowText}"
+                                       VerticalAlignment="Center"
+                                       Margin="0,0,8,6"/>
+                            <TextBox Width="64"
+                                     Margin="0,0,18,6"
+                                     Style="{StaticResource NumericCellInputStyle}"
+                                     Text="{Binding MaxDistanceToWallInput, UpdateSourceTrigger=PropertyChanged}"
+                                     ToolTip="{Binding MaxDistanceToWallTooltip}"/>
+
+                            <TextBlock Text="{Binding TileSizeLabel}"
+                                       Style="{StaticResource EyebrowText}"
+                                       VerticalAlignment="Center"
+                                       Margin="0,0,8,6"/>
+                            <TextBox Width="52"
+                                     Margin="0,0,6,6"
+                                     Style="{StaticResource NumericCellInputStyle}"
+                                     Text="{Binding TileUInput, UpdateSourceTrigger=PropertyChanged}"
+                                     ToolTip="{Binding TileSizeTooltip}"/>
+                            <TextBlock Text="×"
+                                       VerticalAlignment="Center"
+                                       Foreground="{StaticResource TextSecondaryBrush}"
+                                       Margin="0,0,6,6"/>
+                            <TextBox Width="52"
+                                     Margin="0,0,0,6"
+                                     Style="{StaticResource NumericCellInputStyle}"
+                                     Text="{Binding TileVInput, UpdateSourceTrigger=PropertyChanged}"
+                                     ToolTip="{Binding TileSizeTooltip}"/>
+                        </WrapPanel>
                     </StackPanel>
 
                     <!-- ROOM TABLE HEADER (Status Column Removed) -->
@@ -602,6 +637,13 @@
                                Style="{StaticResource DataMuted}"
                                Margin="0,2,0,0"
                                Text="{Binding PlacementStatusMessage}"/>
+                    <!-- The selected type has no rating in the active catalog (normal in Model mode,
+                         where a Revit family carries no dBA/Candela/DetectorType/Mount at all). -->
+                    <TextBlock FontSize="11.5"
+                               Style="{StaticResource WarningText}"
+                               Margin="0,4,0,0"
+                               Text="{Binding MissingCatalogDataMessage}"
+                               Visibility="{Binding MissingCatalogDataMessage, Converter={StaticResource StringToVis}}"/>
                 </StackPanel>
             </ctrl:InfoBanner>
 

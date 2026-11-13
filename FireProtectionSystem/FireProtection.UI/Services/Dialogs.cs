@@ -22,12 +22,15 @@ namespace FireProtection.UI.Services
             }
         }
 
+        public static bool SuppressDialogs { get; set; } = false;
+
         public static MessageBoxResult Show(
             string message,
             string caption,
             MessageBoxButton button = MessageBoxButton.OK,
             MessageBoxImage image = MessageBoxImage.Information)
         {
+            if (SuppressDialogs) return MessageBoxResult.OK;
             Window owner = Owner;
             return owner != null
                 ? MessageBox.Show(owner, message, caption, button, image)
@@ -48,10 +51,11 @@ namespace FireProtection.UI.Services
         {
             try
             {
-                Dispatcher dispatcher = Application.Current != null
-                    ? Application.Current.Dispatcher
-                    : Dispatcher.CurrentDispatcher;
-
+                // Deliberately NOT Dispatcher.CurrentDispatcher as a fallback. On a thread with no
+                // dispatcher that call CREATES one and attaches an activation context to the
+                // thread, which is exactly what later throws SEHException in DeactivateActCtx.
+                // WpfHost returns null instead of manufacturing a dispatcher.
+                Dispatcher dispatcher = WpfHost.UiDispatcher;
                 if (dispatcher == null) return;
                 dispatcher.Invoke(DispatcherPriority.Background, new Action(delegate { }));
             }

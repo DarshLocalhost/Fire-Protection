@@ -1,0 +1,46 @@
+{
+  "name": "fireprotection_load_catalog",
+  "title": "Load device catalog from Excel workbook",
+  "description": "Loads the device catalog from an Excel workbook (.xlsx) containing sprinkler, smoke detector, and notification appliance definitions. The workbook must have sheets named 'Sprinklers', 'SmokeDetectors', and/or 'NotificationAppliances' with required columns. The loader validates the catalog schema and returns a populated CatalogService with lookup capabilities. Throws CatalogLoadException on any IO or schema problem. Use this before running placement calculations to ensure the correct device data is available.",
+  "input_schema": {
+    "type": "object",
+    "properties": {
+      "file_path": {
+        "type": "string",
+        "description": "Absolute path to the Excel catalog workbook (.xlsx)."
+      }
+    },
+    "required": ["file_path"],
+    "additionalProperties": false
+  },
+  "output_schema": {
+    "type": "object",
+    "properties": {
+      "is_loaded": { "type": "boolean" },
+      "catalog_version": { "type": "string" },
+      "source_path": { "type": "string" },
+      "total_row_count": { "type": "integer" },
+      "available_hazard_classes": { "type": "array", "items": { "type": "string" } },
+      "available_sprinkler_mounts": { "type": "array", "items": { "type": "string" } },
+      "available_detector_types": { "type": "array", "items": { "type": "string" } },
+      "available_mounts": { "type": "array", "items": { "type": "string" } },
+      "available_ceiling_slopes": { "type": "array", "items": { "type": "string" } },
+      "available_appliance_types": { "type": "array", "items": { "type": "string" } },
+      "available_candelas": { "type": "array", "items": { "type": "string" } },
+      "available_notification_dbas": { "type": "array", "items": { "type": "string" } },
+      "sprinkler_families": { "type": "array", "items": { "type": "string" } },
+      "smoke_detector_families": { "type": "array", "items": { "type": "string" } },
+      "notification_appliance_families": { "type": "array", "items": { "type": "string" } }
+    },
+    "required": ["is_loaded", "catalog_version", "source_path", "total_row_count", "available_hazard_classes", "available_sprinkler_mounts", "available_detector_types", "available_mounts", "available_ceiling_slopes", "available_appliance_types", "available_candelas", "available_notification_dbas", "sprinkler_families", "smoke_detector_families", "notification_appliance_families"]
+  },
+  "input_examples": [
+    { "file_path": "C:\\catalogs\\FireProtectionCatalog.xlsx" }
+  ],
+  "annotations": {
+    "readOnlyHint": true,
+    "destructiveHint": false,
+    "idempotentHint": true,
+    "openWorldHint": false
+  }
+}

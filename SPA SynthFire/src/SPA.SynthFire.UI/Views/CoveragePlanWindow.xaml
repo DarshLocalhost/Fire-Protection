@@ -1,0 +1,111 @@
+<Window x:Class="SPA.SynthFire.UI.Views.CoveragePlanWindow"
+        xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        xmlns:ctrl="clr-namespace:SPA.SynthFire.UI.Controls"
+        Title="SPA SynthFire — Coverage Plan" Height="720" Width="1120"
+        Background="#1B1F24" WindowStartupLocation="CenterOwner">
+    <Window.Resources>
+        <SolidColorBrush x:Key="Ink" Color="#E6E9ED"/>
+        <SolidColorBrush x:Key="Sub" Color="#9AA3AD"/>
+        <Style TargetType="TextBlock">
+            <Setter Property="Foreground" Value="{StaticResource Ink}"/>
+            <Setter Property="FontFamily" Value="Segoe UI"/>
+        </Style>
+        <Style x:Key="SectionCaption" TargetType="TextBlock">
+            <Setter Property="FontSize" Value="11"/>
+            <Setter Property="FontWeight" Value="Bold"/>
+            <Setter Property="Foreground" Value="{StaticResource Sub}"/>
+            <Setter Property="Margin" Value="0,0,0,8"/>
+        </Style>
+        <Style x:Key="DataRow" TargetType="TextBlock">
+            <Setter Property="Foreground" Value="MediumAquamarine"/>
+            <Setter Property="Margin" Value="0,0,0,4"/>
+        </Style>
+        <Style x:Key="LegendLabel" TargetType="TextBlock">
+            <Setter Property="Margin" Value="10,0,0,0"/>
+            <Setter Property="Foreground" Value="White"/>
+            <Setter Property="VerticalAlignment" Value="Center"/>
+        </Style>
+    </Window.Resources>
+
+    <Grid>
+        <Grid.ColumnDefinitions>
+            <ColumnDefinition Width="260"/>
+            <ColumnDefinition Width="*"/>
+        </Grid.ColumnDefinitions>
+
+        <!-- Left info panel -->
+        <Border Grid.Column="0" Background="#22272E" Padding="18">
+            <StackPanel>
+                <TextBlock Text="LEVEL" Style="{StaticResource SectionCaption}"/>
+                <ComboBox x:Name="LevelSelector" DisplayMemberPath="LevelName" Margin="0,0,0,14" />
+                <TextBlock x:Name="LevelNameText" Text="—" FontSize="18" FontWeight="SemiBold" Margin="0,0,0,12"/>
+                <TextBlock x:Name="TotalDevicesText" Text="Total devices: —" Style="{StaticResource DataRow}"/>
+                <TextBlock x:Name="TotalNonCompText" Text="Non-compliances: —" Margin="0,0,0,4"/>
+
+                <TextBlock Text="PROPERTIES" Style="{StaticResource SectionCaption}" Margin="0,22,0,8"/>
+                <TextBlock x:Name="SelName" Text="(click a room)" FontSize="15" FontWeight="SemiBold" Margin="0,0,0,10"/>
+                <TextBlock x:Name="SelArea" Text="Floor area: —" Style="{StaticResource DataRow}"  />
+                <TextBlock x:Name="SelDevices" Text="Devices: —" Style="{StaticResource DataRow}"/>
+                <TextBlock x:Name="SelCoverage" Text="Coverage: —" Style="{StaticResource DataRow}"/>
+                <TextBlock x:Name="SelNonComp" Text="Non-compliances: —" Style="{StaticResource DataRow}"/>
+
+                <TextBlock Text="LEGEND" Style="{StaticResource SectionCaption}" Margin="0,22,0,8"/>
+                <StackPanel Orientation="Horizontal" Margin="0,0,0,6">
+                    <Rectangle Width="16" Height="16" RadiusX="3" RadiusY="3" Fill="#805AC850"/>
+                    <TextBlock Text="Covered (1 device)" Style="{StaticResource LegendLabel}"/>
+                </StackPanel>
+                <StackPanel Orientation="Horizontal" Margin="0,0,0,6">
+                    <Rectangle Width="16" Height="16" RadiusX="3" RadiusY="3" Fill="#CC46AA50"/>
+                    <TextBlock Text="Overlap (2+ devices)" Style="{StaticResource LegendLabel}"/>
+                </StackPanel>
+                <StackPanel Orientation="Horizontal" Margin="0,0,0,6">
+                    <Rectangle Width="16" Height="16" RadiusX="3" RadiusY="3" Fill="#5FDC3737"/>
+                    <TextBlock Text="Uncovered gap" Style="{StaticResource LegendLabel}"/>
+                </StackPanel>
+                <StackPanel Orientation="Horizontal" Margin="0,0,0,6">
+                    <Rectangle Width="16" Height="16" RadiusX="3" RadiusY="3" Fill="#96969696"/>
+                    <TextBlock Text="Obstructed floor" Style="{StaticResource LegendLabel}"/>
+                </StackPanel>
+                <TextBlock Text="PROVISIONAL coverage geometry — review before issue."
+                           TextWrapping="Wrap" FontSize="11" Foreground="#C8A24B" Margin="0,20,0,0"/>
+            </StackPanel>
+        </Border>
+
+        <!-- Plan canvas + toolbar -->
+        <Grid Grid.Column="1">
+            <Grid.RowDefinitions>
+                <RowDefinition Height="*"/>
+                <RowDefinition Height="Auto"/>
+            </Grid.RowDefinitions>
+
+            <ctrl:CoveragePlanCanvas x:Name="Plan" Grid.Row="0"/>
+
+            <Border Grid.Row="1" Background="#22272E" Padding="12,10">
+                <Grid>
+                    <StackPanel Orientation="Horizontal" HorizontalAlignment="Left" VerticalAlignment="Center">
+                        <Button x:Name="ZoomOutBtn" Content="—" Width="34" Height="28"/>
+                        <TextBlock x:Name="ZoomText" Text="100%" VerticalAlignment="Center"
+                                   Width="56" TextAlignment="Center" Margin="6,0"/>
+                        <Button x:Name="ZoomInBtn" Content="+" Width="34" Height="28"/>
+                        <Button x:Name="ResetBtn" Content="Reset" Width="70" Height="28" Margin="10,0,0,0"/>
+                        <Button x:Name="UndoBtn" Content="Undo" Width="60" Height="28" Margin="18,0,0,0"
+                                IsEnabled="False" Visibility="Collapsed"/>
+                        <Button x:Name="RedoBtn" Content="Redo" Width="60" Height="28" Margin="6,0,0,0"
+                                IsEnabled="False" Visibility="Collapsed"/>
+                        <TextBlock Text="scroll = zoom · drag = pan · click = select"
+                                   Foreground="{StaticResource Sub}" VerticalAlignment="Center" Margin="18,0,0,0"/>
+                        <TextBlock x:Name="PlaceHint" Text="· right-click a gap = add · click a head = remove"
+                                   Foreground="#C8A24B" VerticalAlignment="Center" Margin="6,0,0,0"
+                                   Visibility="Collapsed"/>
+                    </StackPanel>
+                    <StackPanel Orientation="Horizontal" HorizontalAlignment="Right" VerticalAlignment="Center">
+                        <Button x:Name="View3DBtn" Content="3D View" Width="90" Height="28" Margin="0,0,8,0"/>
+                        <Button x:Name="OkBtn" Content="OK" Width="90" Height="28" Margin="0,0,8,0"/>
+                        <Button x:Name="CloseBtn" Content="Close" Width="90" Height="28"/>
+                    </StackPanel>
+                </Grid>
+            </Border>
+        </Grid>
+    </Grid>
+</Window>

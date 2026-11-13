@@ -21,11 +21,22 @@ namespace FireProtection.Backend.Services.Placement.Sprinklers.Final.Strategies
                     context.Document.Regenerate();
                 }
 
+                XYZ placePt = context.RequestedPoint;
+                if (context.CeilingHostResolver != null)
+                {
+                    CeilingHostLookup host = context.CeilingHostResolver.FindCeilingHost(context.Document, context.RequestedPoint, context.Level);
+                    if (host != null && host.ProjectedPointOnFace != null)
+                    {
+                        // Deflector drop: 1 inch (0.0833 ft) below the exact overhead ceiling/slab face
+                        placePt = new XYZ(context.RequestedPoint.X, context.RequestedPoint.Y, host.ProjectedPointOnFace.Z - 0.0833);
+                    }
+                }
+
                 FamilyInstance instance = context.Document.Create.NewFamilyInstance(
-                    context.RequestedPoint, context.Symbol, context.Level, StructuralType.NonStructural);
+                    placePt, context.Symbol, context.Level, StructuralType.NonStructural);
 
                 // FIX: Enforce level association and offset securely
-                LevelAssociation.EnforceAndVerify(context.Document, instance, context.Level, context.RequestedPoint.Z);
+                LevelAssociation.EnforceAndVerify(context.Document, instance, context.Level, placePt.Z);
 
                 return PlacementOutcome.CreatedInstance(instance, "LevelBased", "none");
             }

@@ -31,6 +31,9 @@ namespace FireProtection.Backend.Services.Placement.Sprinklers.Final.Strategies
         /// <summary>The candidate point fell outside its own room polygon in host coordinates — refused before
         /// any element was created. Non-zero counts here point at a coordinate-space (linked-model transform) bug.</summary>
         public const string OutsideRoomBoundary = "OUTSIDE_ROOM_BOUNDARY";
+
+        /// <summary>Skipped because candidate location conflicts with a detected obstacle and user opted not to ignore.</summary>
+        public const string ObstacleConflict = "OBSTACLE_CONFLICT";
     }
 
     /// <summary>
@@ -78,6 +81,12 @@ namespace FireProtection.Backend.Services.Placement.Sprinklers.Final.Strategies
         public string CeilingSource;      // "host" / "link:<name>" / "none"
         public string LinkInstanceName;
         public string HostCeilingElementId;
+        /// <summary>
+        /// The geometric target after strategy-specific hosting transforms. For a sidewall
+        /// family the engine candidate is intentionally inboard, while Revit must place the
+        /// insertion point on the wall face; post-placement validation compares to this value.
+        /// </summary>
+        public XYZ ExpectedLocation;
 
         public bool Created => Instance != null && Instance.Id != ElementId.InvalidElementId;
 
@@ -106,7 +115,8 @@ namespace FireProtection.Backend.Services.Placement.Sprinklers.Final.Strategies
             string hostingStrategy,
             string ceilingSource,
             string linkInstanceName = null,
-            string hostCeilingElementId = null)
+            string hostCeilingElementId = null,
+            XYZ expectedLocation = null)
         {
             return new PlacementOutcome
             {
@@ -116,7 +126,8 @@ namespace FireProtection.Backend.Services.Placement.Sprinklers.Final.Strategies
                 HostingStrategy = hostingStrategy,
                 CeilingSource = ceilingSource ?? "none",
                 LinkInstanceName = linkInstanceName,
-                HostCeilingElementId = hostCeilingElementId
+                HostCeilingElementId = hostCeilingElementId,
+                ExpectedLocation = expectedLocation
             };
         }
     }

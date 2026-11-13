@@ -31,6 +31,9 @@ namespace FireProtection.Backend.Services.Placement.Sprinklers.Final.Strategies
         /// <summary>The candidate point fell outside its own room polygon in host coordinates — refused before
         /// any element was created. Non-zero counts here point at a coordinate-space (linked-model transform) bug.</summary>
         public const string OutsideRoomBoundary = "OUTSIDE_ROOM_BOUNDARY";
+
+        /// <summary>Skipped because candidate location conflicts with a detected obstacle and user opted not to ignore.</summary>
+        public const string ObstacleConflict = "OBSTACLE_CONFLICT";
     }
 
     /// <summary>

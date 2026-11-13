@@ -23,6 +23,14 @@ namespace FireProtection.Backend.Services.Placement.Sprinklers.Final
         public string CeilingType { get; set; }
         public List<double[]> Polygon { get; set; }
 
+        /// <summary>
+        /// Rehydrated boundary payload from the room extraction, when the caller carries
+        /// the full RoomData. Its OuterLoop.Segments carry the wall / non-wall segment
+        /// classification the sidewall edge mask depends on (Decision 032). When absent,
+        /// every polygon edge is treated as a wall (legacy all-true behavior).
+        /// </summary>
+        public BoundaryData Boundary { get; set; }
+
         public List<CeilingData> Ceilings { get; set; }
         public List<ObstacleData> Obstacles { get; set; }
         public List<ExistingSprinklerData> ExistingSprinklers { get; set; }
@@ -99,11 +107,33 @@ namespace FireProtection.Backend.Services.Placement.Sprinklers.Final
                         }
                     }
 
-                    BoundaryData boundary = new BoundaryData
+                    BoundaryData boundary;
+                    if (sel.Boundary?.OuterLoop?.Segments != null && sel.Boundary.OuterLoop.Segments.Count > 0)
                     {
-                        Polygon = polyCopy,
-                        OuterLoop = new BoundaryLoopData { IsOuter = true, Polygon = polyCopy }
-                    };
+                        // Rehydrated boundary from the room extraction: carries the wall /
+                        // non-wall segment classification so BuildWallEdgeMask can restrict
+                        // sidewall rows to real wall edges (Decision 032). Polygon stays the
+                        // UI-normalized copy; BuildWallEdgeMask matches segment count
+                        // mismatches to the nearest polygon edge.
+                        boundary = new BoundaryData
+                        {
+                            Polygon = polyCopy,
+                            OuterLoop = new BoundaryLoopData
+                            {
+                                IsOuter = true,
+                                Polygon = polyCopy,
+                                Segments = sel.Boundary.OuterLoop.Segments
+                            }
+                        };
+                    }
+                    else
+                    {
+                        boundary = new BoundaryData
+                        {
+                            Polygon = polyCopy,
+                            OuterLoop = new BoundaryLoopData { IsOuter = true, Polygon = polyCopy }
+                        };
+                    }
 
                     string rowFamily = !string.IsNullOrEmpty(sel.SelectedSprinklerFamilyName) ? sel.SelectedSprinklerFamilyName : selectedFamilyName;
                     string rowType = !string.IsNullOrEmpty(sel.SelectedSprinklerTypeName) ? sel.SelectedSprinklerTypeName : selectedTypeName;

@@ -1,0 +1,87 @@
+<Window x:Class="SPA.SynthFire.PreviewLab.MainWindow"
+        xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        xmlns:ctrl="clr-namespace:SPA.SynthFire.UI.Controls;assembly=SPA.SynthFire.UI"
+        Title="Advanced Design Tool — Preview Lab" Height="720" Width="1120"
+        Background="#1B1F24" WindowStartupLocation="CenterScreen">
+    <Window.Resources>
+        <SolidColorBrush x:Key="Ink" Color="#E6E9ED"/>
+        <SolidColorBrush x:Key="Sub" Color="#9AA3AD"/>
+        <Style TargetType="TextBlock">
+            <Setter Property="Foreground" Value="{StaticResource Ink}"/>
+            <Setter Property="FontFamily" Value="Segoe UI"/>
+        </Style>
+    </Window.Resources>
+
+    <Grid>
+        <Grid.ColumnDefinitions>
+            <ColumnDefinition Width="270"/>
+            <ColumnDefinition Width="*"/>
+        </Grid.ColumnDefinitions>
+
+        <!-- Left info panel -->
+        <Border Grid.Column="0" Background="#22272E" Padding="16">
+            <StackPanel>
+                <TextBlock Text="LEVEL DETAILS" FontSize="12" FontWeight="Bold" Foreground="{StaticResource Sub}"/>
+                <TextBlock x:Name="LevelNameText" Text="—" FontSize="18" FontWeight="SemiBold" Margin="0,4,0,12"/>
+                <TextBlock x:Name="TotalDevicesText" Text="Total devices: —" Margin="0,2"/>
+                <TextBlock x:Name="TotalNonCompText" Text="Non-compliances: —" Margin="0,2,0,16"/>
+
+                <TextBlock Text="PROPERTIES" FontSize="12" FontWeight="Bold" Foreground="{StaticResource Sub}"/>
+                <TextBlock x:Name="SelName" Text="(click a room)" FontSize="15" FontWeight="SemiBold" Margin="0,4,0,8"/>
+                <TextBlock x:Name="SelArea" Text="Floor area: —" Margin="0,2"/>
+                <TextBlock x:Name="SelDevices" Text="Devices: —" Margin="0,2"/>
+                <TextBlock x:Name="SelCoverage" Text="Coverage: —" Margin="0,2"/>
+                <TextBlock x:Name="SelNonComp" Text="Non-compliances: —" Margin="0,2,0,16"/>
+
+                <TextBlock Text="LEGEND" FontSize="12" FontWeight="Bold" Foreground="{StaticResource Sub}"/>
+                <StackPanel Orientation="Horizontal" Margin="0,6,0,3">
+                    <Rectangle Width="16" Height="16" Fill="#805AC850"/>
+                    <TextBlock Text="Covered (1 device)" Margin="8,0"/>
+                </StackPanel>
+                <StackPanel Orientation="Horizontal" Margin="0,3">
+                    <Rectangle Width="16" Height="16" Fill="#CC46AA50"/>
+                    <TextBlock Text="Overlap (2+ devices)" Margin="8,0"/>
+                </StackPanel>
+                <StackPanel Orientation="Horizontal" Margin="0,3">
+                    <Rectangle Width="16" Height="16" Fill="#5FDC3737"/>
+                    <TextBlock Text="Uncovered gap" Margin="8,0"/>
+                </StackPanel>
+                <StackPanel Orientation="Horizontal" Margin="0,3">
+                    <Rectangle Width="16" Height="16" Fill="#96969696"/>
+                    <TextBlock Text="Obstructed floor" Margin="8,0"/>
+                </StackPanel>
+                <TextBlock Text="PROVISIONAL coverage geometry — review before issue."
+                           TextWrapping="Wrap" FontSize="11" Foreground="#C8A24B" Margin="0,16,0,0"/>
+            </StackPanel>
+        </Border>
+
+        <!-- Plan canvas + toolbar -->
+        <Grid Grid.Column="1">
+            <Grid.RowDefinitions>
+                <RowDefinition Height="*"/>
+                <RowDefinition Height="Auto"/>
+            </Grid.RowDefinitions>
+
+            <ctrl:CoveragePlanCanvas x:Name="Plan" Grid.Row="0"/>
+
+            <Border Grid.Row="1" Background="#22272E" Padding="10">
+                <Grid>
+                    <StackPanel Orientation="Horizontal" HorizontalAlignment="Left">
+                        <Button x:Name="ZoomOutBtn" Content="—" Width="34" Margin="0,0,6,0"/>
+                        <TextBlock x:Name="ZoomText" Text="100%" VerticalAlignment="Center"
+                                   Width="64" TextAlignment="Center"/>
+                        <Button x:Name="ZoomInBtn" Content="+" Width="34" Margin="6,0"/>
+                        <Button x:Name="ResetBtn" Content="Reset" Width="64" Margin="6,0"/>
+                        <TextBlock Text="scroll = zoom · drag = pan · click = select"
+                                   Foreground="{StaticResource Sub}" VerticalAlignment="Center" Margin="16,0"/>
+                    </StackPanel>
+                    <StackPanel Orientation="Horizontal" HorizontalAlignment="Right">
+                        <Button x:Name="PlaceBtn" Content="Place Sprinklers" Width="140" Margin="0,0,8,0"/>
+                        <Button x:Name="CancelBtn" Content="Cancel" Width="90"/>
+                    </StackPanel>
+                </Grid>
+            </Border>
+        </Grid>
+    </Grid>
+</Window>

@@ -969,6 +969,8 @@ namespace FireProtection.UI.ViewModels.Devices
             return true;
         }
 
+        private bool _ignoreObstacles = true;
+
         private void ExecutePlaceDevices()
         {
             if (IsBackendPending)
@@ -983,6 +985,18 @@ namespace FireProtection.UI.ViewModels.Devices
             }
 
             if (IsPlacementRunning) return;
+
+            // Obstacle handling prompt: always asks user whether to place regardless of detected obstacles
+            string deviceNoun = DeviceDisplayName.ToLowerInvariant();
+            MessageBoxResult obstaclePromptResult = Dialogs.Show(
+                $"Place {deviceNoun} at calculated locations regardless of detected obstacles?\n\n" +
+                $"• Click 'Yes' to place all {deviceNoun} (even where obstacles are detected).\n" +
+                $"• Click 'No' to skip candidate locations that conflict with obstacles.",
+                "Obstacle Handling Confirmation",
+                MessageBoxButton.YesNo,
+                MessageBoxImage.Question);
+
+            _ignoreObstacles = (obstaclePromptResult == MessageBoxResult.Yes);
 
             if (ExistingDevicePolicySelection == ExistingDevicePolicy.ReplaceExisting &&
                 !Dialogs.Confirm(
@@ -1045,7 +1059,7 @@ namespace FireProtection.UI.ViewModels.Devices
                 AddRunLogEntry("Rooms: " + roomSelections.Count + ", Policy: " + ExistingDevicePolicySelection, "INFO");
 
                 PlacementRunReport report = _deviceExecutor.ExecutePlacement(
-                    roomSelections, _progressReporter, ExistingDevicePolicySelection);
+                    roomSelections, _progressReporter, ExistingDevicePolicySelection, _ignoreObstacles);
                 LastDeviceResult = report;
 
                 AddRunLogEntry("Processed " + report.RoomsProcessed + " room(s): " +
@@ -1207,9 +1221,12 @@ namespace FireProtection.UI.ViewModels.Devices
         private List<DeviceRoomInputItem> CollectAllRoomsForEligibility()
         {
             List<DeviceRoomInputItem> list = new List<DeviceRoomInputItem>();
+            bool anyLevelSelected = Levels != null && Levels.Any(l => l.IsSelected);
 
             foreach (DeviceLevelItemViewModel levelVm in Levels)
             {
+                if (anyLevelSelected && !levelVm.IsSelected) continue;
+
                 foreach (DeviceRoomItemViewModel roomVm in levelVm.Rooms)
                 {
                     if (roomVm.Room == null) continue;
@@ -1426,6 +1443,7 @@ namespace FireProtection.UI.ViewModels.Devices
             RaiseRoomCounts();
             if (HideUnselectedLevels) LevelsView.Refresh();
             CommandManager.InvalidateRequerySuggested();
+            RefreshEligibility();
         }
 
         private void OnRoomSelectionChanged(object sender, EventArgs e)
@@ -1592,8 +1610,15 @@ namespace FireProtection.UI.ViewModels.Devices
                     }
                 }
 
+                bool anyLevelSelected = Levels != null && Levels.Any(l => l.IsSelected);
+
                 foreach (DeviceRoomItemViewModel roomVm in AllRooms)
                 {
+                    if (anyLevelSelected && roomVm.ParentLevel != null && !roomVm.ParentLevel.IsSelected)
+                    {
+                        continue;
+                    }
+
                     PlacementEligibilityResult result = null;
 
                     if (allRooms.Count > 0)

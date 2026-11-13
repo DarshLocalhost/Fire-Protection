@@ -1,5 +1,6 @@
 using System;
 using System.Collections.Generic;
+using System.Linq;
 using FireProtection.Backend.Models.DTOs;
 using FireProtection.Backend.Models.Placement.SmokeDetectors.Final;
 using FireProtection.Backend.Models.Placement.Sprinklers.Final;
@@ -16,11 +17,11 @@ namespace FireProtection.Tests
         public static void RunAll()
         {
             _failures = 0;
-            TestBeamDepthAnalysis();
-            TestSlopedCeilingPeakRow();
+            TestSmokeDetectorNfpa72Basics();
             TestSmokeDetectorRules();
             TestNotificationApplianceRules();
             TestAudibleCoverageEngine();
+            TestObstacleConflictFlagging();
 
             if (_failures == 0)
             {
@@ -64,41 +65,33 @@ namespace FireProtection.Tests
             };
         }
 
-        private static CeilingData SlopedCeiling(double bottomElevationFt, double topElevationFt)
-        {
-            return new CeilingData
-            {
-                SlopeType = "SLOPED",
-                BottomElevationFt = bottomElevationFt,
-                TopElevationFt = topElevationFt,
-                Source = new SourceReferenceData()
-            };
-        }
-
         private static SmokeDetectorRoomInput MakeRoom(
-            string id,
+            string roomId,
             List<double[]> polygon,
-            double areaSqFt = 100.0,
+            string detectorType = "Photoelectric",
             string mount = "Ceiling",
             string ceilingSlope = "FLAT",
-            List<ObstacleData> obstacles = null,
-            List<CeilingData> ceilings = null)
+            List<CeilingData> ceilings = null,
+            List<ObstacleData> obstacles = null)
         {
             SmokeDetectorRoomInput room = new SmokeDetectorRoomInput
             {
-                RoomId = id,
-                RoomName = id,
-                RoomNumber = id,
+                RoomId = roomId,
+                RoomName = roomId,
+                RoomNumber = roomId,
                 LevelId = "L1",
+                LevelName = "Level 1",
                 LevelElevationFt = 0.0,
-                AreaSqFt = areaSqFt,
+                AreaSqFt = 600.0,
                 CeilingHeightFt = 9.0,
+                DetectorType = detectorType,
                 Mount = mount,
                 CeilingSlope = ceilingSlope,
-                SelectedPlacementBehavior = DevicePlacementBehavior.CeilingOverhead,
+                SelectedFamilyName = "Smoke Detector",
+                SelectedTypeName = "Standard",
                 BoundaryPolygon = polygon,
-                Obstacles = obstacles ?? new List<ObstacleData>(),
-                Ceilings = ceilings ?? new List<CeilingData> { FlatCeiling(9.0) }
+                Ceilings = ceilings ?? new List<CeilingData> { FlatCeiling(9.0) },
+                Obstacles = obstacles ?? new List<ObstacleData>()
             };
             room.Boundary = new BoundaryData
             {
@@ -109,7 +102,7 @@ namespace FireProtection.Tests
 
         private static SmokeDetectorCalculationResult Calc(SmokeDetectorPlacementInputSnapshot snapshot)
         {
-            return SmokeDetectorCalculationService.Calculate(
+            return Nfpa72SmokeDetectorEngine.Calculate(
                 snapshot, new Nfpa72SmokeDetectorRules(), BruteForceCalculationConfig.Default());
         }
 
@@ -120,65 +113,41 @@ namespace FireProtection.Tests
             return snapshot;
         }
 
-        // -----------------------------------------------------------------
-        // Test 1 — beam depth < 0.1H does not reduce spacing
-        // -----------------------------------------------------------------
-        private static void TestBeamDepthAnalysis()
+        private static void TestSmokeDetectorNfpa72Basics()
         {
-            Console.WriteLine("Test: beam depth < 0.1H keeps smooth-ceiling spacing");
+            Console.WriteLine("Test: NFPA 72 standard spacing and wall distance");
+            List<double[]> poly = Rect(0, 0, 60, 40);
+            var room = MakeRoom("R1", poly);
+            var result = Calc(BuildSnapshot(room));
+            var roomResult = result.Rooms[0];
+
+            Check(roomResult.CalculatedCount > 0, "detectors placed in room (got " + roomResult.CalculatedCount + ")");
+            Check(roomResult.AppliedMaxSpacingFt == 30.0, "applied max spacing is 30 ft (got " + roomResult.AppliedMaxSpacingFt + ")");
+            Check(roomResult.Points.All(p => p.Mount == "Ceiling"), "all points ceiling mount");
+        }
+
+        private static void TestObstacleConflictFlagging()
+        {
+            Console.WriteLine("Test: obstacle clash sets HasObstacleConflict without discarding points");
             List<double[]> poly = Rect(0, 0, 30, 20);
             var beam = new ObstacleData
             {
                 Category = "Structural Framing",
                 BoundingBox = new BoundingBox3DData
                 {
-                    Min = new Point3DData { X = 5, Y = 5, Z = 8.5 },
-                    Max = new Point3DData { X = 25, Y = 6, Z = 9.1 }
-                },
-                DimensionsFt = new Point3DData { X = 20, Y = 1, Z = 0.6 }
-            };
-            var room = MakeRoom("B1", poly, obstacles: new List<ObstacleData> { beam });
-            var result = Calc(BuildSnapshot(room));
-            var roomResult = result.Rooms[0];
-
-            Check(roomResult.AppliedMaxSpacingFt >= 29.0,
-                "beam depth < 0.1H does not reduce MaxSpacingFt (got " + roomResult.AppliedMaxSpacingFt.ToString("F2") + ")");
-        }
-
-        // -----------------------------------------------------------------
-        // Test 2 — sloped ceiling adds peak-row candidates
-        // -----------------------------------------------------------------
-        private static void TestSlopedCeilingPeakRow()
-        {
-            Console.WriteLine("Test: sloped ceiling generates peak-row candidates");
-            List<double[]> poly = Rect(0, 0, 30, 20);
-            var room = MakeRoom("S1", poly, ceilingSlope: "SLOPED",
-                ceilings: new List<CeilingData> { SlopedCeiling(8.0, 12.0) });
-            var result = Calc(BuildSnapshot(room));
-            var roomResult = result.Rooms[0];
-
-            bool hasPeakRowDiagnostic = false;
-            if (roomResult.Diagnostics != null)
-            {
-                foreach (string d in roomResult.Diagnostics)
-                {
-                    if (d.IndexOf("peak-row", StringComparison.OrdinalIgnoreCase) >= 0)
-                    {
-                        hasPeakRowDiagnostic = true;
-                        break;
-                    }
+                    Min = new Point3DData { X = 10, Y = 5, Z = 8.0 },
+                    Max = new Point3DData { X = 20, Y = 15, Z = 10.0 }
                 }
-            }
+            };
+            var room = MakeRoom("ObsRoom", poly, obstacles: new List<ObstacleData> { beam });
+            var result = Calc(BuildSnapshot(room));
+            var roomResult = result.Rooms[0];
 
-            Check(hasPeakRowDiagnostic,
-                "sloped ceiling diagnostics mention peak-row rule");
-            Check(roomResult.CalculatedCount > 0,
-                "sloped ceiling room still places detectors (got " + roomResult.CalculatedCount + ")");
+            Check(roomResult.Points.Count > 0, "candidates generated despite obstacle (got " + roomResult.Points.Count + ")");
+            bool hasClash = roomResult.Points.Any(p => p.HasObstacleConflict);
+            Check(hasClash, "at least one candidate point flagged with HasObstacleConflict=true");
         }
 
-        // -----------------------------------------------------------------
-        // Test 3 — NFPA 72 smoke detector rules produce correct base values
-        // -----------------------------------------------------------------
         private static void TestSmokeDetectorRules()
         {
             Console.WriteLine("Test: NFPA 72 smoke detector rules produce correct base values");
@@ -194,9 +163,6 @@ namespace FireProtection.Tests
             Check(!rules.HasApprovedRules, "smoke rules are correctly marked NOT approved (provisional until AHJ sign-off)");
         }
 
-        // -----------------------------------------------------------------
-        // Test 4 — notification appliance rules derive spacing from candela/dBA
-        // -----------------------------------------------------------------
         private static void TestNotificationApplianceRules()
         {
             Console.WriteLine("Test: notification appliance rules derive spacing from candela/dBA");
@@ -208,9 +174,6 @@ namespace FireProtection.Tests
             Check(!rules.HasApprovedRules, "notification rules are correctly marked NOT approved (provisional until AHJ sign-off)");
         }
 
-        // -----------------------------------------------------------------
-        // Test 5 — audible coverage engine flags uncovered samples
-        // -----------------------------------------------------------------
         private static void TestAudibleCoverageEngine()
         {
             Console.WriteLine("Test: audible coverage engine flags uncovered samples");

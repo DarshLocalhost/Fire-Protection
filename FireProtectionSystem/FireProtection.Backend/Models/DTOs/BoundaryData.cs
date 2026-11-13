@@ -29,6 +29,15 @@ namespace FireProtection.Backend.Models.DTOs
 
         [JsonProperty("radiusFt")]
         public double? RadiusFt { get; set; }
+
+        /// <summary>
+        /// True when this boundary segment corresponds to a physical wall element
+        /// in the Revit model. False for non-wall boundaries such as glass curtain
+        /// walls, room-separation lines, or opening edges. Defaults to true for
+        /// backward compatibility with extraction data that predates this field.
+        /// </summary>
+        [JsonProperty("isWall")]
+        public bool IsWall { get; set; } = true;
     }
 
     public class BoundaryLoopData

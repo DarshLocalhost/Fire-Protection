@@ -82,7 +82,7 @@ namespace FireProtection.Tests
 
             public SprinklerPlacementResult PlaceSprinklers(
                 string selectedFamilyName, string selectedTypeName, BruteForceCalculationResult calcResult,
-                IPlacementProgress progress, ExistingDevicePolicy existingDevicePolicy) => null;
+                IPlacementProgress progress, ExistingDevicePolicy existingDevicePolicy, bool ignoreObstacles = true) => null;
 
             public PlacementEligibilityResult EvaluateRoomEligibility(
                 RoomUiData room, IReadOnlyList<CalculatedSprinklerPoint> candidates,

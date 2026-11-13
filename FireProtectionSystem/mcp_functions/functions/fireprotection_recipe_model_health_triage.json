@@ -1,0 +1,71 @@
+{
+  "name": "fireprotection_recipe_model_health_triage",
+  "title": "Run model health triage recipe",
+  "description": "WORKFLOW RECIPE (read-only): runs a model-health scan and returns a prioritized, actionable triage list — each issue with its severity and a recommended fix. Composes get_model_health internally; use this instead of get_model_health when you want guidance, not raw metrics. Checks warnings, file size, imported vs linked CAD, in-place families, model/detail groups, views not on sheets, element counts by category, and complexity counts. Returns a scorecard with a letter grade (A-F), a 0-100 score, and flagged issues with recommended fixes.",
+  "input_schema": {
+    "type": "object",
+    "properties": {
+      "deep": { "type": "boolean", "default": false, "description": "Include the purge scan (Document.GetUnusedElements). Slower on large models." }
+    },
+    "additionalProperties": false
+  },
+  "output_schema": {
+    "type": "object",
+    "properties": {
+      "scorecard": {
+        "type": "object",
+        "properties": {
+          "grade": { "type": "string", "enum": ["A", "B", "C", "D", "F"] },
+          "score": { "type": "integer", "minimum": 0, "maximum": 100 },
+          "flagged_issues": { "type": "integer" }
+        },
+        "required": ["grade", "score", "flagged_issues"]
+      },
+      "triage_items": {
+        "type": "array",
+        "items": {
+          "type": "object",
+          "properties": {
+            "category": { "type": "string" },
+            "severity": { "type": "string", "enum": ["Critical", "High", "Medium", "Low", "Info"] },
+            "title": { "type": "string" },
+            "description": { "type": "string" },
+            "recommended_fix": { "type": "string" },
+            "affected_count": { "type": "integer" }
+          },
+          "required": ["category", "severity", "title", "description", "recommended_fix", "affected_count"]
+        }
+      },
+      "metrics": {
+        "type": "object",
+        "properties": {
+          "file_size_mb": { "type": "number" },
+          "warning_count": { "type": "integer" },
+          "imported_cad_count": { "type": "integer" },
+          "linked_cad_count": { "type": "integer" },
+          "in_place_family_count": { "type": "integer" },
+          "model_group_count": { "type": "integer" },
+          "detail_group_count": { "type": "integer" },
+          "views_not_on_sheets": { "type": "integer" },
+          "element_counts_by_category": { "type": "object", "additionalProperties": { "type": "integer" } },
+          "levels_count": { "type": "integer" },
+          "grids_count": { "type": "integer" },
+          "design_options_count": { "type": "integer" },
+          "reference_planes_count": { "type": "integer" }
+        },
+        "required": ["file_size_mb", "warning_count", "imported_cad_count", "linked_cad_count", "in_place_family_count", "model_group_count", "detail_group_count", "views_not_on_sheets", "element_counts_by_category", "levels_count", "grids_count", "design_options_count", "reference_planes_count"]
+      }
+    },
+    "required": ["scorecard", "triage_items", "metrics"]
+  },
+  "input_examples": [
+    { "deep": false },
+    { "deep": true }
+  ],
+  "annotations": {
+    "readOnlyHint": true,
+    "destructiveHint": false,
+    "idempotentHint": true,
+    "openWorldHint": false
+  }
+}

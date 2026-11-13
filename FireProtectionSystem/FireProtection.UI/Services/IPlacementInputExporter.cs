@@ -57,11 +57,19 @@ namespace FireProtection.UI.Services
         public double? TypeMinSpacingFt { get; set; }
         public double? TypeCoverageRadiusFt { get; set; }
         public string SprinklerClass { get; set; }
+        public double? TypeSidewallMaxThrowFt { get; set; }
+        public double? DeflectorToCeilingIn { get; set; }
 
         // Full room payload (ceilings, obstacles, existingSprinklers, source, etc.) captured
         // from the ModelSnapshot JSON and forwarded to the exporter. The Backend rehydrates
         // its own DTOs from this, avoiding any circular project dependency.
         public JObject FullRoomJson { get; set; }
+
+        /// <summary>
+        /// Optional live existing sprinkler coordinates (X, Y) collected directly from the active model.
+        /// If provided, overrides any stale existing sprinklers in the cached snapshot.
+        /// </summary>
+        public List<double[]> LiveExistingSprinklerPoints { get; set; }
 
         public PlacementRoomInputItem()
         {

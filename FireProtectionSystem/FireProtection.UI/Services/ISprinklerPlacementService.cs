@@ -21,12 +21,17 @@ namespace FireProtection.UI.Services
         /// <param name="existingDevicePolicy">
         /// What to do with rooms that already contain sprinklers, i.e. what a second run does.
         /// </param>
+        /// <param name="ignoreObstacles">
+        /// When true, places sprinklers at candidate locations regardless of obstacle conflicts.
+        /// When false, skips candidate points that conflict with obstacles.
+        /// </param>
         SprinklerPlacementResult PlaceSprinklers(
             string selectedFamilyName,
             string selectedTypeName,
             BruteForceCalculationResult calcResult,
             IPlacementProgress progress = null,
-            ExistingDevicePolicy existingDevicePolicy = ExistingDevicePolicy.SkipRoom);
+            ExistingDevicePolicy existingDevicePolicy = ExistingDevicePolicy.SkipRoom,
+            bool ignoreObstacles = true);
 
         /// <summary>
         /// Authoritative pre-placement eligibility / preflight for a single room given the currently selected

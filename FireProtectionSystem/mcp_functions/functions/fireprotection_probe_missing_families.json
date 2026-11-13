@@ -1,0 +1,57 @@
+{
+  "name": "fireprotection_probe_missing_families",
+  "title": "Probe for missing sprinkler families",
+  "description": "Read-only probe that lists (Room, Family, Type) entries whose chosen family/type is not loadable in the current Revit model. Returns an empty list when every row's family is available. No elements are created. This is useful before running a placement to ensure all required families are loaded. The probe checks against the OST_Sprinklers category in the active document.",
+  "input_schema": {
+    "type": "object",
+    "properties": {
+      "calculation_result": {
+        "type": "object",
+        "description": "BruteForceCalculationResult from fireprotection_calculate_sprinkler_layout.",
+        "properties": {
+          "success": { "type": "boolean" },
+          "rooms": { "type": "array", "items": { "type": "object" } },
+          "warnings": { "type": "array", "items": { "type": "string" } },
+          "errors": { "type": "array", "items": { "type": "string" } }
+        },
+        "required": ["rooms"]
+      }
+    },
+    "required": ["calculation_result"],
+    "additionalProperties": false
+  },
+  "output_schema": {
+    "type": "object",
+    "properties": {
+      "missing_families": {
+        "type": "array",
+        "items": {
+          "type": "object",
+          "properties": {
+            "room_id": { "type": "string" },
+            "room_name": { "type": "string" },
+            "family_name": { "type": "string" },
+            "type_name": { "type": "string" }
+          },
+          "required": ["room_id", "room_name", "family_name", "type_name"]
+        }
+      }
+    },
+    "required": ["missing_families"]
+  },
+  "input_examples": [
+    {
+      "calculation_result": {
+        "rooms": [],
+        "warnings": [],
+        "errors": []
+      }
+    }
+  ],
+  "annotations": {
+    "readOnlyHint": true,
+    "destructiveHint": false,
+    "idempotentHint": true,
+    "openWorldHint": false
+  }
+}

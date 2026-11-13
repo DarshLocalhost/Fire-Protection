@@ -12,7 +12,8 @@ namespace FireProtection.UI.Services
         PlacementRunReport ExecutePlacement(
             IReadOnlyList<DeviceRoomInputItem> items,
             IPlacementProgress progress = null,
-            ExistingDevicePolicy existingDevicePolicy = ExistingDevicePolicy.SkipRoom);
+            ExistingDevicePolicy existingDevicePolicy = ExistingDevicePolicy.SkipRoom,
+            bool ignoreObstacles = true);
 
         /// <summary>
         /// Read-only pre-placement eligibility check for a batch of rooms, keyed by <see cref="DeviceRoomInputItem.RoomId"/>.

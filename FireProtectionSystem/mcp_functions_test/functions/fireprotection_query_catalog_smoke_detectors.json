@@ -1,0 +1,52 @@
+{
+  "name": "fireprotection_query_catalog_smoke_detectors",
+  "title": "Query smoke detector catalog entries",
+  "description": "Queries the loaded smoke detector catalog for families, types, and their properties. Returns all smoke detector families, or types for a specific family, or full entries for a family. Use this to populate UI dropdowns or to look up detector specifications (detector type, mount, ceiling slope) before running calculations.",
+  "input_schema": {
+    "type": "object",
+    "properties": {
+      "family_name": {
+        "type": "string",
+        "description": "Optional family name to filter by. If omitted, returns all families."
+      },
+      "include_entries": {
+        "type": "boolean",
+        "default": false,
+        "description": "If true and family_name is provided, returns full entries with all properties."
+      }
+    },
+    "additionalProperties": false
+  },
+  "output_schema": {
+    "type": "object",
+    "properties": {
+      "families": { "type": "array", "items": { "type": "string" } },
+      "types_for_family": { "type": "array", "items": { "type": "string" } },
+      "entries": {
+        "type": "array",
+        "items": {
+          "type": "object",
+          "properties": {
+            "family_name": { "type": "string" },
+            "type_name": { "type": "string" },
+            "detector_type": { "type": "string" },
+            "mount": { "type": "string" },
+            "ceiling_slope": { "type": "string" }
+          },
+          "required": ["family_name", "type_name"]
+        }
+      }
+    },
+    "required": ["families"]
+  },
+  "input_examples": [
+    {},
+    { "family_name": "System Sensor 2W-B", "include_entries": true }
+  ],
+  "annotations": {
+    "readOnlyHint": true,
+    "destructiveHint": false,
+    "idempotentHint": true,
+    "openWorldHint": false
+  }
+}

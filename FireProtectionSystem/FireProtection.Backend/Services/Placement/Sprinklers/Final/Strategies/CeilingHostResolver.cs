@@ -196,92 +196,114 @@ namespace FireProtection.Backend.Services.Placement.Sprinklers.Final.Strategies
 
             Options geomOptions = new Options { ComputeReferences = true, DetailLevel = ViewDetailLevel.Coarse };
 
+            double levelElevation = level != null ? level.Elevation : (point.Z - 8.0);
+            double minZ = levelElevation + 3.0; // overhead surfaces must be at least 3 ft above room floor
+            double maxZ = levelElevation + 35.0; // room height upper envelope
+
+            const double xyTol = 1.0;
+
+            Reference bestDownwardRef = null;
+            ElementId bestDownwardId = null;
+            XYZ bestDownwardProj = null;
+            double lowestDownwardZ = double.MaxValue;
+
+            Reference fallbackAnyRef = null;
+            ElementId fallbackAnyId = null;
+            XYZ fallbackAnyProj = null;
+            double fallbackDist = double.MaxValue;
+
             foreach (Element element in candidates)
             {
                 if (useLevelFilter && level != null && element.LevelId != null && element.LevelId != ElementId.InvalidElementId)
                 {
-                    if (!element.LevelId.Equals(level.Id)) continue;
+                    // For finished ceilings, level matching ensures we pick the room's ceiling.
+                    // For floors and roofs serving as overhead slabs, their LevelId is typically the level ABOVE,
+                    // so level matching must not reject them (their 3D bounding box and face projection already
+                    // ensure they are at the correct elevation).
+                    if (element is Ceiling && !element.LevelId.Equals(level.Id)) continue;
                 }
 
                 BoundingBoxXYZ bb = element.get_BoundingBox(null);
                 if (bb == null) continue;
 
-                const double xyTol = 1.0;
-                const double zTol = 4.0;
-
+                // Check horizontal column contains the candidate point
                 if (point.X < bb.Min.X - xyTol || point.X > bb.Max.X + xyTol) continue;
                 if (point.Y < bb.Min.Y - xyTol || point.Y > bb.Max.Y + xyTol) continue;
-                if (point.Z < bb.Min.Z - zTol || point.Z > bb.Max.Z + zTol) continue;
+
+                // Check vertical column intersects the room's overhead elevation band
+                if (bb.Max.Z < minZ || bb.Min.Z > maxZ) continue;
 
                 GeometryElement geom = element.get_Geometry(geomOptions);
                 if (geom == null) continue;
 
-                XYZ tempProj;
-                Reference found = FindHostFaceReference(geom, point, zTol, out tempProj);
-                if (found != null)
+                foreach (GeometryObject obj in geom)
                 {
-                    ceilingId = element.Id;
-                    projectedOnFace = tempProj;
-                    return found;
-                }
-            }
-
-            return null;
-        }
-
-        private static Reference FindHostFaceReference(GeometryElement geom, XYZ point, double tol, out XYZ projectedOnFace)
-        {
-            projectedOnFace = null;
-            Reference bestDownward = null;
-            double lowestZ = double.MaxValue; // CRITICAL: Guarantee we get the absolute lowest face
-
-            Reference bestAny = null;
-            double bestAnyDist = double.MaxValue;
-            XYZ bestAnyProj = null;
-
-            foreach (GeometryObject obj in geom)
-            {
-                foreach (Solid solid in ExtractSolids(obj))
-                {
-                    if (solid == null || solid.Faces.Size == 0) continue;
-
-                    foreach (Face face in solid.Faces)
+                    foreach (Solid solid in ExtractSolids(obj))
                     {
-                        PlanarFace planar = face as PlanarFace;
-                        if (planar == null) continue;
+                        if (solid == null || solid.Faces.Size == 0) continue;
 
-                        IntersectionResult ir = planar.Project(point);
-                        if (ir == null || double.IsNaN(ir.Distance)) continue;
-                        double d = Math.Abs(ir.Distance);
-                        if (d > tol) continue;
-
-                        // Only consider faces pointing down, and save the one with the lowest Z elevation
-                        if (planar.FaceNormal.Z < -0.5)
+                        foreach (Face face in solid.Faces)
                         {
-                            if (ir.XYZPoint.Z < lowestZ)
+                            PlanarFace planar = face as PlanarFace;
+                            if (planar == null) continue;
+
+                            IntersectionResult ir = planar.Project(point);
+                            if (ir == null || double.IsNaN(ir.Distance)) continue;
+
+                            double faceZ = ir.XYZPoint.Z;
+                            if (faceZ < minZ || faceZ > maxZ) continue;
+
+
+
+
+
+                            
+
+                            //Downward planar face: we want the lowest overhead surface directly above(point.X, point.Y)
+                            if (planar.FaceNormal.Z < -0.5)
                             {
-                                lowestZ = ir.XYZPoint.Z;
-                                bestDownward = planar.Reference;
-                                projectedOnFace = ir.XYZPoint;
+                                if (faceZ < lowestDownwardZ)
+                                {
+                                    lowestDownwardZ = faceZ;
+                                    bestDownwardRef = planar.Reference;
+                                    bestDownwardId = element.Id;
+                                    bestDownwardProj = ir.XYZPoint;
+                                }
                             }
-                        }
-                        else if (d < bestAnyDist)
-                        {
-                            bestAnyDist = d;
-                            bestAny = planar.Reference;
-                            bestAnyProj = ir.XYZPoint;
+                            else if (bestDownwardRef == null)
+                            {
+                                double d = Math.Abs(ir.Distance);
+                                if (d < fallbackDist)
+                                {
+                                    fallbackDist = d;
+                                    fallbackAnyRef = planar.Reference;
+                                    fallbackAnyId = element.Id;
+                                    fallbackAnyProj = ir.XYZPoint;
+                                }
+                            }
                         }
                     }
                 }
             }
 
-            if (bestDownward != null)
+            if (bestDownwardRef != null)
             {
-                return bestDownward;
+                ceilingId = bestDownwardId;
+                projectedOnFace = bestDownwardProj;
+                return bestDownwardRef;
             }
 
-            projectedOnFace = bestAnyProj;
-            return bestAny;
+            if (fallbackAnyRef != null)
+            {
+                ceilingId = fallbackAnyId;
+                projectedOnFace = fallbackAnyProj;
+                return fallbackAnyRef;
+            }
+
+            return null;
+
+
+
         }
 
         private static IEnumerable<Solid> ExtractSolids(GeometryObject obj)

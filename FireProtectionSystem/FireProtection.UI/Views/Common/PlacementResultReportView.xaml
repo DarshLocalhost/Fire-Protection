@@ -165,6 +165,7 @@
                     <DataGrid.Columns>
                         <DataGridTextColumn Header="Room" Binding="{Binding RoomName}" Width="*"/>
                         <DataGridTextColumn Header="Level" Binding="{Binding LevelName}" Width="100"/>
+                        <DataGridTextColumn Header="Coverage" Binding="{Binding CoverageText}" Width="85"/>
                         <DataGridTextColumn Header="Status" Binding="{Binding Status}" Width="100"/>
                         <DataGridTextColumn Header="Placed" Binding="{Binding PointsPlaced}" Width="70"/>
                         <DataGridTextColumn Header="Requested" Binding="{Binding PointsRequested}" Width="80"/>

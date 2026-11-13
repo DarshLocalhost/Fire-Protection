@@ -170,6 +170,7 @@ namespace FireProtection.Backend.Services.Placement.Sprinklers.Final.BruteForce
                 {
                     placementZ = bestCeiling.BottomElevationFt.Value;
                 }
+
                 if (result != null && !string.IsNullOrEmpty(selectionReason))
                 {
                     result.Diagnostics.Add(selectionReason);
@@ -423,6 +424,8 @@ namespace FireProtection.Backend.Services.Placement.Sprinklers.Final.BruteForce
                     return false;
                 }
 
+
+               
                 // Ch.19 p.220: the minimum distance to a wall is 4 inches. The rule-set value may
                 // be larger (a design choice) but must never be smaller than the code minimum.
                 double effectiveBoundary = Math.Max(ruleSet.BoundaryClearanceFt,
@@ -434,69 +437,9 @@ namespace FireProtection.Backend.Services.Placement.Sprinklers.Final.BruteForce
                     return false;
                 }
 
+                // Chapter 20 lower zone bookkeeping
                 foreach (ObstacleBox box in obstacleBoxes)
                 {
-                    bool spansPlacement = box.SpansZ(placementZ, config.ToleranceFt);
-
-                    // ---- Chapter 20, upper zone: the "Three Times" rule -------------------
-                    // Ch.20 p.248: distance from the near edge of a vertical or open horizontal
-                    // obstruction must be >= 3 x the obstruction's MAXIMUM dimension, capped at
-                    // 24 in. Applies to columns and to open joist/truss bottom chords.
-                    if (spansPlacement && box.IsStructuralMember
-                        && IsThreeTimesRuleCategory(box.Category))
-                    {
-                        double required = Math.Min(
-                            Nfpa13RulebookRules.ThreeTimesRuleFactor * box.MaxHorizontalDimensionFt,
-                            Nfpa13RulebookRules.ThreeTimesRuleMaxRequiredDistanceFt);
-
-                        double toEdge = box.DistanceToNearEdge(x, y);
-
-                        // Exception (Ch.20 p.248): the rule can be ignored when sprinklers are
-                        // installed on the OTHER side, provided they are within half the allowable
-                        // spacing of the obstruction centreline. Existing sprinklers count too.
-                        bool otherSideSprinklerWithinHalfSpacing = false;
-                        double halfSpacing = ruleSet.MaxSpacingFt * Nfpa13RulebookRules.ThreeTimesExceptionHalfSpacing;
-                        foreach (double[] es in existingSprinklerXy)
-                        {
-                            if (box.DistanceToCenterline(es[0], es[1]) <= halfSpacing)
-                            {
-                                otherSideSprinklerWithinHalfSpacing = true;
-                                break;
-                            }
-                        }
-
-                        if (!otherSideSprinklerWithinHalfSpacing && toEdge < required - config.ToleranceFt)
-                        {
-                            rejectedThreeTimesRule++;
-                            return false;
-                        }
-                    }
-
-                    // ---- Legacy flat clearance, retained for non-structural obstructions ----
-                    // Ducts, pipes and cable trays have no Chapter 20 dimension-based rule in this
-                    // design basis (see Nfpa13RulebookRules.KnownGaps), so they keep a flat
-                    // clearance exclusion.
-                    if (!box.IsStructuralMember
-                        && GeometryMath.InsideExpandedBox(x, y, box.MinX, box.MinY, box.MaxX, box.MaxY, box.ClearanceFt)
-                        && spansPlacement)
-                    {
-                        rejectedObstacle++;
-                        return false;
-                    }
-
-                    // ---- Beam-rule candidate rejection ------------------------------------
-                    // The Beam rule (NFPA 13 Table 8.6.5.1.2) clear-distance lookup is NOT in the
-                    // rulebook, so no numeric distance is invented. Where a member is tight to the
-                    // ceiling and continuous, the point is only rejected if it lies inside the
-                    // member's own footprint (which is certainly wrong), and the room is flagged.
-                    if (spansPlacement && box.IsStructuralMember
-                        && GeometryMath.InsideExpandedBox(x, y, box.MinX, box.MinY, box.MaxX, box.MaxY, 0.0))
-                    {
-                        rejectedBeamRule++;
-                        return false;
-                    }
-
-                    // ---- Chapter 20 lower zone bookkeeping ---------------------------------
                     if (!double.IsNaN(box.MaxZ) && box.MaxZ <= placementZ - Nfpa13RulebookRules.ObstructionZonePlaneBelowSprinklerFt)
                     {
                         if (!belowZoneObstacles.Contains(box)) belowZoneObstacles.Add(box);
@@ -572,6 +515,9 @@ namespace FireProtection.Backend.Services.Placement.Sprinklers.Final.BruteForce
                 existingSprinklerXy, placementZ, gridRes, config, result,
                 ceilingUnsupported, ceilingNote, tileGrid, smallRoomRuleApplied);
         }
+
+
+       
 
         private static RoomCalculationResult SelectCenteredGrid(
             List<CandidatePoint> validCandidates,
@@ -678,40 +624,12 @@ namespace FireProtection.Backend.Services.Placement.Sprinklers.Final.BruteForce
                             }
                         }
 
-                        // ---------------------------------------------------------------
-                        // Obstacle-recovery expanded search (Bug 2 fix)
-                        // ---------------------------------------------------------------
-                        // If the tight captureRadius search found nothing (because a physical
-                        // obstacle like a beam/column/duct blocked the ideal target), scan ALL
-                        // unused candidates within spacing/2. This is the mathematical upper bound
-                        // that still keeps the resulting head within NFPA 13 MaxSpacingFt
-                        // compliance: moving a head by at most S/2 can produce a gap of at
-                        // most S + S/2 = 1.5S to its neighbour in the array, which the
-                        // FinalizeSelection nearest-neighbour check will then flag as a
-                        // warning rather than silently dropping the head.
-                        if (snapIdx < 0)
-                        {
-                            double expandedRadius = spacing / 2.0;
-                            bestDist = double.PositiveInfinity;
-                            for (int c = 0; c < validCandidates.Count; c++)
-                            {
-                                if (used[c]) continue;
-                                double d = GeometryMath.Distance(tx, ty, validCandidates[c].X, validCandidates[c].Y);
-                                if (d > expandedRadius + config.ToleranceFt) continue;
-                                if (d < bestDist - config.ToleranceFt)
-                                {
-                                    bestDist = d;
-                                    snapIdx = c;
-                                    obstacleRecovered = true;
-                                }
-                            }
-                        }
-
                         if (snapIdx < 0)
                         {
                             cellsSkipped++;
                             continue;
                         }
+
                         rx = validCandidates[snapIdx].X;
                         ry = validCandidates[snapIdx].Y;
                     }
@@ -762,7 +680,6 @@ namespace FireProtection.Backend.Services.Placement.Sprinklers.Final.BruteForce
                 $"placed={selected.Count} (exact={placedExact}, snapped={placedSnapped}, " +
                 $"obstacleRecovered={placedObstacleRecovered}), skipped={cellsSkipped}.");
 
-
             if (selected.Count == 0)
             {
                 result.Status = CalculationStatus.Failed;
@@ -772,6 +689,11 @@ namespace FireProtection.Backend.Services.Placement.Sprinklers.Final.BruteForce
                     "Centered-grid placement produced no sprinklers: every grid position was blocked " +
                     "and no valid fallback candidate was within reach.");
                 return result;
+            }
+
+            foreach (CalculatedSprinklerPoint pt in selected)
+            {
+                CheckSprinklerObstacleConflict(pt, obstacleBoxes, existingSprinklerXy, ruleSet, config);
             }
 
             return FinalizeSelection(
@@ -985,46 +907,6 @@ double u = tileGrid.UFt;
 
                         if (!found)
                         {
-                            // ---------------------------------------------------------------
-                            // Obstacle-recovery expanded search (Bug 3 fix)
-                            // ---------------------------------------------------------------
-                            // If none of the 8 immediate neighbours is within snapBudget, try
-                            // any valid tile within spacing/2 of the array target. The upper
-                            // bound spacing/2 is derived from max-spacing mathematics: moving
-                            // the head by at most S/2 can widen its gap to the next array
-                            // position by at most S/2, giving a worst-case distance of
-                            // S + S/2 = 1.5S — which FinalizeSelection's nearest-neighbour
-                            // check then flags as a warning rather than silently dropping the
-                            // head. Search range is capped at extRange tiles in each axis to
-                            // avoid O(all tiles) for large rooms.
-                            int extRange = Math.Max(tileStepU, tileStepV) + 1;
-                            double maxRecoveryDist = Math.Max(spacing, ruleSet.MaxSpacingFt > 0 ? ruleSet.MaxSpacingFt : spacing) / 2.0;
-
-                            for (int dv2 = -extRange; dv2 <= extRange && !found; dv2++)
-                            {
-                                for (int du2 = -extRange; du2 <= extRange; du2++)
-                                {
-                                    // Skip the 8 immediate neighbours already searched above.
-                                    if (Math.Abs(du2) <= 1 && Math.Abs(dv2) <= 1) continue;
-                                    int tiu2 = iuTarget + du2;
-                                    int tiv2 = ivTarget + dv2;
-                                    if (!validIndexSet.Contains(CeilingGridMath.IndexKey(tiu2, tiv2))) continue;
-                                    double d2 = CeilingGridMath.IndexDistance(iuTarget, ivTarget, tiu2, tiv2, in tileGrid);
-                                    if (d2 > maxRecoveryDist + config.ToleranceFt) continue;
-                                    if (d2 < bestD - config.ToleranceFt)
-                                    {
-                                        bestD = d2;
-                                        bestIu = tiu2;
-                                        bestIv = tiv2;
-                                        found = true;
-                                        obstacleRecovered = true;
-                                    }
-                                }
-                            }
-                        }
-
-                        if (!found)
-                        {
                             skippedNoValidNeighbour++;
                             continue;
                         }
@@ -1119,6 +1001,11 @@ double u = tileGrid.UFt;
                 return result;
             }
 
+            foreach (CalculatedSprinklerPoint pt in selected)
+            {
+                CheckSprinklerObstacleConflict(pt, obstacleBoxes, existingSprinklerXy, ruleSet, config);
+            }
+
             return FinalizeSelection(
                 selected, room, geometry, ruleSet, obstacleBoxes,
                 existingSprinklerXy, config, result, ceilingUnsupported, ceilingNote, smallRoomRuleApplied);
@@ -1138,52 +1025,6 @@ double u = tileGrid.UFt;
             double effectiveBoundary = Math.Max(ruleSet.BoundaryClearanceFt,
                 Nfpa13RulebookRules.MinWallClearanceFt);
             if (geometry.DistanceToOuterBoundary(x, y) < effectiveBoundary - config.ToleranceFt) return false;
-
-            foreach (ObstacleBox box in obstacleBoxes)
-            {
-                bool spansPlacement = box.SpansZ(placementZ, config.ToleranceFt);
-
-                // ---- Chapter 20: Three Times Rule (structural members) --------
-                // Mirror TryAcceptPoint exactly. No opposing-sprinkler exception
-                // check here (existing sprinklers already placed are in existingSprinklerXy;
-                // newly-selected heads are not yet placed so conservative is correct).
-                if (spansPlacement && box.IsStructuralMember
-                    && IsThreeTimesRuleCategory(box.Category))
-                {
-                    double required = Math.Min(
-                        Nfpa13RulebookRules.ThreeTimesRuleFactor * box.MaxHorizontalDimensionFt,
-                        Nfpa13RulebookRules.ThreeTimesRuleMaxRequiredDistanceFt);
-
-                    double toEdge = box.DistanceToNearEdge(x, y);
-
-                    // Opposing-sprinkler exception (Ch.20 p.248): existing sprinklers on
-                    // the other side within half the allowable spacing of the centreline.
-                    bool otherSideSprinklerWithinHalfSpacing = false;
-                    double halfSpacing = ruleSet.MaxSpacingFt * Nfpa13RulebookRules.ThreeTimesExceptionHalfSpacing;
-                    foreach (double[] es in existingSprinklerXy)
-                    {
-                        if (box.DistanceToCenterline(es[0], es[1]) <= halfSpacing)
-                        {
-                            otherSideSprinklerWithinHalfSpacing = true;
-                            break;
-                        }
-                    }
-
-                    if (!otherSideSprinklerWithinHalfSpacing && toEdge < required - config.ToleranceFt)
-                        return false;
-                }
-
-                // ---- Flat clearance for non-structural obstacles ---------------
-                if (!box.IsStructuralMember
-                    && GeometryMath.InsideExpandedBox(x, y, box.MinX, box.MinY, box.MaxX, box.MaxY, box.ClearanceFt)
-                    && spansPlacement)
-                    return false;
-
-                // ---- Beam rule: reject if inside member footprint --------------
-                if (spansPlacement && box.IsStructuralMember
-                    && GeometryMath.InsideExpandedBox(x, y, box.MinX, box.MinY, box.MaxX, box.MaxY, 0.0))
-                    return false;
-            }
 
             foreach (double[] es in existingSprinklerXy)
             {
@@ -1495,12 +1336,22 @@ double u = tileGrid.UFt;
         {
             List<double[]> polygon = ExtractOuterPolygon(room);
             polygon = CleanPolygonLoop(polygon);
+            polygon = BridgeObstacleNotches(polygon);
             if (polygon == null || polygon.Count < 3)
             {
                 result.Status = CalculationStatus.InvalidRoomGeometry;
                 result.Errors.Add("Sidewall solver: room polygon is degenerate (need at least 3 vertices).");
                 return result;
             }
+
+            // CRITICAL: the WallEdgeIndex values assigned below refer to this cleaned polygon.
+            // The placement strategy (WallSidewallPlacementStrategy) reads result.Polygon to look
+            // up the edge for each head. If result.Polygon still points to the uncleaned outer loop
+            // (set in CalculateRoom before this method was called), the index maps to the wrong
+            // edge and every head binds to the wrong wall. This is the confirmed root cause of
+            // the "all heads stacked on one wall" defect.
+            result.Polygon = polygon;
+            RoomGeometry bridgedGeometry = new RoomGeometry(polygon, ExtractInnerLoops(room));
 
             double alongSpacing = ruleSet.MaxSpacingFt > 0 ? ruleSet.MaxSpacingFt : 10.0;
             double hazardCeiling = GetNfpa13MaxSpacingCeiling(ruleSet.HazardClass);
@@ -1524,6 +1375,7 @@ double u = tileGrid.UFt;
                 $"Sidewall directional solver: alongSpacing={alongSpacing:F2} ft, throwDepth={throwDepth:F2} ft, "
                 + $"endWallMax={endWallMax:F2} ft (derived S/2), standOff={standOff:F2} ft.");
 
+            bool[] wallEdgeMask = BuildWallEdgeMask(polygon, room);
             bool isCCW = ComputeSignedArea(polygon) > 0;
             List<List<SidewallHead>> rowsPerEdge = new List<List<SidewallHead>>();
             double[] edgeLenArr = new double[polygon.Count];
@@ -1534,6 +1386,14 @@ double u = tileGrid.UFt;
 
             for (int i = 0; i < polygon.Count; i++)
             {
+                if (!wallEdgeMask[i])
+                {
+                    rowsPerEdge.Add(new List<SidewallHead>());
+                    result.Diagnostics.Add(
+                        $"Sidewall edge {i} skipped: boundary segment is not a physical wall (room separation/opening/virtual edge).");
+                    continue;
+                }
+
                 double[] a = polygon[i];
                 double[] b = polygon[(i + 1) % polygon.Count];
                 List<SidewallHead> row = new List<SidewallHead>();
@@ -1554,7 +1414,7 @@ double u = tileGrid.UFt;
                 bool inward = false;
                 foreach (double step in new[] { 0.1, 0.25, 0.5 })
                 {
-                    if (geometry.IsPointInsideRoom(midX + nx * step, midY + ny * step, config.ToleranceFt))
+                    if (bridgedGeometry.IsPointInsideRoom(midX + nx * step, midY + ny * step, config.ToleranceFt))
                     { inward = true; break; }
                 }
                 if (!inward) { nx = -nx; ny = -ny; }
@@ -1563,23 +1423,56 @@ double u = tileGrid.UFt;
 
                 double minSpacing = ruleSet.MinSpacingFt > 0 ? ruleSet.MinSpacingFt : 0.0;
 
+                // =========================================================================
+                // NFPA 13 (Rulebook Ch. 19 & Table 19-2) & Industry-Preferred Spacing:
+                // Primary authority:
+                //   - Max spacing along wall: alongSpacing (S <= S_max)
+                //   - Max distance to end wall/corner: endWallMax = alongSpacing * 0.5 (E <= S_max / 2)
+                //   - Min distance to end wall/corner: 4 inches (0.333 ft, NFPA 13 §10.3.4.2)
+                //   - Min spacing between sprinklers: 6.0 ft (or ruleSet.MinSpacingFt)
+                // Secondary priority (Industry preferred):
+                //   - Uniformly balanced / centered distribution across the wall length.
+                //   - Each sprinkler occupies an equal bay S = edgeLen / N.
+                //   - Corner offsets are equalized to E = S / 2 (or clamped to min clearance).
+                //   - No artificial voids, gaps, or obstacle-dodging shifts.
+                // =========================================================================
+                double minEndWall = 4.0 / 12.0; // 4 inches (NFPA 13 §10.3.4.2)
+                double effectiveMinSpacing = Math.Max(6.0, minSpacing);
+
                 List<double> dists = new List<double>();
-                if (edgeLen <= 2.0 * endWallMax)
+                if (edgeLen < 2.0 * minEndWall)
                 {
+                    // Wall segment too short to satisfy 4 in clearance from both corners
+                    continue;
+                }
+
+                int numHeads = Math.Max(1, (int)Math.Ceiling(edgeLen / alongSpacing));
+                if (numHeads == 1)
+                {
+                    // Single head centered on the wall (distance to each end is edgeLen / 2 <= S_max / 2)
                     dists.Add(edgeLen * 0.5);
                 }
                 else
                 {
-                    double span = edgeLen - 2.0 * endWallMax;
-                    int segs = Math.Max(1, (int)Math.Ceiling(span / alongSpacing));
-                    double step = span / segs;
-                    if (segs >= 1 && step < minSpacing)
+                    double pitch = edgeLen / numHeads;
+                    if (pitch < effectiveMinSpacing)
                     {
-                        dists.Add(edgeLen * 0.5);
+                        if (numHeads == 2 && edgeLen >= effectiveMinSpacing + 2.0 * minEndWall)
+                        {
+                            double e = (edgeLen - effectiveMinSpacing) * 0.5;
+                            dists.Add(e);
+                            dists.Add(edgeLen - e);
+                        }
+                        else
+                        {
+                            dists.Add(edgeLen * 0.5);
+                        }
                     }
                     else
                     {
-                        for (int k = 0; k <= segs; k++) dists.Add(endWallMax + k * step);
+                        double step = edgeLen / numHeads;
+                        double endDist = step * 0.5;
+                        for (int k = 0; k < numHeads; k++) dists.Add(endDist + k * step);
                     }
                 }
 
@@ -1587,25 +1480,20 @@ double u = tileGrid.UFt;
                 {
                     double bx = a[0] + ux * d, by = a[1] + uy * d;
                     double cx = bx + nx * standOff, cy = by + ny * standOff;
-                    if (!geometry.IsPointInsideRoom(cx, cy, config.ToleranceFt)) continue;
-
-                    bool blocked = false;
-                    foreach (ObstacleBox box in obstacleBoxes)
+                    bool insideRoom = bridgedGeometry.IsPointInsideRoom(cx, cy, config.ToleranceFt);
+                    bool insideObstacle = false;
+                    if (!insideRoom && obstacleBoxes != null && obstacleBoxes.Count > 0)
                     {
-                        if (!box.SpansZ(placementZ, config.ToleranceFt)) continue;
-
-                        if (GeometryMath.InsideExpandedBox(cx, cy, box.MinX, box.MinY, box.MaxX, box.MaxY, 0.0))
-                        { blocked = true; break; }
-
-                        double boxCx = (box.MinX + box.MaxX) * 0.5;
-                        double boxCy = (box.MinY + box.MaxY) * 0.5;
-                        double towardBox = (boxCx - cx) * nx + (boxCy - cy) * ny;
-                        if (towardBox <= config.ToleranceFt) continue;
-
-                        if (GeometryMath.InsideExpandedBox(cx, cy, box.MinX, box.MinY, box.MaxX, box.MaxY, box.ClearanceFt))
-                        { blocked = true; break; }
+                        foreach (ObstacleBox box in obstacleBoxes)
+                        {
+                            if (GeometryMath.InsideExpandedBox(cx, cy, box.MinX, box.MinY, box.MaxX, box.MaxY, 0.5))
+                            {
+                                insideObstacle = true;
+                                break;
+                            }
+                        }
                     }
-                    if (blocked) continue;
+                    if (!insideRoom && !insideObstacle) continue;
 
                     row.Add(new SidewallHead
                     {
@@ -1622,19 +1510,19 @@ double u = tileGrid.UFt;
 
             double sampleStep = Math.Max(Math.Min(alongSpacing, throwDepth) / 3.0, 0.5);
             List<double[]> samples = new List<double[]>();
-            for (double sy = geometry.MinY; sy <= geometry.MaxY + config.ToleranceFt; sy += sampleStep)
+            for (double sy = bridgedGeometry.MinY; sy <= bridgedGeometry.MaxY + config.ToleranceFt; sy += sampleStep)
             {
-                for (double sx = geometry.MinX; sx <= geometry.MaxX + config.ToleranceFt; sx += sampleStep)
+                for (double sx = bridgedGeometry.MinX; sx <= bridgedGeometry.MaxX + config.ToleranceFt; sx += sampleStep)
                 {
-                    if (!geometry.IsPointInsideRoom(sx, sy, config.ToleranceFt)) continue;
-                    bool inObstacle = false;
-                    foreach (ObstacleBox box in obstacleBoxes)
-                    {
-                        if (!box.SpansZ(placementZ, config.ToleranceFt)) continue;
-                        if (GeometryMath.InsideExpandedBox(sx, sy, box.MinX, box.MinY, box.MaxX, box.MaxY, 0.0))
-                        { inObstacle = true; break; }
-                    }
-                    if (inObstacle) continue;
+                    if (!bridgedGeometry.IsPointInsideRoom(sx, sy, config.ToleranceFt)) continue;
+                    // COVERAGE ASSESSMENT: include ALL floor-plan points inside the room, regardless of
+                    // obstacles. The sample grid is used only to decide which walls need sprinkler rows
+                    // (i.e., which walls provide enough throw to cover the room area). Excluding obstacle
+                    // footprints from this grid was causing the solver to undercount coverage needs —
+                    // e.g. a Kitchen with large column obstacles would appear fully covered by a single
+                    // wall because the obstacle area was removed from the "needs coverage" set.
+                    // Obstacles are handled per-sprinkler-head at CheckSprinklerObstacleConflict; the
+                    // ignoreObstacles flag at placement time then decides whether to skip those heads.
                     samples.Add(new double[] { sx, sy });
                 }
             }
@@ -1679,6 +1567,9 @@ double u = tileGrid.UFt;
                 return gain;
             }
 
+            // =====================================================================
+            // SEED PHASE 1 — Primary wall (longest edge with highest coverage gain)
+            // =====================================================================
             int longestEdge = -1;
             double maxLen = 0.0;
             for (int e = 0; e < rowsPerEdge.Count; e++)
@@ -1695,32 +1586,95 @@ double u = tileGrid.UFt;
                 int g = EdgeGain(e);
                 if (g > bestSeedGain) { bestSeedGain = g; longestEdge = e; }
             }
+
             if (longestEdge >= 0 && remaining > 0)
             {
                 ApplyEdge(longestEdge);
 
-                double[] anchor = polygon[longestEdge];
+                // =================================================================
+                // SEED PHASE 2 — Opposing wall (NFPA 13 §11.3.3.2)
+                // =================================================================
+                // When the room depth perpendicular to the primary wall exceeds the
+                // listed throw depth, heads on the opposing wall are required to
+                // eliminate the uncovered strip in the middle of the room.
+                //
+                // Room depth is measured as the maximum perpendicular projection of
+                // ANY polygon vertex onto the seed edge's inward normal. This is
+                // robust for L-shaped or jogged rooms where a single anchor vertex
+                // can under- or over-report the true cross-room distance.
+                double[] seedA = polygon[longestEdge];
                 double roomDepth = 0.0;
-                foreach (double[] v in polygon)
+                for (int vi = 0; vi < polygon.Count; vi++)
                 {
+                    double[] v = polygon[vi];
                     if (v == null || v.Length < 2) continue;
-                    double d = (v[0] - anchor[0]) * edgeInX[longestEdge]
-                             + (v[1] - anchor[1]) * edgeInY[longestEdge];
+                    double d = (v[0] - seedA[0]) * edgeInX[longestEdge]
+                             + (v[1] - seedA[1]) * edgeInY[longestEdge];
                     if (d > roomDepth) roomDepth = d;
                 }
 
+                result.Diagnostics.Add(
+                    $"Sidewall seed: longestEdge={longestEdge} (len={edgeLenArr[longestEdge]:F2} ft), " +
+                    $"roomDepth={roomDepth:F2} ft, throwDepth={throwDepth:F2} ft.");
+
                 if (roomDepth > throwDepth + config.ToleranceFt)
                 {
+                    // Select the opposing edge using a composite score:
+                    //   1. Direction antiparallelism (the opposite wall runs in reverse)
+                    //   2. Perpendicular distance from the seed edge (the TRUE opposite
+                    //      wall is the farthest antiparallel edge, not a nearby partition)
+                    //
+                    // The previous code only checked antiparallelism > 0.5, which could
+                    // match a partition wall that runs parallel to the boundary but sits
+                    // a few feet inside the room. Adding the distance term ensures the
+                    // actual room boundary wins.
                     int opposite = -1;
-                    double bestAnti = 0.5;
+                    double bestScore = double.MinValue;
+
                     for (int e = 0; e < rowsPerEdge.Count; e++)
                     {
                         if (usedEdge[e] || rowsPerEdge[e].Count == 0) continue;
-                        double dot = edgeUx[e] * edgeUx[longestEdge] + edgeUy[e] * edgeUy[longestEdge];
-                        if (-dot > bestAnti) { bestAnti = -dot; opposite = e; }
+
+                        double dot = edgeUx[e] * edgeUx[longestEdge]
+                                   + edgeUy[e] * edgeUy[longestEdge];
+                        double antiParallelism = -dot; // 1.0 = perfectly antiparallel
+
+                        if (antiParallelism < 0.3) continue;
+
+                        // Perpendicular distance from seed edge to candidate edge midpoint
+                        int nextE = (e + 1) % polygon.Count;
+                        double candMidX = (polygon[e][0] + polygon[nextE][0]) * 0.5;
+                        double candMidY = (polygon[e][1] + polygon[nextE][1]) * 0.5;
+                        double perpDist = (candMidX - seedA[0]) * edgeInX[longestEdge]
+                                        + (candMidY - seedA[1]) * edgeInY[longestEdge];
+
+                        // Composite: direction match (0-10) + actual distance (ft).
+                        // A partition 2 ft inside the room scores ~12; the real opposite
+                        // wall at 18 ft scores ~28. The distance term dominates.
+                        double score = antiParallelism * 10.0 + perpDist;
+
+                        if (score > bestScore)
+                        {
+                            bestScore = score;
+                            opposite = e;
+                        }
                     }
+
                     if (opposite >= 0)
+                    {
+                        result.Diagnostics.Add(
+                            $"Sidewall opposing wall: edge={opposite} (len={edgeLenArr[opposite]:F2} ft, " +
+                            $"score={bestScore:F2}). Room depth {roomDepth:F2} ft exceeds throw " +
+                            $"{throwDepth:F2} ft — opposing heads required per NFPA 13 §11.3.3.2.");
                         ApplyEdge(opposite);
+                    }
+                    else
+                    {
+                        result.Warnings.Add(
+                            $"Sidewall: room depth {roomDepth:F2} ft exceeds throw {throwDepth:F2} ft " +
+                            "but no opposing wall was found. Coverage gap likely — the greedy pass " +
+                            "will attempt remaining edges, but verify manually.");
+                    }
                 }
             }
 
@@ -1740,7 +1694,7 @@ double u = tileGrid.UFt;
             List<CalculatedSprinklerPoint> selected = new List<CalculatedSprinklerPoint>();
             foreach (SidewallHead h in chosen)
             {
-                selected.Add(new CalculatedSprinklerPoint
+                var pt = new CalculatedSprinklerPoint
                 {
                     X = h.X,
                     Y = h.Y,
@@ -1749,7 +1703,9 @@ double u = tileGrid.UFt;
                     LevelId = room.LevelId,
                     LevelName = room.LevelName,
                     WallEdgeIndex = h.WallEdgeIndex
-                });
+                };
+                CheckSprinklerObstacleConflict(pt, obstacleBoxes, existingSprinklerXy, ruleSet, config);
+                selected.Add(pt);
             }
 
             result.Points = selected;
@@ -1898,6 +1854,198 @@ double u = tileGrid.UFt;
             }
 
             return result;
+        }
+
+        private static double PerpDistanceToLine(double[] p, double[] a, double[] b)
+        {
+            double abx = b[0] - a[0];
+            double aby = b[1] - a[1];
+            double l = Math.Sqrt(abx * abx + aby * aby);
+            if (l < 1e-9) return GeometryMath.Distance(p[0], p[1], a[0], a[1]);
+            return Math.Abs(abx * (p[1] - a[1]) - aby * (p[0] - a[0])) / l;
+        }
+
+        private static List<double[]> CollapseCloseVertices(List<double[]> polygon, double minDist = 0.05)
+        {
+            if (polygon == null || polygon.Count < 3) return polygon ?? new List<double[]>();
+            List<double[]> res = new List<double[]>();
+            foreach (double[] p in polygon)
+            {
+                if (p == null || p.Length < 2) continue;
+                if (res.Count == 0 || GeometryMath.Distance(res[res.Count - 1][0], res[res.Count - 1][1], p[0], p[1]) >= minDist)
+                {
+                    res.Add(p);
+                }
+            }
+            if (res.Count > 1 && GeometryMath.Distance(res[0][0], res[0][1], res[res.Count - 1][0], res[res.Count - 1][1]) < minDist)
+            {
+                res.RemoveAt(res.Count - 1);
+            }
+            return res;
+        }
+
+        /// <summary>
+        /// Bridges local obstacle notches (e.g. room-bounding column bumps or casework jogs along walls)
+        /// where the room boundary temporarily departs from a primary wall line and returns to the collinear
+        /// continuation of the same wall. Restores the true continuous host wall baseline for pure grid
+        /// sprinkler spacing and calculation.
+        /// </summary>
+        private static List<double[]> BridgeObstacleNotches(
+            List<double[]> polygon,
+            double maxDepth = 3.5,
+            double maxSpan = 15.0,
+            double tol = 0.1)
+        {
+            if (polygon == null || polygon.Count < 4) return polygon ?? new List<double[]>();
+
+            List<double[]> current = CleanPolygonLoop(CollapseCloseVertices(polygon));
+            bool changed = true;
+            int iterations = 0;
+
+            while (changed && iterations < 15)
+            {
+                iterations++;
+                changed = false;
+                int n = current.Count;
+                if (n < 4) break;
+
+                for (int i = 0; i < n; i++)
+                {
+                    double[] a = current[(i - 1 + n) % n];
+                    double[] b = current[i];
+                    double abLen = GeometryMath.Distance(a[0], a[1], b[0], b[1]);
+                    if (abLen < 0.2) continue;
+
+                    double ux = (b[0] - a[0]) / abLen;
+                    double uy = (b[1] - a[1]) / abLen;
+
+                    for (int step = 2; step < Math.Min(15, n); step++)
+                    {
+                        int cIdx = (i + step - 1) % n;
+                        double[] c = current[cIdx];
+                        if (PerpDistanceToLine(c, a, b) > tol) continue;
+
+                        double span = (c[0] - b[0]) * ux + (c[1] - b[1]) * uy;
+                        if (span <= 0.05 || span > maxSpan) continue;
+
+                        bool valid = true;
+                        bool hasJog = false;
+                        for (int j = 1; j < step; j++)
+                        {
+                            double[] v = current[(i + j - 1) % n];
+                            double dV = PerpDistanceToLine(v, a, b);
+                            if (dV > maxDepth) { valid = false; break; }
+                            if (dV > 0.05) hasJog = true;
+                        }
+
+                        if (valid && hasJog)
+                        {
+                            HashSet<int> dropIndices = new HashSet<int>();
+                            for (int j = 1; j < step - 1; j++)
+                            {
+                                dropIndices.Add((i + j) % n);
+                            }
+                            List<double[]> newPoly = new List<double[]>();
+                            for (int k = 0; k < n; k++)
+                            {
+                                if (!dropIndices.Contains(k)) newPoly.Add(current[k]);
+                            }
+                            current = CleanPolygonLoop(newPoly);
+                            changed = true;
+                            break;
+                        }
+                    }
+                    if (changed) break;
+                }
+            }
+
+            return CleanPolygonLoop(current);
+        }
+
+        private static bool[] BuildWallEdgeMask(List<double[]> polygon, PlacementRoomInput room)
+        {
+            if (polygon == null || polygon.Count == 0)
+            {
+                return new bool[0];
+            }
+
+            bool[] wallMask = new bool[polygon.Count];
+            for (int i = 0; i < polygon.Count; i++) wallMask[i] = true;
+
+            BoundaryLoopData outerLoop = room?.Boundary?.OuterLoop;
+            if (outerLoop == null || outerLoop.Segments == null || outerLoop.Segments.Count == 0)
+            {
+                return wallMask;
+            }
+
+            // Calculate how much physical wall length vs non-wall length lies along each edge
+            double[] wallLengthPerEdge = new double[polygon.Count];
+            double[] nonWallLengthPerEdge = new double[polygon.Count];
+
+            for (int i = 0; i < outerLoop.Segments.Count; i++)
+            {
+                BoundarySegmentData seg = outerLoop.Segments[i];
+                if (seg == null) continue;
+
+                double startX = seg.Start?.X ?? 0.0;
+                double startY = seg.Start?.Y ?? 0.0;
+                double endX = seg.End?.X ?? startX;
+                double endY = seg.End?.Y ?? startY;
+                double segLen = GeometryMath.Distance(startX, startY, endX, endY);
+                if (segLen < 0.05) continue;
+
+                double midX = (startX + endX) * 0.5;
+                double midY = (startY + endY) * 0.5;
+
+                int bestEdge = -1;
+                double bestDistance = double.MaxValue;
+
+                for (int j = 0; j < polygon.Count; j++)
+                {
+                    double[] a = polygon[j];
+                    double[] b = polygon[(j + 1) % polygon.Count];
+                    if (a == null || b == null || a.Length < 2 || b.Length < 2) continue;
+
+                    double edgeMidX = (a[0] + b[0]) * 0.5;
+                    double edgeMidY = (a[1] + b[1]) * 0.5;
+                    double dist = Math.Abs(edgeMidX - midX) + Math.Abs(edgeMidY - midY);
+
+                    if (dist < bestDistance)
+                    {
+                        bestDistance = dist;
+                        bestEdge = j;
+                    }
+                }
+
+                if (bestEdge >= 0)
+                {
+                    if (seg.IsWall) wallLengthPerEdge[bestEdge] += segLen;
+                    else nonWallLengthPerEdge[bestEdge] += segLen;
+                }
+            }
+
+            for (int j = 0; j < polygon.Count; j++)
+            {
+                double w = wallLengthPerEdge[j];
+                double nw = nonWallLengthPerEdge[j];
+                // An edge is considered a physical wall if it contains physical wall segments,
+                // or if no segments matched (defaults to true). It is only marked non-wall if
+                // it is dominated by non-wall segments (e.g., room separation lines).
+                if (w > 0.5)
+                {
+                    wallMask[j] = true;
+                }
+                else if (nw > 0.5)
+                {
+                    wallMask[j] = false;
+                }
+                else
+                {
+                    wallMask[j] = true;
+                }
+            }
+
+            return wallMask;
         }
 
         private static List<double[]> ExtractOuterPolygon(PlacementRoomInput room)
@@ -2343,6 +2491,7 @@ double u = tileGrid.UFt;
                 MaxY = maxY,
                 MinZ = minZ,
                 MaxZ = maxZ,
+                ElementId = obstacle.ElementId,
                 Category = obstacle.Category ?? "obstacle",
                 WidthFt = maxX - minX,
                 DepthFt = maxY - minY,
@@ -2750,6 +2899,7 @@ double u = tileGrid.UFt;
             public double MaxY { get; set; }
             public double MinZ { get; set; }
             public double MaxZ { get; set; }
+            public string ElementId { get; set; }
             public string Category { get; set; }
             public double ClearanceFt { get; set; }
 
@@ -2803,6 +2953,29 @@ double u = tileGrid.UFt;
                 if (Math.Abs(MaxZ - MinZ) < 1e-6) return true;
                 return placementZ >= MinZ - toleranceFt
                     && placementZ <= MaxZ + toleranceFt;
+            }
+        }
+
+        private static void CheckSprinklerObstacleConflict(
+            CalculatedSprinklerPoint pt,
+            List<ObstacleBox> obstacleBoxes,
+            List<double[]> existingSprinklerXy,
+            HazardPlacementRuleSet ruleSet,
+            BruteForceCalculationConfig config)
+        {
+            if (pt == null || obstacleBoxes == null || obstacleBoxes.Count == 0) return;
+
+            foreach (ObstacleBox box in obstacleBoxes)
+            {
+                if (!box.SpansZ(pt.Z, config.ToleranceFt)) continue;
+
+                // Direct bounding box collision only: skips when candidate location falls on obstacle bounding box
+                if (GeometryMath.InsideExpandedBox(pt.X, pt.Y, box.MinX, box.MinY, box.MaxX, box.MaxY, 0.0))
+                {
+                    pt.HasObstacleConflict = true;
+                    pt.ObstacleConflictDescription = $"Direct collision with {box.Category} {box.ElementId}";
+                    return;
+                }
             }
         }
     }

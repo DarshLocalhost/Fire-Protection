@@ -35,7 +35,7 @@ namespace FireProtection.UI.ViewModels.Sprinklers.BruteForce
         private bool _canCancelPlacement;
         private string _placementProgressText;
         private PlacementProgressReporter _progressReporter;
-        private string _selectedExistingDevicePolicyLabel = ExistingDevicePolicyOptions.SkipRoomLabel;
+        private string _selectedExistingDevicePolicyLabel = ExistingDevicePolicyOptions.ReplaceExistingLabel;
         private string _bulkSpacingInput;
         private string _bulkClearanceInput;
 
@@ -178,6 +178,10 @@ namespace FireProtection.UI.ViewModels.Sprinklers.BruteForce
             PlaceSprinklersCommand = new RelayCommand(
                 _ => ExecutePlaceSprinklers(),
                 _ => CanExecutePlaceSprinklers());
+
+            GoToFinalCommand = new RelayCommand(
+                _ => ExecuteGoToFinal(),
+                _ => CanExecuteGoToFinal());
 
             ResetCommand = new RelayCommand(_ => Reset());
 
@@ -619,6 +623,9 @@ namespace FireProtection.UI.ViewModels.Sprinklers.BruteForce
         public string RoomSelectionToggleLabel =>
             AreAllSelectableRoomsSelected ? "Clear All" : "Select All";
 
+        public Action RequestNavigateToFinal { get; set; }
+        public ICommand GoToFinalCommand { get; }
+
         public ICommand PlaceSprinklersCommand { get; }
         public ICommand ResetCommand { get; }
         public ICommand CancelPlacementCommand { get; }
@@ -890,6 +897,21 @@ namespace FireProtection.UI.ViewModels.Sprinklers.BruteForce
                 SelectedSprinklerType = SprinklerTypes[0];
         }
 
+        private bool CanExecuteGoToFinal()
+        {
+            if (IsPlacementRunning) return false;
+            if (_isEligibilityRefreshing) return false;
+            if (SelectedVisibleEligibleRoomCount == 0) return false;
+            if (SelectedSprinklerFamily == null) return false;
+            if (SelectedSprinklerType == null) return false;
+            return true;
+        }
+
+        private void ExecuteGoToFinal()
+        {
+            RequestNavigateToFinal?.Invoke();
+        }
+
         private bool CanExecutePlaceSprinklers()
         {
             if (IsPlacementRunning) return false;
@@ -899,6 +921,25 @@ namespace FireProtection.UI.ViewModels.Sprinklers.BruteForce
             if (SelectedSprinklerType == null) return false;
             if (!string.Equals(SelectedSprinklerType.FamilyName, SelectedSprinklerFamily.FamilyName, StringComparison.OrdinalIgnoreCase)) return false;
             return true;
+        }
+
+        private bool _ignoreObstacles = false;
+
+        /// <summary>
+        /// When true, all calculated sprinklers are placed regardless of obstacle conflicts.
+        /// When false (default), sprinklers that directly collide with obstacle bounding boxes are skipped.
+        /// </summary>
+        public bool IgnoreObstacles
+        {
+            get => _ignoreObstacles;
+            set
+            {
+                if (_ignoreObstacles != value)
+                {
+                    _ignoreObstacles = value;
+                    OnPropertyChanged(nameof(IgnoreObstacles));
+                }
+            }
         }
 
         private void ExecutePlaceSprinklers()
@@ -911,19 +952,6 @@ namespace FireProtection.UI.ViewModels.Sprinklers.BruteForce
                 PlacementStatusMessage = validationMessage;
                 Dialogs.Show(validationMessage, "Place Sprinklers", MessageBoxButton.OK, MessageBoxImage.Warning);
                 return;
-            }
-
-            // Replace deletes existing devices. It is undoable (the whole run is one undo entry), but it is still
-            // destructive, so it is confirmed explicitly rather than applied on a combo-box selection alone.
-            if (ExistingDevicePolicySelection == ExistingDevicePolicy.ReplaceExisting &&
-                !Dialogs.Confirm(
-                    "Replace will DELETE the existing sprinklers inside every selected room before placing the new "
-                    + "set.\n\nThis can be undone in Revit (the run is a single undo entry), but the existing devices "
-                    + "and any data on them will be gone.\n\nContinue?",
-                    "Replace existing sprinklers"))
-            {
-                PlacementStatusMessage = "Placement cancelled.";
-                return; 
             }
 
             // Placement creates real Revit elements inside a Transaction, which is illegal from a modeless
@@ -1126,7 +1154,8 @@ namespace FireProtection.UI.ViewModels.Sprinklers.BruteForce
                         typeName,
                         calc,
                         _progressReporter,
-                        ExistingDevicePolicySelection);
+                        ExistingDevicePolicySelection,
+                        _ignoreObstacles);
 
                     LastPlacementResult = placement;
                     didPlace = true;
@@ -1575,8 +1604,15 @@ namespace FireProtection.UI.ViewModels.Sprinklers.BruteForce
             // that would hide a calculation/infrastructure failure behind "blocked".
             bool calcFailed = calcRan && calcByRoom == null;
 
+            bool anyLevelSelected = Levels != null && Levels.Any(l => l.IsSelected);
+
             foreach (RoomItemViewModel roomVm in AllRooms)
             {
+                if (anyLevelSelected && roomVm.ParentLevel != null && !roomVm.ParentLevel.IsSelected)
+                {
+                    continue;
+                }
+
                 PlacementEligibilityResult result;
                 int candidateCount = 0;
 
@@ -1644,9 +1680,12 @@ namespace FireProtection.UI.ViewModels.Sprinklers.BruteForce
         private List<PlacementRoomInputItem> CollectAllVisibleRooms()
         {
             List<PlacementRoomInputItem> list = new List<PlacementRoomInputItem>();
+            bool anyLevelSelected = Levels != null && Levels.Any(l => l.IsSelected);
 
             foreach (LevelItemViewModel levelVm in Levels)
             {
+                if (anyLevelSelected && !levelVm.IsSelected) continue;
+
                 LevelUiData levelData = levelVm.Level;
                 if (levelData == null) continue;
 
@@ -1737,6 +1776,7 @@ namespace FireProtection.UI.ViewModels.Sprinklers.BruteForce
             RaiseRoomCounts();
             if (HideUnselectedLevels) LevelsView.Refresh();
             CommandManager.InvalidateRequerySuggested();
+            RefreshEligibility();
         }
 
         private void OnRoomSelectionChanged(object sender, EventArgs e)

@@ -76,7 +76,8 @@ namespace FireProtection.Backend.Services.Placement.Devices
         public PlacementRunReport ExecutePlacement(
             IReadOnlyList<DeviceRoomInputItem> items,
             IPlacementProgress progress = null,
-            ExistingDevicePolicy existingDevicePolicy = ExistingDevicePolicy.SkipRoom)
+            ExistingDevicePolicy existingDevicePolicy = ExistingDevicePolicy.SkipRoom,
+            bool ignoreObstacles = true)
         {
             if (progress == null) progress = NullPlacementProgress.Instance;
 
@@ -114,7 +115,7 @@ namespace FireProtection.Backend.Services.Placement.Devices
             using (var group = new TransactionGroup(_document, _transactionGroupName))
             {
                 group.Start();
-                cancelled = RunPlacement(calc, existing, existingPoints, progress, existingDevicePolicy, report);
+                cancelled = RunPlacement(calc, existing, existingPoints, progress, existingDevicePolicy, report, ignoreObstacles);
                 if (cancelled) group.RollBack();
                 else group.Assimilate();
             }
@@ -375,7 +376,8 @@ namespace FireProtection.Backend.Services.Placement.Devices
             List<XYZ> existingPoints,
             IPlacementProgress progress,
             ExistingDevicePolicy existingDevicePolicy,
-            PlacementRunReport report)
+            PlacementRunReport report,
+            bool ignoreObstacles = true)
         {
             using (var transaction = new Transaction(_document, "Place " + DeviceNounCap + "s"))
             {
@@ -454,11 +456,20 @@ namespace FireProtection.Backend.Services.Placement.Devices
                         int placed = 0;
                         int invalid = 0;
                         int failed = 0;
+                        int skippedObstacle = 0;
                         string lastFailureReason = null;
                         var diagLines = new List<string>();
 
                         foreach (CalculatedSmokeDetectorPoint point in room.Points)
                         {
+                            if (!ignoreObstacles && point.HasObstacleConflict)
+                            {
+                                skippedObstacle++;
+                                diagLines.Add(string.Format("({0:F2}, {1:F2}, {2:F2}) -> Skipped (obstacle conflict: {3})",
+                                    point.X, point.Y, point.Z, point.ObstacleConflictDescription ?? "obstacle collision"));
+                                continue;
+                            }
+
                             PointResult pr = PlaceSinglePoint(symbol, placementType, point, room.Polygon, existingPoints, out string pointError, diagLines);
                             if (pr == PointResult.Placed) placed++;
                             else if (pr == PointResult.PlacedInvalid) { placed++; invalid++; }
@@ -475,7 +486,7 @@ namespace FireProtection.Backend.Services.Placement.Devices
                         if (placed == 0)
                         {
                             roomReport.Status = "Failed";
-                            roomReport.FailureReason = lastFailureReason ?? ("No " + _deviceNoun + "s could be placed (" + failed + " point(s) failed).");
+                            roomReport.FailureReason = lastFailureReason ?? ("No " + _deviceNoun + "s could be placed (" + failed + " point(s) failed" + (skippedObstacle > 0 ? ", " + skippedObstacle + " skipped due to obstacles" : "") + ").");
                             roomReport.Message = roomReport.FailureReason;
                         }
                         else if (invalid > 0 || calcReview)

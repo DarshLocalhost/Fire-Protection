@@ -263,27 +263,28 @@ namespace FireProtection.Tests
         }
 
         /// <summary>
-        /// The product decision: Smoke Detectors and Notification Appliances present ONE shared
-        /// list because both come from OST_FireAlarmDevices. If the two tabs ever diverge, the user
-        /// sees different options for the same physical device.
+        /// Industry-grade separation: Smoke Detectors and Notification Appliances filter
+        /// device families so each tab displays only its relevant device kinds.
         /// </summary>
         private static void TestBothDeviceTabsShareOneList()
         {
-            Console.WriteLine("Test: Smoke and Notification tabs present the SAME device list");
+            Console.WriteLine("Test: Smoke and Notification tabs segregate device families by kind");
 
             var model = ModelCatalog(new FakeWorkbook());
 
             IReadOnlyList<string> smoke = model.GetSmokeDetectorFamilies();
             IReadOnlyList<string> appliance = model.GetNotificationApplianceFamilies();
-            Check(smoke.SequenceEqual(appliance, StringComparer.OrdinalIgnoreCase),
-                "both tabs return an identical family list");
-            Check(smoke.Count == 2 && smoke.Contains("Strobe") && smoke.Contains("Smoke Detector"),
-                "the shared list includes both detectors and strobes");
 
-            IReadOnlyList<string> smokeTypes = model.GetSmokeDetectorTypesForFamily("Strobe");
+            Check(smoke.Contains("Smoke Detector") && !smoke.Contains("Strobe"),
+                "smoke detector tab contains detectors and excludes strobes");
+            Check(appliance.Contains("Strobe") && !appliance.Contains("Smoke Detector"),
+                "notification appliance tab contains strobes and excludes smoke detectors");
+
+            IReadOnlyList<string> smokeTypes = model.GetSmokeDetectorTypesForFamily("Smoke Detector");
+            Check(smokeTypes.Count > 0, "smoke tab returns types for smoke detector family");
+
             IReadOnlyList<string> applianceTypes = model.GetNotificationApplianceTypesForFamily("Strobe");
-            Check(smokeTypes.SequenceEqual(applianceTypes, StringComparer.OrdinalIgnoreCase),
-                "both tabs return identical types for the same family");
+            Check(applianceTypes.Count > 0, "appliance tab returns types for strobe family");
         }
 
         private static void TestOverlaySuppliesSprinklerValues()

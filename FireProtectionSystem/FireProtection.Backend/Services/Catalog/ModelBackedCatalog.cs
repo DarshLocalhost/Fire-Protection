@@ -1,6 +1,7 @@
 using System;
 using System.Collections.Generic;
 using System.Linq;
+using FireProtection.Backend.Services.Placement.Devices;
 using FireProtection.UI.Services;
 
 namespace FireProtection.Backend.Services.Catalog
@@ -34,14 +35,12 @@ namespace FireProtection.Backend.Services.Catalog
     /// discards the engineering data entirely. This class therefore takes NAMES from the model and
     /// VALUES from the workbook; the UI banner reports when a lookup found nothing.
     ///
-    /// SHARED DEVICE LIST
-    /// ------------------
-    /// Smoke detectors and notification appliances share the Revit category
-    /// <c>OST_FireAlarmDevices</c>, and the product decision is to show the SAME list on both tabs.
-    /// Because the workbook stores them in two separate sheets, every alarm-device lookup goes
-    /// through <see cref="DeviceCatalogOverlay"/>, which searches BOTH sheets — otherwise a strobe
-    /// shown on the Smoke tab (listed under NotificationAppliances) would find no row and lose its
-    /// attributes, re-exposing empty editable pickers.
+    /// SHARED DEVICE LIST VS SEPARATION
+    /// --------------------------------
+    /// Smoke detectors and notification appliances share the Revit category <c>OST_FireAlarmDevices</c>.
+    /// To ensure clean professional UX, each tab's family picker filters by device kind using keyword heuristics
+    /// (via <see cref="DeviceKindResolver"/>), so horns and strobes appear only under Notification Appliances,
+    /// and smoke detectors appear only under Smoke Detectors.
     /// </summary>
     public sealed class ModelBackedCatalog : ICatalog
     {
@@ -52,9 +51,17 @@ namespace FireProtection.Backend.Services.Catalog
         private readonly Dictionary<string, List<string>> _sprinklerTypes =
             new Dictionary<string, List<string>>(StringComparer.OrdinalIgnoreCase);
 
-        /// <summary>Fire-alarm family -> types, read from the model. Shared by both device tabs.</summary>
+        /// <summary>Fire-alarm family -> types, read from the model. Segregated by kind.</summary>
         private readonly List<string> _deviceFamilies = new List<string>();
         private readonly Dictionary<string, List<string>> _deviceTypes =
+            new Dictionary<string, List<string>>(StringComparer.OrdinalIgnoreCase);
+
+        private readonly List<string> _smokeFamilies = new List<string>();
+        private readonly Dictionary<string, List<string>> _smokeTypes =
+            new Dictionary<string, List<string>>(StringComparer.OrdinalIgnoreCase);
+
+        private readonly List<string> _notificationFamilies = new List<string>();
+        private readonly Dictionary<string, List<string>> _notificationTypes =
             new Dictionary<string, List<string>>(StringComparer.OrdinalIgnoreCase);
 
         /// <summary>
@@ -84,12 +91,46 @@ namespace FireProtection.Backend.Services.Catalog
             _sprinklerTypes.Clear();
             _deviceFamilies.Clear();
             _deviceTypes.Clear();
+            _smokeFamilies.Clear();
+            _smokeTypes.Clear();
+            _notificationFamilies.Clear();
+            _notificationTypes.Clear();
 
             Index(sprinklerTypes, _sprinklerFamilies, _sprinklerTypes);
             Index(deviceTypes, _deviceFamilies, _deviceTypes);
 
             _sprinklerFamilies.Sort(StringComparer.OrdinalIgnoreCase);
             _deviceFamilies.Sort(StringComparer.OrdinalIgnoreCase);
+
+            // Segregate fire-alarm devices into smoke detectors vs notification appliances
+            if (deviceTypes != null)
+            {
+                var smokeList = new List<ModelFamilyType>();
+                var notifList = new List<ModelFamilyType>();
+
+                foreach (ModelFamilyType dt in deviceTypes)
+                {
+                    if (dt == null) continue;
+                    if (DeviceKindResolver.TryResolve(dt.FamilyName, dt.TypeName, out DeviceKind kind))
+                    {
+                        if (kind == DeviceKind.NotificationAppliance) notifList.Add(dt);
+                        else if (kind == DeviceKind.SmokeDetector) smokeList.Add(dt);
+                        else smokeList.Add(dt);
+                    }
+                    else
+                    {
+                        // Fallback: if unresolved, include in both or smoke
+                        smokeList.Add(dt);
+                        notifList.Add(dt);
+                    }
+                }
+
+                Index(smokeList, _smokeFamilies, _smokeTypes);
+                Index(notifList, _notificationFamilies, _notificationTypes);
+
+                _smokeFamilies.Sort(StringComparer.OrdinalIgnoreCase);
+                _notificationFamilies.Sort(StringComparer.OrdinalIgnoreCase);
+            }
 
             BuiltUtc = DateTime.UtcNow;
         }
@@ -179,22 +220,34 @@ namespace FireProtection.Backend.Services.Catalog
             return new List<string>();
         }
 
-        // Both alarm-device tabs return the SAME shared list (OST_FireAlarmDevices).
-        public IReadOnlyList<string> GetSmokeDetectorFamilies() { return _deviceFamilies.ToList(); }
+        public IReadOnlyList<string> GetSmokeDetectorFamilies()
+        {
+            return _smokeFamilies.Count > 0 ? _smokeFamilies.ToList() : _deviceFamilies.ToList();
+        }
 
         public IReadOnlyList<string> GetSmokeDetectorTypesForFamily(string familyName)
         {
             List<string> types;
+            if (!string.IsNullOrEmpty(familyName) && _smokeTypes.TryGetValue(familyName.Trim(), out types))
+                return types.ToList();
             if (!string.IsNullOrEmpty(familyName) && _deviceTypes.TryGetValue(familyName.Trim(), out types))
                 return types.ToList();
             return new List<string>();
         }
 
-        public IReadOnlyList<string> GetNotificationApplianceFamilies() { return _deviceFamilies.ToList(); }
+        public IReadOnlyList<string> GetNotificationApplianceFamilies()
+        {
+            return _notificationFamilies.Count > 0 ? _notificationFamilies.ToList() : _deviceFamilies.ToList();
+        }
 
         public IReadOnlyList<string> GetNotificationApplianceTypesForFamily(string familyName)
         {
-            return GetSmokeDetectorTypesForFamily(familyName);
+            List<string> types;
+            if (!string.IsNullOrEmpty(familyName) && _notificationTypes.TryGetValue(familyName.Trim(), out types))
+                return types.ToList();
+            if (!string.IsNullOrEmpty(familyName) && _deviceTypes.TryGetValue(familyName.Trim(), out types))
+                return types.ToList();
+            return new List<string>();
         }
 
         // -----------------------------------------------------------------------------------

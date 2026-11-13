@@ -1,0 +1,26 @@
+{
+  "name": "fireprotection_clear_eligibility_cache",
+  "title": "Clear placement eligibility cache",
+  "description": "Drops any cached eligibility results. Deliberately NOT called automatically before every sweep. The cache key already covers room identity, level name, hazard class, family and type, so those inputs miss the cache on their own. Call it when the DOCUMENT changes in a way the key cannot see - in practice, after loading a family. Known remaining gap: a linked-model edit, or an in-place ceiling move, is not visible to the key and can therefore serve stale results until the next family load or manual invalidation.",
+  "input_schema": {
+    "type": "object",
+    "properties": {},
+    "additionalProperties": false
+  },
+  "output_schema": {
+    "type": "object",
+    "properties": {
+      "cleared": { "type": "boolean", "const": true }
+    },
+    "required": ["cleared"]
+  },
+  "input_examples": [
+    {}
+  ],
+  "annotations": {
+    "readOnlyHint": true,
+    "destructiveHint": false,
+    "idempotentHint": true,
+    "openWorldHint": false
+  }
+}

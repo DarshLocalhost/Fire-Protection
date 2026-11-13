@@ -1,0 +1,14 @@
+<Project Sdk="Microsoft.NET.Sdk">
+
+  <PropertyGroup>
+    <TargetFramework>net8.0</TargetFramework>
+    <RootNamespace>SPA.SynthFire.Placement</RootNamespace>
+    <AssemblyName>SPA.SynthFire.Placement</AssemblyName>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <ProjectReference Include="..\SPA.SynthFire.Core\SPA.SynthFire.Core.csproj" />
+    <ProjectReference Include="..\SPA.SynthFire.Catalog\SPA.SynthFire.Catalog.csproj" />
+  </ItemGroup>
+
+</Project>

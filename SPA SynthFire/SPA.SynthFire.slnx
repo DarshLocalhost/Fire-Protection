@@ -1,0 +1,21 @@
+<Solution>
+  <Configurations>
+    <BuildType Name="Debug" />
+    <BuildType Name="Release" />
+    <BuildType Name="Revit2025" />
+    <BuildType Name="Revit2026" />
+    <Platform Name="Any CPU" />
+    <Platform Name="x64" />
+  </Configurations>
+  <Folder Name="/src/">
+    <Project Path="src/SPA.SynthFire.Catalog/SPA.SynthFire.Catalog.csproj" />
+    <Project Path="src/SPA.SynthFire.Core/SPA.SynthFire.Core.csproj" />
+    <Project Path="src/SPA.SynthFire.Placement/SPA.SynthFire.Placement.csproj" />
+    <Project Path="src/SPA.SynthFire.Presentation/SPA.SynthFire.Presentation.csproj" />
+    <Project Path="src/SPA.SynthFire.Revit/SPA.SynthFire.Revit.csproj" />
+    <Project Path="src/SPA.SynthFire.UI/SPA.SynthFire.UI.csproj" />
+  </Folder>
+  <Folder Name="/tests/">
+    <Project Path="tests/SPA.SynthFire.Tests/SPA.SynthFire.Tests.csproj" />
+  </Folder>
+</Solution>

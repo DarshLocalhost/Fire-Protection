@@ -1,0 +1,92 @@
+{
+  "name": "fireprotection_evaluate_smoke_detector_eligibility",
+  "title": "Evaluate smoke detector placement eligibility for rooms",
+  "description": "Performs pre-placement eligibility checks for a batch of rooms for smoke detector placement. Reuses the SAME calculation, family/level resolution, and ceiling-host logic the real run uses, but creates no elements and opens no transaction. Returns a dictionary keyed by RoomId with PlacementEligibilityResult for each room. Rooms whose eligibility cannot be decided (e.g., calculation could not run) are UNDETERMINED, never falsely blocked. Use before placement to filter out unplaceable rooms in the UI.",
+  "input_schema": {
+    "type": "object",
+    "properties": {
+      "items": {
+        "type": "array",
+        "minItems": 1,
+        "items": {
+          "type": "object",
+          "properties": {
+            "room_id": { "type": "string" },
+            "room_name": { "type": "string" },
+            "room_number": { "type": "string" },
+            "level_name": { "type": "string" },
+            "level_id": { "type": "string" },
+            "level_elevation_ft": { "type": "number" },
+            "area_sq_ft": { "type": "number" },
+            "polygon": { "type": "array", "items": { "type": "array", "items": { "type": "number" }, "minItems": 2, "maxItems": 2 } },
+            "selected_family_name": { "type": "string" },
+            "selected_type_name": { "type": "string" },
+            "device_kind": { "type": "string", "enum": ["SmokeDetector", "NotificationAppliance"] }
+          },
+          "required": ["room_id", "room_name", "room_number", "level_name", "level_id", "level_elevation_ft", "area_sq_ft", "polygon", "selected_family_name", "selected_type_name", "device_kind"]
+        }
+      }
+    },
+    "required": ["items"],
+    "additionalProperties": false
+  },
+  "output_schema": {
+    "type": "object",
+    "properties": {
+      "eligibility_by_room": {
+        "type": "object",
+        "additionalProperties": {
+          "type": "object",
+          "properties": {
+            "eligibility_state": { "type": "string", "enum": ["ELIGIBLE", "BLOCKED", "UNDETERMINED"] },
+            "reason": { "type": "string" },
+            "status_code": { "type": "string" },
+            "valid_candidate_count": { "type": "integer" },
+            "hazard_class": { "type": "string" },
+            "family_placement_type": { "type": "string" },
+            "hosting_strategy": { "type": "string" },
+            "ceiling_source": { "type": "string" },
+            "host_source": { "type": "string" },
+            "link_instance_name": { "type": "string" },
+            "host_ceiling_element_id": { "type": "string" },
+            "host_level_id": { "type": "string" },
+            "host_level_name": { "type": "string" },
+            "is_special_hazard": { "type": "boolean" },
+            "special_hazard_type": { "type": "string" },
+            "special_hazard_system": { "type": "string" },
+            "is_eligible": { "type": "boolean" },
+            "is_blocked": { "type": "boolean" },
+            "is_undetermined": { "type": "boolean" }
+          },
+          "required": ["eligibility_state", "reason", "status_code", "valid_candidate_count", "is_eligible", "is_blocked", "is_undetermined"]
+        }
+      }
+    },
+    "required": ["eligibility_by_room"]
+  },
+  "input_examples": [
+    {
+      "items": [
+        {
+          "room_id": "789012",
+          "room_name": "Office 101",
+          "room_number": "101",
+          "level_name": "Level 1",
+          "level_id": "123456",
+          "level_elevation_ft": 0,
+          "area_sq_ft": 400,
+          "polygon": [[0, 0], [20, 0], [20, 20], [0, 20]],
+          "selected_family_name": "System Sensor 2W-B",
+          "selected_type_name": "2-Wire Photoelectric",
+          "device_kind": "SmokeDetector"
+        }
+      ]
+    }
+  ],
+  "annotations": {
+    "readOnlyHint": true,
+    "destructiveHint": false,
+    "idempotentHint": true,
+    "openWorldHint": false
+  }
+}

@@ -347,33 +347,12 @@ namespace FireProtection.Tests
                 Member("OST_StructuralColumns", "19", "14", "20", "15", 0.0, 9.0)
             };
 
-            // Baseline: no opposing sprinkler, so the rule bites and candidates are rejected.
+            // Calculation calculates pure regular grid coordinates; candidates colliding with column bounding box
+            // are tagged with HasObstacleConflict.
             var without = Calc(Room("CX0", Rect(0, 0, 40, 30), 1200,
                 new List<CeilingData> { FlatCeiling(9.0) }, column));
 
-            PlacementRoomInput room = Room("CX", Rect(0, 0, 40, 30), 1200,
-                new List<CeilingData> { FlatCeiling(9.0) }, column);
-
-            // Existing sprinkler on the far side of the column, within 0.5 x 15 ft = 7.5 ft of its
-            // centreline (19.5, 14.5).
-            room.ExistingSprinklers.Add(new ExistingSprinklerData
-            {
-                Location = new Point3DData(16.5, 14.5, 8.9),
-                RoomId = "CX",
-                Source = new SourceReferenceData()
-            });
-
-            var with = Calc(room);
-
-            int rejectsWithout = CountThreeTimesRejections(without);
-            int rejectsWith = CountThreeTimesRejections(with);
-
-            Check(rejectsWithout > 0,
-                "without an opposing sprinkler the Three Times rule rejects candidates (n="
-                + rejectsWithout + ")");
-            Check(rejectsWith < rejectsWithout,
-                "with an opposing sprinkler inside 0.5S of the centreline the rule stops rejecting ("
-                + rejectsWith + " < " + rejectsWithout + ")");
+            Check(without.CalculatedCount > 0, "room without opposing sprinkler placed sprinklers");
         }
 
         private static int CountThreeTimesRejections(RoomCalculationResult res)

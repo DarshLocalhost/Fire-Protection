@@ -57,13 +57,24 @@ namespace FireProtection.UI.ViewModels.Sprinklers
         {
             Data = data;
 
-            Collision = new SprinklerCollisionViewModel(data);
             BruteForce = new SprinklerBruteForceViewModel(
                 data,
                 placementInputExporter,
                 sprinklerFamilySource,
                 sprinklerPlacementService,
                 catalog);
+            Collision = new SprinklerCollisionViewModel(data, BruteForce);
+
+            BruteForce.RequestNavigateToFinal = () =>
+            {
+                Collision.RefreshReviewList();
+                SelectedSubTabViewModel = Collision;
+            };
+
+            Collision.RequestNavigateToPreliminary = () =>
+            {
+                SelectedSubTabViewModel = BruteForce;
+            };
 
             SubTabViewModels = new ObservableCollection<object>
             {
@@ -84,7 +95,14 @@ namespace FireProtection.UI.ViewModels.Sprinklers
         public object SelectedSubTabViewModel
         {
             get => _selectedSubTabViewModel;
-            set => SetProperty(ref _selectedSubTabViewModel, value);
+            set
+            {
+                if (value == Collision)
+                {
+                    Collision.RefreshReviewList();
+                }
+                SetProperty(ref _selectedSubTabViewModel, value);
+            }
         }
 
         protected bool SetProperty<T>(

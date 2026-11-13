@@ -2,6 +2,14 @@
 
 Priority order: P0 = critical, P1 = high, P2 = medium, P3 = low.
 
+## Completed Work
+
+- [x] **Simplified Obstacle Handling & Placement Wizard (2026-10-23)**
+  - Candidate points placed at calculated target locations regardless of obstacles; obstacle clashes tracked in diagnostics and warnings.
+  - 2-step navigation workflow: Preliminary (selection, overrides) -> Final Review (summary table, Previous, Apply, Cancel).
+  - Apply confirmation prompt: *"Place sprinklers at calculated locations regardless of detected obstacles?"*.
+  - UI compact responsiveness for smaller screens (window min constraints 820x500).
+
 ## Environment status
 
 - [ ] Restore a valid Revit runtime/build environment on this machine before claiming runtime verification.
@@ -17,6 +25,34 @@ Priority order: P0 = critical, P1 = high, P2 = medium, P3 = low.
 - [ ] Replace the provisional sprinkler spacing with code-edition-approved NFPA rules.
   - Area: [FireProtection.Backend/Services/Placement/Sprinklers/Final/BruteForce/DefaultHazardPlacementRules.cs](FireProtection.Backend/Services/Placement/Sprinklers/Final/BruteForce/DefaultHazardPlacementRules.cs)
   - Requirement: no placeholder 15 ft logic remains in the production path.
+  - **Sidewall-specific (2026-11-12 audit):** the sidewall path needs its OWN rule rows, not the
+    ceiling-table values — NFPA 13 (2022) §10.3.4 max along-wall spacing **14 ft light / 10 ft ordinary**,
+    §10.3.3.2.1 max protection area **196 ft² light / 100 ft² ordinary** (effective throw = area ÷ spacing:
+    LH 14 ft, OH ~10 ft). The provisional 15 ft throw (`throwAssumedSquare`,
+    BruteForceCalculationService.cs L1523–1531) over-estimates OH throw by 5 ft and could mask gaps in
+    single-row rooms deeper than ~10 ft. Seeding already implements the NFPA model
+    (`throwDepth = TypeMaxCoverageAreaSqFt / alongSpacing`); only the rule values are missing.
+  - Audited deltas of the current 24-head layout vs §10.3 (kitchen OH1, end-wall max = S/2): kitchen
+    ends 5.74 ft vs 5.0 (0.74 over, ×4 heads); sitting room mid-edge heads 8.27 ft vs 7.0; bedroom 1
+    8.56 ft vs 7.0. All along-wall gaps, protection areas, min spacing, and opposing-row depth
+    requirements pass.
+  - **Rulebook source verified (2026-11-12):** `sprinkler_rulebook.md` Ch.19 p.228 (PDF p.234) Table 19-2
+    confirms the sidewall values: LH 14 ft spacing / 12 ft (combustible) or 14 ft (noncombustible)
+    single-row width / 120 or 196 sq ft per head; OH 10 ft / 10 ft / 80 or 100 sq ft. Opposing rows
+    allowed to room width 20 ft OH / 24 ft LH; no back-to-back without continuous lintel/soffit;
+    deflector 4–6 in below ceiling (listed up to 18 in); soffit > 8 in needs a pendent. Matches the
+    independently web-verified NFPA 13 (2022) §10.3 values (LH 14/196, OH 10/100).
+  - **Implementation gaps found (doc claims ≠ code):** `FireProtection-Sprinklers.md` §2.3/§10 claim the
+    sidewall solver is "governed entirely by Table 19-2" — it is NOT. Actual chain:
+    `MaxSpacingFt 15 (provisional p.218) × 0.9 CeilingHeightAdjustmentFactor × 0.85 orientation
+    placeholder = 11.475 ft alongSpacing` (proven by exact head positions: endWallMax 5.7375 reproduces
+    all 8 kitchen heads); no wall-finish column (no `SidewallWallFinish` in PlacementRoomInput);
+    catalog `TypeSidewall*` fields (CatalogModels) never read by `SelectSidewallDirectional` (only
+    `TypeMaxCoverageAreaSqFt`); no sidewall deflector rule (4–6 in); no opposing-room-width (20/24 ft)
+    or back-to-back/lintel feasibility checks; `Nfpa13RulebookRules.cs` has zero sidewall content.
+  - Doc fixes needed: `FireProtection-Sprinklers.md` §2.3 Light-Combustible single-row width is
+    transcribed as **14**, rulebook says **12**; §10 "governed entirely by Table 19-2" must be marked
+    planned/not-implemented; stand-off 1.5 in (doc) vs 0.5 ft in code.
 
 - [ ] Finalize the shared device-placement framework but keep device rules independent.
   - Area: [FireProtection.Backend/Services/Placement](FireProtection.Backend/Services/Placement)
@@ -34,9 +70,9 @@ Priority order: P0 = critical, P1 = high, P2 = medium, P3 = low.
   - Area: [FireProtection.Backend/Services/Placement/SmokeDetectors](FireProtection.Backend/Services/Placement/SmokeDetectors), [FireProtection.UI/ViewModels/SmokeDetectors](FireProtection.UI/ViewModels/SmokeDetectors)
   - Requirement: detector spacing, ceiling mount, slope handling, wall offset, and valid-host checks must be independent from sprinkler rules.
 
-- [ ] Implement standards-based notification appliance placement logic.
-  - Area: [FireProtection.Backend/Services/Placement/NotificationAppliances](FireProtection.Backend/Services/Placement/NotificationAppliances), [FireProtection.UI/ViewModels/NotificationAppliances](FireProtection.UI/ViewModels/NotificationAppliances)
-  - Requirement: use NFPA-72 logic, not a sprinkler copy; visible and audible coverage must both be considered.
+- [x] Implement standards-based notification appliance placement logic (Decision 034).
+  - Area: [FireProtection.Backend/Services/Placement/NotificationAppliances](FireProtection.Backend/Services/Placement/NotificationAppliances), [FireProtection.UI/Views/NotificationAppliances](FireProtection.UI/Views/NotificationAppliances)
+  - Requirement: use NFPA-72 Chapter 18 logic (compartment 1-per-room up to 900 sq ft, 90 in AFF wall-mounting on primary wall, 100 ft corridor spacing with 15 ft end offsets), streamlined UI matching smoke detectors.
 
 - [ ] Complete catalog validation and missing-family handling.
   - Area: [FireProtection.Backend/Services/Catalog](FireProtection.Backend/Services/Catalog), [FireProtection.UI/ViewModels/Catalog](FireProtection.UI/ViewModels/Catalog)

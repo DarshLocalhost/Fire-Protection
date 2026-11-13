@@ -1,13 +1,14 @@
-using System;
-using System.Collections.Generic;
-using System.Globalization;
-using System.Linq;
 using Autodesk.Revit.DB;
 using FireProtection.Backend.Models.Placement.Sprinklers.Final;
+using FireProtection.Backend.Services.Placement.Sprinklers.Final.BruteForce;
 using FireProtection.Backend.Services.Placement.Sprinklers.Final.Strategies;
 using FireProtection.UI.Models;
 using FireProtection.UI.Models.Sprinklers.BruteForce;
 using FireProtection.UI.Services;
+using System;
+using System.Collections.Generic;
+using System.Globalization;
+using System.Linq;
 
 namespace FireProtection.Backend.Services.Placement.Sprinklers.Final
 {
@@ -57,7 +58,8 @@ namespace FireProtection.Backend.Services.Placement.Sprinklers.Final
             string selectedTypeName,
             BruteForceCalculationResult calcResult,
             IPlacementProgress progress = null,
-            ExistingDevicePolicy existingDevicePolicy = ExistingDevicePolicy.SkipRoom)
+            ExistingDevicePolicy existingDevicePolicy = ExistingDevicePolicy.SkipRoom,
+            bool ignoreObstacles = true)
         {
             if (progress == null) progress = NullPlacementProgress.Instance;
 
@@ -110,7 +112,7 @@ namespace FireProtection.Backend.Services.Placement.Sprinklers.Final
 
                 RunPlacementTransaction(
                     calcResult, selectedFamilyName, selectedTypeName,
-                    existingSprinklers, existingPoints, progress, existingDevicePolicy, result);
+                    existingSprinklers, existingPoints, progress, existingDevicePolicy, ignoreObstacles, result);
 
                 if (result.WasCancelled) group.RollBack();
                 else group.Assimilate();
@@ -188,6 +190,7 @@ namespace FireProtection.Backend.Services.Placement.Sprinklers.Final
             List<XYZ> existingSprinklerPoints,
             IPlacementProgress progress,
             ExistingDevicePolicy existingDevicePolicy,
+            bool ignoreObstacles,
             SprinklerPlacementResult result)
         {
             using (Transaction transaction = new Transaction(_hostDocument, "Place Sprinklers"))
@@ -297,10 +300,28 @@ namespace FireProtection.Backend.Services.Placement.Sprinklers.Final
 
                         foreach (CalculatedSprinklerPoint point in room.Points)
                         {
+                            if (!ignoreObstacles && point.HasObstacleConflict)
+                            {
+                                roomResult.Failed.Add(new FailedSprinklerEntry
+                                {
+                                    X = point.X,
+                                    Y = point.Y,
+                                    Z = point.Z,
+                                    RoomId = room.RoomId,
+                                    LevelId = point.LevelId,
+                                    ErrorCode = PlacementStatusCodes.ObstacleConflict,
+                                    Reason = point.ObstacleConflictDescription ?? "Point conflicts with detected obstacle."
+                                });
+                                continue;
+                            }
+
                             // Coordinate-space guard: a candidate must fall inside its own room polygon in HOST
                             // coordinates. One that does not is almost always an untransformed linked-model point,
                             // and creating it would drop a sprinkler far outside the room.
-                            if (!IsPointInsideRoom(point, room))
+                            // When ignoreObstacles is true, candidate points that sit on room-bounding obstacles
+                            // (such as column projections or casework along walls) must not be refused as outside room.
+                            bool allowObstaclePoint = ignoreObstacles && point.HasObstacleConflict && point.WallEdgeIndex.HasValue;
+                            if (!IsPointInsideRoom(point, room) && !allowObstaclePoint)
                             {
                                 result.SkippedOutsideRoomCount++;
                                 roomResult.Failed.Add(new FailedSprinklerEntry
@@ -501,6 +522,8 @@ if (symbol == null)
                                 ?? "The candidate's host level could not be resolved.";
                         continue;
                     }
+
+                   
 
                     anyLevelResolved = true;
                     Level level = levelRes.HostLevel;
@@ -854,12 +877,31 @@ if (symbol == null)
                 XYZ actualLocation = placedLocation != null ? placedLocation.Point : null;
 
                 bool locationKnown = actualLocation != null;
-                // A sidewall candidate is intentionally generated inboard, then projected to the
-                // host wall face. Validate against that host-plane target, not the inboard sweep
-                // point; otherwise every legitimate sidewall placement is falsely marked invalid.
+
+                // Reported deviation follows the DTO contract: requested calc point vs actual
+                // instance location. (The previous implementation compared the actual location
+                // against the strategy's projected host target, which reported ~0 ft even when
+                // that target itself was wrong — e.g. an end-face projection stacking heads on
+                // a wall corner.)
                 XYZ validationTarget = outcome.ExpectedLocation ?? xyz;
-                double deviationFt = locationKnown ? actualLocation.DistanceTo(validationTarget) : 0.0;
-                bool spatiallyValid = locationKnown && deviationFt <= _config.PlacementValidationToleranceFt;
+                double deviationFt = locationKnown ? actualLocation.DistanceTo(xyz) : 0.0;
+
+                // Validity is two-part:
+                //  1) Execution accuracy — the instance sits where the strategy projected it
+                //     (ExpectedLocation), within the configured tolerance.
+                //  2) Sidewall fidelity — the projected target itself must stay within the
+                //     face-snap envelope of the requested point. A sidewall candidate is
+                //     generated ~0.5 ft inboard and is projected to the host face, so a legit
+                //     snap adds at most ~1 ft; anything beyond that means the host plane was
+                //     wrong (end face / oblique wall) even though Revit executed exactly.
+                double executionDeviationFt = locationKnown ? actualLocation.DistanceTo(validationTarget) : 0.0;
+                double targetDriftFt = validationTarget.DistanceTo(xyz);
+                bool isSidewallOutcome = outcome.HostingStrategy != null &&
+                    outcome.HostingStrategy.StartsWith("WallSidewall", StringComparison.OrdinalIgnoreCase);
+                const double SidewallFaceSnapEnvelopeFt = 1.5;
+                bool spatiallyValid = locationKnown &&
+                    executionDeviationFt <= _config.PlacementValidationToleranceFt &&
+                    (!isSidewallOutcome || targetDriftFt <= SidewallFaceSnapEnvelopeFt);
                 string statusCode = spatiallyValid
                     ? PlacementStatusCodes.PlacedAndValid
                     : PlacementStatusCodes.PlacedButInvalid;
@@ -897,10 +939,15 @@ if (symbol == null)
                 // both counted (PlacedButInvalidCount, which fails result.Success) and explained here.
                 if (!spatiallyValid)
                 {
-                    string detail = locationKnown
-                        ? $"actual ({actualLocation.X:F2},{actualLocation.Y:F2},{actualLocation.Z:F2}) is {deviationFt:F2} ft from expected host target " +
-                          $"({validationTarget.X:F2},{validationTarget.Y:F2},{validationTarget.Z:F2}); tolerance {_config.PlacementValidationToleranceFt:F2} ft"
-                        : "the created instance exposes no LocationPoint, so its placed position cannot be verified";
+                    string detail = !locationKnown
+                        ? "the created instance exposes no LocationPoint, so its placed position cannot be verified"
+                        : $"actual ({actualLocation.X:F2},{actualLocation.Y:F2},{actualLocation.Z:F2}) is {executionDeviationFt:F2} ft from expected host target " +
+                          $"({validationTarget.X:F2},{validationTarget.Y:F2},{validationTarget.Z:F2}); tolerance {_config.PlacementValidationToleranceFt:F2} ft";
+                    if (locationKnown && isSidewallOutcome && targetDriftFt > SidewallFaceSnapEnvelopeFt)
+                    {
+                        detail += $"; projected host target is {targetDriftFt:F2} ft from the requested point " +
+                                  $"(face-snap envelope {SidewallFaceSnapEnvelopeFt:F2} ft)";
+                    }
                     result.Warnings.Add(
                         $"[REVIEW] Instance {instance.Id} (room {point.RoomId}, strategy {outcome.HostingStrategy}) " +
                         $"placed but spatially INVALID: {detail}.");

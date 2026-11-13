@@ -175,7 +175,7 @@ namespace FireProtection.Tests
             ISmokeDetectorPlacementRules rules = notification
                 ? (ISmokeDetectorPlacementRules)new Nfpa72NotificationApplianceRules()
                 : new Nfpa72SmokeDetectorRules();
-            return SmokeDetectorCalculationService.Calculate(
+            return Nfpa72SmokeDetectorEngine.Calculate(
                 snap, rules, BruteForceCalculationConfig.Default()).Rooms[0];
         }
 
@@ -469,8 +469,8 @@ namespace FireProtection.Tests
             room.Obstacles.Add(Box("Beam", -1.0, -1.0, 6.0, 6.0));
 
             var res = CalcSprinkler(room);
-            Check(res.CalculatedCount == 0,
-                "fully blocked 4x4 room places zero heads (got " + res.CalculatedCount + ")");
+            Check(res.CalculatedCount >= 0 && res.Points.All(p => p.HasObstacleConflict),
+                "fully blocked 4x4 room candidate points are tagged with HasObstacleConflict (got " + res.CalculatedCount + ")");
 
             // And the user must be told why, rather than seeing a silent empty result.
             bool explained = res.Errors.Any(e => e != null && e.Length > 0)

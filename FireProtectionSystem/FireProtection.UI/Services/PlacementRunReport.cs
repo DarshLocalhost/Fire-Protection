@@ -54,6 +54,7 @@ namespace FireProtection.UI.Services
         public bool ReviewRequired { get; set; }
         public int PointsRequested { get; set; }
         public int PointsPlaced { get; set; }
+        public double? CoveragePercent { get; set; }
 
         /// <summary>
         /// Per-point placement diagnostics (one line per calculated point): requested vs actual

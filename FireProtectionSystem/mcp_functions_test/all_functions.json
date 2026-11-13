@@ -1,0 +1,6335 @@
+[
+  {
+    "name": "fireprotection_begin_host_resolution_pass",
+    "title": "Begin host resolution pass",
+    "description": "Opens a read-only host-resolution pass: ceiling/floor/roof and link-instance element lists are collected once and reused for every candidate point until fireprotection_end_host_resolution_pass is called. This exists purely for performance. Without it, each candidate point rebuilt the same document-wide element lists, which is O(rooms x candidates x document) collectors on the thread that also pumps the UI - the main cause of the tool freezing. Callers MUST bracket a single read-only sweep and MUST end it before any document modification. Elements are only valid while the document is unmodified, which is why the cache is scoped to one pass rather than kept for the session.",
+    "input_schema": {
+      "type": "object",
+      "properties": {},
+      "additionalProperties": false
+    },
+    "output_schema": {
+      "type": "object",
+      "properties": {
+        "started": {
+          "type": "boolean",
+          "const": true
+        },
+        "message": {
+          "type": "string"
+        }
+      },
+      "required": [
+        "started",
+        "message"
+      ]
+    },
+    "input_examples": [
+      {}
+    ],
+    "annotations": {
+      "readOnlyHint": true,
+      "destructiveHint": false,
+      "idempotentHint": false,
+      "openWorldHint": false
+    }
+  },
+  {
+    "name": "fireprotection_calculate_notification_appliance_layout",
+    "title": "Calculate notification appliance placement layout (NFPA 72)",
+    "description": "Runs the provisional notification appliance (strobe/speaker/speaker-strobe) placement calculation on the provided rooms. The notification rules are PROVISIONAL and catalog-independent - they use simplified audible/visible coverage heuristics rather than full NFPA 72 Chapter 18 calculations. The run and its report are flagged 'engineering review required'. Computes device locations based on room geometry, appliance type (strobe, speaker, speaker-strobe), candela rating, and dBA rating. Uses centered grid layout with spacing derived from candela coverage. Obstacle conflicts are flagged. Returns per-room results with calculated points, diagnostics, warnings, and errors. This is a read-only calculation that does not modify the Revit model. Results are NOT NFPA 72 compliant without engineering review.",
+    "input_schema": {
+      "type": "object",
+      "properties": {
+        "rooms": {
+          "type": "array",
+          "minItems": 1,
+          "items": {
+            "type": "object",
+            "properties": {
+              "room_id": {
+                "type": "string"
+              },
+              "room_name": {
+                "type": "string"
+              },
+              "room_number": {
+                "type": "string"
+              },
+              "level_id": {
+                "type": "string"
+              },
+              "level_name": {
+                "type": "string"
+              },
+              "level_elevation_ft": {
+                "type": "number"
+              },
+              "area_sq_ft": {
+                "type": "number"
+              },
+              "boundary_polygon": {
+                "type": "array",
+                "minItems": 3,
+                "items": {
+                  "type": "array",
+                  "items": {
+                    "type": "number"
+                  },
+                  "minItems": 2,
+                  "maxItems": 2
+                }
+              },
+              "boundary": {
+                "type": "object"
+              },
+              "selected_family_name": {
+                "type": "string"
+              },
+              "selected_type_name": {
+                "type": "string"
+              },
+              "appliance_type": {
+                "type": "string",
+                "enum": [
+                  "Strobe",
+                  "Speaker",
+                  "SpeakerStrobe"
+                ]
+              },
+              "candela": {
+                "type": "integer",
+                "minimum": 15,
+                "maximum": 1000
+              },
+              "notification_dba": {
+                "type": "integer",
+                "minimum": 70,
+                "maximum": 120
+              },
+              "override_max_spacing_ft": {
+                "type": [
+                  "number",
+                  "null"
+                ]
+              },
+              "override_max_distance_to_wall_ft": {
+                "type": [
+                  "number",
+                  "null"
+                ]
+              },
+              "override_boundary_clearance_ft": {
+                "type": [
+                  "number",
+                  "null"
+                ]
+              },
+              "ceilings": {
+                "type": "array",
+                "items": {
+                  "type": "object"
+                }
+              },
+              "obstacles": {
+                "type": "array",
+                "items": {
+                  "type": "object"
+                }
+              }
+            },
+            "required": [
+              "room_id",
+              "room_name",
+              "room_number",
+              "level_id",
+              "level_name",
+              "level_elevation_ft",
+              "area_sq_ft",
+              "boundary_polygon",
+              "selected_family_name",
+              "selected_type_name",
+              "appliance_type",
+              "candela",
+              "notification_dba"
+            ]
+          }
+        }
+      },
+      "required": [
+        "rooms"
+      ],
+      "additionalProperties": false
+    },
+    "output_schema": {
+      "type": "object",
+      "properties": {
+        "success": {
+          "type": "boolean"
+        },
+        "is_provisional": {
+          "type": "boolean",
+          "const": true
+        },
+        "applied_rules_summary": {
+          "type": "string"
+        },
+        "total_calculated_detectors": {
+          "type": "integer"
+        },
+        "rooms": {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "properties": {
+              "room_id": {
+                "type": "string"
+              },
+              "room_name": {
+                "type": "string"
+              },
+              "room_number": {
+                "type": "string"
+              },
+              "family_name": {
+                "type": "string"
+              },
+              "type_name": {
+                "type": "string"
+              },
+              "status": {
+                "type": "string",
+                "enum": [
+                  "Success",
+                  "ReviewRequired",
+                  "Failed",
+                  "InvalidRoomGeometry",
+                  "InvalidInput",
+                  "NoValidCandidates",
+                  "CalculationFailed"
+                ]
+              },
+              "calculated_count": {
+                "type": "integer"
+              },
+              "required_count": {
+                "type": "integer"
+              },
+              "applied_max_spacing_ft": {
+                "type": "number"
+              },
+              "applied_boundary_clearance_ft": {
+                "type": "number"
+              },
+              "polygon": {
+                "type": "array",
+                "items": {
+                  "type": "array",
+                  "items": {
+                    "type": "number"
+                  },
+                  "minItems": 2,
+                  "maxItems": 2
+                }
+              },
+              "points": {
+                "type": "array",
+                "items": {
+                  "type": "object",
+                  "properties": {
+                    "x": {
+                      "type": "number"
+                    },
+                    "y": {
+                      "type": "number"
+                    },
+                    "z": {
+                      "type": "number"
+                    },
+                    "room_id": {
+                      "type": "string"
+                    },
+                    "level_id": {
+                      "type": "string"
+                    },
+                    "level_name": {
+                      "type": "string"
+                    },
+                    "mount": {
+                      "type": "string"
+                    },
+                    "wall_edge_index": {
+                      "type": [
+                        "integer",
+                        "null"
+                      ]
+                    },
+                    "has_obstacle_conflict": {
+                      "type": "boolean"
+                    },
+                    "obstacle_conflict_description": {
+                      "type": "string"
+                    }
+                  },
+                  "required": [
+                    "x",
+                    "y",
+                    "z",
+                    "room_id",
+                    "level_id",
+                    "level_name",
+                    "mount"
+                  ]
+                }
+              },
+              "warnings": {
+                "type": "array",
+                "items": {
+                  "type": "string"
+                }
+              },
+              "errors": {
+                "type": "array",
+                "items": {
+                  "type": "string"
+                }
+              },
+              "diagnostics": {
+                "type": "array",
+                "items": {
+                  "type": "string"
+                }
+              }
+            },
+            "required": [
+              "room_id",
+              "room_name",
+              "room_number",
+              "status",
+              "calculated_count"
+            ]
+          }
+        },
+        "warnings": {
+          "type": "array",
+          "items": {
+            "type": "string"
+          }
+        },
+        "errors": {
+          "type": "array",
+          "items": {
+            "type": "string"
+          }
+        }
+      },
+      "required": [
+        "success",
+        "is_provisional",
+        "applied_rules_summary",
+        "total_calculated_detectors",
+        "rooms",
+        "warnings",
+        "errors"
+      ]
+    },
+    "input_examples": [
+      {
+        "rooms": [
+          {
+            "room_id": "789012",
+            "room_name": "Office 101",
+            "room_number": "101",
+            "level_id": "123456",
+            "level_name": "Level 1",
+            "level_elevation_ft": 0,
+            "area_sq_ft": 400,
+            "boundary_polygon": [
+              [
+                0,
+                0
+              ],
+              [
+                20,
+                0
+              ],
+              [
+                20,
+                20
+              ],
+              [
+                0,
+                20
+              ]
+            ],
+            "selected_family_name": "Wheelock Exceder",
+            "selected_type_name": "LED Strobe 15cd",
+            "appliance_type": "Strobe",
+            "candela": 15,
+            "notification_dba": 85
+          }
+        ]
+      }
+    ],
+    "annotations": {
+      "readOnlyHint": true,
+      "destructiveHint": false,
+      "idempotentHint": true,
+      "openWorldHint": false
+    }
+  },
+  {
+    "name": "fireprotection_calculate_smoke_detector_layout",
+    "title": "Calculate smoke detector placement layout (NFPA 72)",
+    "description": "Runs the NFPA 72 Chapter 17 smoke detector placement calculation engine on the provided rooms. Computes optimal detector locations based on room geometry, detector type (spot, beam, aspirating), mount (ceiling/wall), ceiling slope, and air changes per hour. Supports both ceiling-grid-snapped (tile-centered) and free-centered orthogonal grid layouts, plus wall-mount layouts for corridors. Applies NFPA 72 spacing rules: max spacing S=30 ft (smooth/level ceilings), wall distance <= S/2 (15 ft), radial coverage <= 0.7*S (21.213 ft). High airflow (ACH > 7.5) reduces coverage area per Table 17.7.6.3.3.2. Obstacle conflicts are flagged but do not discard candidates (non-destructive). Performs post-selection NFPA 72 compliance checks (corner coverage, wall distance, obstacle notices). Returns per-room results with calculated points, diagnostics, warnings, and errors. This is a read-only calculation that does not modify the Revit model.",
+    "input_schema": {
+      "type": "object",
+      "properties": {
+        "rooms": {
+          "type": "array",
+          "minItems": 1,
+          "items": {
+            "type": "object",
+            "properties": {
+              "room_id": {
+                "type": "string"
+              },
+              "room_name": {
+                "type": "string"
+              },
+              "room_number": {
+                "type": "string"
+              },
+              "level_id": {
+                "type": "string"
+              },
+              "level_name": {
+                "type": "string"
+              },
+              "level_elevation_ft": {
+                "type": "number"
+              },
+              "area_sq_ft": {
+                "type": "number"
+              },
+              "boundary_polygon": {
+                "type": "array",
+                "minItems": 3,
+                "items": {
+                  "type": "array",
+                  "items": {
+                    "type": "number"
+                  },
+                  "minItems": 2,
+                  "maxItems": 2
+                }
+              },
+              "boundary": {
+                "type": "object",
+                "properties": {
+                  "polygon": {
+                    "type": "array",
+                    "items": {
+                      "type": "array",
+                      "items": {
+                        "type": "number"
+                      },
+                      "minItems": 2,
+                      "maxItems": 2
+                    }
+                  },
+                  "outer_loop": {
+                    "type": "object",
+                    "properties": {
+                      "is_outer": {
+                        "type": "boolean"
+                      },
+                      "polygon": {
+                        "type": "array",
+                        "items": {
+                          "type": "array",
+                          "items": {
+                            "type": "number"
+                          },
+                          "minItems": 2,
+                          "maxItems": 2
+                        }
+                      },
+                      "segments": {
+                        "type": "array",
+                        "items": {
+                          "type": "object"
+                        }
+                      }
+                    },
+                    "required": [
+                      "is_outer",
+                      "polygon",
+                      "segments"
+                    ]
+                  },
+                  "inner_loops": {
+                    "type": "array",
+                    "items": {
+                      "type": "object"
+                    }
+                  }
+                },
+                "required": [
+                  "polygon",
+                  "outer_loop",
+                  "inner_loops"
+                ]
+              },
+              "selected_family_name": {
+                "type": "string"
+              },
+              "selected_type_name": {
+                "type": "string"
+              },
+              "detector_type": {
+                "type": "string",
+                "enum": [
+                  "Spot",
+                  "Beam",
+                  "Aspirating"
+                ]
+              },
+              "mount": {
+                "type": "string",
+                "enum": [
+                  "Ceiling",
+                  "Wall"
+                ]
+              },
+              "ceiling_slope": {
+                "type": "string",
+                "enum": [
+                  "Flat",
+                  "Sloped"
+                ]
+              },
+              "air_changes_per_hour": {
+                "type": [
+                  "number",
+                  "null"
+                ]
+              },
+              "override_max_spacing_ft": {
+                "type": [
+                  "number",
+                  "null"
+                ]
+              },
+              "override_max_distance_to_wall_ft": {
+                "type": [
+                  "number",
+                  "null"
+                ]
+              },
+              "override_boundary_clearance_ft": {
+                "type": [
+                  "number",
+                  "null"
+                ]
+              },
+              "override_ceiling_tile_u_ft": {
+                "type": [
+                  "number",
+                  "null"
+                ]
+              },
+              "override_ceiling_tile_v_ft": {
+                "type": [
+                  "number",
+                  "null"
+                ]
+              },
+              "ceilings": {
+                "type": "array",
+                "items": {
+                  "type": "object"
+                }
+              },
+              "obstacles": {
+                "type": "array",
+                "items": {
+                  "type": "object"
+                }
+              },
+              "selected_placement_behavior": {
+                "type": "string"
+              }
+            },
+            "required": [
+              "room_id",
+              "room_name",
+              "room_number",
+              "level_id",
+              "level_name",
+              "level_elevation_ft",
+              "area_sq_ft",
+              "boundary_polygon",
+              "selected_family_name",
+              "selected_type_name",
+              "detector_type",
+              "mount",
+              "ceiling_slope"
+            ]
+          }
+        },
+        "config": {
+          "type": "object",
+          "properties": {
+            "max_candidate_points": {
+              "type": "integer",
+              "default": 5000,
+              "minimum": 100,
+              "maximum": 20000
+            },
+            "tolerance_ft": {
+              "type": "number",
+              "default": 0.01,
+              "minimum": 0.001,
+              "maximum": 1.0
+            },
+            "grid_resolution_factor": {
+              "type": "number",
+              "default": 1.0,
+              "minimum": 0.5,
+              "maximum": 2.0
+            }
+          },
+          "additionalProperties": false
+        }
+      },
+      "required": [
+        "rooms"
+      ],
+      "additionalProperties": false
+    },
+    "output_schema": {
+      "type": "object",
+      "properties": {
+        "success": {
+          "type": "boolean"
+        },
+        "is_provisional": {
+          "type": "boolean"
+        },
+        "applied_rules_summary": {
+          "type": "string"
+        },
+        "total_calculated_detectors": {
+          "type": "integer"
+        },
+        "rooms": {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "properties": {
+              "room_id": {
+                "type": "string"
+              },
+              "room_name": {
+                "type": "string"
+              },
+              "room_number": {
+                "type": "string"
+              },
+              "family_name": {
+                "type": "string"
+              },
+              "type_name": {
+                "type": "string"
+              },
+              "status": {
+                "type": "string",
+                "enum": [
+                  "Success",
+                  "ReviewRequired",
+                  "Failed",
+                  "InvalidRoomGeometry",
+                  "InvalidInput",
+                  "NoValidCandidates",
+                  "CalculationFailed"
+                ]
+              },
+              "calculated_count": {
+                "type": "integer"
+              },
+              "required_count": {
+                "type": "integer"
+              },
+              "applied_max_spacing_ft": {
+                "type": "number"
+              },
+              "applied_boundary_clearance_ft": {
+                "type": "number"
+              },
+              "polygon": {
+                "type": "array",
+                "items": {
+                  "type": "array",
+                  "items": {
+                    "type": "number"
+                  },
+                  "minItems": 2,
+                  "maxItems": 2
+                }
+              },
+              "points": {
+                "type": "array",
+                "items": {
+                  "type": "object",
+                  "properties": {
+                    "x": {
+                      "type": "number"
+                    },
+                    "y": {
+                      "type": "number"
+                    },
+                    "z": {
+                      "type": "number"
+                    },
+                    "room_id": {
+                      "type": "string"
+                    },
+                    "level_id": {
+                      "type": "string"
+                    },
+                    "level_name": {
+                      "type": "string"
+                    },
+                    "mount": {
+                      "type": "string"
+                    },
+                    "wall_edge_index": {
+                      "type": [
+                        "integer",
+                        "null"
+                      ]
+                    },
+                    "has_obstacle_conflict": {
+                      "type": "boolean"
+                    },
+                    "obstacle_conflict_description": {
+                      "type": "string"
+                    }
+                  },
+                  "required": [
+                    "x",
+                    "y",
+                    "z",
+                    "room_id",
+                    "level_id",
+                    "level_name",
+                    "mount"
+                  ]
+                }
+              },
+              "warnings": {
+                "type": "array",
+                "items": {
+                  "type": "string"
+                }
+              },
+              "errors": {
+                "type": "array",
+                "items": {
+                  "type": "string"
+                }
+              },
+              "diagnostics": {
+                "type": "array",
+                "items": {
+                  "type": "string"
+                }
+              }
+            },
+            "required": [
+              "room_id",
+              "room_name",
+              "room_number",
+              "status",
+              "calculated_count"
+            ]
+          }
+        },
+        "warnings": {
+          "type": "array",
+          "items": {
+            "type": "string"
+          }
+        },
+        "errors": {
+          "type": "array",
+          "items": {
+            "type": "string"
+          }
+        }
+      },
+      "required": [
+        "success",
+        "is_provisional",
+        "applied_rules_summary",
+        "total_calculated_detectors",
+        "rooms",
+        "warnings",
+        "errors"
+      ]
+    },
+    "input_examples": [
+      {
+        "rooms": [
+          {
+            "room_id": "789012",
+            "room_name": "Office 101",
+            "room_number": "101",
+            "level_id": "123456",
+            "level_name": "Level 1",
+            "level_elevation_ft": 0,
+            "area_sq_ft": 400,
+            "boundary_polygon": [
+              [
+                0,
+                0
+              ],
+              [
+                20,
+                0
+              ],
+              [
+                20,
+                20
+              ],
+              [
+                0,
+                20
+              ]
+            ],
+            "selected_family_name": "System Sensor 2W-B",
+            "selected_type_name": "2-Wire Photoelectric",
+            "detector_type": "Spot",
+            "mount": "Ceiling",
+            "ceiling_slope": "Flat",
+            "air_changes_per_hour": 6
+          }
+        ]
+      }
+    ],
+    "annotations": {
+      "readOnlyHint": true,
+      "destructiveHint": false,
+      "idempotentHint": true,
+      "openWorldHint": false
+    }
+  },
+  {
+    "name": "fireprotection_calculate_sprinkler_layout",
+    "title": "Calculate sprinkler placement layout (BruteForce)",
+    "description": "Runs the BruteForce sprinkler placement calculation engine on the provided rooms using NFPA 13-2022 rules. The engine computes optimal sprinkler locations based on room geometry, hazard classification, ceiling type/height, obstacles, and selected sprinkler type. Supports both ceiling-grid-snapped (tile-centered) and free-centered array layouts. Handles pendent, upright, and sidewall orientations. Applies ceiling height adjustments, slope factors, and small-room rules. Obstacle conflicts are flagged but do not discard candidates (non-destructive). Returns per-room results with calculated points, diagnostics, warnings, and errors. This is a read-only calculation that does not modify the Revit model. The calculation uses provisional spacing rules (15 ft default) unless project-approved hazard placement rules are supplied.",
+    "input_schema": {
+      "type": "object",
+      "properties": {
+        "rooms": {
+          "type": "array",
+          "minItems": 1,
+          "description": "Array of room input objects for calculation.",
+          "items": {
+            "type": "object",
+            "properties": {
+              "level_id": {
+                "type": "string"
+              },
+              "level_name": {
+                "type": "string"
+              },
+              "level_elevation_ft": {
+                "type": "number"
+              },
+              "room_id": {
+                "type": "string"
+              },
+              "room_name": {
+                "type": "string"
+              },
+              "room_number": {
+                "type": "string"
+              },
+              "area_sq_ft": {
+                "type": "number"
+              },
+              "volume_cu_ft": {
+                "type": [
+                  "number",
+                  "null"
+                ]
+              },
+              "effective_hazard_class": {
+                "type": "string",
+                "enum": [
+                  "Light",
+                  "OH1",
+                  "OH2",
+                  "EH1",
+                  "EH2"
+                ]
+              },
+              "ceiling_height_ft": {
+                "type": [
+                  "number",
+                  "null"
+                ]
+              },
+              "ceiling_type": {
+                "type": "string"
+              },
+              "polygon": {
+                "type": "array",
+                "minItems": 3,
+                "items": {
+                  "type": "array",
+                  "items": {
+                    "type": "number"
+                  },
+                  "minItems": 2,
+                  "maxItems": 2
+                }
+              },
+              "boundary": {
+                "type": "object",
+                "properties": {
+                  "polygon": {
+                    "type": "array",
+                    "items": {
+                      "type": "array",
+                      "items": {
+                        "type": "number"
+                      },
+                      "minItems": 2,
+                      "maxItems": 2
+                    }
+                  },
+                  "outer_loop": {
+                    "type": "object",
+                    "properties": {
+                      "is_outer": {
+                        "type": "boolean"
+                      },
+                      "polygon": {
+                        "type": "array",
+                        "items": {
+                          "type": "array",
+                          "items": {
+                            "type": "number"
+                          },
+                          "minItems": 2,
+                          "maxItems": 2
+                        }
+                      },
+                      "segments": {
+                        "type": "array",
+                        "items": {
+                          "type": "object",
+                          "properties": {
+                            "type": {
+                              "type": "string"
+                            },
+                            "start": {
+                              "type": "object",
+                              "properties": {
+                                "x": {
+                                  "type": "number"
+                                },
+                                "y": {
+                                  "type": "number"
+                                },
+                                "z": {
+                                  "type": "number"
+                                }
+                              },
+                              "required": [
+                                "x",
+                                "y",
+                                "z"
+                              ]
+                            },
+                            "end": {
+                              "type": "object",
+                              "properties": {
+                                "x": {
+                                  "type": "number"
+                                },
+                                "y": {
+                                  "type": "number"
+                                },
+                                "z": {
+                                  "type": "number"
+                                }
+                              },
+                              "required": [
+                                "x",
+                                "y",
+                                "z"
+                              ]
+                            },
+                            "mid": {
+                              "type": "object",
+                              "properties": {
+                                "x": {
+                                  "type": "number"
+                                },
+                                "y": {
+                                  "type": "number"
+                                },
+                                "z": {
+                                  "type": "number"
+                                }
+                              },
+                              "required": [
+                                "x",
+                                "y",
+                                "z"
+                              ]
+                            },
+                            "length_ft": {
+                              "type": "number"
+                            },
+                            "radius_ft": {
+                              "type": [
+                                "number",
+                                "null"
+                              ]
+                            },
+                            "is_wall": {
+                              "type": "boolean"
+                            }
+                          },
+                          "required": [
+                            "type",
+                            "start",
+                            "end",
+                            "mid",
+                            "length_ft",
+                            "is_wall"
+                          ]
+                        }
+                      }
+                    },
+                    "required": [
+                      "is_outer",
+                      "polygon",
+                      "segments"
+                    ]
+                  },
+                  "inner_loops": {
+                    "type": "array",
+                    "items": {
+                      "type": "object"
+                    }
+                  }
+                },
+                "required": [
+                  "polygon",
+                  "outer_loop",
+                  "inner_loops"
+                ]
+              },
+              "ceilings": {
+                "type": "array",
+                "items": {
+                  "type": "object"
+                }
+              },
+              "obstacles": {
+                "type": "array",
+                "items": {
+                  "type": "object"
+                }
+              },
+              "existing_sprinklers": {
+                "type": "array",
+                "items": {
+                  "type": "object"
+                }
+              },
+              "source": {
+                "type": "object"
+              },
+              "selected_sprinkler_family_name": {
+                "type": "string"
+              },
+              "selected_sprinkler_type_name": {
+                "type": "string"
+              },
+              "override_max_spacing_ft": {
+                "type": [
+                  "number",
+                  "null"
+                ]
+              },
+              "override_boundary_clearance_ft": {
+                "type": [
+                  "number",
+                  "null"
+                ]
+              },
+              "override_max_distance_to_wall_ft": {
+                "type": [
+                  "number",
+                  "null"
+                ]
+              },
+              "override_ceiling_tile_u_ft": {
+                "type": [
+                  "number",
+                  "null"
+                ]
+              },
+              "override_ceiling_tile_v_ft": {
+                "type": [
+                  "number",
+                  "null"
+                ]
+              },
+              "selected_sprinkler_orientation": {
+                "type": "string",
+                "enum": [
+                  "pendent",
+                  "upright",
+                  "sidewall"
+                ]
+              },
+              "type_max_coverage_area_sq_ft": {
+                "type": [
+                  "number",
+                  "null"
+                ]
+              },
+              "type_max_spacing_ft": {
+                "type": [
+                  "number",
+                  "null"
+                ]
+              },
+              "type_min_spacing_ft": {
+                "type": [
+                  "number",
+                  "null"
+                ]
+              },
+              "type_coverage_radius_ft": {
+                "type": [
+                  "number",
+                  "null"
+                ]
+              },
+              "sprinkler_class": {
+                "type": "string"
+              }
+            },
+            "required": [
+              "level_id",
+              "level_name",
+              "level_elevation_ft",
+              "room_id",
+              "room_name",
+              "room_number",
+              "area_sq_ft",
+              "effective_hazard_class",
+              "polygon"
+            ]
+          }
+        },
+        "selected_family_name": {
+          "type": "string",
+          "description": "Universal sprinkler family name for rooms without per-room override."
+        },
+        "selected_type_name": {
+          "type": "string",
+          "description": "Universal sprinkler type name for rooms without per-room override."
+        },
+        "project_name": {
+          "type": "string",
+          "default": "RevitModel"
+        },
+        "config": {
+          "type": "object",
+          "properties": {
+            "max_candidate_points": {
+              "type": "integer",
+              "default": 5000,
+              "minimum": 100,
+              "maximum": 20000
+            },
+            "tolerance_ft": {
+              "type": "number",
+              "default": 0.01,
+              "minimum": 0.001,
+              "maximum": 1.0
+            },
+            "grid_resolution_factor": {
+              "type": "number",
+              "default": 1.0,
+              "minimum": 0.5,
+              "maximum": 2.0
+            }
+          },
+          "additionalProperties": false
+        }
+      },
+      "required": [
+        "rooms",
+        "selected_family_name",
+        "selected_type_name"
+      ],
+      "additionalProperties": false
+    },
+    "output_schema": {
+      "type": "object",
+      "properties": {
+        "success": {
+          "type": "boolean"
+        },
+        "is_provisional": {
+          "type": "boolean"
+        },
+        "applied_rules_summary": {
+          "type": "string"
+        },
+        "total_calculated_sprinklers": {
+          "type": "integer"
+        },
+        "rooms": {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "properties": {
+              "room_id": {
+                "type": "string"
+              },
+              "room_name": {
+                "type": "string"
+              },
+              "room_number": {
+                "type": "string"
+              },
+              "sprinkler_family_name": {
+                "type": "string"
+              },
+              "sprinkler_type_name": {
+                "type": "string"
+              },
+              "status": {
+                "type": "string",
+                "enum": [
+                  "Success",
+                  "ReviewRequired",
+                  "Failed",
+                  "InvalidRoomGeometry",
+                  "InvalidInput",
+                  "NoValidCandidates",
+                  "MissingCeiling",
+                  "UnsupportedCeiling",
+                  "CalculationFailed"
+                ]
+              },
+              "calculated_count": {
+                "type": "integer"
+              },
+              "required_count": {
+                "type": "integer"
+              },
+              "applied_max_spacing_ft": {
+                "type": "number"
+              },
+              "applied_boundary_clearance_ft": {
+                "type": "number"
+              },
+              "rules_approved": {
+                "type": "boolean"
+              },
+              "polygon": {
+                "type": "array",
+                "items": {
+                  "type": "array",
+                  "items": {
+                    "type": "number"
+                  },
+                  "minItems": 2,
+                  "maxItems": 2
+                }
+              },
+              "points": {
+                "type": "array",
+                "items": {
+                  "type": "object",
+                  "properties": {
+                    "x": {
+                      "type": "number"
+                    },
+                    "y": {
+                      "type": "number"
+                    },
+                    "z": {
+                      "type": "number"
+                    },
+                    "room_id": {
+                      "type": "string"
+                    },
+                    "level_id": {
+                      "type": "string"
+                    },
+                    "level_name": {
+                      "type": "string"
+                    },
+                    "wall_edge_index": {
+                      "type": [
+                        "integer",
+                        "null"
+                      ]
+                    },
+                    "has_obstacle_conflict": {
+                      "type": "boolean"
+                    },
+                    "obstacle_conflict_description": {
+                      "type": "string"
+                    }
+                  },
+                  "required": [
+                    "x",
+                    "y",
+                    "z",
+                    "room_id",
+                    "level_id",
+                    "level_name"
+                  ]
+                }
+              },
+              "warnings": {
+                "type": "array",
+                "items": {
+                  "type": "string"
+                }
+              },
+              "errors": {
+                "type": "array",
+                "items": {
+                  "type": "string"
+                }
+              },
+              "diagnostics": {
+                "type": "array",
+                "items": {
+                  "type": "string"
+                }
+              }
+            },
+            "required": [
+              "room_id",
+              "room_name",
+              "room_number",
+              "status",
+              "calculated_count"
+            ]
+          }
+        },
+        "warnings": {
+          "type": "array",
+          "items": {
+            "type": "string"
+          }
+        },
+        "errors": {
+          "type": "array",
+          "items": {
+            "type": "string"
+          }
+        }
+      },
+      "required": [
+        "success",
+        "is_provisional",
+        "applied_rules_summary",
+        "total_calculated_sprinklers",
+        "rooms",
+        "warnings",
+        "errors"
+      ]
+    },
+    "input_examples": [
+      {
+        "project_name": "Sample Project",
+        "selected_family_name": "Tyco TY-FRB",
+        "selected_type_name": "1/2\" Pendent 155F",
+        "rooms": [
+          {
+            "level_id": "123456",
+            "level_name": "Level 1",
+            "level_elevation_ft": 0,
+            "room_id": "789012",
+            "room_name": "Office 101",
+            "room_number": "101",
+            "area_sq_ft": 400,
+            "effective_hazard_class": "Light",
+            "ceiling_height_ft": 9,
+            "ceiling_type": "FLAT",
+            "polygon": [
+              [
+                0,
+                0
+              ],
+              [
+                20,
+                0
+              ],
+              [
+                20,
+                20
+              ],
+              [
+                0,
+                20
+              ]
+            ],
+            "selected_sprinkler_family_name": "Tyco TY-FRB",
+            "selected_sprinkler_type_name": "1/2\" Pendent 155F",
+            "selected_sprinkler_orientation": "pendent"
+          }
+        ]
+      }
+    ],
+    "annotations": {
+      "readOnlyHint": true,
+      "destructiveHint": false,
+      "idempotentHint": true,
+      "openWorldHint": false
+    }
+  },
+  {
+    "name": "fireprotection_check_clearance",
+    "title": "Check clearance/clash between element sets",
+    "description": "Detects hard clashes or clearance violations between two element sets (host or linked files). Uses Revit's ReferenceIntersector for accurate raycast-based clearance checks. axis='bbox' inflates setA bounding boxes by clearanceMm in all directions \u00e2\u20ac\u201d use for omnidirectional proximity checks. axis='Z' fires a vertical ReferenceIntersector raycast from each setA element and automatically finds the nearest setB element directly below or above it; reports the actual measured clearance. Use direction='below' (duct\u00e2\u2020\u2019floor below) or 'above' (duct\u00e2\u2020\u2019ceiling above). IMPORTANT for axis='Z': do NOT manually fetch or enumerate setB elements first \u00e2\u20ac\u201d just pass a category filter in setB and let the raycast locate the nearest hit automatically. clearanceMm=0 + axis='bbox' \u00e2\u2020\u2019 hard clash only. This is a read-only check that does not modify the model.",
+    "input_schema": {
+      "type": "object",
+      "properties": {
+        "set_a": {
+          "type": "object",
+          "properties": {
+            "source": {
+              "type": "string",
+              "enum": [
+                "host",
+                "link"
+              ],
+              "default": "host"
+            },
+            "link_id": {
+              "type": "integer",
+              "description": "Required when source='link'. ElementId of the RevitLinkInstance."
+            },
+            "categories": {
+              "type": "array",
+              "items": {
+                "type": "string"
+              },
+              "description": "BuiltInCategory names, e.g. ['OST_DuctCurves', 'OST_PipeCurves']. Empty = all element types."
+            },
+            "limit": {
+              "type": "integer",
+              "minimum": 1,
+              "maximum": 2000,
+              "default": 500
+            },
+            "scope_id": {
+              "type": "integer",
+              "description": "ElementId of a spatial container (MEP Space, Room, Floor, equipment). Only elements whose centroid falls inside that element's bbox are included."
+            }
+          },
+          "required": [
+            "source"
+          ]
+        },
+        "set_b": {
+          "type": "object",
+          "properties": {
+            "source": {
+              "type": "string",
+              "enum": [
+                "host",
+                "link"
+              ],
+              "default": "host"
+            },
+            "link_id": {
+              "type": "integer"
+            },
+            "categories": {
+              "type": "array",
+              "items": {
+                "type": "string"
+              }
+            },
+            "limit": {
+              "type": "integer",
+              "minimum": 1,
+              "maximum": 2000,
+              "default": 500
+            },
+            "scope_id": {
+              "type": "integer"
+            }
+          },
+          "required": [
+            "source"
+          ]
+        },
+        "axis": {
+          "type": "string",
+          "enum": [
+            "bbox",
+            "Z"
+          ],
+          "default": "bbox"
+        },
+        "direction": {
+          "type": "string",
+          "enum": [
+            "below",
+            "above"
+          ],
+          "default": "below"
+        },
+        "view_id": {
+          "type": "integer",
+          "description": "ElementId of a 3D view for axis=Z raycast. Uses active view if omitted."
+        },
+        "clearance_mm": {
+          "type": "number",
+          "minimum": 0,
+          "default": 0
+        },
+        "sample_count": {
+          "type": "integer",
+          "minimum": 1,
+          "maximum": 10,
+          "default": 3
+        },
+        "max_results": {
+          "type": "integer",
+          "minimum": 1,
+          "maximum": 2000,
+          "default": 200
+        }
+      },
+      "required": [
+        "set_a",
+        "set_b"
+      ],
+      "additionalProperties": false
+    },
+    "output_schema": {
+      "type": "object",
+      "properties": {
+        "clashes": {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "properties": {
+              "set_a_element_id": {
+                "type": "integer"
+              },
+              "set_a_category": {
+                "type": "string"
+              },
+              "set_b_element_id": {
+                "type": "integer"
+              },
+              "set_b_category": {
+                "type": "string"
+              },
+              "measured_clearance_mm": {
+                "type": "number"
+              },
+              "violation_mm": {
+                "type": "number",
+                "description": "How much the measured clearance falls short of the threshold."
+              },
+              "sample_point": {
+                "type": "object",
+                "properties": {
+                  "x": {
+                    "type": "number"
+                  },
+                  "y": {
+                    "type": "number"
+                  },
+                  "z": {
+                    "type": "number"
+                  }
+                }
+              }
+            },
+            "required": [
+              "set_a_element_id",
+              "set_a_category",
+              "set_b_element_id",
+              "set_b_category",
+              "measured_clearance_mm",
+              "violation_mm"
+            ]
+          }
+        },
+        "summary": {
+          "type": "object",
+          "properties": {
+            "total_clashes": {
+              "type": "integer"
+            },
+            "hard_clashes": {
+              "type": "integer"
+            },
+            "clearance_violations": {
+              "type": "integer"
+            },
+            "set_a_elements_checked": {
+              "type": "integer"
+            },
+            "set_b_elements_checked": {
+              "type": "integer"
+            }
+          },
+          "required": [
+            "total_clashes",
+            "hard_clashes",
+            "clearance_violations",
+            "set_a_elements_checked",
+            "set_b_elements_checked"
+          ]
+        }
+      },
+      "required": [
+        "clashes",
+        "summary"
+      ]
+    },
+    "input_examples": [
+      {
+        "set_a": {
+          "source": "host",
+          "categories": [
+            "OST_DuctCurves"
+          ],
+          "limit": 500
+        },
+        "set_b": {
+          "source": "host",
+          "categories": [
+            "OST_PipeCurves"
+          ],
+          "limit": 500
+        },
+        "axis": "bbox",
+        "clearance_mm": 100,
+        "max_results": 100
+      },
+      {
+        "set_a": {
+          "source": "host",
+          "categories": [
+            "OST_DuctCurves"
+          ]
+        },
+        "set_b": {
+          "source": "link",
+          "link_id": 12345,
+          "categories": [
+            "OST_Floors"
+          ]
+        },
+        "axis": "Z",
+        "direction": "below",
+        "clearance_mm": 2400,
+        "sample_count": 5,
+        "max_results": 200
+      }
+    ],
+    "annotations": {
+      "readOnlyHint": true,
+      "destructiveHint": false,
+      "idempotentHint": true,
+      "openWorldHint": false
+    }
+  },
+  {
+    "name": "fireprotection_clear_eligibility_cache",
+    "title": "Clear placement eligibility cache",
+    "description": "Drops any cached eligibility results. Deliberately NOT called automatically before every sweep. The cache key already covers room identity, level name, hazard class, family and type, so those inputs miss the cache on their own. Call it when the DOCUMENT changes in a way the key cannot see - in practice, after loading a family. Known remaining gap: a linked-model edit, or an in-place ceiling move, is not visible to the key and can therefore serve stale results until the next family load or manual invalidation.",
+    "input_schema": {
+      "type": "object",
+      "properties": {},
+      "additionalProperties": false
+    },
+    "output_schema": {
+      "type": "object",
+      "properties": {
+        "cleared": {
+          "type": "boolean",
+          "const": true
+        }
+      },
+      "required": [
+        "cleared"
+      ]
+    },
+    "input_examples": [
+      {}
+    ],
+    "annotations": {
+      "readOnlyHint": true,
+      "destructiveHint": false,
+      "idempotentHint": true,
+      "openWorldHint": false
+    }
+  },
+  {
+    "name": "fireprotection_end_host_resolution_pass",
+    "title": "End host resolution pass",
+    "description": "Ends the read-only host-resolution pass opened by fireprotection_begin_host_resolution_pass and releases cached elements. Must be called before any document modification.",
+    "input_schema": {
+      "type": "object",
+      "properties": {},
+      "additionalProperties": false
+    },
+    "output_schema": {
+      "type": "object",
+      "properties": {
+        "ended": {
+          "type": "boolean",
+          "const": true
+        },
+        "collector_calls_saved": {
+          "type": "integer",
+          "description": "Number of document-wide collector invocations avoided by the cache."
+        }
+      },
+      "required": [
+        "ended",
+        "collector_calls_saved"
+      ]
+    },
+    "input_examples": [
+      {}
+    ],
+    "annotations": {
+      "readOnlyHint": true,
+      "destructiveHint": false,
+      "idempotentHint": false,
+      "openWorldHint": false
+    }
+  },
+  {
+    "name": "fireprotection_evaluate_notification_appliance_eligibility",
+    "title": "Evaluate notification appliance placement eligibility for rooms",
+    "description": "Performs pre-placement eligibility checks for a batch of rooms for notification appliance placement. Reuses the SAME calculation, family/level resolution, and ceiling-host logic the real run uses, but creates no elements and opens no transaction. Returns a dictionary keyed by RoomId with PlacementEligibilityResult for each room. Rooms whose eligibility cannot be decided are UNDETERMINED, never falsely blocked. The provisional notification rules mean all results should be treated as requiring engineering review. Use before placement to filter out unplaceable rooms in the UI.",
+    "input_schema": {
+      "type": "object",
+      "properties": {
+        "items": {
+          "type": "array",
+          "minItems": 1,
+          "items": {
+            "type": "object",
+            "properties": {
+              "room_id": {
+                "type": "string"
+              },
+              "room_name": {
+                "type": "string"
+              },
+              "room_number": {
+                "type": "string"
+              },
+              "level_name": {
+                "type": "string"
+              },
+              "level_id": {
+                "type": "string"
+              },
+              "level_elevation_ft": {
+                "type": "number"
+              },
+              "area_sq_ft": {
+                "type": "number"
+              },
+              "polygon": {
+                "type": "array",
+                "items": {
+                  "type": "array",
+                  "items": {
+                    "type": "number"
+                  },
+                  "minItems": 2,
+                  "maxItems": 2
+                }
+              },
+              "selected_family_name": {
+                "type": "string"
+              },
+              "selected_type_name": {
+                "type": "string"
+              },
+              "device_kind": {
+                "type": "string",
+                "enum": [
+                  "SmokeDetector",
+                  "NotificationAppliance"
+                ]
+              }
+            },
+            "required": [
+              "room_id",
+              "room_name",
+              "room_number",
+              "level_name",
+              "level_id",
+              "level_elevation_ft",
+              "area_sq_ft",
+              "polygon",
+              "selected_family_name",
+              "selected_type_name",
+              "device_kind"
+            ]
+          }
+        }
+      },
+      "required": [
+        "items"
+      ],
+      "additionalProperties": false
+    },
+    "output_schema": {
+      "type": "object",
+      "properties": {
+        "eligibility_by_room": {
+          "type": "object",
+          "additionalProperties": {
+            "type": "object",
+            "properties": {
+              "eligibility_state": {
+                "type": "string",
+                "enum": [
+                  "ELIGIBLE",
+                  "BLOCKED",
+                  "UNDETERMINED"
+                ]
+              },
+              "reason": {
+                "type": "string"
+              },
+              "status_code": {
+                "type": "string"
+              },
+              "valid_candidate_count": {
+                "type": "integer"
+              },
+              "hazard_class": {
+                "type": "string"
+              },
+              "family_placement_type": {
+                "type": "string"
+              },
+              "hosting_strategy": {
+                "type": "string"
+              },
+              "ceiling_source": {
+                "type": "string"
+              },
+              "host_source": {
+                "type": "string"
+              },
+              "link_instance_name": {
+                "type": "string"
+              },
+              "host_ceiling_element_id": {
+                "type": "string"
+              },
+              "host_level_id": {
+                "type": "string"
+              },
+              "host_level_name": {
+                "type": "string"
+              },
+              "is_special_hazard": {
+                "type": "boolean"
+              },
+              "special_hazard_type": {
+                "type": "string"
+              },
+              "special_hazard_system": {
+                "type": "string"
+              },
+              "is_eligible": {
+                "type": "boolean"
+              },
+              "is_blocked": {
+                "type": "boolean"
+              },
+              "is_undetermined": {
+                "type": "boolean"
+              }
+            },
+            "required": [
+              "eligibility_state",
+              "reason",
+              "status_code",
+              "valid_candidate_count",
+              "is_eligible",
+              "is_blocked",
+              "is_undetermined"
+            ]
+          }
+        }
+      },
+      "required": [
+        "eligibility_by_room"
+      ]
+    },
+    "input_examples": [
+      {
+        "items": [
+          {
+            "room_id": "789012",
+            "room_name": "Office 101",
+            "room_number": "101",
+            "level_name": "Level 1",
+            "level_id": "123456",
+            "level_elevation_ft": 0,
+            "area_sq_ft": 400,
+            "polygon": [
+              [
+                0,
+                0
+              ],
+              [
+                20,
+                0
+              ],
+              [
+                20,
+                20
+              ],
+              [
+                0,
+                20
+              ]
+            ],
+            "selected_family_name": "Wheelock Exceder",
+            "selected_type_name": "LED Strobe 15cd",
+            "device_kind": "NotificationAppliance"
+          }
+        ]
+      }
+    ],
+    "annotations": {
+      "readOnlyHint": true,
+      "destructiveHint": false,
+      "idempotentHint": true,
+      "openWorldHint": false
+    }
+  },
+  {
+    "name": "fireprotection_evaluate_smoke_detector_eligibility",
+    "title": "Evaluate smoke detector placement eligibility for rooms",
+    "description": "Performs pre-placement eligibility checks for a batch of rooms for smoke detector placement. Reuses the SAME calculation, family/level resolution, and ceiling-host logic the real run uses, but creates no elements and opens no transaction. Returns a dictionary keyed by RoomId with PlacementEligibilityResult for each room. Rooms whose eligibility cannot be decided (e.g., calculation could not run) are UNDETERMINED, never falsely blocked. Use before placement to filter out unplaceable rooms in the UI.",
+    "input_schema": {
+      "type": "object",
+      "properties": {
+        "items": {
+          "type": "array",
+          "minItems": 1,
+          "items": {
+            "type": "object",
+            "properties": {
+              "room_id": {
+                "type": "string"
+              },
+              "room_name": {
+                "type": "string"
+              },
+              "room_number": {
+                "type": "string"
+              },
+              "level_name": {
+                "type": "string"
+              },
+              "level_id": {
+                "type": "string"
+              },
+              "level_elevation_ft": {
+                "type": "number"
+              },
+              "area_sq_ft": {
+                "type": "number"
+              },
+              "polygon": {
+                "type": "array",
+                "items": {
+                  "type": "array",
+                  "items": {
+                    "type": "number"
+                  },
+                  "minItems": 2,
+                  "maxItems": 2
+                }
+              },
+              "selected_family_name": {
+                "type": "string"
+              },
+              "selected_type_name": {
+                "type": "string"
+              },
+              "device_kind": {
+                "type": "string",
+                "enum": [
+                  "SmokeDetector",
+                  "NotificationAppliance"
+                ]
+              }
+            },
+            "required": [
+              "room_id",
+              "room_name",
+              "room_number",
+              "level_name",
+              "level_id",
+              "level_elevation_ft",
+              "area_sq_ft",
+              "polygon",
+              "selected_family_name",
+              "selected_type_name",
+              "device_kind"
+            ]
+          }
+        }
+      },
+      "required": [
+        "items"
+      ],
+      "additionalProperties": false
+    },
+    "output_schema": {
+      "type": "object",
+      "properties": {
+        "eligibility_by_room": {
+          "type": "object",
+          "additionalProperties": {
+            "type": "object",
+            "properties": {
+              "eligibility_state": {
+                "type": "string",
+                "enum": [
+                  "ELIGIBLE",
+                  "BLOCKED",
+                  "UNDETERMINED"
+                ]
+              },
+              "reason": {
+                "type": "string"
+              },
+              "status_code": {
+                "type": "string"
+              },
+              "valid_candidate_count": {
+                "type": "integer"
+              },
+              "hazard_class": {
+                "type": "string"
+              },
+              "family_placement_type": {
+                "type": "string"
+              },
+              "hosting_strategy": {
+                "type": "string"
+              },
+              "ceiling_source": {
+                "type": "string"
+              },
+              "host_source": {
+                "type": "string"
+              },
+              "link_instance_name": {
+                "type": "string"
+              },
+              "host_ceiling_element_id": {
+                "type": "string"
+              },
+              "host_level_id": {
+                "type": "string"
+              },
+              "host_level_name": {
+                "type": "string"
+              },
+              "is_special_hazard": {
+                "type": "boolean"
+              },
+              "special_hazard_type": {
+                "type": "string"
+              },
+              "special_hazard_system": {
+                "type": "string"
+              },
+              "is_eligible": {
+                "type": "boolean"
+              },
+              "is_blocked": {
+                "type": "boolean"
+              },
+              "is_undetermined": {
+                "type": "boolean"
+              }
+            },
+            "required": [
+              "eligibility_state",
+              "reason",
+              "status_code",
+              "valid_candidate_count",
+              "is_eligible",
+              "is_blocked",
+              "is_undetermined"
+            ]
+          }
+        }
+      },
+      "required": [
+        "eligibility_by_room"
+      ]
+    },
+    "input_examples": [
+      {
+        "items": [
+          {
+            "room_id": "789012",
+            "room_name": "Office 101",
+            "room_number": "101",
+            "level_name": "Level 1",
+            "level_id": "123456",
+            "level_elevation_ft": 0,
+            "area_sq_ft": 400,
+            "polygon": [
+              [
+                0,
+                0
+              ],
+              [
+                20,
+                0
+              ],
+              [
+                20,
+                20
+              ],
+              [
+                0,
+                20
+              ]
+            ],
+            "selected_family_name": "System Sensor 2W-B",
+            "selected_type_name": "2-Wire Photoelectric",
+            "device_kind": "SmokeDetector"
+          }
+        ]
+      }
+    ],
+    "annotations": {
+      "readOnlyHint": true,
+      "destructiveHint": false,
+      "idempotentHint": true,
+      "openWorldHint": false
+    }
+  },
+  {
+    "name": "fireprotection_evaluate_sprinkler_eligibility",
+    "title": "Evaluate sprinkler placement eligibility for a room",
+    "description": "Performs a deterministic pre-placement eligibility check for a single room given the currently selected sprinkler family/type and the room's actual candidate sprinkler points. The evaluation reuses the EXACT same family-resolution, strategy-selection, level-resolution, and ceiling-host logic that the actual placement uses, but performs only READ-ONLY queries \u00e2\u20ac\u201d no transaction, no FamilyInstance creation. Returns a structured result with one of three semantic states: ELIGIBLE (at least one candidate satisfies all placement prerequisites), BLOCKED (deterministic inability to place with explicit reason), or UNDETERMINED (could not be decided due to configuration/infrastructure error). This is the single source of truth for whether a room can receive sprinklers with the current configuration. Use before placement to filter out unplaceable rooms in the UI.",
+    "input_schema": {
+      "type": "object",
+      "properties": {
+        "room": {
+          "type": "object",
+          "description": "RoomUiData object with room geometry, classification, and extension data.",
+          "properties": {
+            "room_id": {
+              "type": "string"
+            },
+            "name": {
+              "type": "string"
+            },
+            "number": {
+              "type": "string"
+            },
+            "level_name": {
+              "type": "string"
+            },
+            "area_sq_ft": {
+              "type": "number"
+            },
+            "classification": {
+              "type": "object",
+              "properties": {
+                "hazard_class": {
+                  "type": "string"
+                },
+                "suggested_by_classifier": {
+                  "type": "string"
+                },
+                "overridden": {
+                  "type": "boolean"
+                },
+                "confirmed_by": {
+                  "type": "string"
+                }
+              },
+              "required": [
+                "hazard_class",
+                "suggested_by_classifier",
+                "overridden",
+                "confirmed_by"
+              ]
+            },
+            "geometry": {
+              "type": "object",
+              "properties": {
+                "polygon": {
+                  "type": "array",
+                  "items": {
+                    "type": "array",
+                    "items": {
+                      "type": "number"
+                    },
+                    "minItems": 2,
+                    "maxItems": 2
+                  }
+                },
+                "ceiling_height_ft": {
+                  "type": [
+                    "number",
+                    "null"
+                  ]
+                },
+                "ceiling_type": {
+                  "type": "string"
+                }
+              },
+              "required": [
+                "polygon",
+                "ceiling_type"
+              ]
+            },
+            "requires_human_review": {
+              "type": "boolean"
+            },
+            "extension_data": {
+              "type": "object",
+              "description": "Full room data from ModelSnapshot (ceilings, obstacles, existing sprinklers, boundary, hazard, source)."
+            }
+          },
+          "required": [
+            "room_id",
+            "name",
+            "number",
+            "level_name",
+            "area_sq_ft",
+            "classification",
+            "geometry",
+            "requires_human_review"
+          ]
+        },
+        "candidates": {
+          "type": "array",
+          "description": "Calculated sprinkler points from BruteForce calculation for this room.",
+          "items": {
+            "type": "object",
+            "properties": {
+              "x": {
+                "type": "number"
+              },
+              "y": {
+                "type": "number"
+              },
+              "z": {
+                "type": "number"
+              },
+              "room_id": {
+                "type": "string"
+              },
+              "level_id": {
+                "type": "string"
+              },
+              "level_name": {
+                "type": "string"
+              },
+              "wall_edge_index": {
+                "type": [
+                  "integer",
+                  "null"
+                ]
+              },
+              "has_obstacle_conflict": {
+                "type": "boolean"
+              },
+              "obstacle_conflict_description": {
+                "type": "string"
+              }
+            },
+            "required": [
+              "x",
+              "y",
+              "z",
+              "room_id",
+              "level_id",
+              "level_name"
+            ]
+          }
+        },
+        "selected_family_name": {
+          "type": "string"
+        },
+        "selected_type_name": {
+          "type": "string"
+        }
+      },
+      "required": [
+        "room",
+        "candidates",
+        "selected_family_name",
+        "selected_type_name"
+      ],
+      "additionalProperties": false
+    },
+    "output_schema": {
+      "type": "object",
+      "properties": {
+        "eligibility_state": {
+          "type": "string",
+          "enum": [
+            "ELIGIBLE",
+            "BLOCKED",
+            "UNDETERMINED"
+          ]
+        },
+        "reason": {
+          "type": "string"
+        },
+        "status_code": {
+          "type": "string"
+        },
+        "valid_candidate_count": {
+          "type": "integer"
+        },
+        "hazard_class": {
+          "type": "string"
+        },
+        "family_placement_type": {
+          "type": "string"
+        },
+        "hosting_strategy": {
+          "type": "string"
+        },
+        "ceiling_source": {
+          "type": "string"
+        },
+        "host_source": {
+          "type": "string"
+        },
+        "link_instance_name": {
+          "type": "string"
+        },
+        "host_ceiling_element_id": {
+          "type": "string"
+        },
+        "host_level_id": {
+          "type": "string"
+        },
+        "host_level_name": {
+          "type": "string"
+        },
+        "is_special_hazard": {
+          "type": "boolean"
+        },
+        "special_hazard_type": {
+          "type": "string"
+        },
+        "special_hazard_system": {
+          "type": "string"
+        },
+        "is_eligible": {
+          "type": "boolean"
+        },
+        "is_blocked": {
+          "type": "boolean"
+        },
+        "is_undetermined": {
+          "type": "boolean"
+        }
+      },
+      "required": [
+        "eligibility_state",
+        "reason",
+        "status_code",
+        "valid_candidate_count",
+        "hazard_class",
+        "family_placement_type",
+        "hosting_strategy",
+        "ceiling_source",
+        "host_source",
+        "is_eligible",
+        "is_blocked",
+        "is_undetermined"
+      ]
+    },
+    "input_examples": [
+      {
+        "room": {
+          "room_id": "789012",
+          "name": "Office 101",
+          "number": "101",
+          "level_name": "Level 1",
+          "area_sq_ft": 400,
+          "classification": {
+            "hazard_class": "Light",
+            "suggested_by_classifier": "Light",
+            "overridden": false,
+            "confirmed_by": ""
+          },
+          "geometry": {
+            "polygon": [
+              [
+                0,
+                0
+              ],
+              [
+                20,
+                0
+              ],
+              [
+                20,
+                20
+              ],
+              [
+                0,
+                20
+              ]
+            ],
+            "ceiling_height_ft": 9,
+            "ceiling_type": "FLAT"
+          },
+          "requires_human_review": false,
+          "extension_data": {}
+        },
+        "candidates": [
+          {
+            "x": 5,
+            "y": 5,
+            "z": 9,
+            "room_id": "789012",
+            "level_id": "123456",
+            "level_name": "Level 1"
+          }
+        ],
+        "selected_family_name": "Tyco TY-FRB",
+        "selected_type_name": "1/2\" Pendent 155F"
+      }
+    ],
+    "annotations": {
+      "readOnlyHint": true,
+      "destructiveHint": false,
+      "idempotentHint": true,
+      "openWorldHint": false
+    }
+  },
+  {
+    "name": "fireprotection_extract_lightweight_snapshot",
+    "title": "Extract lightweight model snapshot",
+    "description": "Extracts a lightweight model snapshot from the active Revit document without heavy obstacle geometry extraction. This performs fast extraction of levels, ceilings, rooms with hazard classifications, and existing sprinklers, but defers obstacle extraction until later. All geometry is normalized to host MEP coordinates. Use this when you need to launch the UI quickly or when obstacles are not immediately needed for the workflow. Returns a structured ModelSnapshot DTO with empty obstacles list, summary statistics, warnings, and errors.",
+    "input_schema": {
+      "type": "object",
+      "properties": {
+        "export_file_path": {
+          "type": "string",
+          "description": "Optional path to export the snapshot as JSON. If omitted, the snapshot is returned in memory only."
+        }
+      },
+      "additionalProperties": false
+    },
+    "output_schema": {
+      "type": "object",
+      "properties": {
+        "schema_version": {
+          "type": "string"
+        },
+        "units": {
+          "type": "object",
+          "properties": {
+            "length": {
+              "type": "string"
+            },
+            "area": {
+              "type": "string"
+            },
+            "volume": {
+              "type": "string"
+            },
+            "angle": {
+              "type": "string"
+            }
+          },
+          "required": [
+            "length",
+            "area",
+            "volume",
+            "angle"
+          ]
+        },
+        "coordinate_system": {
+          "type": "object",
+          "properties": {
+            "canonical": {
+              "type": "string"
+            },
+            "length_unit": {
+              "type": "string"
+            }
+          },
+          "required": [
+            "canonical",
+            "length_unit"
+          ]
+        },
+        "project": {
+          "type": "object",
+          "properties": {
+            "name": {
+              "type": "string"
+            },
+            "standard": {
+              "type": "string"
+            },
+            "timestamp_utc": {
+              "type": "string"
+            }
+          },
+          "required": [
+            "name",
+            "standard",
+            "timestamp_utc"
+          ]
+        },
+        "model": {
+          "type": "object",
+          "properties": {
+            "host_document_title": {
+              "type": "string"
+            },
+            "linked_documents": {
+              "type": "array",
+              "items": {
+                "type": "object",
+                "properties": {
+                  "title": {
+                    "type": "string"
+                  },
+                  "path": {
+                    "type": "string"
+                  },
+                  "is_loaded": {
+                    "type": "boolean"
+                  },
+                  "room_count": {
+                    "type": "integer"
+                  }
+                },
+                "required": [
+                  "title",
+                  "path",
+                  "is_loaded",
+                  "room_count"
+                ]
+              }
+            }
+          },
+          "required": [
+            "host_document_title",
+            "linked_documents"
+          ]
+        },
+        "levels": {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "properties": {
+              "level_id": {
+                "type": "string"
+              },
+              "name": {
+                "type": "string"
+              },
+              "elevation_ft": {
+                "type": "number"
+              },
+              "source_document": {
+                "type": "string"
+              },
+              "source_level_id": {
+                "type": "string"
+              },
+              "rooms": {
+                "type": "array",
+                "items": {
+                  "type": "string"
+                }
+              }
+            },
+            "required": [
+              "level_id",
+              "name",
+              "elevation_ft",
+              "source_document"
+            ]
+          }
+        },
+        "rooms": {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "properties": {
+              "room_id": {
+                "type": "string"
+              },
+              "element_id": {
+                "type": "string"
+              },
+              "name": {
+                "type": "string"
+              },
+              "number": {
+                "type": "string"
+              },
+              "level_id": {
+                "type": "string"
+              },
+              "level_name": {
+                "type": "string"
+              },
+              "level_elevation_ft": {
+                "type": "number"
+              },
+              "area_sq_ft": {
+                "type": "number"
+              },
+              "volume_cu_ft": {
+                "type": [
+                  "number",
+                  "null"
+                ]
+              },
+              "phase": {
+                "type": "string"
+              },
+              "source": {
+                "type": "object",
+                "properties": {
+                  "document_title": {
+                    "type": "string"
+                  },
+                  "document_path": {
+                    "type": "string"
+                  },
+                  "is_from_link": {
+                    "type": "boolean"
+                  },
+                  "link_instance_id": {
+                    "type": "string"
+                  },
+                  "link_name": {
+                    "type": "string"
+                  }
+                },
+                "required": [
+                  "document_title",
+                  "document_path",
+                  "is_from_link",
+                  "link_instance_id",
+                  "link_name"
+                ]
+              },
+              "location_point": {
+                "type": [
+                  "object",
+                  "null"
+                ],
+                "properties": {
+                  "x": {
+                    "type": "number"
+                  },
+                  "y": {
+                    "type": "number"
+                  },
+                  "z": {
+                    "type": "number"
+                  }
+                },
+                "required": [
+                  "x",
+                  "y",
+                  "z"
+                ]
+              },
+              "bounding_box": {
+                "type": [
+                  "object",
+                  "null"
+                ],
+                "properties": {
+                  "min": {
+                    "type": "object",
+                    "properties": {
+                      "x": {
+                        "type": "number"
+                      },
+                      "y": {
+                        "type": "number"
+                      },
+                      "z": {
+                        "type": "number"
+                      }
+                    },
+                    "required": [
+                      "x",
+                      "y",
+                      "z"
+                    ]
+                  },
+                  "max": {
+                    "type": "object",
+                    "properties": {
+                      "x": {
+                        "type": "number"
+                      },
+                      "y": {
+                        "type": "number"
+                      },
+                      "z": {
+                        "type": "number"
+                      }
+                    },
+                    "required": [
+                      "x",
+                      "y",
+                      "z"
+                    ]
+                  }
+                },
+                "required": [
+                  "min",
+                  "max"
+                ]
+              },
+              "boundary": {
+                "type": "object"
+              },
+              "hazard": {
+                "type": "object",
+                "properties": {
+                  "hazard_class": {
+                    "type": "string"
+                  },
+                  "matched_keyword": {
+                    "type": "string"
+                  },
+                  "matched_terms": {
+                    "type": "array",
+                    "items": {
+                      "type": "string"
+                    }
+                  },
+                  "requires_review": {
+                    "type": "boolean"
+                  }
+                },
+                "required": [
+                  "hazard_class",
+                  "matched_keyword",
+                  "matched_terms",
+                  "requires_review"
+                ]
+              },
+              "classification": {
+                "type": "object",
+                "properties": {
+                  "hazard_class": {
+                    "type": "string"
+                  },
+                  "suggested_by_classifier": {
+                    "type": "string"
+                  },
+                  "overridden": {
+                    "type": "boolean"
+                  },
+                  "confirmed_by": {
+                    "type": "string"
+                  }
+                },
+                "required": [
+                  "hazard_class",
+                  "suggested_by_classifier",
+                  "overridden",
+                  "confirmed_by"
+                ]
+              },
+              "geometry": {
+                "type": "object",
+                "properties": {
+                  "polygon": {
+                    "type": "array",
+                    "items": {
+                      "type": "array",
+                      "items": {
+                        "type": "number"
+                      },
+                      "minItems": 2,
+                      "maxItems": 2
+                    }
+                  },
+                  "ceiling_height_ft": {
+                    "type": [
+                      "number",
+                      "null"
+                    ]
+                  },
+                  "ceiling_type": {
+                    "type": "string"
+                  }
+                },
+                "required": [
+                  "polygon",
+                  "ceiling_type"
+                ]
+              },
+              "ceilings": {
+                "type": "array",
+                "items": {
+                  "type": "object"
+                }
+              },
+              "associated_obstacle_ids": {
+                "type": "array",
+                "items": {
+                  "type": "string"
+                }
+              },
+              "requires_human_review": {
+                "type": "boolean"
+              },
+              "warnings": {
+                "type": "array",
+                "items": {
+                  "type": "string"
+                }
+              }
+            },
+            "required": [
+              "room_id",
+              "element_id",
+              "name",
+              "number",
+              "level_id",
+              "level_name",
+              "level_elevation_ft",
+              "area_sq_ft",
+              "phase",
+              "source",
+              "location_point",
+              "bounding_box",
+              "boundary",
+              "hazard",
+              "classification",
+              "geometry",
+              "ceilings",
+              "associated_obstacle_ids",
+              "requires_human_review",
+              "warnings"
+            ]
+          }
+        },
+        "ceilings": {
+          "type": "array",
+          "items": {
+            "type": "object"
+          }
+        },
+        "existing_sprinklers": {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "properties": {
+              "element_id": {
+                "type": "string"
+              },
+              "room_id": {
+                "type": "string"
+              },
+              "room_name": {
+                "type": "string"
+              },
+              "family_name": {
+                "type": "string"
+              },
+              "type_name": {
+                "type": "string"
+              },
+              "location": {
+                "type": "object",
+                "properties": {
+                  "x": {
+                    "type": "number"
+                  },
+                  "y": {
+                    "type": "number"
+                  },
+                  "z": {
+                    "type": "number"
+                  }
+                },
+                "required": [
+                  "x",
+                  "y",
+                  "z"
+                ]
+              },
+              "level_id": {
+                "type": "string"
+              },
+              "level_name": {
+                "type": "string"
+              },
+              "host_id": {
+                "type": "string"
+              },
+              "host_name": {
+                "type": "string"
+              }
+            },
+            "required": [
+              "element_id",
+              "room_id",
+              "room_name",
+              "family_name",
+              "type_name",
+              "location",
+              "level_id",
+              "level_name",
+              "host_id",
+              "host_name"
+            ]
+          }
+        },
+        "obstacles": {
+          "type": "array",
+          "items": {
+            "type": "object"
+          }
+        },
+        "summary": {
+          "type": "object",
+          "properties": {
+            "total_rooms": {
+              "type": "integer"
+            },
+            "total_ceilings": {
+              "type": "integer"
+            },
+            "total_obstacles": {
+              "type": "integer"
+            },
+            "total_existing_sprinklers": {
+              "type": "integer"
+            },
+            "total_linked_documents": {
+              "type": "integer"
+            },
+            "rooms_with_ceilings": {
+              "type": "integer"
+            },
+            "rooms_without_ceilings": {
+              "type": "integer"
+            },
+            "hazard_classification_counts": {
+              "type": "object",
+              "additionalProperties": {
+                "type": "integer"
+              }
+            },
+            "extraction_duration_ms": {
+              "type": "integer"
+            }
+          },
+          "required": [
+            "total_rooms",
+            "total_ceilings",
+            "total_obstacles",
+            "total_existing_sprinklers",
+            "total_linked_documents",
+            "rooms_with_ceilings",
+            "rooms_without_ceilings",
+            "hazard_classification_counts",
+            "extraction_duration_ms"
+          ]
+        },
+        "warnings": {
+          "type": "array",
+          "items": {
+            "type": "object"
+          }
+        },
+        "errors": {
+          "type": "array",
+          "items": {
+            "type": "object"
+          }
+        },
+        "export_path": {
+          "type": [
+            "string",
+            "null"
+          ]
+        }
+      },
+      "required": [
+        "schema_version",
+        "units",
+        "coordinate_system",
+        "project",
+        "model",
+        "levels",
+        "rooms",
+        "ceilings",
+        "existing_sprinklers",
+        "obstacles",
+        "summary",
+        "warnings",
+        "errors",
+        "export_path"
+      ]
+    },
+    "input_examples": [
+      {
+        "export_file_path": "C:\\exports\\lightweight_snapshot.json"
+      },
+      {}
+    ],
+    "annotations": {
+      "readOnlyHint": true,
+      "destructiveHint": false,
+      "idempotentHint": true,
+      "openWorldHint": false
+    }
+  },
+  {
+    "name": "fireprotection_extract_model_snapshot",
+    "title": "Extract full model snapshot",
+    "description": "Extracts a complete model snapshot from the active Revit document including all linked architectural models. This performs full data extraction: levels (host + links in host coordinates), ceilings (3D solid recursive geometry with slope classification), rooms with boundary geometry and hazard classifications, obstacles (columns, beams, walls, MEP elements), and existing sprinklers from both host and linked models. All geometry is normalized to host MEP coordinates. The operation is read-only and does not modify the model. Use this when you need the complete model data for placement calculations or analysis. The extraction can take several seconds on large models with many linked files. Returns a structured ModelSnapshot DTO with summary statistics, warnings, and errors.",
+    "input_schema": {
+      "type": "object",
+      "properties": {
+        "export_file_path": {
+          "type": "string",
+          "description": "Optional path to export the snapshot as JSON. If omitted, the snapshot is returned in memory only."
+        }
+      },
+      "additionalProperties": false
+    },
+    "output_schema": {
+      "type": "object",
+      "properties": {
+        "schema_version": {
+          "type": "string"
+        },
+        "units": {
+          "type": "object",
+          "properties": {
+            "length": {
+              "type": "string"
+            },
+            "area": {
+              "type": "string"
+            },
+            "volume": {
+              "type": "string"
+            },
+            "angle": {
+              "type": "string"
+            }
+          },
+          "required": [
+            "length",
+            "area",
+            "volume",
+            "angle"
+          ]
+        },
+        "coordinate_system": {
+          "type": "object",
+          "properties": {
+            "canonical": {
+              "type": "string"
+            },
+            "length_unit": {
+              "type": "string"
+            }
+          },
+          "required": [
+            "canonical",
+            "length_unit"
+          ]
+        },
+        "project": {
+          "type": "object",
+          "properties": {
+            "name": {
+              "type": "string"
+            },
+            "standard": {
+              "type": "string"
+            },
+            "timestamp_utc": {
+              "type": "string"
+            }
+          },
+          "required": [
+            "name",
+            "standard",
+            "timestamp_utc"
+          ]
+        },
+        "model": {
+          "type": "object",
+          "properties": {
+            "host_document_title": {
+              "type": "string"
+            },
+            "linked_documents": {
+              "type": "array",
+              "items": {
+                "type": "object",
+                "properties": {
+                  "title": {
+                    "type": "string"
+                  },
+                  "path": {
+                    "type": "string"
+                  },
+                  "is_loaded": {
+                    "type": "boolean"
+                  },
+                  "room_count": {
+                    "type": "integer"
+                  }
+                },
+                "required": [
+                  "title",
+                  "path",
+                  "is_loaded",
+                  "room_count"
+                ]
+              }
+            }
+          },
+          "required": [
+            "host_document_title",
+            "linked_documents"
+          ]
+        },
+        "levels": {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "properties": {
+              "level_id": {
+                "type": "string"
+              },
+              "name": {
+                "type": "string"
+              },
+              "elevation_ft": {
+                "type": "number"
+              },
+              "source_document": {
+                "type": "string"
+              },
+              "source_level_id": {
+                "type": "string"
+              },
+              "rooms": {
+                "type": "array",
+                "items": {
+                  "type": "string"
+                }
+              }
+            },
+            "required": [
+              "level_id",
+              "name",
+              "elevation_ft",
+              "source_document"
+            ]
+          }
+        },
+        "rooms": {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "properties": {
+              "room_id": {
+                "type": "string"
+              },
+              "element_id": {
+                "type": "string"
+              },
+              "name": {
+                "type": "string"
+              },
+              "number": {
+                "type": "string"
+              },
+              "level_id": {
+                "type": "string"
+              },
+              "level_name": {
+                "type": "string"
+              },
+              "level_elevation_ft": {
+                "type": "number"
+              },
+              "area_sq_ft": {
+                "type": "number"
+              },
+              "volume_cu_ft": {
+                "type": [
+                  "number",
+                  "null"
+                ]
+              },
+              "phase": {
+                "type": "string"
+              },
+              "source": {
+                "type": "object",
+                "properties": {
+                  "document_title": {
+                    "type": "string"
+                  },
+                  "document_path": {
+                    "type": "string"
+                  },
+                  "is_from_link": {
+                    "type": "boolean"
+                  },
+                  "link_instance_id": {
+                    "type": "string"
+                  },
+                  "link_name": {
+                    "type": "string"
+                  }
+                },
+                "required": [
+                  "document_title",
+                  "document_path",
+                  "is_from_link",
+                  "link_instance_id",
+                  "link_name"
+                ]
+              },
+              "location_point": {
+                "type": [
+                  "object",
+                  "null"
+                ],
+                "properties": {
+                  "x": {
+                    "type": "number"
+                  },
+                  "y": {
+                    "type": "number"
+                  },
+                  "z": {
+                    "type": "number"
+                  }
+                },
+                "required": [
+                  "x",
+                  "y",
+                  "z"
+                ]
+              },
+              "bounding_box": {
+                "type": [
+                  "object",
+                  "null"
+                ],
+                "properties": {
+                  "min": {
+                    "type": "object",
+                    "properties": {
+                      "x": {
+                        "type": "number"
+                      },
+                      "y": {
+                        "type": "number"
+                      },
+                      "z": {
+                        "type": "number"
+                      }
+                    },
+                    "required": [
+                      "x",
+                      "y",
+                      "z"
+                    ]
+                  },
+                  "max": {
+                    "type": "object",
+                    "properties": {
+                      "x": {
+                        "type": "number"
+                      },
+                      "y": {
+                        "type": "number"
+                      },
+                      "z": {
+                        "type": "number"
+                      }
+                    },
+                    "required": [
+                      "x",
+                      "y",
+                      "z"
+                    ]
+                  }
+                },
+                "required": [
+                  "min",
+                  "max"
+                ]
+              },
+              "boundary": {
+                "type": "object",
+                "properties": {
+                  "polygon": {
+                    "type": "array",
+                    "items": {
+                      "type": "array",
+                      "items": {
+                        "type": "number"
+                      },
+                      "minItems": 2,
+                      "maxItems": 2
+                    }
+                  },
+                  "outer_loop": {
+                    "type": "object",
+                    "properties": {
+                      "is_outer": {
+                        "type": "boolean"
+                      },
+                      "polygon": {
+                        "type": "array",
+                        "items": {
+                          "type": "array",
+                          "items": {
+                            "type": "number"
+                          },
+                          "minItems": 2,
+                          "maxItems": 2
+                        }
+                      },
+                      "segments": {
+                        "type": "array",
+                        "items": {
+                          "type": "object",
+                          "properties": {
+                            "type": {
+                              "type": "string"
+                            },
+                            "start": {
+                              "type": "object",
+                              "properties": {
+                                "x": {
+                                  "type": "number"
+                                },
+                                "y": {
+                                  "type": "number"
+                                },
+                                "z": {
+                                  "type": "number"
+                                }
+                              },
+                              "required": [
+                                "x",
+                                "y",
+                                "z"
+                              ]
+                            },
+                            "end": {
+                              "type": "object",
+                              "properties": {
+                                "x": {
+                                  "type": "number"
+                                },
+                                "y": {
+                                  "type": "number"
+                                },
+                                "z": {
+                                  "type": "number"
+                                }
+                              },
+                              "required": [
+                                "x",
+                                "y",
+                                "z"
+                              ]
+                            },
+                            "mid": {
+                              "type": "object",
+                              "properties": {
+                                "x": {
+                                  "type": "number"
+                                },
+                                "y": {
+                                  "type": "number"
+                                },
+                                "z": {
+                                  "type": "number"
+                                }
+                              },
+                              "required": [
+                                "x",
+                                "y",
+                                "z"
+                              ]
+                            },
+                            "length_ft": {
+                              "type": "number"
+                            },
+                            "radius_ft": {
+                              "type": [
+                                "number",
+                                "null"
+                              ]
+                            },
+                            "is_wall": {
+                              "type": "boolean"
+                            }
+                          },
+                          "required": [
+                            "type",
+                            "start",
+                            "end",
+                            "mid",
+                            "length_ft",
+                            "is_wall"
+                          ]
+                        }
+                      }
+                    },
+                    "required": [
+                      "is_outer",
+                      "polygon",
+                      "segments"
+                    ]
+                  },
+                  "inner_loops": {
+                    "type": "array",
+                    "items": {
+                      "type": "object",
+                      "properties": {
+                        "is_outer": {
+                          "type": "boolean"
+                        },
+                        "polygon": {
+                          "type": "array",
+                          "items": {
+                            "type": "array",
+                            "items": {
+                              "type": "number"
+                            },
+                            "minItems": 2,
+                            "maxItems": 2
+                          }
+                        },
+                        "segments": {
+                          "type": "array",
+                          "items": {
+                            "type": "object",
+                            "properties": {
+                              "type": {
+                                "type": "string"
+                              },
+                              "start": {
+                                "type": "object",
+                                "properties": {
+                                  "x": {
+                                    "type": "number"
+                                  },
+                                  "y": {
+                                    "type": "number"
+                                  },
+                                  "z": {
+                                    "type": "number"
+                                  }
+                                },
+                                "required": [
+                                  "x",
+                                  "y",
+                                  "z"
+                                ]
+                              },
+                              "end": {
+                                "type": "object",
+                                "properties": {
+                                  "x": {
+                                    "type": "number"
+                                  },
+                                  "y": {
+                                    "type": "number"
+                                  },
+                                  "z": {
+                                    "type": "number"
+                                  }
+                                },
+                                "required": [
+                                  "x",
+                                  "y",
+                                  "z"
+                                ]
+                              },
+                              "mid": {
+                                "type": "object",
+                                "properties": {
+                                  "x": {
+                                    "type": "number"
+                                  },
+                                  "y": {
+                                    "type": "number"
+                                  },
+                                  "z": {
+                                    "type": "number"
+                                  }
+                                },
+                                "required": [
+                                  "x",
+                                  "y",
+                                  "z"
+                                ]
+                              },
+                              "length_ft": {
+                                "type": "number"
+                              },
+                              "radius_ft": {
+                                "type": [
+                                  "number",
+                                  "null"
+                                ]
+                              },
+                              "is_wall": {
+                                "type": "boolean"
+                              }
+                            },
+                            "required": [
+                              "type",
+                              "start",
+                              "end",
+                              "mid",
+                              "length_ft",
+                              "is_wall"
+                            ]
+                          }
+                        }
+                      },
+                      "required": [
+                        "is_outer",
+                        "polygon",
+                        "segments"
+                      ]
+                    }
+                  }
+                },
+                "required": [
+                  "polygon",
+                  "outer_loop",
+                  "inner_loops"
+                ]
+              },
+              "hazard": {
+                "type": "object",
+                "properties": {
+                  "hazard_class": {
+                    "type": "string"
+                  },
+                  "matched_keyword": {
+                    "type": "string"
+                  },
+                  "matched_terms": {
+                    "type": "array",
+                    "items": {
+                      "type": "string"
+                    }
+                  },
+                  "requires_review": {
+                    "type": "boolean"
+                  }
+                },
+                "required": [
+                  "hazard_class",
+                  "matched_keyword",
+                  "matched_terms",
+                  "requires_review"
+                ]
+              },
+              "classification": {
+                "type": "object",
+                "properties": {
+                  "hazard_class": {
+                    "type": "string"
+                  },
+                  "suggested_by_classifier": {
+                    "type": "string"
+                  },
+                  "overridden": {
+                    "type": "boolean"
+                  },
+                  "confirmed_by": {
+                    "type": "string"
+                  }
+                },
+                "required": [
+                  "hazard_class",
+                  "suggested_by_classifier",
+                  "overridden",
+                  "confirmed_by"
+                ]
+              },
+              "geometry": {
+                "type": "object",
+                "properties": {
+                  "polygon": {
+                    "type": "array",
+                    "items": {
+                      "type": "array",
+                      "items": {
+                        "type": "number"
+                      },
+                      "minItems": 2,
+                      "maxItems": 2
+                    }
+                  },
+                  "ceiling_height_ft": {
+                    "type": [
+                      "number",
+                      "null"
+                    ]
+                  },
+                  "ceiling_type": {
+                    "type": "string"
+                  }
+                },
+                "required": [
+                  "polygon",
+                  "ceiling_type"
+                ]
+              },
+              "ceilings": {
+                "type": "array",
+                "items": {
+                  "type": "object",
+                  "properties": {
+                    "element_id": {
+                      "type": "string"
+                    },
+                    "level_id": {
+                      "type": "string"
+                    },
+                    "level_name": {
+                      "type": "string"
+                    },
+                    "ceiling_name": {
+                      "type": "string"
+                    },
+                    "family_name": {
+                      "type": "string"
+                    },
+                    "type_name": {
+                      "type": "string"
+                    },
+                    "category": {
+                      "type": "string"
+                    },
+                    "source": {
+                      "type": "object",
+                      "properties": {
+                        "document_title": {
+                          "type": "string"
+                        },
+                        "document_path": {
+                          "type": "string"
+                        },
+                        "is_from_link": {
+                          "type": "boolean"
+                        },
+                        "link_instance_id": {
+                          "type": "string"
+                        },
+                        "link_name": {
+                          "type": "string"
+                        }
+                      },
+                      "required": [
+                        "document_title",
+                        "document_path",
+                        "is_from_link",
+                        "link_instance_id",
+                        "link_name"
+                      ]
+                    },
+                    "bounding_box": {
+                      "type": [
+                        "object",
+                        "null"
+                      ],
+                      "properties": {
+                        "min": {
+                          "type": "object",
+                          "properties": {
+                            "x": {
+                              "type": "number"
+                            },
+                            "y": {
+                              "type": "number"
+                            },
+                            "z": {
+                              "type": "number"
+                            }
+                          },
+                          "required": [
+                            "x",
+                            "y",
+                            "z"
+                          ]
+                        },
+                        "max": {
+                          "type": "object",
+                          "properties": {
+                            "x": {
+                              "type": "number"
+                            },
+                            "y": {
+                              "type": "number"
+                            },
+                            "z": {
+                              "type": "number"
+                            }
+                          },
+                          "required": [
+                            "x",
+                            "y",
+                            "z"
+                          ]
+                        }
+                      },
+                      "required": [
+                        "min",
+                        "max"
+                      ]
+                    },
+                    "bottom_elevation_ft": {
+                      "type": [
+                        "number",
+                        "null"
+                      ]
+                    },
+                    "top_elevation_ft": {
+                      "type": [
+                        "number",
+                        "null"
+                      ]
+                    },
+                    "height_above_level_ft": {
+                      "type": [
+                        "number",
+                        "null"
+                      ]
+                    },
+                    "slope_type": {
+                      "type": "string"
+                    },
+                    "slope_degrees": {
+                      "type": [
+                        "number",
+                        "null"
+                      ]
+                    },
+                    "boundary_polygon": {
+                      "type": "array",
+                      "items": {
+                        "type": "array",
+                        "items": {
+                          "type": "number"
+                        },
+                        "minItems": 2,
+                        "maxItems": 2
+                      }
+                    },
+                    "thickness_ft": {
+                      "type": [
+                        "number",
+                        "null"
+                      ]
+                    },
+                    "is_room_direct_ceiling": {
+                      "type": "boolean"
+                    },
+                    "is_model_group": {
+                      "type": "boolean"
+                    },
+                    "area_sq_ft": {
+                      "type": "number"
+                    },
+                    "has_readable_grid": {
+                      "type": "boolean"
+                    },
+                    "grid_origin_x_ft": {
+                      "type": "number"
+                    },
+                    "grid_origin_y_ft": {
+                      "type": "number"
+                    },
+                    "grid_spacing_u_ft": {
+                      "type": "number"
+                    },
+                    "grid_spacing_v_ft": {
+                      "type": "number"
+                    },
+                    "grid_angle_rad": {
+                      "type": "number"
+                    },
+                    "grid_origin_source": {
+                      "type": "string"
+                    },
+                    "notes": {
+                      "type": "string"
+                    }
+                  },
+                  "required": [
+                    "element_id",
+                    "level_id",
+                    "level_name",
+                    "ceiling_name",
+                    "family_name",
+                    "type_name",
+                    "category",
+                    "source",
+                    "slope_type",
+                    "boundary_polygon",
+                    "area_sq_ft",
+                    "has_readable_grid",
+                    "grid_origin_x_ft",
+                    "grid_origin_y_ft",
+                    "grid_spacing_u_ft",
+                    "grid_spacing_v_ft",
+                    "grid_angle_rad",
+                    "grid_origin_source"
+                  ]
+                }
+              },
+              "associated_obstacle_ids": {
+                "type": "array",
+                "items": {
+                  "type": "string"
+                }
+              },
+              "requires_human_review": {
+                "type": "boolean"
+              },
+              "warnings": {
+                "type": "array",
+                "items": {
+                  "type": "string"
+                }
+              }
+            },
+            "required": [
+              "room_id",
+              "element_id",
+              "name",
+              "number",
+              "level_id",
+              "level_name",
+              "level_elevation_ft",
+              "area_sq_ft",
+              "phase",
+              "source",
+              "location_point",
+              "bounding_box",
+              "boundary",
+              "hazard",
+              "classification",
+              "geometry",
+              "ceilings",
+              "associated_obstacle_ids",
+              "requires_human_review",
+              "warnings"
+            ]
+          }
+        },
+        "ceilings": {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "properties": {
+              "element_id": {
+                "type": "string"
+              },
+              "level_id": {
+                "type": "string"
+              },
+              "level_name": {
+                "type": "string"
+              },
+              "ceiling_name": {
+                "type": "string"
+              },
+              "family_name": {
+                "type": "string"
+              },
+              "type_name": {
+                "type": "string"
+              },
+              "category": {
+                "type": "string"
+              },
+              "source": {
+                "type": "object",
+                "properties": {
+                  "document_title": {
+                    "type": "string"
+                  },
+                  "document_path": {
+                    "type": "string"
+                  },
+                  "is_from_link": {
+                    "type": "boolean"
+                  },
+                  "link_instance_id": {
+                    "type": "string"
+                  },
+                  "link_name": {
+                    "type": "string"
+                  }
+                },
+                "required": [
+                  "document_title",
+                  "document_path",
+                  "is_from_link",
+                  "link_instance_id",
+                  "link_name"
+                ]
+              },
+              "bounding_box": {
+                "type": [
+                  "object",
+                  "null"
+                ],
+                "properties": {
+                  "min": {
+                    "type": "object",
+                    "properties": {
+                      "x": {
+                        "type": "number"
+                      },
+                      "y": {
+                        "type": "number"
+                      },
+                      "z": {
+                        "type": "number"
+                      }
+                    },
+                    "required": [
+                      "x",
+                      "y",
+                      "z"
+                    ]
+                  },
+                  "max": {
+                    "type": "object",
+                    "properties": {
+                      "x": {
+                        "type": "number"
+                      },
+                      "y": {
+                        "type": "number"
+                      },
+                      "z": {
+                        "type": "number"
+                      }
+                    },
+                    "required": [
+                      "x",
+                      "y",
+                      "z"
+                    ]
+                  }
+                },
+                "required": [
+                  "min",
+                  "max"
+                ]
+              },
+              "bottom_elevation_ft": {
+                "type": [
+                  "number",
+                  "null"
+                ]
+              },
+              "top_elevation_ft": {
+                "type": [
+                  "number",
+                  "null"
+                ]
+              },
+              "height_above_level_ft": {
+                "type": [
+                  "number",
+                  "null"
+                ]
+              },
+              "slope_type": {
+                "type": "string"
+              },
+              "slope_degrees": {
+                "type": [
+                  "number",
+                  "null"
+                ]
+              },
+              "boundary_polygon": {
+                "type": "array",
+                "items": {
+                  "type": "array",
+                  "items": {
+                    "type": "number"
+                  },
+                  "minItems": 2,
+                  "maxItems": 2
+                }
+              },
+              "thickness_ft": {
+                "type": [
+                  "number",
+                  "null"
+                ]
+              },
+              "is_room_direct_ceiling": {
+                "type": "boolean"
+              },
+              "is_model_group": {
+                "type": "boolean"
+              },
+              "area_sq_ft": {
+                "type": "number"
+              },
+              "has_readable_grid": {
+                "type": "boolean"
+              },
+              "grid_origin_x_ft": {
+                "type": "number"
+              },
+              "grid_origin_y_ft": {
+                "type": "number"
+              },
+              "grid_spacing_u_ft": {
+                "type": "number"
+              },
+              "grid_spacing_v_ft": {
+                "type": "number"
+              },
+              "grid_angle_rad": {
+                "type": "number"
+              },
+              "grid_origin_source": {
+                "type": "string"
+              },
+              "notes": {
+                "type": "string"
+              }
+            },
+            "required": [
+              "element_id",
+              "level_id",
+              "level_name",
+              "ceiling_name",
+              "family_name",
+              "type_name",
+              "category",
+              "source",
+              "slope_type",
+              "boundary_polygon",
+              "area_sq_ft",
+              "has_readable_grid",
+              "grid_origin_x_ft",
+              "grid_origin_y_ft",
+              "grid_spacing_u_ft",
+              "grid_spacing_v_ft",
+              "grid_angle_rad",
+              "grid_origin_source"
+            ]
+          }
+        },
+        "existing_sprinklers": {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "properties": {
+              "element_id": {
+                "type": "string"
+              },
+              "room_id": {
+                "type": "string"
+              },
+              "room_name": {
+                "type": "string"
+              },
+              "family_name": {
+                "type": "string"
+              },
+              "type_name": {
+                "type": "string"
+              },
+              "location": {
+                "type": "object",
+                "properties": {
+                  "x": {
+                    "type": "number"
+                  },
+                  "y": {
+                    "type": "number"
+                  },
+                  "z": {
+                    "type": "number"
+                  }
+                },
+                "required": [
+                  "x",
+                  "y",
+                  "z"
+                ]
+              },
+              "level_id": {
+                "type": "string"
+              },
+              "level_name": {
+                "type": "string"
+              },
+              "host_id": {
+                "type": "string"
+              },
+              "host_name": {
+                "type": "string"
+              }
+            },
+            "required": [
+              "element_id",
+              "room_id",
+              "room_name",
+              "family_name",
+              "type_name",
+              "location",
+              "level_id",
+              "level_name",
+              "host_id",
+              "host_name"
+            ]
+          }
+        },
+        "obstacles": {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "properties": {
+              "element_id": {
+                "type": "string"
+              },
+              "category": {
+                "type": "string"
+              },
+              "name": {
+                "type": "string"
+              },
+              "bounding_box": {
+                "type": "object",
+                "properties": {
+                  "min": {
+                    "type": "object",
+                    "properties": {
+                      "x": {
+                        "type": "number"
+                      },
+                      "y": {
+                        "type": "number"
+                      },
+                      "z": {
+                        "type": "number"
+                      }
+                    },
+                    "required": [
+                      "x",
+                      "y",
+                      "z"
+                    ]
+                  },
+                  "max": {
+                    "type": "object",
+                    "properties": {
+                      "x": {
+                        "type": "number"
+                      },
+                      "y": {
+                        "type": "number"
+                      },
+                      "z": {
+                        "type": "number"
+                      }
+                    },
+                    "required": [
+                      "x",
+                      "y",
+                      "z"
+                    ]
+                  }
+                },
+                "required": [
+                  "min",
+                  "max"
+                ]
+              },
+              "associated_room_ids": {
+                "type": "array",
+                "items": {
+                  "type": "string"
+                }
+              }
+            },
+            "required": [
+              "element_id",
+              "category",
+              "name",
+              "bounding_box",
+              "associated_room_ids"
+            ]
+          }
+        },
+        "summary": {
+          "type": "object",
+          "properties": {
+            "total_rooms": {
+              "type": "integer"
+            },
+            "total_ceilings": {
+              "type": "integer"
+            },
+            "total_obstacles": {
+              "type": "integer"
+            },
+            "total_existing_sprinklers": {
+              "type": "integer"
+            },
+            "total_linked_documents": {
+              "type": "integer"
+            },
+            "rooms_with_ceilings": {
+              "type": "integer"
+            },
+            "rooms_without_ceilings": {
+              "type": "integer"
+            },
+            "hazard_classification_counts": {
+              "type": "object",
+              "additionalProperties": {
+                "type": "integer"
+              }
+            },
+            "extraction_duration_ms": {
+              "type": "integer"
+            }
+          },
+          "required": [
+            "total_rooms",
+            "total_ceilings",
+            "total_obstacles",
+            "total_existing_sprinklers",
+            "total_linked_documents",
+            "rooms_with_ceilings",
+            "rooms_without_ceilings",
+            "hazard_classification_counts",
+            "extraction_duration_ms"
+          ]
+        },
+        "warnings": {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "properties": {
+              "severity": {
+                "type": "string"
+              },
+              "category": {
+                "type": "string"
+              },
+              "message": {
+                "type": "string"
+              },
+              "element_id": {
+                "type": "string"
+              },
+              "element_name": {
+                "type": "string"
+              }
+            },
+            "required": [
+              "severity",
+              "category",
+              "message"
+            ]
+          }
+        },
+        "errors": {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "properties": {
+              "severity": {
+                "type": "string"
+              },
+              "category": {
+                "type": "string"
+              },
+              "message": {
+                "type": "string"
+              },
+              "element_id": {
+                "type": "string"
+              },
+              "element_name": {
+                "type": "string"
+              }
+            },
+            "required": [
+              "severity",
+              "category",
+              "message"
+            ]
+          }
+        },
+        "export_path": {
+          "type": [
+            "string",
+            "null"
+          ]
+        }
+      },
+      "required": [
+        "schema_version",
+        "units",
+        "coordinate_system",
+        "project",
+        "model",
+        "levels",
+        "rooms",
+        "ceilings",
+        "existing_sprinklers",
+        "obstacles",
+        "summary",
+        "warnings",
+        "errors",
+        "export_path"
+      ]
+    },
+    "input_examples": [
+      {
+        "export_file_path": "C:\\exports\\model_snapshot.json"
+      },
+      {}
+    ],
+    "annotations": {
+      "readOnlyHint": true,
+      "destructiveHint": false,
+      "idempotentHint": true,
+      "openWorldHint": false
+    }
+  },
+  {
+    "name": "fireprotection_extract_obstacles",
+    "title": "Extract obstacles on demand",
+    "description": "Extracts MEP, architectural, and structural obstacles (columns, beams, walls, ducts, pipes, cable trays, etc.) from the active Revit document and linked models, and associates them to the provided rooms. This is typically called after a lightweight snapshot when obstacle data is needed for placement calculations. All obstacle geometry is normalized to host MEP coordinates. The operation is read-only and does not modify the model. Returns a list of ObstacleData with bounding boxes and room associations.",
+    "input_schema": {
+      "type": "object",
+      "properties": {
+        "room_ids": {
+          "type": "array",
+          "items": {
+            "type": "string"
+          },
+          "minItems": 1,
+          "description": "Room IDs (ElementIds as strings) to associate obstacles with. Only obstacles intersecting these rooms in XY and Z will be returned."
+        }
+      },
+      "required": [
+        "room_ids"
+      ],
+      "additionalProperties": false
+    },
+    "output_schema": {
+      "type": "object",
+      "properties": {
+        "obstacles": {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "properties": {
+              "element_id": {
+                "type": "string"
+              },
+              "category": {
+                "type": "string"
+              },
+              "name": {
+                "type": "string"
+              },
+              "bounding_box": {
+                "type": "object",
+                "properties": {
+                  "min": {
+                    "type": "object",
+                    "properties": {
+                      "x": {
+                        "type": "number"
+                      },
+                      "y": {
+                        "type": "number"
+                      },
+                      "z": {
+                        "type": "number"
+                      }
+                    },
+                    "required": [
+                      "x",
+                      "y",
+                      "z"
+                    ]
+                  },
+                  "max": {
+                    "type": "object",
+                    "properties": {
+                      "x": {
+                        "type": "number"
+                      },
+                      "y": {
+                        "type": "number"
+                      },
+                      "z": {
+                        "type": "number"
+                      }
+                    },
+                    "required": [
+                      "x",
+                      "y",
+                      "z"
+                    ]
+                  }
+                },
+                "required": [
+                  "min",
+                  "max"
+                ]
+              },
+              "associated_room_ids": {
+                "type": "array",
+                "items": {
+                  "type": "string"
+                }
+              }
+            },
+            "required": [
+              "element_id",
+              "category",
+              "name",
+              "bounding_box",
+              "associated_room_ids"
+            ]
+          }
+        }
+      },
+      "required": [
+        "obstacles"
+      ]
+    },
+    "input_examples": [
+      {
+        "room_ids": [
+          "123456",
+          "123457",
+          "123458"
+        ]
+      }
+    ],
+    "annotations": {
+      "readOnlyHint": true,
+      "destructiveHint": false,
+      "idempotentHint": true,
+      "openWorldHint": false
+    }
+  },
+  {
+    "name": "fireprotection_load_catalog",
+    "title": "Load device catalog from Excel workbook",
+    "description": "Loads the device catalog from an Excel workbook (.xlsx) containing sprinkler, smoke detector, and notification appliance definitions. The workbook must have sheets named 'Sprinklers', 'SmokeDetectors', and/or 'NotificationAppliances' with required columns. The loader validates the catalog schema and returns a populated CatalogService with lookup capabilities. Throws CatalogLoadException on any IO or schema problem. Use this before running placement calculations to ensure the correct device data is available.",
+    "input_schema": {
+      "type": "object",
+      "properties": {
+        "file_path": {
+          "type": "string",
+          "description": "Absolute path to the Excel catalog workbook (.xlsx)."
+        }
+      },
+      "required": [
+        "file_path"
+      ],
+      "additionalProperties": false
+    },
+    "output_schema": {
+      "type": "object",
+      "properties": {
+        "is_loaded": {
+          "type": "boolean"
+        },
+        "catalog_version": {
+          "type": "string"
+        },
+        "source_path": {
+          "type": "string"
+        },
+        "total_row_count": {
+          "type": "integer"
+        },
+        "available_hazard_classes": {
+          "type": "array",
+          "items": {
+            "type": "string"
+          }
+        },
+        "available_sprinkler_mounts": {
+          "type": "array",
+          "items": {
+            "type": "string"
+          }
+        },
+        "available_detector_types": {
+          "type": "array",
+          "items": {
+            "type": "string"
+          }
+        },
+        "available_mounts": {
+          "type": "array",
+          "items": {
+            "type": "string"
+          }
+        },
+        "available_ceiling_slopes": {
+          "type": "array",
+          "items": {
+            "type": "string"
+          }
+        },
+        "available_appliance_types": {
+          "type": "array",
+          "items": {
+            "type": "string"
+          }
+        },
+        "available_candelas": {
+          "type": "array",
+          "items": {
+            "type": "string"
+          }
+        },
+        "available_notification_dbas": {
+          "type": "array",
+          "items": {
+            "type": "string"
+          }
+        },
+        "sprinkler_families": {
+          "type": "array",
+          "items": {
+            "type": "string"
+          }
+        },
+        "smoke_detector_families": {
+          "type": "array",
+          "items": {
+            "type": "string"
+          }
+        },
+        "notification_appliance_families": {
+          "type": "array",
+          "items": {
+            "type": "string"
+          }
+        }
+      },
+      "required": [
+        "is_loaded",
+        "catalog_version",
+        "source_path",
+        "total_row_count",
+        "available_hazard_classes",
+        "available_sprinkler_mounts",
+        "available_detector_types",
+        "available_mounts",
+        "available_ceiling_slopes",
+        "available_appliance_types",
+        "available_candelas",
+        "available_notification_dbas",
+        "sprinkler_families",
+        "smoke_detector_families",
+        "notification_appliance_families"
+      ]
+    },
+    "input_examples": [
+      {
+        "file_path": "C:\\catalogs\\FireProtectionCatalog.xlsx"
+      }
+    ],
+    "annotations": {
+      "readOnlyHint": true,
+      "destructiveHint": false,
+      "idempotentHint": true,
+      "openWorldHint": false
+    }
+  },
+  {
+    "name": "fireprotection_place_notification_appliances",
+    "title": "Place notification appliances in Revit model",
+    "description": "Places actual Revit FamilyInstance notification appliances (strobes, speakers, speaker-strobes) in the model for every calculated point from a notification appliance calculation result. Uses the shared FireAlarmDevicePlacementCore which handles symbol/level resolution, existing-device policy, ceiling-host resolution, and transaction management. Runs inside a TransactionGroup so the entire run is a single undo entry; cancellation rolls back everything. Performs post-placement spatial validation. The provisional notification rules mean results require engineering review. Supports existing-device policies (SkipRoom, ReplaceExisting, AddAnyway). Requires the appliance family/type to be loaded in the active Revit document under OST_FireAlarmDevices. This function WRITES to the Revit model. Use with caution on production models.",
+    "input_schema": {
+      "type": "object",
+      "properties": {
+        "items": {
+          "type": "array",
+          "minItems": 1,
+          "items": {
+            "type": "object",
+            "properties": {
+              "room_id": {
+                "type": "string"
+              },
+              "room_name": {
+                "type": "string"
+              },
+              "room_number": {
+                "type": "string"
+              },
+              "level_name": {
+                "type": "string"
+              },
+              "level_id": {
+                "type": "string"
+              },
+              "level_elevation_ft": {
+                "type": "number"
+              },
+              "area_sq_ft": {
+                "type": "number"
+              },
+              "polygon": {
+                "type": "array",
+                "items": {
+                  "type": "array",
+                  "items": {
+                    "type": "number"
+                  },
+                  "minItems": 2,
+                  "maxItems": 2
+                }
+              },
+              "selected_family_name": {
+                "type": "string"
+              },
+              "selected_type_name": {
+                "type": "string"
+              },
+              "device_kind": {
+                "type": "string",
+                "enum": [
+                  "SmokeDetector",
+                  "NotificationAppliance"
+                ]
+              }
+            },
+            "required": [
+              "room_id",
+              "room_name",
+              "room_number",
+              "level_name",
+              "level_id",
+              "level_elevation_ft",
+              "area_sq_ft",
+              "polygon",
+              "selected_family_name",
+              "selected_type_name",
+              "device_kind"
+            ]
+          }
+        },
+        "existing_device_policy": {
+          "type": "string",
+          "enum": [
+            "SkipRoom",
+            "ReplaceExisting",
+            "AddAnyway"
+          ],
+          "default": "SkipRoom"
+        },
+        "ignore_obstacles": {
+          "type": "boolean",
+          "default": true
+        }
+      },
+      "required": [
+        "items"
+      ],
+      "additionalProperties": false
+    },
+    "output_schema": {
+      "type": "object",
+      "properties": {
+        "rooms_processed": {
+          "type": "integer"
+        },
+        "rooms_succeeded": {
+          "type": "integer"
+        },
+        "rooms_failed": {
+          "type": "integer"
+        },
+        "rooms_skipped": {
+          "type": "integer"
+        },
+        "review_required_count": {
+          "type": "integer"
+        },
+        "sprinklers_requested": {
+          "type": "integer"
+        },
+        "sprinklers_placed": {
+          "type": "integer"
+        },
+        "is_provisional": {
+          "type": "boolean",
+          "const": true
+        },
+        "applied_rules_summary": {
+          "type": "string"
+        },
+        "overall_status": {
+          "type": "string"
+        },
+        "summary": {
+          "type": "string"
+        },
+        "warnings": {
+          "type": "array",
+          "items": {
+            "type": "string"
+          }
+        },
+        "failed_reasons": {
+          "type": "array",
+          "items": {
+            "type": "string"
+          }
+        },
+        "review_required_reasons": {
+          "type": "array",
+          "items": {
+            "type": "string"
+          }
+        },
+        "room_reports": {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "properties": {
+              "room_id": {
+                "type": "string"
+              },
+              "room_name": {
+                "type": "string"
+              },
+              "level_name": {
+                "type": "string"
+              },
+              "status": {
+                "type": "string",
+                "enum": [
+                  "Success",
+                  "Failed",
+                  "Skipped",
+                  "ReviewRequired"
+                ]
+              },
+              "message": {
+                "type": "string"
+              },
+              "failure_reason": {
+                "type": "string"
+              },
+              "review_required": {
+                "type": "boolean"
+              },
+              "points_requested": {
+                "type": "integer"
+              },
+              "points_placed": {
+                "type": "integer"
+              },
+              "coverage_percent": {
+                "type": [
+                  "number",
+                  "null"
+                ]
+              },
+              "placement_diagnostics": {
+                "type": "array",
+                "items": {
+                  "type": "string"
+                }
+              }
+            },
+            "required": [
+              "room_id",
+              "room_name",
+              "level_name",
+              "status",
+              "message",
+              "points_requested",
+              "points_placed"
+            ]
+          }
+        }
+      },
+      "required": [
+        "rooms_processed",
+        "rooms_succeeded",
+        "rooms_failed",
+        "rooms_skipped",
+        "sprinklers_requested",
+        "sprinklers_placed",
+        "overall_status",
+        "summary",
+        "room_reports"
+      ]
+    },
+    "input_examples": [
+      {
+        "items": [
+          {
+            "room_id": "789012",
+            "room_name": "Office 101",
+            "room_number": "101",
+            "level_name": "Level 1",
+            "level_id": "123456",
+            "level_elevation_ft": 0,
+            "area_sq_ft": 400,
+            "polygon": [
+              [
+                0,
+                0
+              ],
+              [
+                20,
+                0
+              ],
+              [
+                20,
+                20
+              ],
+              [
+                0,
+                20
+              ]
+            ],
+            "selected_family_name": "Wheelock Exceder",
+            "selected_type_name": "LED Strobe 15cd",
+            "device_kind": "NotificationAppliance"
+          }
+        ],
+        "existing_device_policy": "SkipRoom",
+        "ignore_obstacles": true
+      }
+    ],
+    "annotations": {
+      "readOnlyHint": false,
+      "destructiveHint": true,
+      "idempotentHint": false,
+      "openWorldHint": false
+    }
+  },
+  {
+    "name": "fireprotection_place_smoke_detectors",
+    "title": "Place smoke detectors in Revit model",
+    "description": "Places actual Revit FamilyInstance smoke detectors in the model for every calculated point from an NFPA 72 calculation result. Uses the shared FireAlarmDevicePlacementCore which handles symbol/level resolution, existing-device policy, ceiling-host resolution, and transaction management. Runs inside a TransactionGroup so the entire run is a single undo entry; cancellation rolls back everything. Performs post-placement spatial validation using bounding-box center Z (authoritative for work-plane families) and XY deviation checks. Supports existing-device policies (SkipRoom, ReplaceExisting, AddAnyway). Requires the detector family/type to be loaded in the active Revit document under OST_FireAlarmDevices. This function WRITES to the Revit model and cannot be fully previewed without a dry-run mode. Use with caution on production models.",
+    "input_schema": {
+      "type": "object",
+      "properties": {
+        "items": {
+          "type": "array",
+          "minItems": 1,
+          "description": "Array of DeviceRoomInputItem objects matching the calculation input.",
+          "items": {
+            "type": "object",
+            "properties": {
+              "room_id": {
+                "type": "string"
+              },
+              "room_name": {
+                "type": "string"
+              },
+              "room_number": {
+                "type": "string"
+              },
+              "level_name": {
+                "type": "string"
+              },
+              "level_id": {
+                "type": "string"
+              },
+              "level_elevation_ft": {
+                "type": "number"
+              },
+              "area_sq_ft": {
+                "type": "number"
+              },
+              "polygon": {
+                "type": "array",
+                "items": {
+                  "type": "array",
+                  "items": {
+                    "type": "number"
+                  },
+                  "minItems": 2,
+                  "maxItems": 2
+                }
+              },
+              "selected_family_name": {
+                "type": "string"
+              },
+              "selected_type_name": {
+                "type": "string"
+              },
+              "device_kind": {
+                "type": "string",
+                "enum": [
+                  "SmokeDetector",
+                  "NotificationAppliance"
+                ]
+              }
+            },
+            "required": [
+              "room_id",
+              "room_name",
+              "room_number",
+              "level_name",
+              "level_id",
+              "level_elevation_ft",
+              "area_sq_ft",
+              "polygon",
+              "selected_family_name",
+              "selected_type_name",
+              "device_kind"
+            ]
+          }
+        },
+        "existing_device_policy": {
+          "type": "string",
+          "enum": [
+            "SkipRoom",
+            "ReplaceExisting",
+            "AddAnyway"
+          ],
+          "default": "SkipRoom"
+        },
+        "ignore_obstacles": {
+          "type": "boolean",
+          "default": true
+        }
+      },
+      "required": [
+        "items"
+      ],
+      "additionalProperties": false
+    },
+    "output_schema": {
+      "type": "object",
+      "properties": {
+        "rooms_processed": {
+          "type": "integer"
+        },
+        "rooms_succeeded": {
+          "type": "integer"
+        },
+        "rooms_failed": {
+          "type": "integer"
+        },
+        "rooms_skipped": {
+          "type": "integer"
+        },
+        "review_required_count": {
+          "type": "integer"
+        },
+        "sprinklers_requested": {
+          "type": "integer"
+        },
+        "sprinklers_placed": {
+          "type": "integer"
+        },
+        "is_provisional": {
+          "type": "boolean"
+        },
+        "applied_rules_summary": {
+          "type": "string"
+        },
+        "overall_status": {
+          "type": "string"
+        },
+        "summary": {
+          "type": "string"
+        },
+        "warnings": {
+          "type": "array",
+          "items": {
+            "type": "string"
+          }
+        },
+        "failed_reasons": {
+          "type": "array",
+          "items": {
+            "type": "string"
+          }
+        },
+        "review_required_reasons": {
+          "type": "array",
+          "items": {
+            "type": "string"
+          }
+        },
+        "room_reports": {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "properties": {
+              "room_id": {
+                "type": "string"
+              },
+              "room_name": {
+                "type": "string"
+              },
+              "level_name": {
+                "type": "string"
+              },
+              "status": {
+                "type": "string",
+                "enum": [
+                  "Success",
+                  "Failed",
+                  "Skipped",
+                  "ReviewRequired"
+                ]
+              },
+              "message": {
+                "type": "string"
+              },
+              "failure_reason": {
+                "type": "string"
+              },
+              "review_required": {
+                "type": "boolean"
+              },
+              "points_requested": {
+                "type": "integer"
+              },
+              "points_placed": {
+                "type": "integer"
+              },
+              "coverage_percent": {
+                "type": [
+                  "number",
+                  "null"
+                ]
+              },
+              "placement_diagnostics": {
+                "type": "array",
+                "items": {
+                  "type": "string"
+                }
+              }
+            },
+            "required": [
+              "room_id",
+              "room_name",
+              "level_name",
+              "status",
+              "message",
+              "points_requested",
+              "points_placed"
+            ]
+          }
+        }
+      },
+      "required": [
+        "rooms_processed",
+        "rooms_succeeded",
+        "rooms_failed",
+        "rooms_skipped",
+        "sprinklers_requested",
+        "sprinklers_placed",
+        "overall_status",
+        "summary",
+        "room_reports"
+      ]
+    },
+    "input_examples": [
+      {
+        "items": [
+          {
+            "room_id": "789012",
+            "room_name": "Office 101",
+            "room_number": "101",
+            "level_name": "Level 1",
+            "level_id": "123456",
+            "level_elevation_ft": 0,
+            "area_sq_ft": 400,
+            "polygon": [
+              [
+                0,
+                0
+              ],
+              [
+                20,
+                0
+              ],
+              [
+                20,
+                20
+              ],
+              [
+                0,
+                20
+              ]
+            ],
+            "selected_family_name": "System Sensor 2W-B",
+            "selected_type_name": "2-Wire Photoelectric",
+            "device_kind": "SmokeDetector"
+          }
+        ],
+        "existing_device_policy": "SkipRoom",
+        "ignore_obstacles": true
+      }
+    ],
+    "annotations": {
+      "readOnlyHint": false,
+      "destructiveHint": true,
+      "idempotentHint": false,
+      "openWorldHint": false
+    }
+  },
+  {
+    "name": "fireprotection_place_sprinklers",
+    "title": "Place sprinklers in Revit model",
+    "description": "Places actual Revit FamilyInstance sprinklers in the model for every calculated point from a BruteForce calculation result. Resolves the selected FamilySymbol from the active document, activates it, and creates instances using the correct placement overload for the family's host behavior (FaceBased, WorkPlaneBased, OneLevelBased, or WallSidewall). Runs inside a TransactionGroup so the entire run is a single undo entry; cancellation rolls back everything. Performs post-placement spatial validation: each placed instance's actual location is compared to the requested point, and deviations beyond tolerance are flagged as PLACED_BUT_INVALID. Supports existing-device policies (SkipRoom, ReplaceExisting, AddAnyway). Requires the sprinkler family/type to be loaded in the active Revit document. This function WRITES to the Revit model and cannot be fully previewed without a dry-run mode (not currently implemented in the backend). Use with caution on production models.",
+    "input_schema": {
+      "type": "object",
+      "properties": {
+        "selected_family_name": {
+          "type": "string",
+          "description": "Revit family name of the sprinkler to place."
+        },
+        "selected_type_name": {
+          "type": "string",
+          "description": "Revit type name of the sprinkler to place."
+        },
+        "calculation_result": {
+          "type": "object",
+          "description": "BruteForceCalculationResult from fireprotection_calculate_sprinkler_layout.",
+          "properties": {
+            "success": {
+              "type": "boolean"
+            },
+            "is_provisional": {
+              "type": "boolean"
+            },
+            "applied_rules_summary": {
+              "type": "string"
+            },
+            "total_calculated_sprinklers": {
+              "type": "integer"
+            },
+            "rooms": {
+              "type": "array",
+              "items": {
+                "type": "object"
+              }
+            },
+            "warnings": {
+              "type": "array",
+              "items": {
+                "type": "string"
+              }
+            },
+            "errors": {
+              "type": "array",
+              "items": {
+                "type": "string"
+              }
+            }
+          },
+          "required": [
+            "success",
+            "rooms"
+          ]
+        },
+        "existing_device_policy": {
+          "type": "string",
+          "enum": [
+            "SkipRoom",
+            "ReplaceExisting",
+            "AddAnyway"
+          ],
+          "default": "SkipRoom",
+          "description": "What to do with rooms that already contain sprinklers."
+        },
+        "ignore_obstacles": {
+          "type": "boolean",
+          "default": true,
+          "description": "When true, places sprinklers at candidate locations regardless of obstacle conflicts."
+        }
+      },
+      "required": [
+        "selected_family_name",
+        "selected_type_name",
+        "calculation_result"
+      ],
+      "additionalProperties": false
+    },
+    "output_schema": {
+      "type": "object",
+      "properties": {
+        "timestamp_utc": {
+          "type": "string"
+        },
+        "project_name": {
+          "type": "string"
+        },
+        "selected_family": {
+          "type": "string"
+        },
+        "selected_type": {
+          "type": "string"
+        },
+        "rooms_processed": {
+          "type": "integer"
+        },
+        "calculated_sprinkler_count": {
+          "type": "integer"
+        },
+        "placed_sprinkler_count": {
+          "type": "integer"
+        },
+        "failed_sprinkler_count": {
+          "type": "integer"
+        },
+        "skipped_duplicate_count": {
+          "type": "integer"
+        },
+        "skipped_missing_family_count": {
+          "type": "integer"
+        },
+        "placed_and_valid_count": {
+          "type": "integer"
+        },
+        "placed_but_invalid_count": {
+          "type": "integer"
+        },
+        "resolved_family_placement_type": {
+          "type": "string"
+        },
+        "was_cancelled": {
+          "type": "boolean"
+        },
+        "skipped_existing_room_count": {
+          "type": "integer"
+        },
+        "replaced_existing_count": {
+          "type": "integer"
+        },
+        "skipped_outside_room_count": {
+          "type": "integer"
+        },
+        "success": {
+          "type": "boolean"
+        },
+        "rooms": {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "properties": {
+              "room_id": {
+                "type": "string"
+              },
+              "room_name": {
+                "type": "string"
+              },
+              "room_number": {
+                "type": "string"
+              },
+              "placed": {
+                "type": "array",
+                "items": {
+                  "type": "object",
+                  "properties": {
+                    "x": {
+                      "type": "number"
+                    },
+                    "y": {
+                      "type": "number"
+                    },
+                    "z": {
+                      "type": "number"
+                    },
+                    "requested_x": {
+                      "type": "number"
+                    },
+                    "requested_y": {
+                      "type": "number"
+                    },
+                    "requested_z": {
+                      "type": "number"
+                    },
+                    "room_id": {
+                      "type": "string"
+                    },
+                    "level_id": {
+                      "type": "string"
+                    },
+                    "host_level_id": {
+                      "type": "string"
+                    },
+                    "host_level_name": {
+                      "type": "string"
+                    },
+                    "revit_element_id": {
+                      "type": "string"
+                    },
+                    "hosting_strategy": {
+                      "type": "string"
+                    },
+                    "ceiling_source": {
+                      "type": "string"
+                    },
+                    "status_code": {
+                      "type": "string"
+                    },
+                    "is_spatially_valid": {
+                      "type": "boolean"
+                    },
+                    "placement_deviation_ft": {
+                      "type": "number"
+                    },
+                    "family_placement_type": {
+                      "type": "string"
+                    },
+                    "host_ceiling_element_id": {
+                      "type": "string"
+                    },
+                    "link_instance_name": {
+                      "type": "string"
+                    },
+                    "actual_host_element_id": {
+                      "type": "string"
+                    },
+                    "actual_host_name": {
+                      "type": "string"
+                    },
+                    "actual_instance_level_id": {
+                      "type": "string"
+                    },
+                    "actual_instance_level_name": {
+                      "type": "string"
+                    },
+                    "actual_schedule_level_name": {
+                      "type": "string"
+                    }
+                  },
+                  "required": [
+                    "x",
+                    "y",
+                    "z",
+                    "room_id",
+                    "level_id",
+                    "revit_element_id",
+                    "status_code",
+                    "is_spatially_valid"
+                  ]
+                }
+              },
+              "failed": {
+                "type": "array",
+                "items": {
+                  "type": "object",
+                  "properties": {
+                    "x": {
+                      "type": "number"
+                    },
+                    "y": {
+                      "type": "number"
+                    },
+                    "z": {
+                      "type": "number"
+                    },
+                    "room_id": {
+                      "type": "string"
+                    },
+                    "level_id": {
+                      "type": "string"
+                    },
+                    "reason": {
+                      "type": "string"
+                    },
+                    "error_code": {
+                      "type": "string"
+                    },
+                    "skipped_due_to_duplicate": {
+                      "type": "boolean"
+                    },
+                    "family_placement_type": {
+                      "type": "string"
+                    },
+                    "hosting_strategy": {
+                      "type": "string"
+                    },
+                    "ceiling_source": {
+                      "type": "string"
+                    },
+                    "link_instance_name": {
+                      "type": "string"
+                    },
+                    "host_ceiling_element_id": {
+                      "type": "string"
+                    }
+                  },
+                  "required": [
+                    "x",
+                    "y",
+                    "z",
+                    "room_id",
+                    "level_id",
+                    "reason",
+                    "error_code"
+                  ]
+                }
+              }
+            },
+            "required": [
+              "room_id",
+              "room_name",
+              "room_number",
+              "placed",
+              "failed"
+            ]
+          }
+        },
+        "warnings": {
+          "type": "array",
+          "items": {
+            "type": "string"
+          }
+        },
+        "errors": {
+          "type": "array",
+          "items": {
+            "type": "string"
+          }
+        }
+      },
+      "required": [
+        "timestamp_utc",
+        "project_name",
+        "selected_family",
+        "selected_type",
+        "rooms_processed",
+        "calculated_sprinkler_count",
+        "placed_sprinkler_count",
+        "failed_sprinkler_count",
+        "success",
+        "rooms",
+        "warnings",
+        "errors"
+      ]
+    },
+    "input_examples": [
+      {
+        "selected_family_name": "Tyco TY-FRB",
+        "selected_type_name": "1/2\" Pendent 155F",
+        "calculation_result": {
+          "success": true,
+          "rooms": [],
+          "warnings": [],
+          "errors": []
+        },
+        "existing_device_policy": "SkipRoom",
+        "ignore_obstacles": true
+      }
+    ],
+    "annotations": {
+      "readOnlyHint": false,
+      "destructiveHint": true,
+      "idempotentHint": false,
+      "openWorldHint": false
+    }
+  },
+  {
+    "name": "fireprotection_probe_missing_families",
+    "title": "Probe for missing sprinkler families",
+    "description": "Read-only probe that lists (Room, Family, Type) entries whose chosen family/type is not loadable in the current Revit model. Returns an empty list when every row's family is available. No elements are created. This is useful before running a placement to ensure all required families are loaded. The probe checks against the OST_Sprinklers category in the active document.",
+    "input_schema": {
+      "type": "object",
+      "properties": {
+        "calculation_result": {
+          "type": "object",
+          "description": "BruteForceCalculationResult from fireprotection_calculate_sprinkler_layout.",
+          "properties": {
+            "success": {
+              "type": "boolean"
+            },
+            "rooms": {
+              "type": "array",
+              "items": {
+                "type": "object"
+              }
+            },
+            "warnings": {
+              "type": "array",
+              "items": {
+                "type": "string"
+              }
+            },
+            "errors": {
+              "type": "array",
+              "items": {
+                "type": "string"
+              }
+            }
+          },
+          "required": [
+            "rooms"
+          ]
+        }
+      },
+      "required": [
+        "calculation_result"
+      ],
+      "additionalProperties": false
+    },
+    "output_schema": {
+      "type": "object",
+      "properties": {
+        "missing_families": {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "properties": {
+              "room_id": {
+                "type": "string"
+              },
+              "room_name": {
+                "type": "string"
+              },
+              "family_name": {
+                "type": "string"
+              },
+              "type_name": {
+                "type": "string"
+              }
+            },
+            "required": [
+              "room_id",
+              "room_name",
+              "family_name",
+              "type_name"
+            ]
+          }
+        }
+      },
+      "required": [
+        "missing_families"
+      ]
+    },
+    "input_examples": [
+      {
+        "calculation_result": {
+          "rooms": [],
+          "warnings": [],
+          "errors": []
+        }
+      }
+    ],
+    "annotations": {
+      "readOnlyHint": true,
+      "destructiveHint": false,
+      "idempotentHint": true,
+      "openWorldHint": false
+    }
+  },
+  {
+    "name": "fireprotection_query_catalog_notification_appliances",
+    "title": "Query notification appliance catalog entries",
+    "description": "Queries the loaded notification appliance catalog for families, types, and their properties. Returns all notification appliance families, or types for a specific family, or full entries for a family. Use this to populate UI dropdowns or to look up appliance specifications (appliance type, candela rating, dBA rating) before running calculations.",
+    "input_schema": {
+      "type": "object",
+      "properties": {
+        "family_name": {
+          "type": "string",
+          "description": "Optional family name to filter by. If omitted, returns all families."
+        },
+        "include_entries": {
+          "type": "boolean",
+          "default": false,
+          "description": "If true and family_name is provided, returns full entries with all properties."
+        }
+      },
+      "additionalProperties": false
+    },
+    "output_schema": {
+      "type": "object",
+      "properties": {
+        "families": {
+          "type": "array",
+          "items": {
+            "type": "string"
+          }
+        },
+        "types_for_family": {
+          "type": "array",
+          "items": {
+            "type": "string"
+          }
+        },
+        "entries": {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "properties": {
+              "family_name": {
+                "type": "string"
+              },
+              "type_name": {
+                "type": "string"
+              },
+              "appliance_type": {
+                "type": "string"
+              },
+              "candela": {
+                "type": "integer"
+              },
+              "notification_dba": {
+                "type": "integer"
+              }
+            },
+            "required": [
+              "family_name",
+              "type_name"
+            ]
+          }
+        }
+      },
+      "required": [
+        "families"
+      ]
+    },
+    "input_examples": [
+      {},
+      {
+        "family_name": "Wheelock Exceder",
+        "include_entries": true
+      }
+    ],
+    "annotations": {
+      "readOnlyHint": true,
+      "destructiveHint": false,
+      "idempotentHint": true,
+      "openWorldHint": false
+    }
+  },
+  {
+    "name": "fireprotection_query_catalog_smoke_detectors",
+    "title": "Query smoke detector catalog entries",
+    "description": "Queries the loaded smoke detector catalog for families, types, and their properties. Returns all smoke detector families, or types for a specific family, or full entries for a family. Use this to populate UI dropdowns or to look up detector specifications (detector type, mount, ceiling slope) before running calculations.",
+    "input_schema": {
+      "type": "object",
+      "properties": {
+        "family_name": {
+          "type": "string",
+          "description": "Optional family name to filter by. If omitted, returns all families."
+        },
+        "include_entries": {
+          "type": "boolean",
+          "default": false,
+          "description": "If true and family_name is provided, returns full entries with all properties."
+        }
+      },
+      "additionalProperties": false
+    },
+    "output_schema": {
+      "type": "object",
+      "properties": {
+        "families": {
+          "type": "array",
+          "items": {
+            "type": "string"
+          }
+        },
+        "types_for_family": {
+          "type": "array",
+          "items": {
+            "type": "string"
+          }
+        },
+        "entries": {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "properties": {
+              "family_name": {
+                "type": "string"
+              },
+              "type_name": {
+                "type": "string"
+              },
+              "detector_type": {
+                "type": "string"
+              },
+              "mount": {
+                "type": "string"
+              },
+              "ceiling_slope": {
+                "type": "string"
+              }
+            },
+            "required": [
+              "family_name",
+              "type_name"
+            ]
+          }
+        }
+      },
+      "required": [
+        "families"
+      ]
+    },
+    "input_examples": [
+      {},
+      {
+        "family_name": "System Sensor 2W-B",
+        "include_entries": true
+      }
+    ],
+    "annotations": {
+      "readOnlyHint": true,
+      "destructiveHint": false,
+      "idempotentHint": true,
+      "openWorldHint": false
+    }
+  },
+  {
+    "name": "fireprotection_query_catalog_sprinklers",
+    "title": "Query sprinkler catalog entries",
+    "description": "Queries the loaded sprinkler catalog for families, types, and their properties. Returns all sprinkler families, or types for a specific family, or full entries for a family. Use this to populate UI dropdowns or to look up sprinkler specifications (K-factor, coverage area, spacing, temperature rating, etc.) before running calculations.",
+    "input_schema": {
+      "type": "object",
+      "properties": {
+        "family_name": {
+          "type": "string",
+          "description": "Optional family name to filter by. If omitted, returns all families."
+        },
+        "include_entries": {
+          "type": "boolean",
+          "default": false,
+          "description": "If true and family_name is provided, returns full entries with all properties (KFactor, MaxCoverageAreaSqFt, MaxSpacingFt, etc.)."
+        }
+      },
+      "additionalProperties": false
+    },
+    "output_schema": {
+      "type": "object",
+      "properties": {
+        "families": {
+          "type": "array",
+          "items": {
+            "type": "string"
+          }
+        },
+        "types_for_family": {
+          "type": "array",
+          "items": {
+            "type": "string"
+          }
+        },
+        "entries": {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "properties": {
+              "family_name": {
+                "type": "string"
+              },
+              "type_name": {
+                "type": "string"
+              },
+              "hazard_class": {
+                "type": "string"
+              },
+              "mount": {
+                "type": "string"
+              },
+              "sprinkler_class": {
+                "type": "string"
+              },
+              "max_coverage_area_sq_ft": {
+                "type": [
+                  "number",
+                  "null"
+                ]
+              },
+              "max_spacing_ft": {
+                "type": [
+                  "number",
+                  "null"
+                ]
+              },
+              "min_spacing_ft": {
+                "type": [
+                  "number",
+                  "null"
+                ]
+              },
+              "coverage_radius_ft": {
+                "type": [
+                  "number",
+                  "null"
+                ]
+              },
+              "k_factor": {
+                "type": [
+                  "number",
+                  "null"
+                ]
+              },
+              "response_type": {
+                "type": "string"
+              },
+              "temp_rating_f": {
+                "type": [
+                  "integer",
+                  "null"
+                ]
+              },
+              "deflector_to_ceiling_in": {
+                "type": [
+                  "number",
+                  "null"
+                ]
+              },
+              "sidewall_max_along_wall_spacing_ft": {
+                "type": [
+                  "number",
+                  "null"
+                ]
+              },
+              "sidewall_max_throw_ft": {
+                "type": [
+                  "number",
+                  "null"
+                ]
+              },
+              "sidewall_end_wall_clearance_ft": {
+                "type": [
+                  "number",
+                  "null"
+                ]
+              }
+            },
+            "required": [
+              "family_name",
+              "type_name"
+            ]
+          }
+        }
+      },
+      "required": [
+        "families"
+      ]
+    },
+    "input_examples": [
+      {},
+      {
+        "family_name": "Tyco TY-FRB",
+        "include_entries": true
+      }
+    ],
+    "annotations": {
+      "readOnlyHint": true,
+      "destructiveHint": false,
+      "idempotentHint": true,
+      "openWorldHint": false
+    }
+  },
+  {
+    "name": "fireprotection_recipe_clash_review",
+    "title": "Run coordination clash review recipe",
+    "description": "WORKFLOW RECIPE (read-only): runs a coordination clash sweep across multiple element-set pairs (host vs host, or host vs LINKED RVT) and returns a consolidated, prioritized clash report \u00e2\u20ac\u201d hard clashes first, then clearance violations by smallest gap, counted per pair. Each pair is a check_clearance input; for links set setB.source='link' + linkId (from revit_get_linked_files). Composes check_clearance internally. Use this for a comprehensive coordination review across multiple systems.",
+    "input_schema": {
+      "type": "object",
+      "properties": {
+        "pairs": {
+          "type": "array",
+          "minItems": 1,
+          "description": "Coordination matrix: each entry is a labelled check_clearance pair.",
+          "items": {
+            "type": "object",
+            "properties": {
+              "label": {
+                "type": "string",
+                "description": "Human label for this pair, e.g. 'Ducts \u00c3\u2014 Struct link'."
+              },
+              "set_a": {
+                "type": "object",
+                "properties": {
+                  "source": {
+                    "type": "string",
+                    "enum": [
+                      "host",
+                      "link"
+                    ],
+                    "default": "host"
+                  },
+                  "link_id": {
+                    "type": "integer"
+                  },
+                  "categories": {
+                    "type": "array",
+                    "items": {
+                      "type": "string"
+                    }
+                  },
+                  "limit": {
+                    "type": "integer",
+                    "minimum": 1,
+                    "maximum": 2000,
+                    "default": 500
+                  },
+                  "scope_id": {
+                    "type": "integer"
+                  }
+                },
+                "required": [
+                  "source"
+                ]
+              },
+              "set_b": {
+                "type": "object",
+                "properties": {
+                  "source": {
+                    "type": "string",
+                    "enum": [
+                      "host",
+                      "link"
+                    ],
+                    "default": "host"
+                  },
+                  "link_id": {
+                    "type": "integer"
+                  },
+                  "categories": {
+                    "type": "array",
+                    "items": {
+                      "type": "string"
+                    }
+                  },
+                  "limit": {
+                    "type": "integer",
+                    "minimum": 1,
+                    "maximum": 2000,
+                    "default": 500
+                  },
+                  "scope_id": {
+                    "type": "integer"
+                  }
+                },
+                "required": [
+                  "source"
+                ]
+              },
+              "axis": {
+                "type": "string",
+                "enum": [
+                  "bbox",
+                  "Z"
+                ],
+                "default": "bbox"
+              },
+              "direction": {
+                "type": "string",
+                "enum": [
+                  "below",
+                  "above"
+                ],
+                "default": "below"
+              },
+              "clearance_mm": {
+                "type": "number",
+                "minimum": 0,
+                "default": 0
+              },
+              "view_id": {
+                "type": "integer"
+              },
+              "sample_count": {
+                "type": "integer",
+                "minimum": 1,
+                "maximum": 10,
+                "default": 3
+              },
+              "max_results": {
+                "type": "integer",
+                "minimum": 1,
+                "maximum": 2000,
+                "default": 200
+              }
+            },
+            "required": [
+              "set_a",
+              "set_b"
+            ],
+            "additionalProperties": false
+          }
+        }
+      },
+      "required": [
+        "pairs"
+      ],
+      "additionalProperties": false
+    },
+    "output_schema": {
+      "type": "object",
+      "properties": {
+        "pairs": {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "properties": {
+              "label": {
+                "type": "string"
+              },
+              "clashes": {
+                "type": "array",
+                "items": {
+                  "type": "object"
+                }
+              },
+              "summary": {
+                "type": "object"
+              }
+            },
+            "required": [
+              "label",
+              "clashes",
+              "summary"
+            ]
+          }
+        },
+        "consolidated_summary": {
+          "type": "object",
+          "properties": {
+            "total_hard_clashes": {
+              "type": "integer"
+            },
+            "total_clearance_violations": {
+              "type": "integer"
+            },
+            "worst_violation_mm": {
+              "type": "number"
+            },
+            "pairs_with_clashes": {
+              "type": "integer"
+            }
+          },
+          "required": [
+            "total_hard_clashes",
+            "total_clearance_violations",
+            "worst_violation_mm",
+            "pairs_with_clashes"
+          ]
+        }
+      },
+      "required": [
+        "pairs",
+        "consolidated_summary"
+      ]
+    },
+    "input_examples": [
+      {
+        "pairs": [
+          {
+            "label": "Ducts \u00c3\u2014 Structural Link",
+            "set_a": {
+              "source": "host",
+              "categories": [
+                "OST_DuctCurves"
+              ]
+            },
+            "set_b": {
+              "source": "link",
+              "link_id": 12345,
+              "categories": [
+                "OST_StructuralFraming",
+                "OST_StructuralColumns"
+              ]
+            },
+            "axis": "bbox",
+            "clearance_mm": 50,
+            "max_results": 100
+          },
+          {
+            "label": "Pipes \u00c3\u2014 Ceiling Link",
+            "set_a": {
+              "source": "host",
+              "categories": [
+                "OST_PipeCurves"
+              ]
+            },
+            "set_b": {
+              "source": "link",
+              "link_id": 12345,
+              "categories": [
+                "OST_Ceilings"
+              ]
+            },
+            "axis": "Z",
+            "direction": "above",
+            "clearance_mm": 200,
+            "sample_count": 5,
+            "max_results": 100
+          }
+        ]
+      }
+    ],
+    "annotations": {
+      "readOnlyHint": true,
+      "destructiveHint": false,
+      "idempotentHint": true,
+      "openWorldHint": false
+    }
+  },
+  {
+    "name": "fireprotection_recipe_model_health_triage",
+    "title": "Run model health triage recipe",
+    "description": "WORKFLOW RECIPE (read-only): runs a model-health scan and returns a prioritized, actionable triage list \u00e2\u20ac\u201d each issue with its severity and a recommended fix. Composes get_model_health internally; use this instead of get_model_health when you want guidance, not raw metrics. Checks warnings, file size, imported vs linked CAD, in-place families, model/detail groups, views not on sheets, element counts by category, and complexity counts. Returns a scorecard with a letter grade (A-F), a 0-100 score, and flagged issues with recommended fixes.",
+    "input_schema": {
+      "type": "object",
+      "properties": {
+        "deep": {
+          "type": "boolean",
+          "default": false,
+          "description": "Include the purge scan (Document.GetUnusedElements). Slower on large models."
+        }
+      },
+      "additionalProperties": false
+    },
+    "output_schema": {
+      "type": "object",
+      "properties": {
+        "scorecard": {
+          "type": "object",
+          "properties": {
+            "grade": {
+              "type": "string",
+              "enum": [
+                "A",
+                "B",
+                "C",
+                "D",
+                "F"
+              ]
+            },
+            "score": {
+              "type": "integer",
+              "minimum": 0,
+              "maximum": 100
+            },
+            "flagged_issues": {
+              "type": "integer"
+            }
+          },
+          "required": [
+            "grade",
+            "score",
+            "flagged_issues"
+          ]
+        },
+        "triage_items": {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "properties": {
+              "category": {
+                "type": "string"
+              },
+              "severity": {
+                "type": "string",
+                "enum": [
+                  "Critical",
+                  "High",
+                  "Medium",
+                  "Low",
+                  "Info"
+                ]
+              },
+              "title": {
+                "type": "string"
+              },
+              "description": {
+                "type": "string"
+              },
+              "recommended_fix": {
+                "type": "string"
+              },
+              "affected_count": {
+                "type": "integer"
+              }
+            },
+            "required": [
+              "category",
+              "severity",
+              "title",
+              "description",
+              "recommended_fix",
+              "affected_count"
+            ]
+          }
+        },
+        "metrics": {
+          "type": "object",
+          "properties": {
+            "file_size_mb": {
+              "type": "number"
+            },
+            "warning_count": {
+              "type": "integer"
+            },
+            "imported_cad_count": {
+              "type": "integer"
+            },
+            "linked_cad_count": {
+              "type": "integer"
+            },
+            "in_place_family_count": {
+              "type": "integer"
+            },
+            "model_group_count": {
+              "type": "integer"
+            },
+            "detail_group_count": {
+              "type": "integer"
+            },
+            "views_not_on_sheets": {
+              "type": "integer"
+            },
+            "element_counts_by_category": {
+              "type": "object",
+              "additionalProperties": {
+                "type": "integer"
+              }
+            },
+            "levels_count": {
+              "type": "integer"
+            },
+            "grids_count": {
+              "type": "integer"
+            },
+            "design_options_count": {
+              "type": "integer"
+            },
+            "reference_planes_count": {
+              "type": "integer"
+            }
+          },
+          "required": [
+            "file_size_mb",
+            "warning_count",
+            "imported_cad_count",
+            "linked_cad_count",
+            "in_place_family_count",
+            "model_group_count",
+            "detail_group_count",
+            "views_not_on_sheets",
+            "element_counts_by_category",
+            "levels_count",
+            "grids_count",
+            "design_options_count",
+            "reference_planes_count"
+          ]
+        }
+      },
+      "required": [
+        "scorecard",
+        "triage_items",
+        "metrics"
+      ]
+    },
+    "input_examples": [
+      {
+        "deep": false
+      },
+      {
+        "deep": true
+      }
+    ],
+    "annotations": {
+      "readOnlyHint": true,
+      "destructiveHint": false,
+      "idempotentHint": true,
+      "openWorldHint": false
+    }
+  }
+]

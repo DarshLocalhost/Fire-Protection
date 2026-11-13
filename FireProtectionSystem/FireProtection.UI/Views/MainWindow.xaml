@@ -12,10 +12,10 @@
         xmlns:vSmoke="clr-namespace:FireProtection.UI.Views.SmokeDetectors"
         xmlns:vSprinklers="clr-namespace:FireProtection.UI.Views.Sprinklers"
         xmlns:ctrl="clr-namespace:FireProtection.UI.Controls"
-        Width="1400"
-        Height="900"
-        MinWidth="1040"
-        MinHeight="620"
+        Width="1180"
+        Height="720"
+        MinWidth="800"
+        MinHeight="480"
         ResizeMode="CanResize"
         SizeToContent="Manual"
         Background="{DynamicResource BackgroundBrush}"
@@ -52,52 +52,62 @@
 
     <!-- ================= HEADER ================= -->
     <Border Grid.Row="0"
-        Background="{DynamicResource BackgroundBrush}"
+            Background="{DynamicResource BackgroundBrush}"
             BorderBrush="{StaticResource BorderBrush}"
             BorderThickness="0"
-            Padding="24,16,24,0">
+            Padding="16,10,16,0">
       <DockPanel LastChildFill="False">
         <StackPanel Orientation="Horizontal" DockPanel.Dock="Left">
         <!-- Brand mark: sprinkler deflector plate -->
-        <Border Width="38"
-                Height="38"
+        <Border Width="32"
+                Height="32"
                 VerticalAlignment="Center"
                 Background="{StaticResource BrandBrush}"
                 CornerRadius="4">
-          <Canvas Width="20" Height="20" HorizontalAlignment="Center" VerticalAlignment="Center">
+          <Canvas Width="18" Height="18" HorizontalAlignment="Center" VerticalAlignment="Center">
             <!-- deflector -->
-            <Rectangle Canvas.Left="4" Canvas.Top="5" Width="12" Height="2.5"
+            <Rectangle Canvas.Left="3" Canvas.Top="4" Width="12" Height="2"
                        Fill="White" RadiusX="1" RadiusY="1"/>
             <!-- stem -->
-            <Rectangle Canvas.Left="9" Canvas.Top="7.5" Width="2" Height="6"
+            <Rectangle Canvas.Left="8" Canvas.Top="6" Width="2" Height="5.5"
                        Fill="White"/>
             <!-- drop -->
-            <Path Data="M 10,14 C 12.5,17 12.5,18.5 10,18.5 C 7.5,18.5 7.5,17 10,14 Z"
-                  Fill="White"/>
+            <Path Data="M 9,12 C 11.2,14.8 11.2,16 9,16 C 6.8,16 6.8,14.8 9,12 Z"
+                       Fill="White"/>
           </Canvas>
         </Border>
-        <StackPanel Margin="12,0,0,0" VerticalAlignment="Center">
-          <TextBlock FontSize="17"
+        <StackPanel Margin="10,0,0,0" VerticalAlignment="Center">
+          <TextBlock FontSize="15"
                      FontWeight="SemiBold"
                      Foreground="{StaticResource TextPrimaryBrush}"
                      Text="Fire Protection System"/>
-          <TextBlock Margin="0,2,0,0"
+          <TextBlock Margin="0,1,0,0"
                      FontFamily="{StaticResource DataFontFamily}"
-                     FontSize="10.5"
+                     FontSize="9.5"
                      Foreground="{StaticResource TextMutedBrush}"
                      Text="AUTOMATED LAYOUT WITH CODE-BASED CALCULATIONS"/>
         </StackPanel>
         </StackPanel>
 
-        <!-- Loads a picked .rfa into the active model. Shared across all three device tabs; the
-             actual load is marshalled onto Revit's idle thread by the view model. -->
-        <Button DockPanel.Dock="Right"
-                Content="Load families…"
-                Style="{StaticResource OutlineButtonStyle}"
-                Padding="14,6"
-                VerticalAlignment="Center"
-                Command="{Binding LoadFamiliesCommand}"
-                ToolTip="Load Revit families (.rfa) into the current model. Available for every device tab."/>
+        <!-- Header action buttons -->
+        <StackPanel Orientation="Horizontal" DockPanel.Dock="Right" VerticalAlignment="Center">
+          <Button Content="&#x21BB; Refresh"
+                  Style="{StaticResource OutlineButtonStyle}"
+                  Padding="12,5"
+                  Margin="0,0,8,0"
+                  VerticalAlignment="Center"
+                  Command="{Binding RefreshModelCommand}"
+                  ToolTip="Re-extracts model data (levels, rooms, obstacles, existing devices) from the active Revit document and updates the view."/>
+
+          <!-- Loads a picked .rfa into the active model. Shared across all three device tabs; the
+               actual load is marshalled onto Revit's idle thread by the view model. -->
+          <Button Content="Load families…"
+                  Style="{StaticResource OutlineButtonStyle}"
+                  Padding="12,5"
+                  VerticalAlignment="Center"
+                  Command="{Binding LoadFamiliesCommand}"
+                  ToolTip="Load Revit families (.rfa) into the current model. Available for every device tab."/>
+        </StackPanel>
       </DockPanel>
     </Border>
 
@@ -122,7 +132,7 @@
 
     <!-- Catalog top bar (Decision 020) -->
     <vCatalog:CatalogBar Grid.Row="1"
-                         Margin="16,0,16,0"
+                         Margin="12,0,12,0"
                          DataContext="{Binding Catalog}"/>
 
     <!-- Source-status banner. Hosted ONCE here rather than per tab, because the catalog source is
@@ -130,7 +140,7 @@
          silent: in model mode without a workbook the calculation falls back to provisional
          rulebook spacing, and without this the user cannot tell that happened. -->
     <ctrl:InfoBanner Grid.Row="2"
-                     Margin="16,0,16,0"
+                     Margin="12,0,12,0"
                      Content="{Binding Catalog.StatusMessage}"
                      DataContext="{Binding Catalog}"
                      Visibility="{Binding HasStatusMessage, Converter={StaticResource InverseBoolToVis}}"/>

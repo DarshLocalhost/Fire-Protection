@@ -1,0 +1,102 @@
+{
+  "name": "fireprotection_place_notification_appliances",
+  "title": "Place notification appliances in Revit model",
+  "description": "Places actual Revit FamilyInstance notification appliances (strobes, speakers, speaker-strobes) in the model for every calculated point from a notification appliance calculation result. Uses the shared FireAlarmDevicePlacementCore which handles symbol/level resolution, existing-device policy, ceiling-host resolution, and transaction management. Runs inside a TransactionGroup so the entire run is a single undo entry; cancellation rolls back everything. Performs post-placement spatial validation. The provisional notification rules mean results require engineering review. Supports existing-device policies (SkipRoom, ReplaceExisting, AddAnyway). Requires the appliance family/type to be loaded in the active Revit document under OST_FireAlarmDevices. This function WRITES to the Revit model. Use with caution on production models.",
+  "input_schema": {
+    "type": "object",
+    "properties": {
+      "items": {
+        "type": "array",
+        "minItems": 1,
+        "items": {
+          "type": "object",
+          "properties": {
+            "room_id": { "type": "string" },
+            "room_name": { "type": "string" },
+            "room_number": { "type": "string" },
+            "level_name": { "type": "string" },
+            "level_id": { "type": "string" },
+            "level_elevation_ft": { "type": "number" },
+            "area_sq_ft": { "type": "number" },
+            "polygon": { "type": "array", "items": { "type": "array", "items": { "type": "number" }, "minItems": 2, "maxItems": 2 } },
+            "selected_family_name": { "type": "string" },
+            "selected_type_name": { "type": "string" },
+            "device_kind": { "type": "string", "enum": ["SmokeDetector", "NotificationAppliance"] }
+          },
+          "required": ["room_id", "room_name", "room_number", "level_name", "level_id", "level_elevation_ft", "area_sq_ft", "polygon", "selected_family_name", "selected_type_name", "device_kind"]
+        }
+      },
+      "existing_device_policy": { "type": "string", "enum": ["SkipRoom", "ReplaceExisting", "AddAnyway"], "default": "SkipRoom" },
+      "ignore_obstacles": { "type": "boolean", "default": true }
+    },
+    "required": ["items"],
+    "additionalProperties": false
+  },
+  "output_schema": {
+    "type": "object",
+    "properties": {
+      "rooms_processed": { "type": "integer" },
+      "rooms_succeeded": { "type": "integer" },
+      "rooms_failed": { "type": "integer" },
+      "rooms_skipped": { "type": "integer" },
+      "review_required_count": { "type": "integer" },
+      "sprinklers_requested": { "type": "integer" },
+      "sprinklers_placed": { "type": "integer" },
+      "is_provisional": { "type": "boolean", "const": true },
+      "applied_rules_summary": { "type": "string" },
+      "overall_status": { "type": "string" },
+      "summary": { "type": "string" },
+      "warnings": { "type": "array", "items": { "type": "string" } },
+      "failed_reasons": { "type": "array", "items": { "type": "string" } },
+      "review_required_reasons": { "type": "array", "items": { "type": "string" } },
+      "room_reports": {
+        "type": "array",
+        "items": {
+          "type": "object",
+          "properties": {
+            "room_id": { "type": "string" },
+            "room_name": { "type": "string" },
+            "level_name": { "type": "string" },
+            "status": { "type": "string", "enum": ["Success", "Failed", "Skipped", "ReviewRequired"] },
+            "message": { "type": "string" },
+            "failure_reason": { "type": "string" },
+            "review_required": { "type": "boolean" },
+            "points_requested": { "type": "integer" },
+            "points_placed": { "type": "integer" },
+            "coverage_percent": { "type": ["number", "null"] },
+            "placement_diagnostics": { "type": "array", "items": { "type": "string" } }
+          },
+          "required": ["room_id", "room_name", "level_name", "status", "message", "points_requested", "points_placed"]
+        }
+      }
+    },
+    "required": ["rooms_processed", "rooms_succeeded", "rooms_failed", "rooms_skipped", "sprinklers_requested", "sprinklers_placed", "overall_status", "summary", "room_reports"]
+  },
+  "input_examples": [
+    {
+      "items": [
+        {
+          "room_id": "789012",
+          "room_name": "Office 101",
+          "room_number": "101",
+          "level_name": "Level 1",
+          "level_id": "123456",
+          "level_elevation_ft": 0,
+          "area_sq_ft": 400,
+          "polygon": [[0, 0], [20, 0], [20, 20], [0, 20]],
+          "selected_family_name": "Wheelock Exceder",
+          "selected_type_name": "LED Strobe 15cd",
+          "device_kind": "NotificationAppliance"
+        }
+      ],
+      "existing_device_policy": "SkipRoom",
+      "ignore_obstacles": true
+    }
+  ],
+  "annotations": {
+    "readOnlyHint": false,
+    "destructiveHint": true,
+    "idempotentHint": false,
+    "openWorldHint": false
+  }
+}

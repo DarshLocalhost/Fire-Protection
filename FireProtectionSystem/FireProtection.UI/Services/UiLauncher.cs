@@ -75,7 +75,8 @@ namespace FireProtection.UI.Services
             ISprinklerPlacementService sprinklerPlacementService,
             CatalogViewModel catalog,
             IntPtr revitMainWindowHandle,
-            DevicePlacementSeams deviceSeams = null)
+            DevicePlacementSeams deviceSeams = null,
+            IModelRefreshService refreshService = null)
         {
             if (TryActivateExisting()) return;
 
@@ -86,7 +87,7 @@ namespace FireProtection.UI.Services
             WpfHost.EnsureApplication();
 
             MainWindow window = new MainWindow(
-                json, placementInputExporter, sprinklerFamilySource, sprinklerPlacementService, catalog, deviceSeams);
+                json, placementInputExporter, sprinklerFamilySource, sprinklerPlacementService, catalog, deviceSeams, refreshService);
 
             if (revitMainWindowHandle != IntPtr.Zero)
             {

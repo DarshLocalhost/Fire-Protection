@@ -1,0 +1,97 @@
+{
+  "name": "fireprotection_check_clearance",
+  "title": "Check clearance/clash between element sets",
+  "description": "Detects hard clashes or clearance violations between two element sets (host or linked files). Uses Revit's ReferenceIntersector for accurate raycast-based clearance checks. axis='bbox' inflates setA bounding boxes by clearanceMm in all directions — use for omnidirectional proximity checks. axis='Z' fires a vertical ReferenceIntersector raycast from each setA element and automatically finds the nearest setB element directly below or above it; reports the actual measured clearance. Use direction='below' (duct→floor below) or 'above' (duct→ceiling above). IMPORTANT for axis='Z': do NOT manually fetch or enumerate setB elements first — just pass a category filter in setB and let the raycast locate the nearest hit automatically. clearanceMm=0 + axis='bbox' → hard clash only. This is a read-only check that does not modify the model.",
+  "input_schema": {
+    "type": "object",
+    "properties": {
+      "set_a": {
+        "type": "object",
+        "properties": {
+          "source": { "type": "string", "enum": ["host", "link"], "default": "host" },
+          "link_id": { "type": "integer", "description": "Required when source='link'. ElementId of the RevitLinkInstance." },
+          "categories": { "type": "array", "items": { "type": "string" }, "description": "BuiltInCategory names, e.g. ['OST_DuctCurves', 'OST_PipeCurves']. Empty = all element types." },
+          "limit": { "type": "integer", "minimum": 1, "maximum": 2000, "default": 500 },
+          "scope_id": { "type": "integer", "description": "ElementId of a spatial container (MEP Space, Room, Floor, equipment). Only elements whose centroid falls inside that element's bbox are included." }
+        },
+        "required": ["source"]
+      },
+      "set_b": {
+        "type": "object",
+        "properties": {
+          "source": { "type": "string", "enum": ["host", "link"], "default": "host" },
+          "link_id": { "type": "integer" },
+          "categories": { "type": "array", "items": { "type": "string" } },
+          "limit": { "type": "integer", "minimum": 1, "maximum": 2000, "default": 500 },
+          "scope_id": { "type": "integer" }
+        },
+        "required": ["source"]
+      },
+      "axis": { "type": "string", "enum": ["bbox", "Z"], "default": "bbox" },
+      "direction": { "type": "string", "enum": ["below", "above"], "default": "below" },
+      "view_id": { "type": "integer", "description": "ElementId of a 3D view for axis=Z raycast. Uses active view if omitted." },
+      "clearance_mm": { "type": "number", "minimum": 0, "default": 0 },
+      "sample_count": { "type": "integer", "minimum": 1, "maximum": 10, "default": 3 },
+      "max_results": { "type": "integer", "minimum": 1, "maximum": 2000, "default": 200 }
+    },
+    "required": ["set_a", "set_b"],
+    "additionalProperties": false
+  },
+  "output_schema": {
+    "type": "object",
+    "properties": {
+      "clashes": {
+        "type": "array",
+        "items": {
+          "type": "object",
+          "properties": {
+            "set_a_element_id": { "type": "integer" },
+            "set_a_category": { "type": "string" },
+            "set_b_element_id": { "type": "integer" },
+            "set_b_category": { "type": "string" },
+            "measured_clearance_mm": { "type": "number" },
+            "violation_mm": { "type": "number", "description": "How much the measured clearance falls short of the threshold." },
+            "sample_point": { "type": "object", "properties": { "x": { "type": "number" }, "y": { "type": "number" }, "z": { "type": "number" } } }
+          },
+          "required": ["set_a_element_id", "set_a_category", "set_b_element_id", "set_b_category", "measured_clearance_mm", "violation_mm"]
+        }
+      },
+      "summary": {
+        "type": "object",
+        "properties": {
+          "total_clashes": { "type": "integer" },
+          "hard_clashes": { "type": "integer" },
+          "clearance_violations": { "type": "integer" },
+          "set_a_elements_checked": { "type": "integer" },
+          "set_b_elements_checked": { "type": "integer" }
+        },
+        "required": ["total_clashes", "hard_clashes", "clearance_violations", "set_a_elements_checked", "set_b_elements_checked"]
+      }
+    },
+    "required": ["clashes", "summary"]
+  },
+  "input_examples": [
+    {
+      "set_a": { "source": "host", "categories": ["OST_DuctCurves"], "limit": 500 },
+      "set_b": { "source": "host", "categories": ["OST_PipeCurves"], "limit": 500 },
+      "axis": "bbox",
+      "clearance_mm": 100,
+      "max_results": 100
+    },
+    {
+      "set_a": { "source": "host", "categories": ["OST_DuctCurves"] },
+      "set_b": { "source": "link", "link_id": 12345, "categories": ["OST_Floors"] },
+      "axis": "Z",
+      "direction": "below",
+      "clearance_mm": 2400,
+      "sample_count": 5,
+      "max_results": 200
+    }
+  ],
+  "annotations": {
+    "readOnlyHint": true,
+    "destructiveHint": false,
+    "idempotentHint": true,
+    "openWorldHint": false
+  }
+}

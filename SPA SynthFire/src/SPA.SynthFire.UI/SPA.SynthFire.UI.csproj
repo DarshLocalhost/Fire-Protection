@@ -1,0 +1,18 @@
+﻿<Project Sdk="Microsoft.NET.Sdk">
+
+	<PropertyGroup>
+		<TargetFramework>net8.0-windows</TargetFramework>
+		<UseWPF>true</UseWPF>
+		<RootNamespace>SPA.SynthFire.UI</RootNamespace>
+		<AssemblyName>SPA.SynthFire.UI</AssemblyName>
+		<CopyLocalLockFileAssemblies>true</CopyLocalLockFileAssemblies>
+	</PropertyGroup>
+
+	<ItemGroup>
+		<ProjectReference Include="..\SPA.SynthFire.Core\SPA.SynthFire.Core.csproj" />
+		<ProjectReference Include="..\SPA.SynthFire.Placement\SPA.SynthFire.Placement.csproj" />
+		<ProjectReference Include="..\SPA.SynthFire.Presentation\SPA.SynthFire.Presentation.csproj" />
+		<PackageReference Include="HelixToolkit.Wpf" Version="2.25.0" />
+	</ItemGroup>
+
+</Project>

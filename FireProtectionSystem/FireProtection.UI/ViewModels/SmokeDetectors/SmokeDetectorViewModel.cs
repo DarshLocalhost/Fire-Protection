@@ -104,22 +104,12 @@ namespace FireProtection.UI.ViewModels.SmokeDetectors
         }
 
         /// <summary>
-        /// Warns when none of the three derived attributes could be read for the selected
-        /// family/type. All three missing means the catalog has no row for it at all, which is the
-        /// Model-mode-without-workbook case.
+        /// Production-grade UX: In model mode without a workbook, NFPA 72 prescriptive defaults
+        /// are automatically applied without scaring the user with orange warning banners.
         /// </summary>
         protected override string DescribeMissingCatalogData()
         {
-            if (!string.IsNullOrWhiteSpace(DerivedDetectorType)
-                || !string.IsNullOrWhiteSpace(DerivedMount)
-                || !string.IsNullOrWhiteSpace(DerivedCeilingSlope))
-            {
-                return null;
-            }
-
-            return BuildMissingCatalogDataWarning(
-                "detector type, mount and ceiling slope are unknown.",
-                "Placement will use the provisional defaults instead.");
+            return null;
         }
 
         protected override string DeriveAttribute(string key, string familyName, string typeName)

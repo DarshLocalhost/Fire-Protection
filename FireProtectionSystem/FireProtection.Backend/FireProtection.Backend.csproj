@@ -1,4 +1,4 @@
-﻿<Project Sdk="Microsoft.NET.Sdk">
+<Project Sdk="Microsoft.NET.Sdk">
 
 	<!-- ========================================================= -->
 	<!-- Common settings                                           -->
@@ -34,6 +34,9 @@
 
 		<PlatformTarget>x64</PlatformTarget>
 
+		<!-- Suppress MSB3277 conflict caused by Autodesk Revit references targeting older VisualBasic assemblies than net8.0 -->
+		<NoWarn>$(NoWarn);MSB3277</NoWarn>
+
 	</PropertyGroup>
 
 
@@ -50,6 +53,9 @@
 		<DefineConstants>$(DefineConstants);REVIT_2025</DefineConstants>
 
 		<PlatformTarget>x64</PlatformTarget>
+
+		<!-- Suppress MSB3277 conflict caused by Autodesk Revit references targeting older VisualBasic assemblies than net8.0 -->
+		<NoWarn>$(NoWarn);MSB3277</NoWarn>
 
 	</PropertyGroup>
 
@@ -68,6 +74,9 @@
 
 		<PlatformTarget>x64</PlatformTarget>
 
+		<!-- Suppress MSB3277 conflict caused by Autodesk Revit references targeting older VisualBasic assemblies than net8.0 -->
+		<NoWarn>$(NoWarn);MSB3277</NoWarn>
+
 	</PropertyGroup>
 
 
@@ -81,6 +90,9 @@
 
 		<PlatformTarget>x64</PlatformTarget>
 
+		<!-- Suppress MSB3277 conflict caused by Autodesk Revit references targeting older VisualBasic assemblies than net8.0 -->
+		<NoWarn>$(NoWarn);MSB3277</NoWarn>
+
 	</PropertyGroup>
 
 
@@ -93,6 +105,9 @@
 		<TargetFramework>net8.0-windows</TargetFramework>
 
 		<PlatformTarget>x64</PlatformTarget>
+
+		<!-- Suppress MSB3277 conflict caused by Autodesk Revit references targeting older VisualBasic assemblies than net8.0 -->
+		<NoWarn>$(NoWarn);MSB3277</NoWarn>
 
 	</PropertyGroup>
 
@@ -215,14 +230,14 @@
 		<!-- Copy Backend DLL                                         -->
 		<!-- ======================================================= -->
 
-		<Copy SourceFiles="$(TargetPath)" DestinationFolder="$(RevitAddinsDirectory)" SkipUnchangedFiles="true" />
+		<Copy SourceFiles="$(TargetPath)" DestinationFolder="$(RevitAddinsDirectory)" SkipUnchangedFiles="true" ContinueOnError="true" />
 
 
 		<!-- ======================================================= -->
 		<!-- Copy UI DLL                                              -->
 		<!-- ======================================================= -->
 
-		<Copy SourceFiles="$(TargetDir)FireProtection.UI.dll" DestinationFolder="$(RevitAddinsDirectory)" SkipUnchangedFiles="true" />
+		<Copy SourceFiles="$(TargetDir)FireProtection.UI.dll" DestinationFolder="$(RevitAddinsDirectory)" SkipUnchangedFiles="true" ContinueOnError="true" />
 
 
 		<!-- ======================================================= -->

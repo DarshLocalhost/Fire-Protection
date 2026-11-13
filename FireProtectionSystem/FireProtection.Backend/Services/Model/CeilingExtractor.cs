@@ -9,7 +9,7 @@ namespace FireProtection.Backend.Services.Model
     {
         public class ExtractedCeilingItem
         {
-            public Ceiling Ceiling { get; set; }
+            public Element Ceiling { get; set; }
             public Document Document { get; set; }
             public Transform Transform { get; set; }
             public SourceReferenceData Source { get; set; }
@@ -22,6 +22,8 @@ namespace FireProtection.Backend.Services.Model
             public double? TopElevationFt { get; set; }
             public string SlopeType { get; set; }
             public double? SlopeDegrees { get; set; }
+            public bool IsModelGroup { get; set; }
+            public double AreaSqFt { get; set; }
         }
 
         public List<ExtractedCeilingItem> CollectAllCeilings(RevitModelContext context, List<ExtractionIssue> issues)
@@ -87,7 +89,41 @@ namespace FireProtection.Backend.Services.Model
                 {
                     if (element is Ceiling ceiling)
                     {
-                        ExtractedCeilingItem item = ProcessCeiling(ceiling, document, transform, source, issues);
+                        ExtractedCeilingItem item = ProcessCeilingOrFloor(ceiling, "OST_Ceilings", document, transform, source, issues);
+                        if (item != null)
+                        {
+                            ceilingItems.Add(item);
+                        }
+                    }
+                }
+
+                // Also collect Floors as potential overhead slab boundaries for open-structure rooms
+                FilteredElementCollector floorCollector = new FilteredElementCollector(document)
+                    .OfCategory(BuiltInCategory.OST_Floors)
+                    .WhereElementIsNotElementType();
+
+                foreach (Element element in floorCollector)
+                {
+                    if (element is Floor floor)
+                    {
+                        ExtractedCeilingItem item = ProcessCeilingOrFloor(floor, "OST_Floors", document, transform, source, issues);
+                        if (item != null)
+                        {
+                            ceilingItems.Add(item);
+                        }
+                    }
+                }
+
+                // Also collect Roofs as potential overhead boundaries for top-floor open-structure rooms
+                FilteredElementCollector roofCollector = new FilteredElementCollector(document)
+                    .OfCategory(BuiltInCategory.OST_Roofs)
+                    .WhereElementIsNotElementType();
+
+                foreach (Element element in roofCollector)
+                {
+                    if (element is RoofBase roof)
+                    {
+                        ExtractedCeilingItem item = ProcessCeilingOrFloor(roof, "OST_Roofs", document, transform, source, issues);
                         if (item != null)
                         {
                             ceilingItems.Add(item);
@@ -100,30 +136,31 @@ namespace FireProtection.Backend.Services.Model
                 issues.Add(new ExtractionIssue(
                     ExtractionIssueSeverity.Warning,
                     "CeilingExtraction",
-                    $"Error collecting ceilings from document '{source.DocumentTitle}': {ex.Message}"));
+                    $"Error collecting ceilings/floors from document '{source.DocumentTitle}': {ex.Message}"));
             }
         }
 
-        private ExtractedCeilingItem ProcessCeiling(
-            Ceiling ceiling,
+        private ExtractedCeilingItem ProcessCeilingOrFloor(
+            Element element,
+            string categoryName,
             Document document,
             Transform transform,
             SourceReferenceData source,
             List<ExtractionIssue> issues)
         {
 #if REVIT_2024 || REVIT_2025 || REVIT_2026
-            string elementId = ceiling.Id.Value.ToString();
+            string elementId = element.Id.Value.ToString();
 #else
-            string elementId = ceiling.Id.ToString();
+            string elementId = element.Id.ToString();
 #endif
 
-            BoundingBoxXYZ localBBox = ceiling.get_BoundingBox(null);
+            BoundingBoxXYZ localBBox = element.get_BoundingBox(null);
             BoundingBox3DData hostBBox = localBBox != null
                 ? RevitModelContext.TransformBoundingBox(localBBox, transform)
                 : null;
 
             List<Solid> solids = new List<Solid>();
-            ExtractSolids(ceiling, solids);
+            ExtractSolids(element, solids);
 
             double minBottomZ = double.MaxValue;
             double maxTopZ = double.MinValue;
@@ -185,7 +222,7 @@ namespace FireProtection.Backend.Services.Model
 
             string typeName = string.Empty;
             string familyName = string.Empty;
-            ElementType elemType = document.GetElement(ceiling.GetTypeId()) as ElementType;
+            ElementType elemType = document.GetElement(element.GetTypeId()) as ElementType;
             if (elemType != null)
             {
                 typeName = elemType.Name;
@@ -195,10 +232,10 @@ namespace FireProtection.Backend.Services.Model
             bool hasGrid = false;
             double gridOriginX = 0.0, gridOriginY = 0.0, gridU = 0.0, gridV = 0.0, gridAngle = 0.0;
             string gridOriginSource = CeilingData.GridOriginSources.None;
-            if (string.Equals(slopeType, "FLAT", StringComparison.OrdinalIgnoreCase))
+            if (element is Ceiling ceilingElem && string.Equals(slopeType, "FLAT", StringComparison.OrdinalIgnoreCase))
             {
                 TryReadCeilingGrid(
-                    ceiling, document, hostBBox, bottomFaces, transform, issues,
+                    ceilingElem, document, hostBBox, bottomFaces, transform, issues,
                     out hasGrid, out gridOriginX, out gridOriginY, out gridU, out gridV, out gridAngle,
                     out gridOriginSource);
 
@@ -220,24 +257,32 @@ namespace FireProtection.Backend.Services.Model
                         + $"origin=({gridOriginX:F3},{gridOriginY:F3}), angle={gridAngle:F4}. "
                         + "No readable surface pattern — verify tile centers on RCP.",
                         elementId,
-                        ceiling.Name));
+                        element.Name));
                 }
             }
 
             string ceilingLevelId = string.Empty;
             string ceilingLevelName = string.Empty;
-            if (ceiling.LevelId != null && ceiling.LevelId != ElementId.InvalidElementId)
+            if (element.LevelId != null && element.LevelId != ElementId.InvalidElementId)
             {
 #if REVIT_2024 || REVIT_2025 || REVIT_2026
-                ceilingLevelId = ceiling.LevelId.Value.ToString();
+                ceilingLevelId = element.LevelId.Value.ToString();
 #else
-                ceilingLevelId = ceiling.LevelId.ToString();
+                ceilingLevelId = element.LevelId.ToString();
 #endif
-                Level ceilingLevel = document.GetElement(ceiling.LevelId) as Level;
+                Level ceilingLevel = document.GetElement(element.LevelId) as Level;
                 if (ceilingLevel != null)
                 {
                     ceilingLevelName = ceilingLevel.Name;
                 }
+            }
+
+            bool isModelGroup = element.GroupId != null && element.GroupId != ElementId.InvalidElementId;
+            double areaSqFt = 0.0;
+            Parameter areaParam = element.get_Parameter(BuiltInParameter.HOST_AREA_COMPUTED);
+            if (areaParam != null && areaParam.HasValue)
+            {
+                areaSqFt = areaParam.AsDouble();
             }
 
             CeilingData dto = new CeilingData
@@ -245,10 +290,10 @@ namespace FireProtection.Backend.Services.Model
                 ElementId = elementId,
                 LevelId = ceilingLevelId,
                 LevelName = ceilingLevelName,
-                CeilingName = ceiling.Name,
+                CeilingName = element.Name,
                 FamilyName = familyName,
                 TypeName = typeName,
-                Category = "OST_Ceilings",
+                Category = categoryName,
                 Source = new SourceReferenceData
                 {
                     DocumentTitle = source.DocumentTitle,
@@ -263,18 +308,20 @@ namespace FireProtection.Backend.Services.Model
                 SlopeType = slopeType,
                 SlopeDegrees = hasSlopedFace ? (double?)maxSlopeDeg : 0.0,
                 IsRoomDirectCeiling = false,
-HasReadableGrid = hasGrid,
-            GridOriginXFt = gridOriginX,
-            GridOriginYFt = gridOriginY,
-            GridSpacingUFt = gridU,
-            GridSpacingVFt = gridV,
-            GridAngleRad = gridAngle,
-            GridOriginSource = hasGrid ? gridOriginSource : CeilingData.GridOriginSources.None
+                IsModelGroup = isModelGroup,
+                AreaSqFt = areaSqFt,
+                HasReadableGrid = hasGrid,
+                GridOriginXFt = gridOriginX,
+                GridOriginYFt = gridOriginY,
+                GridSpacingUFt = gridU,
+                GridSpacingVFt = gridV,
+                GridAngleRad = gridAngle,
+                GridOriginSource = hasGrid ? gridOriginSource : CeilingData.GridOriginSources.None
             };
 
             return new ExtractedCeilingItem
             {
-                Ceiling = ceiling,
+                Ceiling = element,
                 Document = document,
                 Transform = transform,
                 Source = source,
@@ -286,7 +333,9 @@ HasReadableGrid = hasGrid,
                 BottomElevationFt = minBottomZ != double.MaxValue ? (double?)minBottomZ : null,
                 TopElevationFt = maxTopZ != double.MinValue ? (double?)maxTopZ : null,
                 SlopeType = slopeType,
-                SlopeDegrees = hasSlopedFace ? (double?)maxSlopeDeg : 0.0
+                SlopeDegrees = hasSlopedFace ? (double?)maxSlopeDeg : 0.0,
+                IsModelGroup = isModelGroup,
+                AreaSqFt = areaSqFt
             };
         }
 

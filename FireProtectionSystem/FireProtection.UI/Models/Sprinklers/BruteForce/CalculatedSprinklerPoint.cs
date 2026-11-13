@@ -26,6 +26,16 @@ namespace FireProtection.UI.Models.Sprinklers.BruteForce
         /// </summary>
         public int? WallEdgeIndex { get; set; }
 
+        /// <summary>
+        /// True if this candidate point conflicts with any extracted obstacle volume or clearance envelope.
+        /// </summary>
+        public bool HasObstacleConflict { get; set; }
+
+        /// <summary>
+        /// Description of the obstacle that caused the conflict.
+        /// </summary>
+        public string ObstacleConflictDescription { get; set; }
+
         public override string ToString()
         {
             return $"({X:F3}, {Y:F3}, {Z:F3})";

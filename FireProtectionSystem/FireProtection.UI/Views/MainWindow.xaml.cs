@@ -43,12 +43,13 @@ namespace FireProtection.UI.Views
             ISprinklerFamilySource sprinklerFamilySource,
             ISprinklerPlacementService sprinklerPlacementService,
             CatalogViewModel catalog,
-            DevicePlacementSeams deviceSeams)
+            DevicePlacementSeams deviceSeams,
+            IModelRefreshService refreshService = null)
         {
             InitializeComponent();
             FitToWorkArea();
             DataContext = new MainWindowViewModel(
-                json, placementInputExporter, sprinklerFamilySource, sprinklerPlacementService, catalog, deviceSeams);
+                json, placementInputExporter, sprinklerFamilySource, sprinklerPlacementService, catalog, deviceSeams, refreshService);
         }
 
         /// <summary>

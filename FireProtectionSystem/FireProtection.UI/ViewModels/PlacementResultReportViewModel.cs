@@ -138,15 +138,17 @@ namespace FireProtection.UI.ViewModels
                     DateTime.Now.ToString("yyyyMMdd_HHmmss") + ".csv");
 
                 var sb = new System.Text.StringBuilder();
-                sb.AppendLine("Room,Level,Status,Placed,Requested,Message");
+                sb.AppendLine("Room,Level,Coverage,Status,Placed,Requested,Message");
 
                 if (_report.RoomReports != null)
                 {
                     foreach (var room in _report.RoomReports)
                     {
-                        sb.AppendLine(string.Format("{0},{1},{2},{3},{4},{5}",
+                        string cov = room.CoveragePercent.HasValue ? room.CoveragePercent.Value.ToString("F1") + "%" : "-";
+                        sb.AppendLine(string.Format("{0},{1},{2},{3},{4},{5},{6}",
                             Escape(room.RoomName),
                             Escape(room.LevelName),
+                            Escape(cov),
                             Escape(room.Status),
                             room.PointsPlaced,
                             room.PointsRequested,
@@ -182,6 +184,7 @@ namespace FireProtection.UI.ViewModels
             PointsPlaced = report.PointsPlaced;
             PointsRequested = report.PointsRequested;
             Message = report.Message ?? "";
+            CoveragePercent = report.CoveragePercent;
         }
 
         public string RoomName { get; }
@@ -190,6 +193,8 @@ namespace FireProtection.UI.ViewModels
         public int PointsPlaced { get; }
         public int PointsRequested { get; }
         public string Message { get; }
+        public double? CoveragePercent { get; }
+        public string CoverageText => CoveragePercent.HasValue ? $"{CoveragePercent.Value:F1}%" : "-";
     }
 
     public class IssueItemViewModel

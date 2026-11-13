@@ -1,4 +1,4 @@
-﻿using System.Collections.Generic;
+using System.Collections.Generic;
 using System.Text;
 using FireProtection.UI.Models.Sprinklers.BruteForce;
 
@@ -127,6 +127,12 @@ namespace FireProtection.Backend.Models.Placement.SmokeDetectors.Final
 
         /// <summary>Polygon edge index for wall-mounted points; null for ceiling grid.</summary>
         public int? WallEdgeIndex { get; set; }
+
+        /// <summary>True when this point conflicts with a detected obstacle (beam, duct, column).</summary>
+        public bool HasObstacleConflict { get; set; }
+
+        /// <summary>Description of the obstacle conflict if any.</summary>
+        public string ObstacleConflictDescription { get; set; }
 
         public CalculatedSmokeDetectorPoint()
         {

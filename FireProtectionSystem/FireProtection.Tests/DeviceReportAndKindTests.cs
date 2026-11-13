@@ -23,6 +23,8 @@ namespace FireProtection.Tests
             TestMapperDuplicatesAndOutsideCountAsSkippedNotFailed();
             TestMapperCancelledRun();
             TestMapperProvisionalFlagSurvives();
+            TestMapperCoverageEvaluationSuccess();
+            TestMapperCoverageDeficientTriggersReviewRequired();
             TestKindResolverSeparatesSmokeFromNotification();
             TestKindResolverRejectsUnknownNames();
 
@@ -162,6 +164,73 @@ namespace FireProtection.Tests
             Check(report.IsProvisional, "IsProvisional carried from calc");
             Check(report.Summary.Contains("PROVISIONAL"), "summary states provisional rules");
             Check(report.OverallStatus == "ReviewRequired", "provisional never reports plain Success (got " + report.OverallStatus + ")");
+        }
+
+        private static void TestMapperCoverageEvaluationSuccess()
+        {
+            Console.WriteLine("Test: mapper -> 100% coverage reports Success and populates CoveragePercent");
+            var room = new PlacementRoomResult { RoomId = "R1", RoomName = "Room 1" };
+            room.Placed.Add(new PlacedSprinklerEntry { RevitElementId = "1", RoomId = "R1", IsSpatiallyValid = true, X = 5, Y = 5, Z = 9 });
+            var result = ResultWith(room);
+            result.CalculatedSprinklerCount = 1;
+            result.PlacedSprinklerCount = 1;
+            result.PlacedAndValidCount = 1;
+
+            var calc = new BruteForceCalculationResult { IsProvisional = false, AppliedRulesSummary = "approved" };
+            calc.Rooms.Add(new RoomCalculationResult
+            {
+                RoomId = "R1",
+                RoomName = "Room 1",
+                AppliedMaxSpacingFt = 12.75,
+                Polygon = new List<double[]>
+                {
+                    new double[] { 0, 0 },
+                    new double[] { 10, 0 },
+                    new double[] { 10, 10 },
+                    new double[] { 0, 10 }
+                }
+            });
+
+            PlacementRunReport report = result.ToPlacementRunReport(calc, "Fam", "Type");
+            Check(report.RoomReports.Count == 1, "has 1 room report");
+            var r = report.RoomReports[0];
+            Check(r.CoveragePercent.HasValue && r.CoveragePercent.Value >= 95.0, "coverage is >= 95% (got " + r.CoveragePercent + ")");
+            Check(r.Status == "Success", "status is Success (got " + r.Status + ")");
+        }
+
+        private static void TestMapperCoverageDeficientTriggersReviewRequired()
+        {
+            Console.WriteLine("Test: mapper -> deficient coverage (< 95%) triggers ReviewRequired");
+            var room = new PlacementRoomResult { RoomId = "R1", RoomName = "Room 1" };
+            // Sprinkler placed in far bottom-left corner (0, 0) with a 5.3 ft throw in a 30x30 room
+            room.Placed.Add(new PlacedSprinklerEntry { RevitElementId = "1", RoomId = "R1", IsSpatiallyValid = true, X = 0, Y = 0, Z = 9 });
+            var result = ResultWith(room);
+            result.CalculatedSprinklerCount = 1;
+            result.PlacedSprinklerCount = 1;
+            result.PlacedAndValidCount = 1;
+
+            var calc = new BruteForceCalculationResult { IsProvisional = false, AppliedRulesSummary = "approved" };
+            calc.Rooms.Add(new RoomCalculationResult
+            {
+                RoomId = "R1",
+                RoomName = "Room 1",
+                AppliedMaxSpacingFt = 5.303, // Small throw
+                Polygon = new List<double[]>
+                {
+                    new double[] { 0, 0 },
+                    new double[] { 30, 0 },
+                    new double[] { 30, 30 },
+                    new double[] { 0, 30 }
+                }
+            });
+
+            PlacementRunReport report = result.ToPlacementRunReport(calc, "Fam", "Type");
+            Check(report.RoomReports.Count == 1, "has 1 room report");
+            var r = report.RoomReports[0];
+            Check(r.CoveragePercent.HasValue && r.CoveragePercent.Value < 95.0, "coverage is < 95% (got " + r.CoveragePercent + ")");
+            Check(r.Status == "ReviewRequired", "deficient coverage triggers ReviewRequired (got " + r.Status + ")");
+            Check(r.Message.Contains("Coverage incomplete"), "message explains coverage deficiency (got " + r.Message + ")");
+            Check(report.ReviewRequiredReasons.Count > 0, "review reasons includes coverage issue");
         }
 
         // ----- device-kind resolver -----

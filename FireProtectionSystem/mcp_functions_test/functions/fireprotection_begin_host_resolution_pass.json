@@ -1,0 +1,27 @@
+{
+  "name": "fireprotection_begin_host_resolution_pass",
+  "title": "Begin host resolution pass",
+  "description": "Opens a read-only host-resolution pass: ceiling/floor/roof and link-instance element lists are collected once and reused for every candidate point until fireprotection_end_host_resolution_pass is called. This exists purely for performance. Without it, each candidate point rebuilt the same document-wide element lists, which is O(rooms x candidates x document) collectors on the thread that also pumps the UI - the main cause of the tool freezing. Callers MUST bracket a single read-only sweep and MUST end it before any document modification. Elements are only valid while the document is unmodified, which is why the cache is scoped to one pass rather than kept for the session.",
+  "input_schema": {
+    "type": "object",
+    "properties": {},
+    "additionalProperties": false
+  },
+  "output_schema": {
+    "type": "object",
+    "properties": {
+      "started": { "type": "boolean", "const": true },
+      "message": { "type": "string" }
+    },
+    "required": ["started", "message"]
+  },
+  "input_examples": [
+    {}
+  ],
+  "annotations": {
+    "readOnlyHint": true,
+    "destructiveHint": false,
+    "idempotentHint": false,
+    "openWorldHint": false
+  }
+}

@@ -145,7 +145,7 @@ namespace FireProtection.Backend.Services.Placement.Sprinklers.Final.BruteForce
                 default:
                     return new HazardPlacementRuleSet
                     {
-                        HazardClass = HazardClass.Light,
+                        HazardClass = HazardClass.Light, 
                         MaxSpacingFt = 15.0,
                         MinSpacingFt = 6.0,
                         MaxCoverageAreaSqFt = 225.0,

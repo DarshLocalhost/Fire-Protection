@@ -1,0 +1,46 @@
+<Project>
+
+  <!-- Shared build settings for all SPA SynthFire projects.
+       Placed in the SPA SynthFire folder so it only affects this solution,
+       never the sibling FireProtectionSystem project. -->
+
+  <PropertyGroup>
+    <LangVersion>latest</LangVersion>
+    <Nullable>enable</Nullable>
+    <ImplicitUsings>enable</ImplicitUsings>
+    <Company>SPA</Company>
+    <Product>SPA SynthFire</Product>
+
+    <!-- Any CPU (Visual Studio's default) and x64 both work; a Revit add-in loads
+         fine as Any CPU (Revit is an x64 host). Build x64 to silence the
+         reference-architecture warning. -->
+    <Platforms>AnyCPU;x64</Platforms>
+
+    <!-- Build configurations:
+           Debug / Release  -> generic dev/test builds (default Revit 2026 API)
+           Revit2025        -> targets Revit 2025 API + deploys to the 2025 add-ins folder
+           Revit2026        -> targets Revit 2026 API + deploys to the 2026 add-ins folder
+         Pick "Revit2025 | x64" or "Revit2026 | x64" in Visual Studio to build+deploy. -->
+    <Configurations>Debug;Release;Revit2025;Revit2026</Configurations>
+  </PropertyGroup>
+
+  <!-- Resolve the Revit version from the configuration (a CLI -p:RevitVersion=
+       override still wins if provided). -->
+  <PropertyGroup>
+    <RevitVersion Condition="'$(RevitVersion)' == '' and '$(Configuration)' == 'Revit2025'">2025</RevitVersion>
+    <RevitVersion Condition="'$(RevitVersion)' == '' and '$(Configuration)' == 'Revit2026'">2026</RevitVersion>
+    <RevitVersion Condition="'$(RevitVersion)' == ''">2026</RevitVersion>
+
+    <RevitApiDir>C:\Program Files\Autodesk\Revit $(RevitVersion)</RevitApiDir>
+    <RevitAddinDir>$(APPDATA)\Autodesk\Revit\Addins\$(RevitVersion)</RevitAddinDir>
+  </PropertyGroup>
+
+  <!-- The Revit* configurations behave like a Debug build (symbols, no optimise). -->
+  <PropertyGroup Condition="'$(Configuration)' == 'Revit2025' or '$(Configuration)' == 'Revit2026'">
+    <DebugSymbols>true</DebugSymbols>
+    <DebugType>portable</DebugType>
+    <Optimize>false</Optimize>
+    <DefineConstants>$(DefineConstants);DEBUG;TRACE</DefineConstants>
+  </PropertyGroup>
+
+</Project>

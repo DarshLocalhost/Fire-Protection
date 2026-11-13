@@ -25,7 +25,7 @@ namespace FireProtection.Tests
         // These tests cover the eligibility/selection contract only, so both are ignored here.
         public SprinklerPlacementResult PlaceSprinklers(
             string selectedFamilyName, string selectedTypeName, BruteForceCalculationResult calcResult,
-            IPlacementProgress progress, ExistingDevicePolicy existingDevicePolicy) => null;
+            IPlacementProgress progress, ExistingDevicePolicy existingDevicePolicy, bool ignoreObstacles = true) => null;
 
         public PlacementEligibilityResult EvaluateRoomEligibility(
             RoomUiData room, IReadOnlyList<CalculatedSprinklerPoint> candidates,

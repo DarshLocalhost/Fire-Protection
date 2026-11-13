@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using System.Collections.Generic;
 
 namespace FireProtection.Backend.Services.Placement.SmokeDetectors.Final.BruteForce
@@ -78,7 +78,7 @@ namespace FireProtection.Backend.Services.Placement.SmokeDetectors.Final.BruteFo
             MinSpacingFt = 10.0;
             MaxCoverageAreaSqFt = 900.0;
             CoverageRadiusFt = 21.213;
-            MinBoundaryClearanceFt = 0.333;
+            MinBoundaryClearanceFt = 1.0;
             MaxDistanceFromWallsFt = 15.0;
             WallMountDropFromCeilingFt = 0.5;
             HvacSupplyRegisterClearanceFt = 3.0;

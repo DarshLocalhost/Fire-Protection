@@ -1,0 +1,143 @@
+{
+  "name": "fireprotection_place_sprinklers",
+  "title": "Place sprinklers in Revit model",
+  "description": "Places actual Revit FamilyInstance sprinklers in the model for every calculated point from a BruteForce calculation result. Resolves the selected FamilySymbol from the active document, activates it, and creates instances using the correct placement overload for the family's host behavior (FaceBased, WorkPlaneBased, OneLevelBased, or WallSidewall). Runs inside a TransactionGroup so the entire run is a single undo entry; cancellation rolls back everything. Performs post-placement spatial validation: each placed instance's actual location is compared to the requested point, and deviations beyond tolerance are flagged as PLACED_BUT_INVALID. Supports existing-device policies (SkipRoom, ReplaceExisting, AddAnyway). Requires the sprinkler family/type to be loaded in the active Revit document. This function WRITES to the Revit model and cannot be fully previewed without a dry-run mode (not currently implemented in the backend). Use with caution on production models.",
+  "input_schema": {
+    "type": "object",
+    "properties": {
+      "selected_family_name": { "type": "string", "description": "Revit family name of the sprinkler to place." },
+      "selected_type_name": { "type": "string", "description": "Revit type name of the sprinkler to place." },
+      "calculation_result": {
+        "type": "object",
+        "description": "BruteForceCalculationResult from fireprotection_calculate_sprinkler_layout.",
+        "properties": {
+          "success": { "type": "boolean" },
+          "is_provisional": { "type": "boolean" },
+          "applied_rules_summary": { "type": "string" },
+          "total_calculated_sprinklers": { "type": "integer" },
+          "rooms": { "type": "array", "items": { "type": "object" } },
+          "warnings": { "type": "array", "items": { "type": "string" } },
+          "errors": { "type": "array", "items": { "type": "string" } }
+        },
+        "required": ["success", "rooms"]
+      },
+      "existing_device_policy": { "type": "string", "enum": ["SkipRoom", "ReplaceExisting", "AddAnyway"], "default": "SkipRoom", "description": "What to do with rooms that already contain sprinklers." },
+      "ignore_obstacles": { "type": "boolean", "default": true, "description": "When true, places sprinklers at candidate locations regardless of obstacle conflicts." }
+    },
+    "required": ["selected_family_name", "selected_type_name", "calculation_result"],
+    "additionalProperties": false
+  },
+  "output_schema": {
+    "type": "object",
+    "properties": {
+      "timestamp_utc": { "type": "string" },
+      "project_name": { "type": "string" },
+      "selected_family": { "type": "string" },
+      "selected_type": { "type": "string" },
+      "rooms_processed": { "type": "integer" },
+      "calculated_sprinkler_count": { "type": "integer" },
+      "placed_sprinkler_count": { "type": "integer" },
+      "failed_sprinkler_count": { "type": "integer" },
+      "skipped_duplicate_count": { "type": "integer" },
+      "skipped_missing_family_count": { "type": "integer" },
+      "placed_and_valid_count": { "type": "integer" },
+      "placed_but_invalid_count": { "type": "integer" },
+      "resolved_family_placement_type": { "type": "string" },
+      "was_cancelled": { "type": "boolean" },
+      "skipped_existing_room_count": { "type": "integer" },
+      "replaced_existing_count": { "type": "integer" },
+      "skipped_outside_room_count": { "type": "integer" },
+      "success": { "type": "boolean" },
+      "rooms": {
+        "type": "array",
+        "items": {
+          "type": "object",
+          "properties": {
+            "room_id": { "type": "string" },
+            "room_name": { "type": "string" },
+            "room_number": { "type": "string" },
+            "placed": {
+              "type": "array",
+              "items": {
+                "type": "object",
+                "properties": {
+                  "x": { "type": "number" },
+                  "y": { "type": "number" },
+                  "z": { "type": "number" },
+                  "requested_x": { "type": "number" },
+                  "requested_y": { "type": "number" },
+                  "requested_z": { "type": "number" },
+                  "room_id": { "type": "string" },
+                  "level_id": { "type": "string" },
+                  "host_level_id": { "type": "string" },
+                  "host_level_name": { "type": "string" },
+                  "revit_element_id": { "type": "string" },
+                  "hosting_strategy": { "type": "string" },
+                  "ceiling_source": { "type": "string" },
+                  "status_code": { "type": "string" },
+                  "is_spatially_valid": { "type": "boolean" },
+                  "placement_deviation_ft": { "type": "number" },
+                  "family_placement_type": { "type": "string" },
+                  "host_ceiling_element_id": { "type": "string" },
+                  "link_instance_name": { "type": "string" },
+                  "actual_host_element_id": { "type": "string" },
+                  "actual_host_name": { "type": "string" },
+                  "actual_instance_level_id": { "type": "string" },
+                  "actual_instance_level_name": { "type": "string" },
+                  "actual_schedule_level_name": { "type": "string" }
+                },
+                "required": ["x", "y", "z", "room_id", "level_id", "revit_element_id", "status_code", "is_spatially_valid"]
+              }
+            },
+            "failed": {
+              "type": "array",
+              "items": {
+                "type": "object",
+                "properties": {
+                  "x": { "type": "number" },
+                  "y": { "type": "number" },
+                  "z": { "type": "number" },
+                  "room_id": { "type": "string" },
+                  "level_id": { "type": "string" },
+                  "reason": { "type": "string" },
+                  "error_code": { "type": "string" },
+                  "skipped_due_to_duplicate": { "type": "boolean" },
+                  "family_placement_type": { "type": "string" },
+                  "hosting_strategy": { "type": "string" },
+                  "ceiling_source": { "type": "string" },
+                  "link_instance_name": { "type": "string" },
+                  "host_ceiling_element_id": { "type": "string" }
+                },
+                "required": ["x", "y", "z", "room_id", "level_id", "reason", "error_code"]
+              }
+            }
+          },
+          "required": ["room_id", "room_name", "room_number", "placed", "failed"]
+        }
+      },
+      "warnings": { "type": "array", "items": { "type": "string" } },
+      "errors": { "type": "array", "items": { "type": "string" } }
+    },
+    "required": ["timestamp_utc", "project_name", "selected_family", "selected_type", "rooms_processed", "calculated_sprinkler_count", "placed_sprinkler_count", "failed_sprinkler_count", "success", "rooms", "warnings", "errors"]
+  },
+  "input_examples": [
+    {
+      "selected_family_name": "Tyco TY-FRB",
+      "selected_type_name": "1/2\" Pendent 155F",
+      "calculation_result": {
+        "success": true,
+        "rooms": [],
+        "warnings": [],
+        "errors": []
+      },
+      "existing_device_policy": "SkipRoom",
+      "ignore_obstacles": true
+    }
+  ],
+  "annotations": {
+    "readOnlyHint": false,
+    "destructiveHint": true,
+    "idempotentHint": false,
+    "openWorldHint": false
+  }
+}

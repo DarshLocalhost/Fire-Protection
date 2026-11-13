@@ -72,7 +72,7 @@ namespace FireProtection.Tests
             var snapshot = new SmokeDetectorPlacementInputSnapshot();
             snapshot.Rooms.Add(room);
 
-            SmokeDetectorCalculationResult result = SmokeDetectorCalculationService.Calculate(
+            SmokeDetectorCalculationResult result = Nfpa72SmokeDetectorEngine.Calculate(
                 snapshot, rules, BruteForceCalculationConfig.Default());
 
             SmokeDetectorRoomCalculationResult rr = result.Rooms[0];

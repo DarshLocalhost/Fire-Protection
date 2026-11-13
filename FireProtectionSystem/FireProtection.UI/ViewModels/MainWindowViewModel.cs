@@ -29,6 +29,9 @@ namespace FireProtection.UI.ViewModels
         /// (see ISprinklerPlacementService.ClearEligibilityCache).
         /// </summary>
         private readonly ISprinklerPlacementService _sprinklerPlacementService;
+        private readonly IPlacementInputExporter _placementInputExporter;
+        private readonly DevicePlacementSeams _deviceSeams;
+        private readonly IModelRefreshService _refreshService;
 
         public MainWindowViewModel()
             : this((FireProtectionUiData)null, null, null, null)
@@ -94,6 +97,18 @@ namespace FireProtection.UI.ViewModels
             ISprinklerPlacementService sprinklerPlacementService,
             CatalogViewModel catalog,
             DevicePlacementSeams deviceSeams)
+            : this(data, placementInputExporter, sprinklerFamilySource, sprinklerPlacementService, catalog, deviceSeams, null)
+        {
+        }
+
+        public MainWindowViewModel(
+            FireProtectionUiData data,
+            IPlacementInputExporter placementInputExporter,
+            ISprinklerFamilySource sprinklerFamilySource,
+            ISprinklerPlacementService sprinklerPlacementService,
+            CatalogViewModel catalog,
+            DevicePlacementSeams deviceSeams,
+            IModelRefreshService refreshService)
         {
             Data = data;
             Catalog = catalog ?? new CatalogViewModel();
@@ -104,7 +119,12 @@ namespace FireProtection.UI.ViewModels
                 data, deviceSeams?.NotificationFamilySource, deviceSeams?.NotificationExecutor, Catalog);
 
             _familySource = sprinklerFamilySource;
+            _sprinklerPlacementService = sprinklerPlacementService;
+            _placementInputExporter = placementInputExporter;
+            _deviceSeams = deviceSeams;
+            _refreshService = refreshService;
             LoadFamiliesCommand = new RelayCommand(_ => LoadFamilies());
+            RefreshModelCommand = new RelayCommand(_ => RefreshModel());
         }
 
         public MainWindowViewModel(
@@ -124,7 +144,19 @@ namespace FireProtection.UI.ViewModels
             ISprinklerPlacementService sprinklerPlacementService,
             CatalogViewModel catalog,
             DevicePlacementSeams deviceSeams)
-            : this(DeserializeData(json), placementInputExporter, sprinklerFamilySource, sprinklerPlacementService, catalog, deviceSeams)
+            : this(DeserializeData(json), placementInputExporter, sprinklerFamilySource, sprinklerPlacementService, catalog, deviceSeams, null)
+        {
+        }
+
+        public MainWindowViewModel(
+            string json,
+            IPlacementInputExporter placementInputExporter,
+            ISprinklerFamilySource sprinklerFamilySource,
+            ISprinklerPlacementService sprinklerPlacementService,
+            CatalogViewModel catalog,
+            DevicePlacementSeams deviceSeams,
+            IModelRefreshService refreshService)
+            : this(DeserializeData(json), placementInputExporter, sprinklerFamilySource, sprinklerPlacementService, catalog, deviceSeams, refreshService)
         {
         }
 
@@ -148,15 +180,61 @@ namespace FireProtection.UI.ViewModels
 
         public event PropertyChangedEventHandler PropertyChanged;
 
-        public FireProtectionUiData Data { get; }
+        public FireProtectionUiData Data { get; private set; }
 
         public CatalogViewModel Catalog { get; }
 
-        public SprinklerViewModel Sprinkler { get; }
+        public SprinklerViewModel Sprinkler { get; private set; }
 
-        public SmokeDetectorViewModel SmokeDetector { get; }
+        public SmokeDetectorViewModel SmokeDetector { get; private set; }
 
-        public NotificationApplianceViewModel NotificationAppliance { get; }
+        public NotificationApplianceViewModel NotificationAppliance { get; private set; }
+
+        public ICommand RefreshModelCommand { get; }
+
+        private void RefreshModel()
+        {
+            if (_refreshService == null)
+            {
+                Dialogs.Show("Refresh requires an active Revit document.",
+                    "Refresh Model", MessageBoxButton.OK, MessageBoxImage.Information);
+                return;
+            }
+
+            RevitApi.Run(
+                () =>
+                {
+                    string newJson = _refreshService.RefreshModelSnapshot();
+                    FireProtectionUiData newData = DeserializeData(newJson);
+
+                    WpfHost.RunOnUi(() =>
+                    {
+                        if (newData != null)
+                        {
+                            Data = newData;
+                            if (_sprinklerPlacementService != null)
+                            {
+                                _sprinklerPlacementService.ClearEligibilityCache();
+                            }
+                            Catalog?.TryReload(out _);
+                            Sprinkler = new SprinklerViewModel(newData, _placementInputExporter, _familySource, _sprinklerPlacementService, Catalog);
+                            SmokeDetector = new SmokeDetectorViewModel(newData, _deviceSeams?.SmokeFamilySource, _deviceSeams?.SmokeExecutor, Catalog);
+                            NotificationAppliance = new NotificationApplianceViewModel(newData, _deviceSeams?.NotificationFamilySource, _deviceSeams?.NotificationExecutor, Catalog);
+
+                            OnPropertyChanged(nameof(Data));
+                            OnPropertyChanged(nameof(Sprinkler));
+                            OnPropertyChanged(nameof(SmokeDetector));
+                            OnPropertyChanged(nameof(NotificationAppliance));
+
+                            Dialogs.Show("Model data successfully refreshed from Revit.",
+                                "Refresh Model", MessageBoxButton.OK, MessageBoxImage.Information);
+                        }
+                    });
+                },
+                ex => WpfHost.RunOnUi(() => Dialogs.Show(
+                    "Refreshing model failed:\n\n" + (ex != null ? ex.Message : "unknown error"),
+                    "Refresh Model", MessageBoxButton.OK, MessageBoxImage.Error)));
+        }
 
         /// <summary>Top-bar action: pick one or more .rfa files and load them into the active model.
         /// Shared by all three device tabs.</summary>

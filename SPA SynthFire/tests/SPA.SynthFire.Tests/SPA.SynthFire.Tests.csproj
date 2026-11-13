@@ -1,0 +1,24 @@
+<Project Sdk="Microsoft.NET.Sdk">
+
+  <PropertyGroup>
+    <TargetFramework>net8.0</TargetFramework>
+    <RootNamespace>SPA.SynthFire.Tests</RootNamespace>
+    <AssemblyName>SPA.SynthFire.Tests</AssemblyName>
+    <IsPackable>false</IsPackable>
+    <IsTestProject>true</IsTestProject>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <PackageReference Include="Microsoft.NET.Test.Sdk" Version="17.11.1" />
+    <PackageReference Include="xunit" Version="2.9.2" />
+    <PackageReference Include="xunit.runner.visualstudio" Version="2.8.2" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <ProjectReference Include="..\..\src\SPA.SynthFire.Core\SPA.SynthFire.Core.csproj" />
+    <ProjectReference Include="..\..\src\SPA.SynthFire.Catalog\SPA.SynthFire.Catalog.csproj" />
+    <ProjectReference Include="..\..\src\SPA.SynthFire.Placement\SPA.SynthFire.Placement.csproj" />
+    <ProjectReference Include="..\..\src\SPA.SynthFire.Presentation\SPA.SynthFire.Presentation.csproj" />
+  </ItemGroup>
+
+</Project>

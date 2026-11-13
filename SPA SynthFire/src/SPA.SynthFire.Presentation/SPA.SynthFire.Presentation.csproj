@@ -1,0 +1,16 @@
+<Project Sdk="Microsoft.NET.Sdk">
+
+  <PropertyGroup>
+    <TargetFramework>net8.0</TargetFramework>
+    <RootNamespace>SPA.SynthFire.UI</RootNamespace>
+    <AssemblyName>SPA.SynthFire.Presentation</AssemblyName>
+  </PropertyGroup>
+
+  <!-- Revit-free, WPF-free presentation layer: view-model logic + UI contracts.
+       Kept on net8.0 (not net8.0-windows) so the test project can reference it and
+       unit-test the view models, which the WPF UI assembly does not allow. -->
+  <ItemGroup>
+    <ProjectReference Include="..\SPA.SynthFire.Core\SPA.SynthFire.Core.csproj" />
+  </ItemGroup>
+
+</Project>

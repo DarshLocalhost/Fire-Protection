@@ -1,5 +1,6 @@
-﻿using System;
+using System;
 using System.Collections.Generic;
+using System.Linq;
 using FireProtection.Backend.Models.DTOs;
 using FireProtection.Backend.Models.Placement.SmokeDetectors.Final;
 using FireProtection.Backend.Models.Placement.Sprinklers.Final;
@@ -11,8 +12,9 @@ namespace FireProtection.Backend.Services.Placement.SmokeDetectors
     public static class SmokeDetectorPlacementInputBuilder
     {
         public static SmokeDetectorPlacementInputSnapshot BuildSnapshot(
-     List<DeviceRoomInputItem> roomItems,
-     RevitSmokeDetectorFamilySource familySource)
+            List<DeviceRoomInputItem> roomItems,
+            RevitSmokeDetectorFamilySource familySource,
+            IReadOnlyList<ObstacleData> globalObstacles = null)
         {
             var snapshot = new SmokeDetectorPlacementInputSnapshot
             {
@@ -60,9 +62,20 @@ namespace FireProtection.Backend.Services.Placement.SmokeDetectors
                     }
                 }
 
+                RoomData roomData = null;
                 if (item.FullRoomJson != null)
                 {
-                    HydrateFromRoomJson(roomInput, item.FullRoomJson.ToString());
+                    roomData = HydrateFromRoomJson(roomInput, item.FullRoomJson.ToString());
+                }
+
+                List<string> associatedObstacleIds = roomData?.AssociatedObstacleIds;
+                if (globalObstacles != null && globalObstacles.Count > 0)
+                {
+                    roomInput.Obstacles = globalObstacles
+                        .Where(o => o != null &&
+                                    ((o.AssociatedRoomIds != null && o.AssociatedRoomIds.Contains(item.RoomId)) ||
+                                     (associatedObstacleIds != null && associatedObstacleIds.Contains(o.ElementId))))
+                        .ToList();
                 }
 
                 snapshot.Rooms.Add(roomInput);
@@ -87,14 +100,14 @@ namespace FireProtection.Backend.Services.Placement.SmokeDetectors
             return "Ceiling";
         }
 
-        private static void HydrateFromRoomJson(SmokeDetectorRoomInput roomInput, string json)
+        private static RoomData HydrateFromRoomJson(SmokeDetectorRoomInput roomInput, string json)
         {
-            if (string.IsNullOrWhiteSpace(json)) return;
+            if (string.IsNullOrWhiteSpace(json)) return null;
 
             try
             {
                 var roomData = JsonConvert.DeserializeObject<RoomData>(json);
-                if (roomData == null) return;
+                if (roomData == null) return null;
 
                 if (roomData.Boundary != null)
                 {
@@ -110,10 +123,13 @@ namespace FireProtection.Backend.Services.Placement.SmokeDetectors
                 {
                     roomInput.Ceilings = roomData.Ceilings;
                 }
+
+                return roomData;
             }
             catch
             {
                 // Fallback to basic geometry already populated
+                return null;
             }
         }
     }

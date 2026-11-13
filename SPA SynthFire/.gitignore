@@ -1,0 +1,13 @@
+# Build output
+bin/
+obj/
+[Bb]in/
+[Oo]bj/
+
+# VS / Rider
+.vs/
+.idea/
+*.user
+
+# Test results
+TestResults/

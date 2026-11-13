@@ -1,0 +1,156 @@
+{
+  "name": "fireprotection_calculate_smoke_detector_layout",
+  "title": "Calculate smoke detector placement layout (NFPA 72)",
+  "description": "Runs the NFPA 72 Chapter 17 smoke detector placement calculation engine on the provided rooms. Computes optimal detector locations based on room geometry, detector type (spot, beam, aspirating), mount (ceiling/wall), ceiling slope, and air changes per hour. Supports both ceiling-grid-snapped (tile-centered) and free-centered orthogonal grid layouts, plus wall-mount layouts for corridors. Applies NFPA 72 spacing rules: max spacing S=30 ft (smooth/level ceilings), wall distance <= S/2 (15 ft), radial coverage <= 0.7*S (21.213 ft). High airflow (ACH > 7.5) reduces coverage area per Table 17.7.6.3.3.2. Obstacle conflicts are flagged but do not discard candidates (non-destructive). Performs post-selection NFPA 72 compliance checks (corner coverage, wall distance, obstacle notices). Returns per-room results with calculated points, diagnostics, warnings, and errors. This is a read-only calculation that does not modify the Revit model.",
+  "input_schema": {
+    "type": "object",
+    "properties": {
+      "rooms": {
+        "type": "array",
+        "minItems": 1,
+        "items": {
+          "type": "object",
+          "properties": {
+            "room_id": { "type": "string" },
+            "room_name": { "type": "string" },
+            "room_number": { "type": "string" },
+            "level_id": { "type": "string" },
+            "level_name": { "type": "string" },
+            "level_elevation_ft": { "type": "number" },
+            "area_sq_ft": { "type": "number" },
+            "boundary_polygon": {
+              "type": "array",
+              "minItems": 3,
+              "items": { "type": "array", "items": { "type": "number" }, "minItems": 2, "maxItems": 2 }
+            },
+            "boundary": {
+              "type": "object",
+              "properties": {
+                "polygon": { "type": "array", "items": { "type": "array", "items": { "type": "number" }, "minItems": 2, "maxItems": 2 } },
+                "outer_loop": {
+                  "type": "object",
+                  "properties": {
+                    "is_outer": { "type": "boolean" },
+                    "polygon": { "type": "array", "items": { "type": "array", "items": { "type": "number" }, "minItems": 2, "maxItems": 2 } },
+                    "segments": { "type": "array", "items": { "type": "object" } }
+                  },
+                  "required": ["is_outer", "polygon", "segments"]
+                },
+                "inner_loops": { "type": "array", "items": { "type": "object" } }
+              },
+              "required": ["polygon", "outer_loop", "inner_loops"]
+            },
+            "selected_family_name": { "type": "string" },
+            "selected_type_name": { "type": "string" },
+            "detector_type": { "type": "string", "enum": ["Spot", "Beam", "Aspirating"] },
+            "mount": { "type": "string", "enum": ["Ceiling", "Wall"] },
+            "ceiling_slope": { "type": "string", "enum": ["Flat", "Sloped"] },
+            "air_changes_per_hour": { "type": ["number", "null"] },
+            "override_max_spacing_ft": { "type": ["number", "null"] },
+            "override_max_distance_to_wall_ft": { "type": ["number", "null"] },
+            "override_boundary_clearance_ft": { "type": ["number", "null"] },
+            "override_ceiling_tile_u_ft": { "type": ["number", "null"] },
+            "override_ceiling_tile_v_ft": { "type": ["number", "null"] },
+            "ceilings": { "type": "array", "items": { "type": "object" } },
+            "obstacles": { "type": "array", "items": { "type": "object" } },
+            "selected_placement_behavior": { "type": "string" }
+          },
+          "required": ["room_id", "room_name", "room_number", "level_id", "level_name", "level_elevation_ft", "area_sq_ft", "boundary_polygon", "selected_family_name", "selected_type_name", "detector_type", "mount", "ceiling_slope"]
+        }
+      },
+      "config": {
+        "type": "object",
+        "properties": {
+          "max_candidate_points": { "type": "integer", "default": 5000, "minimum": 100, "maximum": 20000 },
+          "tolerance_ft": { "type": "number", "default": 0.01, "minimum": 0.001, "maximum": 1.0 },
+          "grid_resolution_factor": { "type": "number", "default": 1.0, "minimum": 0.5, "maximum": 2.0 }
+        },
+        "additionalProperties": false
+      }
+    },
+    "required": ["rooms"],
+    "additionalProperties": false
+  },
+  "output_schema": {
+    "type": "object",
+    "properties": {
+      "success": { "type": "boolean" },
+      "is_provisional": { "type": "boolean" },
+      "applied_rules_summary": { "type": "string" },
+      "total_calculated_detectors": { "type": "integer" },
+      "rooms": {
+        "type": "array",
+        "items": {
+          "type": "object",
+          "properties": {
+            "room_id": { "type": "string" },
+            "room_name": { "type": "string" },
+            "room_number": { "type": "string" },
+            "family_name": { "type": "string" },
+            "type_name": { "type": "string" },
+            "status": { "type": "string", "enum": ["Success", "ReviewRequired", "Failed", "InvalidRoomGeometry", "InvalidInput", "NoValidCandidates", "CalculationFailed"] },
+            "calculated_count": { "type": "integer" },
+            "required_count": { "type": "integer" },
+            "applied_max_spacing_ft": { "type": "number" },
+            "applied_boundary_clearance_ft": { "type": "number" },
+            "polygon": { "type": "array", "items": { "type": "array", "items": { "type": "number" }, "minItems": 2, "maxItems": 2 } },
+            "points": {
+              "type": "array",
+              "items": {
+                "type": "object",
+                "properties": {
+                  "x": { "type": "number" },
+                  "y": { "type": "number" },
+                  "z": { "type": "number" },
+                  "room_id": { "type": "string" },
+                  "level_id": { "type": "string" },
+                  "level_name": { "type": "string" },
+                  "mount": { "type": "string" },
+                  "wall_edge_index": { "type": ["integer", "null"] },
+                  "has_obstacle_conflict": { "type": "boolean" },
+                  "obstacle_conflict_description": { "type": "string" }
+                },
+                "required": ["x", "y", "z", "room_id", "level_id", "level_name", "mount"]
+              }
+            },
+            "warnings": { "type": "array", "items": { "type": "string" } },
+            "errors": { "type": "array", "items": { "type": "string" } },
+            "diagnostics": { "type": "array", "items": { "type": "string" } }
+          },
+          "required": ["room_id", "room_name", "room_number", "status", "calculated_count"]
+        }
+      },
+      "warnings": { "type": "array", "items": { "type": "string" } },
+      "errors": { "type": "array", "items": { "type": "string" } }
+    },
+    "required": ["success", "is_provisional", "applied_rules_summary", "total_calculated_detectors", "rooms", "warnings", "errors"]
+  },
+  "input_examples": [
+    {
+      "rooms": [
+        {
+          "room_id": "789012",
+          "room_name": "Office 101",
+          "room_number": "101",
+          "level_id": "123456",
+          "level_name": "Level 1",
+          "level_elevation_ft": 0,
+          "area_sq_ft": 400,
+          "boundary_polygon": [[0, 0], [20, 0], [20, 20], [0, 20]],
+          "selected_family_name": "System Sensor 2W-B",
+          "selected_type_name": "2-Wire Photoelectric",
+          "detector_type": "Spot",
+          "mount": "Ceiling",
+          "ceiling_slope": "Flat",
+          "air_changes_per_hour": 6
+        }
+      ]
+    }
+  ],
+  "annotations": {
+    "readOnlyHint": true,
+    "destructiveHint": false,
+    "idempotentHint": true,
+    "openWorldHint": false
+  }
+}

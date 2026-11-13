@@ -5,6 +5,7 @@ using FireProtection.Backend.Models.DTOs;
 using FireProtection.Backend.Services;
 using FireProtection.Backend.Services.Catalog;
 using FireProtection.Backend.Services.Extraction;
+using FireProtection.Backend.Services.Model;
 using FireProtection.Backend.Services.Placement;
 using FireProtection.Backend.Services.Placement.NotificationAppliances;
 using FireProtection.Backend.Services.Placement.SmokeDetectors;
@@ -13,6 +14,7 @@ using FireProtection.UI.Services;
 using FireProtection.UI.ViewModels.Catalog;
 using Newtonsoft.Json;
 using System;
+using System.Collections.Generic;
 
 namespace FireProtection.Backend.Commands
 {
@@ -55,9 +57,28 @@ namespace FireProtection.Backend.Commands
 
                 FireProtectionExtractionService extractionService = new FireProtectionExtractionService();
 
-                var (snapshot, exportPath) = extractionService.ExtractAndExport(hostDocument);
+                // Fast lightweight extraction (levels, ceilings, rooms, existing sprinklers) for instant UI launch
+                ModelSnapshot snapshot = extractionService.ExtractLightweightSnapshot(hostDocument);
 
                 string json = JsonConvert.SerializeObject(snapshot, Formatting.Indented);
+
+                // Lazy obstacle cache — extracted on-demand when placement calculation runs
+                IReadOnlyList<ObstacleData> cachedObstacles = null;
+                Func<IReadOnlyList<ObstacleData>> lazyObstacles = () =>
+                {
+                    if (cachedObstacles != null) return cachedObstacles;
+                    try
+                    {
+                        cachedObstacles = extractionService.ExtractObstacles(hostDocument, snapshot.Rooms);
+                        snapshot.Obstacles = cachedObstacles as List<ObstacleData> ?? new List<ObstacleData>(cachedObstacles);
+                    }
+                    catch (Exception ex)
+                    {
+                        FireProtectionLog.Warn("Lazy obstacle extraction error: " + ex.Message);
+                        cachedObstacles = new List<ObstacleData>();
+                    }
+                    return cachedObstacles;
+                };
 
                 /// CatalogHolder is a tiny shared mutable reference to the current
                 /// ICatalog. The Revit-aware family source (and its resolver
@@ -91,7 +112,7 @@ namespace FireProtection.Backend.Commands
                 /// The calculation engine itself does not yet read the context; the
                 /// calculation algorithm is unchanged byte-for-byte.
                 PlacementInputJsonExporter inputExporter = new PlacementInputJsonExporter(
-                    snapshot.Obstacles,
+                    lazyObstacles,
                     snapshot.ExistingSprinklers,
                     sprinklerFamilySource.GetDeviceContextResolver());
 
@@ -129,10 +150,14 @@ namespace FireProtection.Backend.Commands
                 DevicePlacementSeams deviceSeams = new DevicePlacementSeams
                 {
                     SmokeFamilySource = new RevitSmokeDetectorFamilySource(hostDocument, () => catalogHolder.Current),
-                    SmokeExecutor = new RevitSmokeDetectorPlacementExecutor(hostDocument, () => catalogHolder.Current),
+                    SmokeExecutor = new RevitSmokeDetectorPlacementExecutor(
+                        hostDocument, () => catalogHolder.Current, lazyObstacles),
                     NotificationFamilySource = new RevitNotificationApplianceFamilySource(hostDocument),
-                    NotificationExecutor = new RevitNotificationAppliancePlacementExecutor(hostDocument, () => catalogHolder.Current)
+                    NotificationExecutor = new RevitNotificationAppliancePlacementExecutor(
+                        hostDocument, () => catalogHolder.Current, lazyObstacles)
                 };
+
+                var refreshService = new RevitModelRefreshService(hostDocument);
 
                 // Modeless + owned by Revit's main window: Revit stays fully usable while the tool is open.
                 UiLauncher.Show(
@@ -142,7 +167,8 @@ namespace FireProtection.Backend.Commands
                     placementService,
                     catalogViewModel,
                     uiApplication.MainWindowHandle,
-                    deviceSeams);
+                    deviceSeams,
+                    refreshService);
 
                 return Result.Succeeded;
             }

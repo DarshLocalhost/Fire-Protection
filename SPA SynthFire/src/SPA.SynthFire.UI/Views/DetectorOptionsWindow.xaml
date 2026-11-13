@@ -1,0 +1,37 @@
+<Window x:Class="SPA.SynthFire.UI.Views.DetectorOptionsWindow"
+        xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        Title="SPA SynthFire — Detector Placement"
+        Width="460" Height="320"
+        WindowStartupLocation="CenterScreen"
+        ResizeMode="NoResize"
+        ShowInTaskbar="False">
+    <Grid Margin="18">
+        <Grid.RowDefinitions>
+            <RowDefinition Height="Auto"/>
+            <RowDefinition Height="Auto"/>
+            <RowDefinition Height="Auto"/>
+            <RowDefinition Height="Auto"/>
+            <RowDefinition Height="Auto"/>
+            <RowDefinition Height="Auto"/>
+            <RowDefinition Height="*"/>
+            <RowDefinition Height="Auto"/>
+        </Grid.RowDefinitions>
+
+        <TextBlock Grid.Row="0" Text="Detector Placement" FontSize="18" FontWeight="SemiBold"/>
+        <TextBlock Grid.Row="1" Margin="0,4,0,16" TextWrapping="Wrap" Foreground="#666"
+                   Text="Choose the detector family and type. Detectors are laid out to NFPA 72 nominal ceiling spacing (provisional)."/>
+
+        <TextBlock Grid.Row="2" Text="Detector family / type" FontWeight="SemiBold"/>
+        <ComboBox Grid.Row="3" x:Name="FamilyCombo" Margin="0,4,0,12" Height="28" DisplayMemberPath="Label"/>
+
+        <TextBlock Grid.Row="4" Text="Detector kind" FontWeight="SemiBold"/>
+        <ComboBox Grid.Row="5" x:Name="KindCombo" Margin="0,4,0,12" Height="28"/>
+
+        <StackPanel Grid.Row="7" Orientation="Horizontal" HorizontalAlignment="Right">
+            <Button x:Name="PlaceButton" Content="Place detectors" Width="130" Height="30" Margin="0,0,8,0"
+                    IsDefault="True" Click="Place_Click"/>
+            <Button Content="Cancel" Width="90" Height="30" IsCancel="True"/>
+        </StackPanel>
+    </Grid>
+</Window>

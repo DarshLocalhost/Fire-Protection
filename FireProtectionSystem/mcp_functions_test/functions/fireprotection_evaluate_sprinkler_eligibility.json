@@ -1,0 +1,117 @@
+{
+  "name": "fireprotection_evaluate_sprinkler_eligibility",
+  "title": "Evaluate sprinkler placement eligibility for a room",
+  "description": "Performs a deterministic pre-placement eligibility check for a single room given the currently selected sprinkler family/type and the room's actual candidate sprinkler points. The evaluation reuses the EXACT same family-resolution, strategy-selection, level-resolution, and ceiling-host logic that the actual placement uses, but performs only READ-ONLY queries — no transaction, no FamilyInstance creation. Returns a structured result with one of three semantic states: ELIGIBLE (at least one candidate satisfies all placement prerequisites), BLOCKED (deterministic inability to place with explicit reason), or UNDETERMINED (could not be decided due to configuration/infrastructure error). This is the single source of truth for whether a room can receive sprinklers with the current configuration. Use before placement to filter out unplaceable rooms in the UI.",
+  "input_schema": {
+    "type": "object",
+    "properties": {
+      "room": {
+        "type": "object",
+        "description": "RoomUiData object with room geometry, classification, and extension data.",
+        "properties": {
+          "room_id": { "type": "string" },
+          "name": { "type": "string" },
+          "number": { "type": "string" },
+          "level_name": { "type": "string" },
+          "area_sq_ft": { "type": "number" },
+          "classification": {
+            "type": "object",
+            "properties": {
+              "hazard_class": { "type": "string" },
+              "suggested_by_classifier": { "type": "string" },
+              "overridden": { "type": "boolean" },
+              "confirmed_by": { "type": "string" }
+            },
+            "required": ["hazard_class", "suggested_by_classifier", "overridden", "confirmed_by"]
+          },
+          "geometry": {
+            "type": "object",
+            "properties": {
+              "polygon": { "type": "array", "items": { "type": "array", "items": { "type": "number" }, "minItems": 2, "maxItems": 2 } },
+              "ceiling_height_ft": { "type": ["number", "null"] },
+              "ceiling_type": { "type": "string" }
+            },
+            "required": ["polygon", "ceiling_type"]
+          },
+          "requires_human_review": { "type": "boolean" },
+          "extension_data": { "type": "object", "description": "Full room data from ModelSnapshot (ceilings, obstacles, existing sprinklers, boundary, hazard, source)." }
+        },
+        "required": ["room_id", "name", "number", "level_name", "area_sq_ft", "classification", "geometry", "requires_human_review"]
+      },
+      "candidates": {
+        "type": "array",
+        "description": "Calculated sprinkler points from BruteForce calculation for this room.",
+        "items": {
+          "type": "object",
+          "properties": {
+            "x": { "type": "number" },
+            "y": { "type": "number" },
+            "z": { "type": "number" },
+            "room_id": { "type": "string" },
+            "level_id": { "type": "string" },
+            "level_name": { "type": "string" },
+            "wall_edge_index": { "type": ["integer", "null"] },
+            "has_obstacle_conflict": { "type": "boolean" },
+            "obstacle_conflict_description": { "type": "string" }
+          },
+          "required": ["x", "y", "z", "room_id", "level_id", "level_name"]
+        }
+      },
+      "selected_family_name": { "type": "string" },
+      "selected_type_name": { "type": "string" }
+    },
+    "required": ["room", "candidates", "selected_family_name", "selected_type_name"],
+    "additionalProperties": false
+  },
+  "output_schema": {
+    "type": "object",
+    "properties": {
+      "eligibility_state": { "type": "string", "enum": ["ELIGIBLE", "BLOCKED", "UNDETERMINED"] },
+      "reason": { "type": "string" },
+      "status_code": { "type": "string" },
+      "valid_candidate_count": { "type": "integer" },
+      "hazard_class": { "type": "string" },
+      "family_placement_type": { "type": "string" },
+      "hosting_strategy": { "type": "string" },
+      "ceiling_source": { "type": "string" },
+      "host_source": { "type": "string" },
+      "link_instance_name": { "type": "string" },
+      "host_ceiling_element_id": { "type": "string" },
+      "host_level_id": { "type": "string" },
+      "host_level_name": { "type": "string" },
+      "is_special_hazard": { "type": "boolean" },
+      "special_hazard_type": { "type": "string" },
+      "special_hazard_system": { "type": "string" },
+      "is_eligible": { "type": "boolean" },
+      "is_blocked": { "type": "boolean" },
+      "is_undetermined": { "type": "boolean" }
+    },
+    "required": ["eligibility_state", "reason", "status_code", "valid_candidate_count", "hazard_class", "family_placement_type", "hosting_strategy", "ceiling_source", "host_source", "is_eligible", "is_blocked", "is_undetermined"]
+  },
+  "input_examples": [
+    {
+      "room": {
+        "room_id": "789012",
+        "name": "Office 101",
+        "number": "101",
+        "level_name": "Level 1",
+        "area_sq_ft": 400,
+        "classification": { "hazard_class": "Light", "suggested_by_classifier": "Light", "overridden": false, "confirmed_by": "" },
+        "geometry": { "polygon": [[0, 0], [20, 0], [20, 20], [0, 20]], "ceiling_height_ft": 9, "ceiling_type": "FLAT" },
+        "requires_human_review": false,
+        "extension_data": {}
+      },
+      "candidates": [
+        { "x": 5, "y": 5, "z": 9, "room_id": "789012", "level_id": "123456", "level_name": "Level 1" }
+      ],
+      "selected_family_name": "Tyco TY-FRB",
+      "selected_type_name": "1/2\" Pendent 155F"
+    }
+  ],
+  "annotations": {
+    "readOnlyHint": true,
+    "destructiveHint": false,
+    "idempotentHint": true,
+    "openWorldHint": false
+  }
+}

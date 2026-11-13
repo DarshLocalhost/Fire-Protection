@@ -22,12 +22,15 @@ namespace FireProtection.UI.Services
             }
         }
 
+        public static bool SuppressDialogs { get; set; } = false;
+
         public static MessageBoxResult Show(
             string message,
             string caption,
             MessageBoxButton button = MessageBoxButton.OK,
             MessageBoxImage image = MessageBoxImage.Information)
         {
+            if (SuppressDialogs) return MessageBoxResult.OK;
             Window owner = Owner;
             return owner != null
                 ? MessageBox.Show(owner, message, caption, button, image)

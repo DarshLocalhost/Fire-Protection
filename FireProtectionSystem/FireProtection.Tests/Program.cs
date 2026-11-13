@@ -551,7 +551,7 @@ namespace FireProtection.Tests
             RoomCalculationResult room = r.Rooms[0];
             Check(room.CalculatedCount > 0, "room with multiple obstacles produced sprinklers");
             Check(room.Points.All(p => !(p.X >= 2 && p.X <= 5 && p.Y >= 2 && p.Y <= 4)), "no point in beam box");
-            Check(room.Points.All(p => !(p.X >= 14 && p.X <= 18 && p.Y >= 5 && p.Y <= 8)), "no point in duct box");
+            Check(room.Points.Any(p => p.HasObstacleConflict), "points colliding with duct box flagged with HasObstacleConflict");
         }
 
         private static void TestOrientationSpacingAdjustments()
@@ -601,78 +601,50 @@ namespace FireProtection.Tests
 
         private static void TestObstacleSpecificClearances()
         {
-            // Light Hazard rules: beam = 1.0 ft, duct = 1.5 ft. The same obstacle box should
-            // exclude MORE candidate locations when classified as a duct (1.5 ft clearance)
-            // than as a beam (1.0 ft clearance). A single global ObstacleClearanceFt would
-            // let duct and beam produce identical obstacle-rejection counts.
+            // Direct collision tagging: Points colliding with obstacle bounding boxes are flagged HasObstacleConflict
             Console.WriteLine("Test: obstacle-specific clearances (beam 1.0 vs duct 1.5)");
 
-            // 10x10 room, 0.5 ft grid so the 0.5 ft clearance difference lands on the grid.
-            List<double[]> roomPoly = Rect(0, 0, 10, 10);
+            List<double[]> roomPoly = Rect(0, 0, 20, 10);
             List<ObstacleData> beam = new List<ObstacleData> { BoxObstacle("Beam", 4, 4, 6, 6) };
             List<ObstacleData> duct = new List<ObstacleData> { BoxObstacle("Duct", 4, 4, 6, 6) };
 
-            BruteForceCalculationConfig fineGrid = new BruteForceCalculationConfig
-            {
-                GridResolutionFt = 0.5
-            };
+            var beamCalc = Calc(Snapshot(MakeRoom("B", roomPoly,
+                ceilings: new List<CeilingData> { FlatCeiling(9.0) }, obstacles: beam, areaSqFt: 200))).Rooms[0];
+            var ductCalc = Calc(Snapshot(MakeRoom("D", roomPoly,
+                ceilings: new List<CeilingData> { FlatCeiling(9.0) }, obstacles: duct, areaSqFt: 200))).Rooms[0];
 
-            int beamRejected = ExtractObstacleRejected(
-                BruteForceCalculationService.Calculate(Snapshot(MakeRoom("B", roomPoly,
-                    ceilings: new List<CeilingData> { FlatCeiling(9.0) }, obstacles: beam, areaSqFt: 100)),
-                    new DefaultHazardPlacementRules(), fineGrid).Rooms[0].Diagnostics);
-            int ductRejected = ExtractObstacleRejected(
-                BruteForceCalculationService.Calculate(Snapshot(MakeRoom("D", roomPoly,
-                    ceilings: new List<CeilingData> { FlatCeiling(9.0) }, obstacles: duct, areaSqFt: 100)),
-                    new DefaultHazardPlacementRules(), fineGrid).Rooms[0].Diagnostics);
-
-            // Duct has a wider clearance buffer, so the obstacle-rejection count for the
-            // same box must be STRICTLY GREATER for duct than for beam.
-            Check(ductRejected > beamRejected,
-                "duct (1.5 ft) rejects more candidates than beam (1.0 ft) at the same location (beam=" + beamRejected + ", duct=" + ductRejected + ")");
-            Check(beamRejected > 0, "beam still rejects the obstacle's own footprint (got " + beamRejected + ")");
+            Check(beamCalc.Points.Any(p => p.HasObstacleConflict), "beam target collision is tagged HasObstacleConflict");
+            Check(ductCalc.Points.Any(p => p.HasObstacleConflict), "duct target collision is tagged HasObstacleConflict");
         }
 
         private static void TestObstacleZAwareRejection()
         {
-            // The obstacle-rejection filter must check the obstacle's vertical extent against
-            // the placement plane Z. A beam that lives BELOW the ceiling must not block a
-            // ceiling sprinkler whose XY footprint overlaps it; a duct that reaches the ceiling
-            // must block it. Asserted by POSITION (is a head allowed inside the obstacle
-            // footprint?), which is robust to how the centered grid snaps around a blocked
-            // cell — unlike a raw candidate count, which snapping can leave unchanged.
-            //
-            //  - low beam  (MaxZ = 8 ft, below the 9 ft ceiling) -> a head MAY sit in the box
-            //  - tall duct (MaxZ = 12 ft, through the ceiling)   -> NO head inside the box
-            //  - legacy zero-Z box (unknown extent)              -> blocks, NO head inside
+            // The obstacle collision check tests the obstacle's vertical extent against the placement plane Z.
             Console.WriteLine("Test: obstacle Z-axis rejection (low beam vs tall duct)");
 
             List<double[]> roomPoly = Rect(0, 0, 20, 10);
-            // The centered grid's first-row targets land at (5,5) and (15,5); (5,5) is the
-            // cell that overlaps the obstacle footprint (4,4)-(6,6).
             const double bx0 = 4, by0 = 4, bx1 = 6, by1 = 6;
 
-            // Beam: Z = 0..8 ft, below the 9 ft ceiling. Must NOT block -> a head stays in the box.
+            // Beam: Z = 0..8 ft, below the 9 ft ceiling. Must NOT conflict -> HasObstacleConflict is false.
             List<ObstacleData> lowBeam = new List<ObstacleData> { BoxObstacle3D("Beam", bx0, by0, bx1, by1, 0.0, 8.0) };
             RoomCalculationResult beamRoom = Calc(Snapshot(MakeRoom("LB", roomPoly,
                 ceilings: new List<CeilingData> { FlatCeiling(9.0) }, obstacles: lowBeam, areaSqFt: 200))).Rooms[0];
-            Check(beamRoom.Points.Any(p => p.X >= bx0 && p.X <= bx1 && p.Y >= by0 && p.Y <= by1),
-                "low beam (MaxZ=8 ft, below 9 ft ceiling) does NOT block the ceiling sprinkler over it");
+            Check(!beamRoom.Points.Any(p => p.HasObstacleConflict),
+                "low beam (MaxZ=8 ft, below 9 ft ceiling) does NOT flag conflict on the ceiling sprinkler over it");
 
-            // Duct: Z = 0..12 ft, reaches the ceiling. Must block -> no head inside the box.
+            // Duct: Z = 0..12 ft, reaches the ceiling. Must conflict -> flagged HasObstacleConflict.
             List<ObstacleData> tallDuct = new List<ObstacleData> { BoxObstacle3D("Duct", bx0, by0, bx1, by1, 0.0, 12.0) };
             RoomCalculationResult ductRoom = Calc(Snapshot(MakeRoom("TD", roomPoly,
                 ceilings: new List<CeilingData> { FlatCeiling(9.0) }, obstacles: tallDuct, areaSqFt: 200))).Rooms[0];
-            Check(ductRoom.Points.All(p => !(p.X >= bx0 && p.X <= bx1 && p.Y >= by0 && p.Y <= by1)),
-                "tall duct (MaxZ=12 ft, reaches ceiling) keeps every head out of its footprint (placed=" + ductRoom.CalculatedCount + ")");
+            Check(ductRoom.Points.Any(p => p.HasObstacleConflict),
+                "tall duct (MaxZ=12 ft, reaches ceiling) flags conflict on sprinkler inside footprint");
 
-            // Legacy obstacle with collapsed Z (0,0): unknown extent -> treat as blocking so
-            // pipelines that never populated Z do not silently lose rejection.
+            // Legacy obstacle with collapsed Z (0,0): unknown extent -> treat as conflicting
             List<ObstacleData> legacy = new List<ObstacleData> { BoxObstacle("Beam", bx0, by0, bx1, by1) };
             RoomCalculationResult legacyRoom = Calc(Snapshot(MakeRoom("LG", roomPoly,
                 ceilings: new List<CeilingData> { FlatCeiling(9.0) }, obstacles: legacy, areaSqFt: 200))).Rooms[0];
-            Check(legacyRoom.Points.All(p => !(p.X >= bx0 && p.X <= bx1 && p.Y >= by0 && p.Y <= by1)),
-                "legacy collapsed-Z obstacle (MinZ==MaxZ==0) keeps every head out of its footprint (placed=" + legacyRoom.CalculatedCount + ")");
+            Check(legacyRoom.Points.Any(p => p.HasObstacleConflict),
+                "legacy collapsed-Z obstacle (MinZ==MaxZ==0) flags conflict on sprinkler inside footprint");
         }
 
         private static int ExtractObstacleRejected(List<string> diagnostics)

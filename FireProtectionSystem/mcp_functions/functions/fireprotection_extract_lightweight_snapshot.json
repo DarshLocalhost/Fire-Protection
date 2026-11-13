@@ -1,0 +1,210 @@
+{
+  "name": "fireprotection_extract_lightweight_snapshot",
+  "title": "Extract lightweight model snapshot",
+  "description": "Extracts a lightweight model snapshot from the active Revit document without heavy obstacle geometry extraction. This performs fast extraction of levels, ceilings, rooms with hazard classifications, and existing sprinklers, but defers obstacle extraction until later. All geometry is normalized to host MEP coordinates. Use this when you need to launch the UI quickly or when obstacles are not immediately needed for the workflow. Returns a structured ModelSnapshot DTO with empty obstacles list, summary statistics, warnings, and errors.",
+  "input_schema": {
+    "type": "object",
+    "properties": {
+      "export_file_path": {
+        "type": "string",
+        "description": "Optional path to export the snapshot as JSON. If omitted, the snapshot is returned in memory only."
+      }
+    },
+    "additionalProperties": false
+  },
+  "output_schema": {
+    "type": "object",
+    "properties": {
+      "schema_version": { "type": "string" },
+      "units": {
+        "type": "object",
+        "properties": {
+          "length": { "type": "string" },
+          "area": { "type": "string" },
+          "volume": { "type": "string" },
+          "angle": { "type": "string" }
+        },
+        "required": ["length", "area", "volume", "angle"]
+      },
+      "coordinate_system": {
+        "type": "object",
+        "properties": {
+          "canonical": { "type": "string" },
+          "length_unit": { "type": "string" }
+        },
+        "required": ["canonical", "length_unit"]
+      },
+      "project": {
+        "type": "object",
+        "properties": {
+          "name": { "type": "string" },
+          "standard": { "type": "string" },
+          "timestamp_utc": { "type": "string" }
+        },
+        "required": ["name", "standard", "timestamp_utc"]
+      },
+      "model": {
+        "type": "object",
+        "properties": {
+          "host_document_title": { "type": "string" },
+          "linked_documents": {
+            "type": "array",
+            "items": {
+              "type": "object",
+              "properties": {
+                "title": { "type": "string" },
+                "path": { "type": "string" },
+                "is_loaded": { "type": "boolean" },
+                "room_count": { "type": "integer" }
+              },
+              "required": ["title", "path", "is_loaded", "room_count"]
+            }
+          }
+        },
+        "required": ["host_document_title", "linked_documents"]
+      },
+      "levels": {
+        "type": "array",
+        "items": {
+          "type": "object",
+          "properties": {
+            "level_id": { "type": "string" },
+            "name": { "type": "string" },
+            "elevation_ft": { "type": "number" },
+            "source_document": { "type": "string" },
+            "source_level_id": { "type": "string" },
+            "rooms": { "type": "array", "items": { "type": "string" } }
+          },
+          "required": ["level_id", "name", "elevation_ft", "source_document"]
+        }
+      },
+      "rooms": {
+        "type": "array",
+        "items": {
+          "type": "object",
+          "properties": {
+            "room_id": { "type": "string" },
+            "element_id": { "type": "string" },
+            "name": { "type": "string" },
+            "number": { "type": "string" },
+            "level_id": { "type": "string" },
+            "level_name": { "type": "string" },
+            "level_elevation_ft": { "type": "number" },
+            "area_sq_ft": { "type": "number" },
+            "volume_cu_ft": { "type": ["number", "null"] },
+            "phase": { "type": "string" },
+            "source": {
+              "type": "object",
+              "properties": {
+                "document_title": { "type": "string" },
+                "document_path": { "type": "string" },
+                "is_from_link": { "type": "boolean" },
+                "link_instance_id": { "type": "string" },
+                "link_name": { "type": "string" }
+              },
+              "required": ["document_title", "document_path", "is_from_link", "link_instance_id", "link_name"]
+            },
+            "location_point": {
+              "type": ["object", "null"],
+              "properties": { "x": { "type": "number" }, "y": { "type": "number" }, "z": { "type": "number" } },
+              "required": ["x", "y", "z"]
+            },
+            "bounding_box": {
+              "type": ["object", "null"],
+              "properties": {
+                "min": { "type": "object", "properties": { "x": { "type": "number" }, "y": { "type": "number" }, "z": { "type": "number" } }, "required": ["x", "y", "z"] },
+                "max": { "type": "object", "properties": { "x": { "type": "number" }, "y": { "type": "number" }, "z": { "type": "number" } }, "required": ["x", "y", "z"] }
+              },
+              "required": ["min", "max"]
+            },
+            "boundary": { "type": "object" },
+            "hazard": {
+              "type": "object",
+              "properties": {
+                "hazard_class": { "type": "string" },
+                "matched_keyword": { "type": "string" },
+                "matched_terms": { "type": "array", "items": { "type": "string" } },
+                "requires_review": { "type": "boolean" }
+              },
+              "required": ["hazard_class", "matched_keyword", "matched_terms", "requires_review"]
+            },
+            "classification": {
+              "type": "object",
+              "properties": {
+                "hazard_class": { "type": "string" },
+                "suggested_by_classifier": { "type": "string" },
+                "overridden": { "type": "boolean" },
+                "confirmed_by": { "type": "string" }
+              },
+              "required": ["hazard_class", "suggested_by_classifier", "overridden", "confirmed_by"]
+            },
+            "geometry": {
+              "type": "object",
+              "properties": {
+                "polygon": { "type": "array", "items": { "type": "array", "items": { "type": "number" }, "minItems": 2, "maxItems": 2 } },
+                "ceiling_height_ft": { "type": ["number", "null"] },
+                "ceiling_type": { "type": "string" }
+              },
+              "required": ["polygon", "ceiling_type"]
+            },
+            "ceilings": { "type": "array", "items": { "type": "object" } },
+            "associated_obstacle_ids": { "type": "array", "items": { "type": "string" } },
+            "requires_human_review": { "type": "boolean" },
+            "warnings": { "type": "array", "items": { "type": "string" } }
+          },
+          "required": ["room_id", "element_id", "name", "number", "level_id", "level_name", "level_elevation_ft", "area_sq_ft", "phase", "source", "location_point", "bounding_box", "boundary", "hazard", "classification", "geometry", "ceilings", "associated_obstacle_ids", "requires_human_review", "warnings"]
+        }
+      },
+      "ceilings": { "type": "array", "items": { "type": "object" } },
+      "existing_sprinklers": {
+        "type": "array",
+        "items": {
+          "type": "object",
+          "properties": {
+            "element_id": { "type": "string" },
+            "room_id": { "type": "string" },
+            "room_name": { "type": "string" },
+            "family_name": { "type": "string" },
+            "type_name": { "type": "string" },
+            "location": { "type": "object", "properties": { "x": { "type": "number" }, "y": { "type": "number" }, "z": { "type": "number" } }, "required": ["x", "y", "z"] },
+            "level_id": { "type": "string" },
+            "level_name": { "type": "string" },
+            "host_id": { "type": "string" },
+            "host_name": { "type": "string" }
+          },
+          "required": ["element_id", "room_id", "room_name", "family_name", "type_name", "location", "level_id", "level_name", "host_id", "host_name"]
+        }
+      },
+      "obstacles": { "type": "array", "items": { "type": "object" } },
+      "summary": {
+        "type": "object",
+        "properties": {
+          "total_rooms": { "type": "integer" },
+          "total_ceilings": { "type": "integer" },
+          "total_obstacles": { "type": "integer" },
+          "total_existing_sprinklers": { "type": "integer" },
+          "total_linked_documents": { "type": "integer" },
+          "rooms_with_ceilings": { "type": "integer" },
+          "rooms_without_ceilings": { "type": "integer" },
+          "hazard_classification_counts": { "type": "object", "additionalProperties": { "type": "integer" } },
+          "extraction_duration_ms": { "type": "integer" }
+        },
+        "required": ["total_rooms", "total_ceilings", "total_obstacles", "total_existing_sprinklers", "total_linked_documents", "rooms_with_ceilings", "rooms_without_ceilings", "hazard_classification_counts", "extraction_duration_ms"]
+      },
+      "warnings": { "type": "array", "items": { "type": "object" } },
+      "errors": { "type": "array", "items": { "type": "object" } },
+      "export_path": { "type": ["string", "null"] }
+    },
+    "required": ["schema_version", "units", "coordinate_system", "project", "model", "levels", "rooms", "ceilings", "existing_sprinklers", "obstacles", "summary", "warnings", "errors", "export_path"]
+  },
+  "input_examples": [
+    { "export_file_path": "C:\\exports\\lightweight_snapshot.json" },
+    {}
+  ],
+  "annotations": {
+    "readOnlyHint": true,
+    "destructiveHint": false,
+    "idempotentHint": true,
+    "openWorldHint": false
+  }
+}

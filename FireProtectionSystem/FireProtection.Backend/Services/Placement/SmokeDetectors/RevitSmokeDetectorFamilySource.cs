@@ -1,8 +1,9 @@
-﻿using System;
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using Autodesk.Revit.DB;
 using FireProtection.Backend.Models.Placement.Sprinklers.Final;
+using FireProtection.Backend.Services.Placement.Devices;
 using FireProtection.UI.Services;
 using FireProtection.UI.ViewModels.Devices;
 
@@ -31,7 +32,23 @@ namespace FireProtection.Backend.Services.Placement.SmokeDetectors
                 .OfCategory(BuiltInCategory.OST_FireAlarmDevices)
                 .Cast<FamilySymbol>();
 
-            var familiesGroup = collector.GroupBy(s => s.FamilyName, StringComparer.OrdinalIgnoreCase);
+            // Filter specifically for smoke detector families:
+            // Must NOT be an obvious notification appliance (strobe/horn/speaker) and should
+            // ideally match smoke detector terminology or not conflict with notification keywords.
+            var familiesGroup = collector
+                .Where(s =>
+                {
+                    string fam = s.FamilyName ?? string.Empty;
+                    string type = s.Name ?? string.Empty;
+                    // Check if it resolves explicitly as notification appliance
+                    if (DeviceKindResolver.TryResolve(fam, type, out DeviceKind resolvedKind) &&
+                        resolvedKind == DeviceKind.NotificationAppliance)
+                    {
+                        return false;
+                    }
+                    return true;
+                })
+                .GroupBy(s => s.FamilyName, StringComparer.OrdinalIgnoreCase);
 
             foreach (var group in familiesGroup)
             {

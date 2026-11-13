@@ -1,5 +1,315 @@
 # FireProtectionSystem — Progress
 
+## Fix: Per-Sprinkler Overhead Host Resolution & Pod Ceiling Handling (2026-11-12)
+
+### Context & Defect
+- Units with modular model groups (such as 134 SF bathroom pods in 593 SF units on Level 4 of Snowdon Towers) adopted the pod's 8' ceiling height for the entire room.
+- Sprinklers in the main living space floated mid-air 4.8 ft below the 12' 10" structural slab, while pendant lights correctly mounted at 12' 10".
+
+### Implementation
+1. **`CeilingData.cs` & `CeilingExtractor.cs`**:
+   - Added `IsModelGroup` (`element.GroupId != InvalidElementId`) and `AreaSqFt`.
+2. **`RoomExtractor.cs`**:
+   - Classifies ceilings with `IsModelGroup || AreaSqFt / RoomArea < 0.50` as partial pod ceilings.
+   - For rooms with only partial pod ceilings, resolves the full-coverage overhead structural slab (12' 10") as the room's primary ceiling boundary.
+3. **`CeilingHostResolver.cs`**:
+   - Implemented vertical column raycasting directly above $(point.X, point.Y)$.
+   - Resolves the lowest downward face overhead: points under the pod attach at 8' 0"; points in the open area attach at 12' 10".
+4. **`LevelBasedPlacementStrategy.cs`**:
+   - Aligns `OneLevelBased` families (such as upright sprinklers) to `host.ProjectedPointOnFace.Z - 0.0833`.
+
+### Verification
+- Clean builds for `Revit2025` and `Revit2026`.
+- All 19 test suites passed (`ALL TESTS PASSED`).
+- Fresh DLLs deployed to `%APPDATA%\Autodesk\Revit\Addins\2025` and `2026`.
+
+---
+
+## Fix: Overhead Floor/Roof Slab Identification for Open-Ceiling Rooms (2026-11-12)
+
+### Context & Defect
+- In models with open-structure rooms (e.g. Snowdon Towers Sample Architectural Level 4), only Corridor 402 has an actual finished ceiling (`OST_Ceilings`), while Units 401, 403, 404, 405, 406, 407, 408, 409, and 410 are open to the structural floor slab above.
+- In `SPRINKLER_PlacementResult_20261112_162535.json`:
+  1. Room 401 had 0 sprinklers placed because 0 ceilings were extracted, triggering `CalculationStatus.MissingCeiling` when ceiling-hosted families were chosen.
+  2. Rooms 403, 405, 406, 409 falsely matched Corridor 402's ceiling due to coarse AABB overlap, placing candidate points at corridor ceiling height (8.33 ft). During placement, Revit rejected them (*"WorkPlaneBased placement failed: no usable ceiling face"*) or fell back to mid-air `SketchPlane` floating 4+ feet below the structural slab.
+  3. `CeilingHostResolver` skipped floor slabs because the floor slab of Level 5 has `LevelId != Level 4`.
+
+### Implementation
+1. **`CeilingExtractor.cs`**:
+   - Collects `OST_Floors` and `OST_Roofs` alongside `OST_Ceilings`, extracting bottom planar faces (`FaceNormal.Z < -0.1`) and bottom elevation.
+2. **`RoomExtractor.cs` (`FindCeilingsForRoom` & `CeilingIntersectsRoom`)**:
+   - Two-pass matching: Pass 1 matches finished `OST_Ceilings` using face projection (`face.Project`) and mesh triangulation against room polygon, ensuring corridor ceilings never falsely match adjacent rooms.
+   - Pass 2: If no finished ceiling exists, selects the overhead structural slab (`OST_Floors`/`OST_Roofs`) directly above the room (`slabBottomZ >= roomBottomZ + 4.0` and `<= roomTopZ + 4.0`), setting the room ceiling height to the true distance from floor to slab underside.
+   - Finished ceilings strictly take priority over overhead slabs.
+3. **`CeilingHostResolver.cs`**:
+   - Level filtering (`element.LevelId.Equals(level.Id)`) is restricted to `element is Ceiling`. For `Floor` and `RoofBase`, 3D bounding box (`zTol = 4.0`) and downward face projection are used so the overhead slab of the level above is resolved as a valid host face.
+4. **Zero Impact on Calculation Logic**: Spacing formulas, hazard rule sets, NFPA 13 tables, obstruction checks, and grid algorithms remain 100% untouched.
+
+### Verification
+- Clean compilation for `Revit2025` and `Revit2026`.
+- All 19 test suites passed (`ALL TESTS PASSED`).
+- Fresh DLLs deployed to `%APPDATA%\Autodesk\Revit\Addins\2025` and `2026`.
+
+---
+
+## Fix: Sidewall Obstacle Notch Bridging and Ignore-Obstacles Contract (2026-11-12)
+
+### Context & Defect
+- When "Ignore Obstacles" was checked, sidewall sprinklers clashing with obstacles (e.g. column projections and casework along walls) were still being skipped rather than placed at calculated obstacle locations.
+- Root cause:
+  1. Room-bounding elements created notches in the boundary polygon extracted from Revit, fragmenting continuous host walls (e.g., South wall in Kitchen R-01) into disjoint micro-segments.
+  2. The candidate generation dropped heads whose standoff coordinate fell inside obstacle jogs (`!geometry.IsPointInsideRoom`).
+  3. `RevitSprinklerPlacementService` rejected points colliding with room-bounding obstacles under the `!IsPointInsideRoom` host-space guard even when `ignoreObstacles == true`.
+
+### Implementation
+1. **Obstacle Notch Bridging (`BruteForceCalculationService.cs`)**:
+   - Implemented `BridgeObstacleNotches` to detect local polygon notches returning to a collinear baseline within 3.5 ft depth and 15 ft span, restoring the true continuous host wall baseline for pure grid spacing.
+   - Initialized `bridgedGeometry` so point-in-room checks operate against the continuous room baseline.
+   - Updated standoff candidate filtering to retain points landing inside obstacle bounding boxes along the wall so that heads are preserved as candidates with `HasObstacleConflict = true`.
+   - Updated `BuildWallEdgeMask` to aggregate physical wall segment lengths so obstacle notches do not mark an entire physical wall as non-wall.
+2. **Placement Ignore-Obstacles Enforcement (`RevitSprinklerPlacementService.cs`)**:
+   - Relaxed the host-space guard `!IsPointInsideRoom` for sidewall heads when `ignoreObstacles && point.HasObstacleConflict && point.WallEdgeIndex.HasValue`.
+   - When "Ignore Obstacles" is checked, all calculated sidewall heads (including those on columns or casework) are placed onto the host wall.
+   - When "Ignore Obstacles" is unchecked, only colliding heads (`HasObstacleConflict == true`) are skipped as expected.
+3. **Verification**:
+   - Added unit test `TestSidewallObstacleNotchBridgedAndFlagged` in `SidewallPlacementTests.cs`.
+   - All 19 test suites passed (`ALL TESTS PASSED`).
+   - Clean builds for `Revit2025` and `Revit2026`.
+   - Fresh DLLs deployed to `%APPDATA%\Autodesk\Revit\Addins\2025` and `2026`.
+
+---
+
+## Feature: Placement Result UI Coverage Verification & ReviewRequired Flagging (2026-11-12)
+
+### Context & Need
+- The Placement Result Report UI displayed "Success" with a green badge for all rooms as long as the Revit family instances were created without Revit API transaction crashes, even if room throw/coverage left significant gaps (e.g. when room depth exceeded throw or obstacle skips left rooms partially covered).
+- In addition, users lacked visibility into the actual geometric area coverage percentage achieved per room.
+
+### Implementation
+1. **`PlacementRoomReport` & `PlacementRoomReportViewModel` Data Model**:
+   - Added `CoveragePercent` (`double?`) to `PlacementRoomReport`.
+   - Exposed `CoverageText` (`{CoveragePercent:F1}%` or `"-"`) in `PlacementRoomReportViewModel`.
+   - Added `Coverage` column to CSV export.
+2. **`PlacementResultReportView.xaml`**:
+   - Added a dedicated `Coverage` DataGrid text column between `Level` and `Status`.
+3. **`SprinklerPlacementReportMapper` Coverage Engine**:
+   - Implemented 2D ray-casting point-in-polygon sampling ($0.5\text{ ft}$ grid) evaluating the room polygon against all successfully placed sprinkler positions.
+   - Evaluates coverage against the room's calculated NFPA throw radius (`AppliedMaxSpacingFt` or default $12.75\text{ ft}$).
+   - **Threshold Enforcement**:
+     - $\ge 95.0\%$: Retains `Success` status and records `Coverage: XX.X%.` in the message.
+     - $< 95.0\%$: Automatically overrides status to `ReviewRequired` (warning), records `Coverage incomplete: XX.X% (threshold 95%).`, and surfaces an issue in `report.ReviewRequiredReasons`.
+4. **Verification**:
+   - Added unit tests `TestMapperCoverageEvaluationSuccess` and `TestMapperCoverageDeficientTriggersReviewRequired` in `DeviceReportAndKindTests.cs`.
+   - All 19 test suites passed (`ALL TESTS PASSED`).
+   - Clean builds for both `Revit2025` and `Revit2026`.
+
+---
+
+## Fix: Sidewall boundary filtering for non-wall room edges (2026-11-11)
+
+### Context & Defect
+- Sidewall candidate rows were created from every room polygon edge even when the edge came from a room-separation line, opening, or other non-wall boundary.
+- The extracted `BoundarySegmentData.IsWall` metadata existed, but the sidewall solver never read it, which allowed phantom sidewall heads on virtual edges and broke placement in kitchens/studies and other rooms with non-wall boundaries.
+- This is a narrow sidewall-only fix; ceiling, smoke, and notification placement logic were left untouched.
+
+### Implementation
+1. `RoomExtractor` now tags each boundary segment as `IsWall` when the underlying Revit element is a `Wall`.
+2. `BruteForceCalculationService.SelectSidewallDirectional` now builds a wall-edge mask and skips any polygon edge whose boundary segment is not a physical wall before generating sidewall rows.
+3. The regression test `TestSidewallIgnoresNonWallBoundarySegments` is included in the sidewall suite so the room-edge bug is covered in the calculation harness.
+
+### Verification status
+- The repository is not currently buildable in this environment because the Autodesk Revit assemblies are unavailable here; the command output shows `CS0246` missing `Autodesk.*` references.
+- The root cause is directly evidenced in the source path above and is scoped to the sidewall logic and boundary metadata used by it.
+
+---
+
+## Fix: Obstacle Hydration for Smoke Detectors & Notification Appliances (2026-11-10)
+
+### Context & Defect
+- In smoke detector placement, selecting "No" on the obstacle handling prompt (*"Skip devices with detected obstacle conflicts"*) failed to skip conflicting detectors (e.g. Kitchen R-01 where a detector landed directly on an MEP duct).
+- Root Cause Analysis:
+  - While sprinklers receive `snapshot.Obstacles` via `PlacementInputJsonExporter`, `RevitSmokeDetectorPlacementExecutor` and `RevitNotificationAppliancePlacementExecutor` were constructed without the obstacle list.
+  - `SmokeDetectorPlacementInputBuilder` and `NotificationAppliancePlacementInputBuilder` did not link either room-associated obstacle IDs or global obstacles into `SmokeDetectorRoomInput.Obstacles`.
+  - As a result, `roomInput.Obstacles` was empty, `CheckObstacleClash` found 0 obstacles, `point.HasObstacleConflict` remained `false`, and no devices could ever be skipped or flagged.
+  - In addition, in `ModelBackedCatalog`, `OST_FireAlarmDevices` was shared without filtering, causing notification appliances (horns, strobes) to appear in the Smoke Detectors dropdown.
+
+### Implementation
+1. **Obstacle Wiring in Placement Executors**:
+   - `RevitSmokeDetectorPlacementExecutor` and `RevitNotificationAppliancePlacementExecutor` now accept `Func<IReadOnlyList<ObstacleData>> obstaclesAccessor`.
+   - Wired `() => snapshot.Obstacles` in `FireProtectionCommand.cs`.
+2. **Room Obstacle Association in Builders**:
+   - `SmokeDetectorPlacementInputBuilder.BuildSnapshot` and `NotificationAppliancePlacementInputBuilder.BuildSnapshot` associate obstacles from `globalObstacles` matching `item.RoomId` or `roomData.AssociatedObstacleIds`.
+   - `HydrateFromRoomJson` returns `RoomData` so room-associated obstacle IDs are parsed.
+3. **Segregated Device Family Picker in `ModelBackedCatalog`**:
+   - Classified `deviceTypes` using `DeviceKindResolver.TryResolve` into `_smokeFamilies` and `_notificationFamilies`.
+   - Smoke Detector tab shows only smoke detector families; Notification Appliances tab shows only notification appliances.
+4. **Verification**:
+   - Built cleanly on `Revit2025` and `Revit2026` (`net8.0-windows`).
+   - Headless test suite: all 19 suites passed (`ALL TESTS PASSED`).
+
+
+## Fix: Obstacle Conflict Flagging for Structural Obstructions & Three-Times Rule (2026-11-06)
+
+### Context & Defect
+- When the user selected "No" on the obstacle handling confirmation dialog (*"Skip candidate sprinklers that conflict with obstacles"*), the tool still placed a sprinkler in Room 395769 (`KITCHEN R-01`) directly adjacent to Column 460814.
+- Inspection revealed that in `RevitSprinklerPlacementService.RunPlacementTransaction`, candidates are filtered via `!ignoreObstacles && point.HasObstacleConflict`.
+- However, in `BruteForceCalculationService.cs` (`SelectCenteredGrid`, `SelectCenteredGridOnTiles`, and `SelectSingleCentroidHead`), the conflict check only tested `InsideExpandedBox(..., 0.0)` for structural members, skipping `box.ClearanceFt` and completely omitting the **NFPA 13 Chapter 20 "Three Times" Rule** ($3 \times \text{dimension}$, max 24 in) applied to columns and structural members.
+- Consequently, points located within 2 ft of structural columns/beams had `HasObstacleConflict = false` and were never skipped when clicking "No".
+
+### Implementation
+1. **Centralized `CheckPointObstacleConflict` in `BruteForceCalculationService.cs`**:
+   - Created a unified helper method evaluating:
+     - Direct obstacle volume penetration (`InsideExpandedBox(..., 0.0)`).
+     - Flat clearance for non-structural obstacles (`!box.IsStructuralMember && InsideExpandedBox(..., box.ClearanceFt)`).
+     - Structural member clearance under NFPA 13 Chapter 20 Three-Times rule (`box.IsStructuralMember && IsThreeTimesRuleCategory(box.Category)` with required distance $\min(3 \times \text{dim}, 2.0\text{ ft})$).
+2. **Applied consistently across all layout branches**:
+   - `SelectSingleCentroidHead`
+   - `SelectCenteredGrid` (pure grid placement)
+   - `SelectCenteredGridOnTiles` (tile-centric placement)
+3. **Unit Testing**:
+   - Added `TestObstacleConflictFlaggingOnStructuralMember` in `Nfpa13EnhancementsTests.cs` using the exact Kitchen R-01 column dimensions and coordinates.
+   - All 20 test suites pass.
+
+---
+
+## Pure Grid & Continuous Baseline Rewrite (2026-11-03)
+
+### Context & User Directive
+- User strictly requested removal of all obstacle avoidance/shifting/recovery logic for both sidewall and ceiling-hosted/pendent sprinklers.
+- Candidate points must remain on pure calculated grid/wall locations.
+- If a candidate point intersects an obstacle bounding box, it is flagged with `HasObstacleConflict = true`.
+- When user clicks **Yes** to place regardless of obstacles, all sprinklers are placed at their pure calculated locations (even on obstacles).
+- When user clicks **No**, only candidate points with `HasObstacleConflict == true` are skipped, while all non-conflicting points on the same wall or grid are placed as calculated.
+- In sidewalls with architectural cutouts/indents (e.g. column jogs along the North wall of Kitchen R-01), the continuous wall baseline is synthesized so both opposing walls receive full, balanced candidate rows (e.g., 4 North, 4 South = 8 heads total), rather than fragmenting into 1 head on North and 4 on South.
+
+### Implementation
+1. **Removed Shifting & Recovery from `SelectCenteredGrid`**:
+   - Replaced candidate snap search and obstacle recovery search with pure grid evaluation $(t_x, t_y)$.
+   - Added direct obstacle collision testing to set `HasObstacleConflict = true` when intersecting obstacle bounding boxes.
+2. **Removed Obstacle Recovery from `SelectCenteredGridOnTiles`**:
+   - Eliminated fallback radius search that shifted tiles when obstacles were encountered.
+   - Tagged `HasObstacleConflict = true` directly on tile target.
+3. **Continuous Baseline Synthesis in `CleanPolygonLoop`**:
+   - Added `SimplifyArchitecturalCutouts` to bridge small indents (&lt; 2.5 ft deep) along collinear baseline planes.
+   - Produces balanced opposing walls for sidewall calculations.
+4. **Verification**:
+   - All 19 test suites passing (`Nfpa13RulebookRulesTests`, `CenteredGridPlacementTests`, `BruteForceOverrideTests`, etc.).
+   - Successful build for both Revit 2025 and Revit 2026.
+
+---
+
+## Fix: Wall Backing Validation for Sidewall Sprinkler Placement (2026-11-02)
+
+### Context & Defect
+- In spaces with open boundaries, openings, or room separation lines (e.g. Kitchen boundary facing the hallway/living area), `SelectSidewallDirectional` treated every room boundary edge as a mountable wall.
+- During Revit placement, heads generated on non-wall edges failed with `Wall placement failed near edge X` because no wall face or hosting surface existed.
+
+### Implementation
+1. **`BoundarySegmentData` metadata**:
+   - Added `ElementId` and `IsWall` flag to `BoundarySegmentData` in `FireProtection.Backend.Models.DTOs.BoundaryData`.
+2. **`RoomExtractor` segment inspection**:
+   - During extraction of room boundary loops, each boundary segment's source element is resolved via `segment.ElementId`.
+   - Tags `IsWall = true` only when the underlying Revit element is an actual `Wall` (`OST_Walls`).
+3. **`SelectSidewallDirectional` pre-filter**:
+   - In `BruteForceCalculationService.cs`, edges that are non-wall boundaries (such as room separation lines or virtual openings) are skipped during candidate row generation.
+   - Prevents calculating phantom sidewall heads on open air and avoids mid-transaction placement failures.
+
+---
+
+## Documentation: sprinkler explainer rewrite + 5-slide highlights deck (2026-11-02)
+
+No product code changed. Both deliverables are static-trace documentation; live Revit behavior remains unverified.
+
+### SPRINKLER_POINT_CALCULATION_EXPLAINED.md (rewritten; v2 logic-only supersedes the first pass)
+- v2 same-day replacement after user feedback (first rewrite still narrated process/UI; user demanded
+  "logic only, no any other bullshit than the logic"). v2 (~250 lines) replaces the file entirely with the
+  math pipeline, every formula re-verified verbatim against source: point-count math
+  (ceiling: ceil(A / (pi x r^2)) at `BruteForceCalculationService.cs:1448`; sidewall:
+  ceil(A / (S_al x throwDepth)) at :1797), candidate creation (ComputeGridResolution caps; the only three
+  TryAcceptPoint rejects = outside room / below max(BoundaryClearance, 4 in) - tol / within existing-head
+  separation, everything else tracked-not-rejected), selection solvers (free grid nx/ny/captureRadius
+  formulas verbatim at :604-756; tile X-2X-X balanced solver with avgGap/symmetry-start math from
+  TileCentricPatternGenerator; sidewall throwDepth/endWallMax=0.5S/standOff=0.5/greedy rows), Z/deflector/
+  construction/small-room logic, finalize re-checks (nearest-neighbour spacing, wall distance, S x L with
+  exact S=max(along,2xwall)/L=max(across,2xwall) formulas from CheckCoverageBySxL:2179-2263, 0.7S
+  remote-distance advisory confirmed enforced at :1374), one compact fully-verified worked example
+  (30x20 ft Light -> 4 heads), and a declared-but-NOT-enforced constants list (0.75 corner rule, slope
+  bands, 22/12 in pocket drops, 70% open-cross-section, etc. so the doc never claims they are enforced).
+  Source-line map included at the end.
+- First-pass rewrite (superseded by v2) of the veteran explainer from current sources only (`BruteForceCalculationService`,
+  `DefaultHazardPlacementRules`, `Nfpa13RulebookRules`, `HazardPlacementRuleSet`,
+  `PlacementInputJsonExporter`, `PlacementEligibilityResult`, `HazardClassifier`,
+  `SprinklerBruteForceViewModel`), structured around the engineering process: command flow, user
+  inputs, extracted model data, governing rules, position logic, outcome statuses, placement
+  transaction, exports.
+- Corrections over the old document, verified in code: candidate-stage obstacle checks are
+  **tracked, not rejected** (only outside-ceiling / boundary-clearance / existing-separation
+  reject); required head count is room area / (pi x coverage-radius squared), not rows x columns;
+  the ceiling-selection band limit is floor + ceiling height + 5 ft; the nearest-neighbour spacing
+  check names the worst head; tile-centric -> centred-grid -> sidewall flows and the finalize
+  re-checks are documented as implemented.
+- All spacing/clearance values flagged provisional (NFSA rulebook basis, NFPA 13 2002 edition;
+  `DefaultHazardPlacementRules.HasApprovedRules = false`).
+
+### Sprinkler_Layout_Highlights.pptx (7 slides, project root)
+- Brand-matched summary deck (SPA navy/paper/brass; Segoe UI body, Nasalization accents - Poppins
+  and Figtree are not installed on this machine): Title -> What the tool does -> Your inputs ->
+  Governing rules (hazard table) -> Where the heads go + one-line provisional-review disclaimer.
+- Slides 06-07 (added from a session that verified the math against the live HOUSE_MODEL run via
+  Revit MCP): "Worked example: KITCHEN R-01" (35.66 x 14.94 ft, OH1, 15 ft x 0.9 = 13.5 ft spacing,
+  3 x 2 = 6 heads, amber callout on why 6 beats the area estimate
+  ceil(532.87/130) = 5) and "From count to coordinates" (cell size 11.89 x 7.47 ft, centred-point
+  formula, first/last head read back from Revit, COM-drawn room plan with the 6 placed heads, navy
+  wall-band/min-spacing/obstacle disclaimer bar). Footers renumber automatically (01/07 .. 07/07).
+  Pre-change backup kept as `Sprinkler_Layout_Highlights_backup_5slides.pptx`.
+- User-enforced hard floor: every visible text run >= 20 pt (footers, pills, table cells included);
+  the build script scans all slide text and notes for < 20 pt runs and forbidden phrases and both
+  come out clean.
+- Built with COM scripts in `%TEMP%\opencode\deck-build` (`highlights-lib.ps1`, `highlights-slides.ps1`,
+  `highlights-build.ps1`) from template `SPA Structural Samples.pptx`; pixel-verified against PNG
+  exports (`hi-slides\slide-01..07.png`, contact sheet `hi-contact-sheet.png`).
+
+---
+
+## Sprinkler Tab Wizard Navigation & Whitespace Optimization (2026-10-23)
+
+### 1. Unified Preliminary & Final Sub-Tab Navigation
+- **Sub-Tab Synchronization**: Clicking **Next >** on the Preliminary view directly transitions to the **Final** tab. Clicking the **Final** tab directly immediately shows the Review & Placement summary table.
+- **Previous Navigation**: Clicking **< Previous** or **Cancel** on the Final review view navigates back to the **Preliminary** tab with all selections preserved.
+- **Dedicated Final Review View**: `SprinklerCollisionView.xaml` now hosts the Final Review summary table, sprinkler configuration, and bottom action bar (`< Previous`, `Cancel`, `Apply`) sharing state seamlessly with `SprinklerBruteForceViewModel`.
+
+### 2. Elimination of Excess Whitespace & Compact Sizing
+- **Top Sprinkler Configuration Card**: Reduced padding from `18,14` to `12,8`, tightened margins, and reduced combobox widths from `300` to `260`.
+- **Compact Catalog Notice**: Collapsed redundant empty vertical spacing under the configuration comboboxes; missing catalog messages only display when active in a clean, compact font.
+- **Window Padding & Scaling**: Reduced outer margins in `MainWindow.xaml` and `SprinklerView.xaml` (`Margin="10,4,10,8"`), header icon to `32x32`, and title text to `15px` to provide maximum vertical space for the level and room grids.
+- **Cleaned Up Unused Files**: Removed orphaned/unused draft and script files (`DeviceOwnershipStamp.cs`, `CoverageAreaMath.cs`, `Nfpa13BeamRuleTable.cs`, `CeilingFaceSelector.cs`, `NumericInputBehavior.cs`, `ObstacleCategoryOptions.cs`, `ObstacleCategoryItemViewModel.cs`, etc.).
+
+---
+
+## Simplified Obstacle Handling & Sprinkler Review Wizard (2026-10-23)
+
+### 1. Obstacle Handling Simplification
+- **Obstacle Conflict Handling Option**:
+  - When user clicks **Apply** on the Final page, a prompt asks: *"Place sprinklers at calculated locations regardless of detected obstacles?"*
+  - **Yes**: Places all sprinklers at candidate locations regardless of obstacle conflicts (`ignoreObstacles = true`).
+  - **No**: Skips those candidate points that conflict with obstacles (`HasObstacleConflict == true`), logging them under `PlacementStatusCodes.ObstacleConflict` while placing all other valid points (`ignoreObstacles = false`).
+- **Extraction & Identification Retained**: Revit obstacle extraction (beams, ducts, columns, etc.) and obstacle identification remain fully active. Intersections/clashes are tracked in candidate points and diagnostics.
+- **Existing Sprinklers**: Collision policy selection (Skip / Replace / Add) remains governed by user choice in the dropdown.
+
+### 2. Sprinkler Wizard Flow
+- **Step 1 (Preliminary)**: Configuration of levels, rooms, hazard classes, and overrides. Bottom bar features a **"Next >"** button instead of direct placement.
+- **Step 2 (Final Review)**:
+  - Displays a clean review table containing all selected rooms, levels, hazard classes, sprinkler family & type, and active S->S / WALL overrides.
+  - Bottom bar layout:
+    - Bottom-left: **"< Previous"** button (returns to Preliminary with settings intact).
+    - Bottom-right: **"Cancel"** and **"Apply"** (initiates placement with confirmation dialog).
+
+### 3. Responsive Compact UI
+- `MainWindow.xaml`: Reduced `MinWidth` from 1040 to 820, `MinHeight` from 620 to 500, default size 1200x760 to ensure visibility on laptops and scaled displays without clipping.
+- `SprinklerBruteForceView.xaml`: Optimized grid column widths, margins, and paddings for clean rendering on smaller screens.
+
+---
+
 ## Catalog source switch: Model vs Catalog file (2026-10-07)
 
 Static only. The Revit-document reading half is **UNVERIFIED at runtime**.
@@ -722,3 +1032,104 @@ See [[DECISIONS]] for the full list of deferred items (no view-export fallback f
 family rotation not aligned to the grid angle, one lattice per multi-ceiling room, and the two engines'
 differing ceiling ranking). Nothing here has been confirmed in a live Revit session yet; the new
 `CeilingGrid` extraction diagnostic is how to confirm detection and phase.
+
+## Sidewall Sprinkler Placement & Obstacle Mode Pass (2026-11-11)
+
+### Fixed
+1. **Full NFPA 13 Sidewall Coverage Generation in Obstructed Rooms (Kitchen R-01, Study R-04)**:
+   - In `BruteForceCalculationService.SelectSidewallDirectional`, interior sample points inside obstacle bounding boxes are no longer removed from the coverage verification sample grid. The solver evaluates the entire room space and reliably seeds opposing walls (NFPA 13 §11.3.3.2) when room depth exceeds the listed throw.
+   - Cleaned polygon loop (`CleanPolygonLoop`) is now assigned to `result.Polygon` so `WallEdgeIndex` maps 1:1 with `PlacementContext.RoomPolygon` during face hosting.
+2. **Linked Architectural Wall vs Host Foundation Wall Arbitration**:
+   - `FindWallFaceHostForEdge` evaluates candidate walls across host document AND linked models simultaneously with composite scoring:
+     - Faceless candidates penalised by +1000.
+     - Foundation/subgrade walls penalised by +500.
+     - Linked architectural boundary walls correctly win hosting over host-doc foundation walls.
+3. **Obstacle Handling Control in UI**:
+   - Added `Ignore Obstacles` checkbox in `SprinklerCollisionView` (Final Review) bound to `SprinklerCollisionViewModel.IgnoreObstacles` / `SprinklerBruteForceViewModel.IgnoreObstacles`.
+   - When **Checked**: Places all calculated sidewall sprinklers unconditionally.
+   - When **Unchecked** (default): Skips ONLY sprinklers whose calculated position directly collides with an obstacle 3D bounding box (`InsideExpandedBox(..., 0.0)`). Non-colliding sprinklers in the room are placed normally.
+4. **Re-run Policy Default**:
+   - Defaulted `ExistingDevicePolicySelection` to `ReplaceExisting` so re-testing doesn't skip rooms with heads from previous runs.
+5. **Zero Scope Creep**:
+   - Ceiling-mounted, pendent/upright, smoke detector, and notification appliance logic strictly untouched. All 19 test suites pass cleanly.
+
+## Pure Sprinkler Layout (No Obstacle Shifting) Pass (2026-11-12)
+
+### Changes
+1. **Removed Obstacle Relocation / Candidate Shifting**:
+   - In `CenteredGridPattern`: Removed the expanded search (`spacing/2`) and candidate snapping that displaced target points to other locations. Every grid point is kept at its natural coordinates `(rx = tx, ry = ty)`.
+   - In `SelectCenteredGridOnTiles`: Removed the expanded obstacle-recovery search that shifted heads to distant tiles.
+   - In `TryAcceptPoint` & `IsPlacementValid`: Removed obstacle rejection so candidate generation strictly follows room geometry and spacing rules.
+2. **Pure Conflict Tagging & Checkbox Control**:
+   - Any point colliding with an obstacle 3D bounding box is tagged `pt.HasObstacleConflict = true` without shifting it.
+   - If "Ignore Obstacles" is **Unchecked**: Skips *only* the specific conflicting sprinklers. All other non-colliding sprinklers are placed at their exact positions.
+   - If "Ignore Obstacles" is **Checked**: Places all calculated sprinklers unconditionally.
+3. **Removed Confirmation Modal Dialog**:
+   - Removed `Dialogs.Confirm("Replace will DELETE the existing sprinklers...", ...)` upon clicking "Place Sprinklers".
+4. **Verification**:
+   - All 19 test suites PASS (`ALL TESTS PASSED`). Clean builds for Revit2025 and Revit2026.
+
+
+## Sidewall Head Misplacement & Deviation Metric Fix (2026-11-12)
+
+### Fixed
+1. **End-face head stacking (kitchen top wall)**: export evidence (run 184029) showed three heads requested at X 22.07/12.97/3.87 all placed at X −7.86 and an edge-0 head at an arbitrary X=11.24. `WallSidewallPlacementStrategy.BuildHostFromWall` now evaluates `HostObjectUtils.GetSideFaces` (both shells) plus the geometry scan, filtered to true side faces only (`|normal · wallDir| ≤ 0.7`), scored by room-facing orientation + distance to the requested point, and synthesizes a ⊥ wallDir plane from the wall curve when no side face is usable. `Place()` additionally aborts with a clear diagnostic when the projected along-wall drift exceeds 3.0 ft.
+2. **Broken deviation metric**: `PlacementDeviationFt` compared the instance against the strategy's projected host target (reporting ~0 ft for 29.9-ft errors). It now follows its DTO contract — requested calc point vs actual instance location — while post-placement validity is two-part: execution accuracy (actual vs `ExpectedLocation` ≤ `PlacementValidationToleranceFt`) and sidewall fidelity (projected target vs requested ≤ 1.5 ft face-snap envelope). Misplacements now surface as `PLACED_BUT_INVALID` with a `[REVIEW]` warning naming both deviations.
+3. **Loose sanity envelope**: `IsSpatiallySane` widened to `Math.Max(maxDeviationFt, 15.0)` allowed 30-ft misplacements to pass; restored the strict 3.5 ft envelope (origin-snap rejection unchanged).
+4. **Wall-edge mask fed real segments (Decision 032)**: `PlacementRoomSelection.Boundary` now carries the rehydrated `RoomData.Boundary` through `PlacementInputJsonExporter.BuildSelections`, and `PlacementInputBuilder.Build` copies `OuterLoop.Segments` into the snapshot so `BuildWallEdgeMask` can mark non-wall edges (glass, room-separation lines) instead of defaulting every edge to a wall.
+5. **Verification**: obstacle handling itself needed no change — the per-point gate (`!ignoreObstacles && point.HasObstacleConflict` ⇒ skip that point only) was confirmed correct by the 2026-11-11 exports (kitchen 5 placed + 1 conflicted point skipped unchecked; 24/24 placed checked). Built `Debug`/`Revit2025`/`Revit2026` (0 errors / 0 warnings); Backend deployed to the 2025 + 2026 addins dirs; all 19 test suites pass under Revit2025 and Revit2026 configurations. **Runtime verification pending a Revit restart** (assemblies load at startup).
+
+## Sidewall Sprinkler Balanced Centering & Rulebook Distribution (2026-11-12)
+
+### Fixed
+1. **Replaced corner-anchored formula in SelectSidewallDirectional**:
+   - The previous formula pinned the first head at endWallMax ({max} / 2$) from the start corner and the last head at endWallMax from the end corner, distributing the remaining span between them. On walls where the remaining span was smaller or close to {max}$ (e.g. 21.61 ft wall with 5.735 ft end clearances), this created a massive 10.14 ft gap right in the center of the wall.
+   - When a column or obstacle was in the center of the wall, the two heads sat on either side of it. When the obstacle was deleted, the heads stayed in the exact same positions, giving the false appearance of residual obstacle-dodging logic.
+2. **Implemented NFPA 13 & Industry-Preferred Spacing**:
+   - Wall length $ is divided into  = \\max(1, \\lceil W / S_{max} \\rceil)$ equal coverage bays.
+   - Uniform spacing  = W / N$ between adjacent heads.
+   - End clearances are equalized and centered:  = S / 2 = W / (2N)$.
+   - Enforced NFPA 13 rules:  \\le S_{max} / 2$,  \\ge 4\\text{ inches}$ minimum clearance (NFPA 13 §10.3.4.2), and  \\ge 6.0\\text{ ft}$ minimum spacing between sprinklers (NFPA 13 §10.3.3.4).
+   - Candidate points remain pure mathematical locations; obstacle collisions are flagged per-head with zero displacement or dodging.
+3. **Verification**:
+   - Added unit test TestSidewallBalancedWallDistribution in SidewallPlacementTests.cs.
+   - All 19 test suites PASS (ALL TESTS PASSED). Clean builds for Revit2025 and Revit2026.
+
+
+## NFPA 72 Chapter 18 Notification Appliance Logic Rewrite & UI Streamlining (2026-11-12)
+
+### Fixed & Implemented
+1. **UI Streamlined (`NotificationApplianceView.xaml`)**:
+   - Removed the top `Border` card containing redundant pickers (`Appliance Type`, `Candela`, `Notification dBA`) and status text.
+   - Cleanly embeds `<vDevices:DevicePlacementView />` inside `<Grid Margin="16,16,16,0">`, achieving direct visual and workflow parity with `SmokeDetectorView.xaml`.
+2. **Dedicated Engine (`Nfpa72NotificationApplianceEngine.cs`)**:
+   - Separated notification appliance calculation from smoke detector initiating rules.
+   - Standard rooms (<= 30 ft x 30 ft / <= 900 sq ft) receive exactly 1 appliance per compartment rule.
+   - Wall-mounted appliances target the midpoint of the primary (longest) physical wall edge at 90 inches AFF (7.5 ft above finished floor), within NFPA 72 §18.5.5.1's required 80 in to 96 in envelope. Bridges obstacle notches so `WallEdgeIndex` maps to `WallSidewallPlacementStrategy`.
+   - Ceiling-mounted appliances attach at ceiling elevation at the room centroid.
+   - Corridors (width <= 20 ft, aspect ratio >= 2.5:1) are spaced along the corridor at <= 100 ft intervals with <= 15 ft end offsets (NFPA 72 §18.5.5.5).
+   - Obstacles evaluated non-destructively: intersecting appliances are flagged with `HasObstacleConflict = true`.
+3. **Placement Executor (`RevitNotificationAppliancePlacementExecutor.cs`)**:
+   - Directly executes `Nfpa72NotificationApplianceEngine.Calculate`.
+4. **Verification**:
+   - Added unit tests in `NotificationApplianceRulesTests.cs` validating single appliance placement, wall mounting elevation (7.5 ft AFF), corridor layout (100 ft spacing / 15 ft end offsets), and obstacle conflict detection.
+   - All 19 test suites pass.
+   - Clean compilation on `Revit2025` and `Revit2026`.
+
+
+## Large Model UI Launch Optimization & Freeze Prevention (2026-11-12)
+
+### Fixed & Implemented
+1. **Lightweight Startup Extraction**:
+   - Implemented `FireProtectionExtractionService.ExtractLightweightSnapshot`, collecting only levels, ceilings, rooms, and existing sprinklers (what the UI table actually needs to render) in < 1 second.
+   - Defer heavy obstacle extraction across tens of thousands of elements to a lazy provider (`lazyObstacles`).
+2. **Just-In-Time (JIT) Obstacle Extraction**:
+   - Obstacles are extracted on-demand during placement calculation with visible progress updates.
+   - Accelerated `AssociateObstaclesToRooms` with vertical Z-screening and $O(1)$ `HashSet` lookups, replacing $O(\text{Rooms} \times \text{Obstacles})$ nested loops.
+   - 100% of internal calculation, clash detection, and placement logic is strictly preserved.
+3. **Selected-Levels Scoped Preflight**:
+   - `RunEligibilityPass` evaluates rooms on the active/selected levels at startup, avoiding computing 500+ brute force layouts across unselected floors simultaneously.
+   - Newly toggled levels refresh eligibility via the existing coalesced queue.
+4. **Verification**:
+   - All 19 unit test suites pass.
+   - Builds cleanly for both `Revit2025` and `Revit2026`.

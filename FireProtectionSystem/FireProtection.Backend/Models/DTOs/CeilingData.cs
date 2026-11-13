@@ -74,6 +74,12 @@ namespace FireProtection.Backend.Models.DTOs
         [JsonProperty("isRoomDirectCeiling")]
         public bool IsRoomDirectCeiling { get; set; }
 
+        [JsonProperty("isModelGroup")]
+        public bool IsModelGroup { get; set; }
+
+        [JsonProperty("areaSqFt")]
+        public double AreaSqFt { get; set; }
+
         // ---- Ceiling surface grid (acoustic-tile RCP) --------------------------------
         // Populated at the Revit-aware edge (CeilingExtractor.TryReadCeilingGrid) by reading
         // the ceiling type's surface fill pattern when it is a grid pattern. All values are

@@ -1,0 +1,17 @@
+<Project Sdk="Microsoft.NET.Sdk">
+
+  <PropertyGroup>
+    <TargetFramework>net8.0</TargetFramework>
+    <RootNamespace>SPA.SynthFire.Catalog</RootNamespace>
+    <AssemblyName>SPA.SynthFire.Catalog</AssemblyName>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <PackageReference Include="ClosedXML" Version="0.104.1" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <ProjectReference Include="..\SPA.SynthFire.Core\SPA.SynthFire.Core.csproj" />
+  </ItemGroup>
+
+</Project>

@@ -523,7 +523,6 @@ if (symbol == null)
                         continue;
                     }
 
-                   
 
                     anyLevelResolved = true;
                     Level level = levelRes.HostLevel;

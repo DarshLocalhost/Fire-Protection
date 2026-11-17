@@ -45,6 +45,12 @@ namespace FireProtection.UI.Models.Sprinklers.BruteForce
         /// <summary>Boundary clearance actually used for this room, in feet.</summary>
         public double? AppliedBoundaryClearanceFt { get; set; }
 
+        /// <summary>Room floor area in square feet.</summary>
+        public double? RoomAreaSqFt { get; set; }
+
+        /// <summary>Maximum coverage area per sprinkler for this room/hazard/catalog in square feet.</summary>
+        public double? MaxCoverageAreaSqFt { get; set; }
+
         /// <summary>
         /// False while spacing comes from the provisional placeholder rather than an approved NFPA-13 rule set.
         /// Stamped onto every placed element so a reviewer can tell provisional geometry from approved geometry.

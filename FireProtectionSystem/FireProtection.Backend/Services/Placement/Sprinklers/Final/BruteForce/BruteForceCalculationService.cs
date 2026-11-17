@@ -125,6 +125,8 @@ namespace FireProtection.Backend.Services.Placement.Sprinklers.Final.BruteForce
             result.Polygon = outer;
             result.AppliedMaxSpacingFt = ruleSet.MaxSpacingFt;
             result.AppliedBoundaryClearanceFt = ruleSet.BoundaryClearanceFt;
+            result.RoomAreaSqFt = room.AreaSqFt > 0 ? (double?)room.AreaSqFt : null;
+            result.MaxCoverageAreaSqFt = ruleSet.MaxCoverageAreaSqFt > 0 ? (double?)ruleSet.MaxCoverageAreaSqFt : null;
             result.RulesApproved = rules.HasApprovedRules;
 
             if (string.Equals(room.SprinklerClass, "ESFR", StringComparison.OrdinalIgnoreCase)
@@ -368,9 +370,17 @@ namespace FireProtection.Backend.Services.Placement.Sprinklers.Final.BruteForce
 
             if (isSidewall)
             {
+                //if (room.RoomName.Equals("STUDY R-04", StringComparison.OrdinalIgnoreCase))
+                //{
+
+
+                //    return SelectSidewallDirectional(
+                //        room, geometry, ruleSet, obstacleBoxes, existingSprinklerXy,
+                //        placementZ, config, result, ceilingUnsupported, ceilingNote);
+                //}
                 return SelectSidewallDirectional(
-                    room, geometry, ruleSet, obstacleBoxes, existingSprinklerXy,
-                    placementZ, config, result, ceilingUnsupported, ceilingNote);
+                       room, geometry, ruleSet, obstacleBoxes, existingSprinklerXy,
+                       placementZ, config, result, ceilingUnsupported, ceilingNote);
             }
 
             CeilingGridMath.CeilingGrid tileGrid = CeilingGridMath.TryResolveRoomGrid(
@@ -516,8 +526,6 @@ namespace FireProtection.Backend.Services.Placement.Sprinklers.Final.BruteForce
                 ceilingUnsupported, ceilingNote, tileGrid, smallRoomRuleApplied);
         }
 
-
-       
 
         private static RoomCalculationResult SelectCenteredGrid(
             List<CandidatePoint> validCandidates,

@@ -25,6 +25,7 @@ namespace FireProtection.Tests
             TestMapperProvisionalFlagSurvives();
             TestMapperCoverageEvaluationSuccess();
             TestMapperCoverageDeficientTriggersReviewRequired();
+            TestMapperFormulaBasedCoverageClampingAndShoelace();
             TestKindResolverSeparatesSmokeFromNotification();
             TestKindResolverRejectsUnknownNames();
 
@@ -214,7 +215,9 @@ namespace FireProtection.Tests
             {
                 RoomId = "R1",
                 RoomName = "Room 1",
-                AppliedMaxSpacingFt = 5.303, // Small throw
+                RoomAreaSqFt = 900.0,
+                MaxCoverageAreaSqFt = 25.0, // 1 head * 25 sq ft / 900 sq ft = 2.77% (< 95%)
+                AppliedMaxSpacingFt = 5.0,
                 Polygon = new List<double[]>
                 {
                     new double[] { 0, 0 },
@@ -231,6 +234,68 @@ namespace FireProtection.Tests
             Check(r.Status == "ReviewRequired", "deficient coverage triggers ReviewRequired (got " + r.Status + ")");
             Check(r.Message.Contains("Coverage incomplete"), "message explains coverage deficiency (got " + r.Message + ")");
             Check(report.ReviewRequiredReasons.Count > 0, "review reasons includes coverage issue");
+        }
+
+        private static void TestMapperFormulaBasedCoverageClampingAndShoelace()
+        {
+            Console.WriteLine("Test: mapper -> formula-based coverage clamps at 100% and uses Shoelace when RoomAreaSqFt is null");
+            // Case 1: 2 heads * 225 sq ft in a 500 sq ft room = 450 / 500 = 90.0%
+            var room1 = new PlacementRoomResult { RoomId = "R1", RoomName = "Room 1" };
+            room1.Placed.Add(Placed("1", true));
+            room1.Placed.Add(Placed("2", true));
+            var result1 = ResultWith(room1);
+            result1.CalculatedSprinklerCount = 2;
+            result1.PlacedSprinklerCount = 2;
+            result1.PlacedAndValidCount = 2;
+
+            var calc1 = new BruteForceCalculationResult { IsProvisional = false };
+            calc1.Rooms.Add(new RoomCalculationResult
+            {
+                RoomId = "R1",
+                RoomAreaSqFt = 500.0,
+                MaxCoverageAreaSqFt = 225.0
+            });
+            var report1 = result1.ToPlacementRunReport(calc1, "Fam", "Type");
+            var rr1 = report1.RoomReports[0];
+            Check(rr1.CoveragePercent.HasValue && Math.Abs(rr1.CoveragePercent.Value - 90.0) < 1e-6,
+                "coverage is exactly 90.0% for 2 heads (450 sq ft) in 500 sq ft (got " + rr1.CoveragePercent + "%)");
+
+            // Case 2: 3 heads * 225 sq ft in 500 sq ft room = 675 / 500 = 135% -> clamped to 100.0%
+            room1.Placed.Add(Placed("3", true));
+            result1.CalculatedSprinklerCount = 3;
+            result1.PlacedSprinklerCount = 3;
+            result1.PlacedAndValidCount = 3;
+            var report2 = result1.ToPlacementRunReport(calc1, "Fam", "Type");
+            var rr2 = report2.RoomReports[0];
+            Check(rr2.CoveragePercent.HasValue && Math.Abs(rr2.CoveragePercent.Value - 100.0) < 1e-6,
+                "coverage is clamped to 100.0% when exceeding room area (got " + rr2.CoveragePercent + "%)");
+
+            // Case 3: Shoelace fallback when RoomAreaSqFt is not set (polygon: 20x20 = 400 sq ft, 1 head * 225 = 56.25%)
+            var room3 = new PlacementRoomResult { RoomId = "R3", RoomName = "Room 3" };
+            room3.Placed.Add(Placed("10", true));
+            var result3 = ResultWith(room3);
+            result3.CalculatedSprinklerCount = 1;
+            result3.PlacedSprinklerCount = 1;
+            result3.PlacedAndValidCount = 1;
+
+            var calc3 = new BruteForceCalculationResult { IsProvisional = false };
+            calc3.Rooms.Add(new RoomCalculationResult
+            {
+                RoomId = "R3",
+                RoomAreaSqFt = null,
+                MaxCoverageAreaSqFt = 225.0,
+                Polygon = new List<double[]>
+                {
+                    new double[] { 0, 0 },
+                    new double[] { 20, 0 },
+                    new double[] { 20, 20 },
+                    new double[] { 0, 20 }
+                }
+            });
+            var report3 = result3.ToPlacementRunReport(calc3, "Fam", "Type");
+            var rr3 = report3.RoomReports[0];
+            Check(rr3.CoveragePercent.HasValue && Math.Abs(rr3.CoveragePercent.Value - 56.25) < 1e-6,
+                "Shoelace area fallback gives 56.25% for 1 head in 20x20=400 sq ft room (got " + rr3.CoveragePercent + "%)");
         }
 
         // ----- device-kind resolver -----

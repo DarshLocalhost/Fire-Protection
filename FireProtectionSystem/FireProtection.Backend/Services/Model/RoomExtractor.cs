@@ -164,6 +164,7 @@ namespace FireProtection.Backend.Services.Model
                     else
                     {
                         heightEstimate = 20.0;
+
                     }
                     double roomTopZ = floorZ + heightEstimate;
 

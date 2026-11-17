@@ -104,10 +104,9 @@ namespace FireProtection.UI.Services
                 }
 
                 double? coveragePercent = null;
-                double throwRadius = calcRoom?.AppliedMaxSpacingFt ?? 12.75;
-                if (calcRoom?.Polygon != null && calcRoom.Polygon.Count >= 3 && room.Placed != null && room.Placed.Count > 0)
+                if (room.Placed != null && room.Placed.Count > 0)
                 {
-                    coveragePercent = CalculateRoomCoveragePercent(calcRoom.Polygon, room.Placed, throwRadius);
+                    coveragePercent = CalculateRoomCoveragePercent(calcRoom, room.Placed);
                 }
 
                 string status;
@@ -219,79 +218,65 @@ namespace FireProtection.UI.Services
         }
 
         private static double? CalculateRoomCoveragePercent(
-            List<double[]> polygon,
-            List<PlacedSprinklerEntry> placed,
-            double throwRadius)
+            RoomCalculationResult calcRoom,
+            List<PlacedSprinklerEntry> placed)
         {
-            if (polygon == null || polygon.Count < 3 || placed == null || placed.Count == 0)
-                return null;
+            if (placed == null || placed.Count == 0) return 0.0;
 
-            double minX = double.MaxValue, maxX = double.MinValue;
-            double minY = double.MaxValue, maxY = double.MinValue;
-            foreach (var pt in polygon)
+            // 1. Resolve room floor area (from RoomCalculationResult or Shoelace polygon area fallback)
+            double roomArea = 0.0;
+            if (calcRoom?.RoomAreaSqFt.HasValue == true && calcRoom.RoomAreaSqFt.Value > 0)
             {
-                if (pt == null || pt.Length < 2) continue;
-                if (pt[0] < minX) minX = pt[0];
-                if (pt[0] > maxX) maxX = pt[0];
-                if (pt[1] < minY) minY = pt[1];
-                if (pt[1] > maxY) maxY = pt[1];
+                roomArea = calcRoom.RoomAreaSqFt.Value;
+            }
+            else if (calcRoom?.Polygon != null && calcRoom.Polygon.Count >= 3)
+            {
+                roomArea = Math.Abs(ComputePolygonArea(calcRoom.Polygon));
             }
 
-            if (minX >= maxX || minY >= maxY) return null;
+            if (roomArea <= 0.0) return null;
 
-            double step = 0.5; // 6-inch sampling grid
-            int totalInside = 0;
-            int totalCovered = 0;
-            double throwSq = throwRadius * throwRadius;
-
-            var activePlaced = new List<PlacedSprinklerEntry>();
+            // 2. Count active placed heads
+            int activeCount = 0;
             foreach (var p in placed)
             {
-                if (p != null) activePlaced.Add(p);
+                if (p != null) activeCount++;
             }
-            if (activePlaced.Count == 0) return 0.0;
+            if (activeCount == 0) return 0.0;
 
-            for (double x = minX + step / 2; x < maxX; x += step)
+            // 3. Resolve max coverage area per head (catalog override, ruleSet value, or spacing square fallback)
+            double maxCoveragePerHead = 225.0; // standard Light Hazard fallback
+            if (calcRoom?.MaxCoverageAreaSqFt.HasValue == true && calcRoom.MaxCoverageAreaSqFt.Value > 0)
             {
-                for (double y = minY + step / 2; y < maxY; y += step)
-                {
-                    if (!IsPointInPolygon(x, y, polygon)) continue;
-                    totalInside++;
-
-                    bool covered = false;
-                    for (int i = 0; i < activePlaced.Count; i++)
-                    {
-                        double dx = x - activePlaced[i].X;
-                        double dy = y - activePlaced[i].Y;
-                        if (dx * dx + dy * dy <= throwSq)
-                        {
-                            covered = true;
-                            break;
-                        }
-                    }
-                    if (covered) totalCovered++;
-                }
+                maxCoveragePerHead = calcRoom.MaxCoverageAreaSqFt.Value;
+            }
+            else if (calcRoom?.AppliedMaxSpacingFt.HasValue == true && calcRoom.AppliedMaxSpacingFt.Value > 0)
+            {
+                // Fallback to S * S if explicit coverage area is not set
+                maxCoveragePerHead = calcRoom.AppliedMaxSpacingFt.Value * calcRoom.AppliedMaxSpacingFt.Value;
             }
 
-            return totalInside > 0 ? (totalCovered * 100.0 / totalInside) : (double?)null;
+            // 4. Formula-based coverage: (Total Heads Placed * Head Max Coverage Area) / Room Area * 100%
+            double totalCoverageArea = activeCount * maxCoveragePerHead;
+            double coveragePct = (totalCoverageArea / roomArea) * 100.0;
+
+            // 5. Clamp to 100.0% max as approved
+            return Math.Min(100.0, Math.Max(0.0, coveragePct));
         }
 
-        private static bool IsPointInPolygon(double x, double y, List<double[]> polygon)
+        private static double ComputePolygonArea(List<double[]> polygon)
         {
-            bool inside = false;
-            int j = polygon.Count - 1;
-            for (int i = 0; i < polygon.Count; i++)
+            if (polygon == null || polygon.Count < 3) return 0.0;
+            double area = 0.0;
+            int n = polygon.Count;
+            for (int i = 0; i < n; i++)
             {
-                double xi = polygon[i][0], yi = polygon[i][1];
-                double xj = polygon[j][0], yj = polygon[j][1];
-
-                bool intersect = ((yi > y) != (yj > y)) &&
-                    (x < (xj - xi) * (y - yi) / ((yj - yi) == 0 ? 0.00001 : (yj - yi)) + xi);
-                if (intersect)
-                    inside = !inside;
-                j = i;
+                double[] p1 = polygon[i];
+                double[] p2 = polygon[(i + 1) % n];
+                if (p1 == null || p2 == null || p1.Length < 2 || p2.Length < 2) continue;
+                area += (p1[0] * p2[1]) - (p2[0] * p1[1]);
             }
-            return inside;
+            return area * 0.5;
         }
     }
 }

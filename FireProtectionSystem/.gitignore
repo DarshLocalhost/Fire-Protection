@@ -1,7 +1,37 @@
-
-# Tooling / generated artifacts
+# Tooling / IDE / generated artifacts
 node_modules/
+.vscode/
+.claude/
+.agents/
+.analysis/
 .archify/
 .kilo/
-FireProtectionSystem.zip
-FireProtectionSystem/.analysis/
+scratch/
+mcp_functions/
+mcp_functions_test/
+
+# Archives, binaries, presentations, and large media
+*.zip
+*.pdf
+*.pptx
+*.mp4
+
+# Test and run dumps
+extractTest.json
+demo-xplnation.md
+
+# Redundant / draft markdown files
+Explanation.md
+explanation_2.md
+sim_expl_2.md
+sim_Expla_3.md
+sourced.md
+Detetctors_&_Appliances_Rulebook.md
+FireProtection_Extraction_Phase1_Architecture.md
+SPRINKLER_ACTUAL_Z_DIAGNOSTIC.md
+
+# Build output & user settings
+bin/
+obj/
+*.user
+*.suo

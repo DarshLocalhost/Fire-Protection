@@ -9,6 +9,7 @@ node_modules/
 scratch/
 mcp_functions/
 mcp_functions_test/
+opencode.json
 
 # Archives, binaries, presentations, and large media
 *.zip
